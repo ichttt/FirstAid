@@ -1,6 +1,8 @@
 package de.technikforlife.firstaid.items;
 
 import de.technikforlife.firstaid.FirstAid;
+import de.technikforlife.firstaid.FirstAidConfig;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -8,6 +10,8 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
+
+import javax.annotation.Nonnull;
 
 public class ItemBandage extends Item {
 
@@ -19,12 +23,29 @@ public class ItemBandage extends Item {
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
-        ItemStack stack = player.getHeldItem(hand);
-        if (world.isRemote)
-            player.sendMessage(new TextComponentString("1 Item used"));
-        if (!player.isCreative())
-        stack.shrink(1);
-        return new ActionResult<>(EnumActionResult.PASS, stack);
+    @Nonnull
+    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
+        EnumActionResult result = player.getHealth() == player.getMaxHealth() ? EnumActionResult.FAIL : EnumActionResult.SUCCESS;
+        player.setActiveHand(hand);
+        return new ActionResult<>(result, player.getHeldItem(hand));
+    }
+
+    @Override
+    @Nonnull
+    public ItemStack onItemUseFinish(@Nonnull ItemStack stack, World world, EntityLivingBase entityLiving) {
+        if (entityLiving instanceof EntityPlayer) {
+            EntityPlayer player = (EntityPlayer) entityLiving;
+            if (!player.isCreative())
+                stack.shrink(1);
+        }
+        else
+            stack.shrink(1);
+        entityLiving.heal((float) FirstAidConfig.healAmount);
+        return stack;
+    }
+
+    @Override
+    public int getMaxItemUseDuration(ItemStack stack) {
+        return 20;
     }
 }

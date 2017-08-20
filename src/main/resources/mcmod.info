@@ -1,0 +1,16 @@
+[
+{
+  "modid": "firstaid",
+  "name": "First Aid",
+  "description": "Example placeholder mod.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "technikforlife.de",
+  "updateUrl": "",
+  "authorList": ["TechnikforLife", "ichttt"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

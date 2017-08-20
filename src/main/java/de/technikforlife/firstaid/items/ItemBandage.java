@@ -2,6 +2,8 @@ package de.technikforlife.firstaid.items;
 
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.FirstAidConfig;
+import de.technikforlife.firstaid.client.GuiShowWounds;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -25,9 +27,13 @@ public class ItemBandage extends Item {
     @Override
     @Nonnull
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
-        EnumActionResult result = player.getHealth() == player.getMaxHealth() ? EnumActionResult.FAIL : EnumActionResult.SUCCESS;
-        player.setActiveHand(hand);
-        return new ActionResult<>(result, player.getHeldItem(hand));
+        if (world.isRemote)
+            Minecraft.getMinecraft().displayGuiScreen(new GuiShowWounds(player));
+
+        return super.onItemRightClick(world, player, hand);
+//        EnumActionResult result = player.getHealth() == player.getMaxHealth() ? EnumActionResult.FAIL : EnumActionResult.SUCCESS;
+//        player.setActiveHand(hand);
+//        return new ActionResult<>(result, player.getHeldItem(hand));
     }
 
     @Override

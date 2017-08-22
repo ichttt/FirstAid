@@ -1,11 +1,17 @@
 package de.technikforlife.firstaid;
 
+import de.technikforlife.firstaid.damagesystem.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.DamageHandler;
 import de.technikforlife.firstaid.items.FirstAidItems;
+import net.minecraft.command.CommandHandler;
+import net.minecraft.command.ICommandManager;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import org.apache.logging.log4j.Logger;
 
@@ -21,12 +27,22 @@ public class FirstAid {
 
 
     @Mod.EventHandler
-    public void preinit(FMLPreInitializationEvent pre) {
+    public void preInit(FMLPreInitializationEvent pre) {
         logger = pre.getModLog();
-        logger.info("First Aid loaded, need HELP!");
+        logger.debug("FirstAid starting");
         creativeTab = new CreativeTabFirstAid();
         FirstAidItems.init();
         proxy.init();
+        MinecraftForge.EVENT_BUS.register(DamageHandler.class);
+        CapabilityExtendedHealthSystem.register();
+    }
+
+    @Mod.EventHandler
+    public void serverAboutToStart(FMLServerAboutToStartEvent event) {
+        ICommandManager manager = event.getServer().getCommandManager();
+        if (manager instanceof CommandHandler) {
+            ((CommandHandler) manager).registerCommand(new CommandGetHealth());
+        }
     }
 
     @Mod.EventHandler

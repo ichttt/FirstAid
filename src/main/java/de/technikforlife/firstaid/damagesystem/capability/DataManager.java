@@ -1,7 +1,8 @@
-package de.technikforlife.firstaid.damagesystem;
+package de.technikforlife.firstaid.damagesystem.capability;
 
 import com.google.common.collect.MapMaker;
 import de.technikforlife.firstaid.FirstAid;
+import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;

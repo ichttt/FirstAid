@@ -2,7 +2,7 @@ package de.technikforlife.firstaid.damagesystem;
 
 import javax.annotation.Nonnull;
 
-public class DamagablePart {
+public class DamageablePart {
 
     public final float maxHealth;
     public final boolean canCauseDeath;
@@ -11,7 +11,7 @@ public class DamagablePart {
     private EnumWoundState state = EnumWoundState.HEALTHY;
     public float currentHealth;
 
-    public DamagablePart(float maxHealth, boolean canCauseDeath) {
+    public DamageablePart(float maxHealth, boolean canCauseDeath) {
         this.maxHealth = maxHealth;
         this.canCauseDeath = canCauseDeath;
         currentHealth = maxHealth;

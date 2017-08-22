@@ -1,6 +1,6 @@
 package de.technikforlife.firstaid;
 
-import de.technikforlife.firstaid.damagesystem.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.damagesystem.DamageHandler;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import net.minecraft.command.CommandHandler;

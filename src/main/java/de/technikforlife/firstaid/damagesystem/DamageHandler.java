@@ -1,5 +1,7 @@
 package de.technikforlife.firstaid.damagesystem;
 
+import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.capability.DataManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,46 +26,24 @@ public class DamageHandler {
         PlayerDamageModel damageModel = Objects.requireNonNull(entity.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
         DamageSource source = event.getSource();
         String sourceType = source.damageType;
-        float amount = event.getAmount();
+        DamageablePart toDamage;
         switch (sourceType) {
             case "fall":
             case "hotFloor":
-                if (rand.nextBoolean()) damageModel.LEFT_LEG.damage(amount);
-                else damageModel.RIGHT_LEG.damage(amount);
+                toDamage = rand.nextBoolean() ? damageModel.LEFT_LEG : damageModel.RIGHT_LEG;
                 break;
             case "fallingBlock":
             case "anvil":
-                damageModel.HEAD.damage(amount);
+                toDamage = damageModel.HEAD;
                 break;
             case "starve":
-                damageModel.BODY.damage(amount);
+                toDamage = damageModel.BODY;
                 break;
             default:
-                int value = rand.nextInt(6);
-                switch (value) {
-                    case 0:
-                        damageModel.HEAD.damage(value);
-                        break;
-                    case 1:
-                        damageModel.LEFT_ARM.damage(value);
-                        break;
-                    case 2:
-                        damageModel.LEFT_ARM.damage(value);
-                        break;
-                    case 3:
-                        damageModel.BODY.damage(value);
-                        break;
-                    case 4:
-                        damageModel.RIGHT_ARM.damage(value);
-                        break;
-                    case 5:
-                        damageModel.RIGHT_LEG.damage(value);
-                        break;
-                    default:
-                        throw new RuntimeException("Invalid number " + value);
-                }
+                toDamage = damageModel.getRandomPart();
                 break;
         }
+        toDamage.damage(event.getAmount());
 //        event.setCanceled(true);
     }
 

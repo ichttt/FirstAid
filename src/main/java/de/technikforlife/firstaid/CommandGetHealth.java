@@ -1,6 +1,6 @@
 package de.technikforlife.firstaid;
 
-import de.technikforlife.firstaid.damagesystem.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;

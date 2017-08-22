@@ -3,17 +3,40 @@ package de.technikforlife.firstaid.damagesystem;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.INBTSerializable;
 
+import java.util.Random;
+
 public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
-    public final DamagablePart HEAD, LEFT_ARM, LEFT_LEG, BODY, RIGHT_ARM, RIGHT_LEG;
+    private static final Random rand = new Random();
+    public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, BODY, RIGHT_ARM, RIGHT_LEG;
 
     public PlayerDamageModel() {
 //        this.playerUUID = player.getPersistentID();
-        this.HEAD = new DamagablePart(2.0F, true);
-        this.LEFT_ARM = new DamagablePart(2.0F, false);
-        this.LEFT_LEG = new DamagablePart(2.0F, false);
-        this.BODY = new DamagablePart(3.0F, true);
-        this.RIGHT_ARM = new DamagablePart(2.0F, false);
-        this.RIGHT_LEG = new DamagablePart(2.0F, false);
+        this.HEAD = new DamageablePart(4.0F, true);
+        this.LEFT_ARM = new DamageablePart(4.0F, false);
+        this.LEFT_LEG = new DamageablePart(4.0F, false);
+        this.BODY = new DamageablePart(6.0F, true);
+        this.RIGHT_ARM = new DamageablePart(4.0F, false);
+        this.RIGHT_LEG = new DamageablePart(4.0F, false);
+    }
+
+    public DamageablePart getRandomPart() {
+        int value = rand.nextInt(6);
+        switch (value) {
+            case 0:
+                return HEAD;
+            case 1:
+                return LEFT_ARM;
+            case 2:
+                return LEFT_LEG;
+            case 3:
+                return BODY;
+            case 4:
+                return RIGHT_ARM;
+            case 5:
+                return RIGHT_LEG;
+            default:
+                throw new RuntimeException("Invalid number " + value);
+        }
     }
 
 

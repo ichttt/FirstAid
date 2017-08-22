@@ -1,5 +1,6 @@
-package de.technikforlife.firstaid.damagesystem;
+package de.technikforlife.firstaid.damagesystem.capability;
 
+import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;

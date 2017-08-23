@@ -1,44 +1,43 @@
 package de.technikforlife.firstaid.damagesystem;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.Random;
+import java.util.UUID;
 
 public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
-    private static final Random rand = new Random();
     public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, BODY, RIGHT_ARM, RIGHT_LEG;
 
-    public PlayerDamageModel() {
+    public PlayerDamageModel(UUID playerUUID) {
 //        this.playerUUID = player.getPersistentID();
-        this.HEAD = new DamageablePart(4.0F, true);
-        this.LEFT_ARM = new DamageablePart(4.0F, false);
-        this.LEFT_LEG = new DamageablePart(4.0F, false);
-        this.BODY = new DamageablePart(6.0F, true);
-        this.RIGHT_ARM = new DamageablePart(4.0F, false);
-        this.RIGHT_LEG = new DamageablePart(4.0F, false);
+        this.HEAD = new DamageablePart(4.0F, true, playerUUID);
+        this.LEFT_ARM = new DamageablePart(4.0F, false, playerUUID);
+        this.LEFT_LEG = new DamageablePart(4.0F, false, playerUUID);
+        this.BODY = new DamageablePart(6.0F, true, playerUUID);
+        this.RIGHT_ARM = new DamageablePart(4.0F, false, playerUUID);
+        this.RIGHT_LEG = new DamageablePart(4.0F, false, playerUUID);
     }
 
-    public DamageablePart getRandomPart() {
-        int value = rand.nextInt(6);
-        switch (value) {
-            case 0:
+    public DamageablePart getFromEnum(EnumPlayerPart part) {
+        switch (part) {
+            case HEAD:
                 return HEAD;
-            case 1:
+            case LEFT_ARM:
                 return LEFT_ARM;
-            case 2:
+            case LEFT_LEG:
                 return LEFT_LEG;
-            case 3:
+            case BODY:
                 return BODY;
-            case 4:
+            case RIGHT_ARM:
                 return RIGHT_ARM;
-            case 5:
+            case RIGHT_LEG:
                 return RIGHT_LEG;
             default:
-                throw new RuntimeException("Invalid number " + value);
+                throw new RuntimeException("Unknown enum " + part);
         }
     }
-
 
     @Override
     public NBTTagCompound serializeNBT() {
@@ -60,5 +59,14 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
         BODY.currentHealth = nbt.getFloat("bodyHealth");
         RIGHT_ARM.currentHealth = nbt.getFloat("rightArmHealth");
         RIGHT_LEG.currentHealth = nbt.getFloat("rightLegHealth");
+    }
+
+    public void tick(World world) {
+        HEAD.tick(world);
+        LEFT_ARM.tick(world);
+        LEFT_LEG.tick(world);
+        BODY.tick(world);
+        RIGHT_ARM.tick(world);
+        RIGHT_LEG.tick(world);
     }
 }

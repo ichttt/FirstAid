@@ -7,6 +7,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -14,16 +15,17 @@ import net.minecraftforge.common.util.INBTSerializable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 public class DataManager implements ICapabilityProvider, INBTSerializable<NBTTagCompound> {
     public static final ResourceLocation IDENTIFIER = new ResourceLocation(FirstAid.MODID, "capExtendedHealthSystem");
-    private static final Map<EntityPlayer, PlayerDamageModel> capList = new MapMaker().concurrencyLevel(2).weakKeys().makeMap();
+    private static final ConcurrentMap<EntityPlayer, PlayerDamageModel> capList = new MapMaker().concurrencyLevel(2).weakKeys().makeMap();
 
     private final EntityPlayer player;
 
     public DataManager(EntityPlayer player) {
         this.player = player;
-        capList.putIfAbsent(player, new PlayerDamageModel());
+        capList.putIfAbsent(player, new PlayerDamageModel(player.getPersistentID()));
     }
 
     @Override
@@ -48,5 +50,9 @@ public class DataManager implements ICapabilityProvider, INBTSerializable<NBTTag
     public void deserializeNBT(NBTTagCompound nbt) {
         PlayerDamageModel damageModel = capList.get(player);
         damageModel.deserializeNBT(nbt);
+    }
+
+    public static void tickAll(World world) {
+        capList.forEach((player, playerDamageModel) -> playerDamageModel.tick(world));
     }
 }

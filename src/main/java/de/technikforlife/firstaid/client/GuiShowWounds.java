@@ -1,6 +1,9 @@
 package de.technikforlife.firstaid.client;
 
 import de.technikforlife.firstaid.FirstAid;
+import de.technikforlife.firstaid.damagesystem.DamageHandler;
+import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
+import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -12,6 +15,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
 public class GuiShowWounds extends GuiScreen {
@@ -65,9 +69,28 @@ public class GuiShowWounds extends GuiScreen {
 
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
+        PlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
         switch (button.id) {
-            case 1:
+            case 1: //cancel
                 Minecraft.getMinecraft().displayGuiScreen(null);
+                break;
+            case 2: //head
+                damageModel.HEAD.bandage();
+                break;
+            case 3: //left arm
+                damageModel.LEFT_ARM.bandage();
+                break;
+            case 4: //left leg
+                damageModel.LEFT_LEG.bandage();
+                break;
+            case 5: //body
+                damageModel.BODY.bandage();
+                break;
+            case 6: //right arm
+                damageModel.RIGHT_ARM.bandage();
+                break;
+            case 7: //right leg
+                damageModel.RIGHT_LEG.bandage();
                 break;
             default:
                 super.actionPerformed(button);

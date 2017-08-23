@@ -1,7 +1,7 @@
 package de.technikforlife.firstaid.client;
 
 import de.technikforlife.firstaid.FirstAid;
-import de.technikforlife.firstaid.damagesystem.DamageHandler;
+import de.technikforlife.firstaid.damagesystem.EnumPlayerPart;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import net.minecraft.client.Minecraft;
@@ -22,16 +22,18 @@ public class GuiShowWounds extends GuiScreen {
     private static final ResourceLocation GUI_BACKGROUND = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
     private static final int xSize = 248;
     private static final int ySize = 132;
+
     private int guiLeft;
     private int guiTop;
-    private final EntityPlayer player;
 
-    public GuiShowWounds(EntityPlayer player) {
-        this.player = player;
+    private final PlayerDamageModel damageModel;
+
+    public GuiShowWounds(PlayerDamageModel damageModel) {
+        this.damageModel = damageModel;
     }
 
     @Override
-    public void initGui() {
+    public void initGui() { //TODO I18N
         this.guiLeft = (this.width - xSize) / 2;
         this.guiTop = (this.height - ySize) / 2;
         super.initGui();
@@ -62,39 +64,20 @@ public class GuiShowWounds extends GuiScreen {
         this.drawGradientRect(this.guiLeft, this.guiTop, this.guiLeft + xSize, this.guiTop + ySize, -16777216, -16777216);
         this.mc.getTextureManager().bindTexture(GUI_BACKGROUND);
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
-        GuiInventory.drawEntityOnScreen(this.width / 2, this.height / 2 + 28, 40, 0, 0, player);
+        GuiInventory.drawEntityOnScreen(this.width / 2, this.height / 2 + 28, 40, 0, 0, mc.player);
         drawCenteredString(this.mc.fontRenderer, "Pick where to apply the bandage", this.guiLeft + (xSize / 2), this.guiTop + ySize - 21, 0xFFFFFF);
+        //TODO draw hearts based on the damage model
+        //TODO color the critical parts of the player red?
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
-        PlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
-        switch (button.id) {
-            case 1: //cancel
-                Minecraft.getMinecraft().displayGuiScreen(null);
-                break;
-            case 2: //head
-                damageModel.HEAD.bandage();
-                break;
-            case 3: //left arm
-                damageModel.LEFT_ARM.bandage();
-                break;
-            case 4: //left leg
-                damageModel.LEFT_LEG.bandage();
-                break;
-            case 5: //body
-                damageModel.BODY.bandage();
-                break;
-            case 6: //right arm
-                damageModel.RIGHT_ARM.bandage();
-                break;
-            case 7: //right leg
-                damageModel.RIGHT_LEG.bandage();
-                break;
-            default:
-                super.actionPerformed(button);
+        if (button.id != 1) {
+            EnumPlayerPart playerPart = EnumPlayerPart.fromID((byte) (button.id - 1));
+            //TODO msg bandage applied
         }
+        Minecraft.getMinecraft().displayGuiScreen(null);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package de.technikforlife.firstaid.damagesystem;
 
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;

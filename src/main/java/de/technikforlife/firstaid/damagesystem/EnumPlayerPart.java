@@ -1,5 +1,7 @@
 package de.technikforlife.firstaid.damagesystem;
 
+import de.technikforlife.firstaid.damagesystem.capability.DamageEventHandler;
+
 public enum EnumPlayerPart {
     HEAD(1), LEFT_ARM(2), LEFT_LEG(3), BODY(4), RIGHT_ARM(5), RIGHT_LEG(6);
 
@@ -28,7 +30,7 @@ public enum EnumPlayerPart {
     }
 
     public static EnumPlayerPart getRandomPart() {
-        int value = DamageHandler.rand.nextInt(6);
+        int value = DamageEventHandler.rand.nextInt(6);
         switch (value) {
             case 0:
                 return HEAD;

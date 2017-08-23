@@ -1,9 +1,9 @@
 package de.technikforlife.firstaid;
 
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
-import de.technikforlife.firstaid.damagesystem.DamageHandler;
+import de.technikforlife.firstaid.damagesystem.capability.DamageEventHandler;
 import de.technikforlife.firstaid.items.FirstAidItems;
-import de.technikforlife.firstaid.network.MessageDamagePlayerPart;
+import de.technikforlife.firstaid.network.MessageReceiveDamageInfo;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.world.World;
@@ -43,10 +43,10 @@ public class FirstAid {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(DamageHandler.class);
+        MinecraftForge.EVENT_BUS.register(DamageEventHandler.class);
         CapabilityExtendedHealthSystem.register();
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
-        NETWORKING.registerMessage(MessageDamagePlayerPart.Handler.class, MessageDamagePlayerPart.class, 1, Side.CLIENT);
+        NETWORKING.registerMessage(MessageReceiveDamageInfo.Handler.class, MessageReceiveDamageInfo.class, 1, Side.CLIENT);
     }
 
     @Mod.EventHandler

@@ -11,6 +11,6 @@ public class ClientProxy implements IProxy {
     @Override
     public void init() {
         FirstAid.logger.info("Loading Client");
-        ModelLoader.setCustomModelResourceLocation(FirstAidItems.BANDAGE, 0, new ModelResourceLocation("minecraft:stick"));
+        ModelLoader.setCustomModelResourceLocation(FirstAidItems.BANDAGE, 0, new ModelResourceLocation("firstaid:bandage"));
     }
 }

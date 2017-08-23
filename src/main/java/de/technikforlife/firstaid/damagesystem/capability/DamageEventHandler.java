@@ -1,13 +1,11 @@
-package de.technikforlife.firstaid.damagesystem;
+package de.technikforlife.firstaid.damagesystem.capability;
 
-import de.technikforlife.firstaid.FirstAid;
-import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
-import de.technikforlife.firstaid.damagesystem.capability.DataManager;
-import de.technikforlife.firstaid.network.MessageDamagePlayerPart;
+import de.technikforlife.firstaid.damagesystem.DamageablePart;
+import de.technikforlife.firstaid.damagesystem.EnumPlayerPart;
+import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -19,7 +17,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.Objects;
 import java.util.Random;
 
-public class DamageHandler {
+public class DamageEventHandler {
     public static final Random rand = new Random();
 
     @SubscribeEvent(priority = EventPriority.LOW) //so all other can modify their damage first, and we apply after that
@@ -48,7 +46,7 @@ public class DamageHandler {
                 toDamage = EnumPlayerPart.getRandomPart();
                 break;
         }
-        FirstAid.NETWORKING.sendTo(new MessageDamagePlayerPart(toDamage, amountToDamage), (EntityPlayerMP) entity);
+//        FirstAid.NETWORKING.sendTo(new MessageRequestDamageInfo(toDamage, amountToDamage), (EntityPlayerMP) entity);
         DamageablePart partToDamage = damageModel.getFromEnum(toDamage);
         if (partToDamage.damage(amountToDamage) && partToDamage.canCauseDeath) {
             event.setAmount(Float.MAX_VALUE);
@@ -58,7 +56,7 @@ public class DamageHandler {
     @SubscribeEvent
     public static void registerCapability(AttachCapabilitiesEvent<Entity> event) {
         Entity obj = event.getObject();
-        if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer))
+        if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer) && !obj.getEntityWorld().isRemote) //Server side only
             event.addCapability(DataManager.IDENTIFIER, new DataManager((EntityPlayer) obj));
     }
 

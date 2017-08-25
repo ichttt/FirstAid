@@ -3,6 +3,7 @@ package de.technikforlife.firstaid;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.damagesystem.capability.DamageEventHandler;
 import de.technikforlife.firstaid.items.FirstAidItems;
+import de.technikforlife.firstaid.network.MessageApplyHealth;
 import de.technikforlife.firstaid.network.MessageReceiveDamageInfo;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommandManager;
@@ -32,7 +33,6 @@ public class FirstAid {
     public static CreativeTabFirstAid creativeTab;
     public static SimpleNetworkWrapper NETWORKING;
 
-
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent pre) {
         logger = pre.getModLog();
@@ -49,6 +49,7 @@ public class FirstAid {
         CapabilityExtendedHealthSystem.register();
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
         NETWORKING.registerMessage(MessageReceiveDamageInfo.Handler.class, MessageReceiveDamageInfo.class, 1, Side.CLIENT);
+        NETWORKING.registerMessage(MessageApplyHealth.Handler.class, MessageApplyHealth.class, 2 , Side.SERVER);
         checkEarlyExit();
     }
 
@@ -68,7 +69,7 @@ public class FirstAid {
     }
 
     @Mod.EventHandler
-    public void serstart(FMLServerStartedEvent args) {
+    public void onServerStart(FMLServerStartedEvent args) {
         for (World world:DimensionManager.getWorlds()) {
             world.getGameRules().setOrCreateGameRule(NREG, Boolean.toString(FirstAidConfig.allowNaturalRegeneration));
         }

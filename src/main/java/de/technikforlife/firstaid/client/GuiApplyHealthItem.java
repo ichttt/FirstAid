@@ -2,9 +2,11 @@ package de.technikforlife.firstaid.client;
 
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
+import de.technikforlife.firstaid.damagesystem.EnumHealingType;
 import de.technikforlife.firstaid.damagesystem.EnumPlayerPart;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.network.MessageApplyHealth;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
@@ -30,13 +32,18 @@ public class GuiApplyHealthItem extends GuiScreen {
     private int guiTop;
 
     private final PlayerDamageModel damageModel;
+    private final EnumHealingType healingType;
 
-    public GuiApplyHealthItem(PlayerDamageModel damageModel) {
+    public static boolean isOpen = false;
+
+    public GuiApplyHealthItem(PlayerDamageModel damageModel, EnumHealingType healingType) {
         this.damageModel = damageModel;
+        this.healingType = healingType;
     }
 
     @Override
     public void initGui() { //TODO I18N
+        isOpen = true;
         this.guiLeft = (this.width - xSize) / 2;
         this.guiTop = (this.height - ySize) / 2;
         super.initGui();
@@ -123,7 +130,7 @@ public class GuiApplyHealthItem extends GuiScreen {
     protected void actionPerformed(GuiButton button) throws IOException {
         if (button.id < 7) {
             EnumPlayerPart playerPart = EnumPlayerPart.fromID((button.id));
-            //TODO msg bandage applied
+            FirstAid.NETWORKING.sendToServer(new MessageApplyHealth(playerPart, healingType));
         }
         Minecraft.getMinecraft().displayGuiScreen(null);
     }
@@ -131,5 +138,11 @@ public class GuiApplyHealthItem extends GuiScreen {
     @Override
     public boolean doesGuiPauseGame() {
         return false;
+    }
+
+    @Override
+    public void onGuiClosed() {
+        isOpen = false;
+        super.onGuiClosed();
     }
 }

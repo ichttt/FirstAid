@@ -31,21 +31,6 @@ public enum EnumPlayerPart {
 
     public static EnumPlayerPart getRandomPart() {
         int value = DamageEventHandler.rand.nextInt(6);
-        switch (value) {
-            case 0:
-                return HEAD;
-            case 1:
-                return LEFT_ARM;
-            case 2:
-                return LEFT_LEG;
-            case 3:
-                return BODY;
-            case 4:
-                return RIGHT_ARM;
-            case 5:
-                return RIGHT_LEG;
-            default:
-                throw new RuntimeException("Invalid number " + value);
-        }
+        return fromID(value + 1);
     }
 }

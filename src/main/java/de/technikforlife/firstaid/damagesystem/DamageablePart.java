@@ -65,7 +65,7 @@ public class DamageablePart {
         }
     }
 
-    public void bandage() {
-
+    public void applyItem(EnumHealingType healingType) {
+        //TODO handle logic
     }
 }

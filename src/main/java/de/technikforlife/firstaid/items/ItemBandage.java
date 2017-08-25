@@ -1,6 +1,7 @@
 package de.technikforlife.firstaid.items;
 
 import de.technikforlife.firstaid.FirstAid;
+import de.technikforlife.firstaid.damagesystem.EnumHealingType;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.network.MessageReceiveDamageInfo;
@@ -30,9 +31,8 @@ public class ItemBandage extends Item {
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
         if (!world.isRemote) {
             PlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
-            FirstAid.NETWORKING.sendTo(new MessageReceiveDamageInfo(damageModel), (EntityPlayerMP) player);
+            FirstAid.NETWORKING.sendTo(new MessageReceiveDamageInfo(damageModel, EnumHealingType.BANDAGE), (EntityPlayerMP) player);
         }
-
         return super.onItemRightClick(world, player, hand);
     }
 }

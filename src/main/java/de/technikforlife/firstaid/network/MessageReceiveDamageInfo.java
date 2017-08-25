@@ -1,6 +1,6 @@
 package de.technikforlife.firstaid.network;
 
-import de.technikforlife.firstaid.client.GuiShowWounds;
+import de.technikforlife.firstaid.client.GuiApplyHealthItem;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -38,7 +38,7 @@ public class MessageReceiveDamageInfo implements IMessage {
             Minecraft.getMinecraft().addScheduledTask(() -> {
                 PlayerDamageModel damageModel = new PlayerDamageModel(Minecraft.getMinecraft().player.getPersistentID());
                 damageModel.deserializeNBT(message.playerDamageModel);
-                Minecraft.getMinecraft().displayGuiScreen(new GuiShowWounds(damageModel));
+                Minecraft.getMinecraft().displayGuiScreen(new GuiApplyHealthItem(damageModel));
             });
             return null;
         }

@@ -11,7 +11,7 @@ public enum EnumPlayerPart {
         this.id = (byte) id;
     }
 
-    public static EnumPlayerPart fromID(byte id) {
+    public static EnumPlayerPart fromID(int id) {
         switch (id) {
             case 1:
                 return HEAD;

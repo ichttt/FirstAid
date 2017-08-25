@@ -9,6 +9,7 @@ import net.minecraft.command.ICommandManager;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -39,6 +40,7 @@ public class FirstAid {
         creativeTab = new CreativeTabFirstAid();
         FirstAidItems.init();
         proxy.init();
+        checkEarlyExit();
     }
 
     @Mod.EventHandler
@@ -47,6 +49,14 @@ public class FirstAid {
         CapabilityExtendedHealthSystem.register();
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
         NETWORKING.registerMessage(MessageReceiveDamageInfo.Handler.class, MessageReceiveDamageInfo.class, 1, Side.CLIENT);
+        checkEarlyExit();
+    }
+
+    private static void checkEarlyExit() {
+        if (FMLCommonHandler.instance().isDisplayCloseRequested()) { //another early exit (forge only covers stage transition)
+            logger.info("Early exit requested by user - terminating minecraft");
+            FMLCommonHandler.instance().exitJava(0, false);
+        }
     }
 
     @Mod.EventHandler

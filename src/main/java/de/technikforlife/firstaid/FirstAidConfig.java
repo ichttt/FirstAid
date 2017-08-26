@@ -2,6 +2,7 @@ package de.technikforlife.firstaid;
 
 import net.minecraftforge.common.config.Config;
 
+@SuppressWarnings("CanBeFinal")
 @Config(modid = FirstAid.MODID, name = FirstAid.NAME)
 public class FirstAidConfig {
 
@@ -12,6 +13,7 @@ public class FirstAidConfig {
     @Config.Comment("Settings regarding the max health of the body's parts")
     public static final DamageSystem damageSystem = new DamageSystem();
 
+    @SuppressWarnings("CanBeFinal")
     public static class DamageSystem {
 
         @Config.RangeInt(min = 0, max = 16)

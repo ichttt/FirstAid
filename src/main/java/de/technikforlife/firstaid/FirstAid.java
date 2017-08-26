@@ -25,8 +25,11 @@ public class FirstAid {
     public static final String MODID ="firstaid";
     public static final String NAME ="First Aid";
     private static final String NREG ="naturalRegeneration";
+
+    @SuppressWarnings("unused")
     @SidedProxy(clientSide = "de.technikforlife.firstaid.client.ClientProxy", serverSide = "de.technikforlife.firstaid.server.ServerProxy")
     public static IProxy proxy;
+
     public static CreativeTabFirstAid creativeTab;
     public static SimpleNetworkWrapper NETWORKING;
 

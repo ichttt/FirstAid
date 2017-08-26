@@ -44,11 +44,12 @@ public class MessageApplyHealth implements IMessage {
 
         @Override
         public IMessage onMessage(MessageApplyHealth message, MessageContext ctx) {
+            //noinspection ConstantConditions
             ctx.getServerHandler().player.getServer().addScheduledTask(() -> {
                 PlayerDamageModel damageModel = Objects.requireNonNull(ctx.getServerHandler().player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
                 ctx.getServerHandler().player.getHeldItem(message.hand).shrink(1);
                 DamageablePart damageablePart = damageModel.getFromEnum(message.part);
-                damageablePart.applyItem(message.healingType.createNewHealer(), ctx.getServerHandler().player.getUniqueID());
+                damageablePart.applyItem(message.healingType.createNewHealer());
             });
             return null;
         }

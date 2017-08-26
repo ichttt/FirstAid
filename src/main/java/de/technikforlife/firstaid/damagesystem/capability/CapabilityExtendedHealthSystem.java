@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 
 public class CapabilityExtendedHealthSystem {
 
+    @SuppressWarnings("unused")
     @CapabilityInject(PlayerDamageModel.class)
     public static Capability<PlayerDamageModel> CAP_EXTENDED_HEALTH_SYSTEM;
 

@@ -7,7 +7,6 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.UUID;
 
 public class DamageablePart {
 
@@ -15,7 +14,6 @@ public class DamageablePart {
     public final boolean canCauseDeath;
     @Nullable
     private PartHealer activeHealer;
-    private UUID playerUUID;
 
     @Nonnull
     private EnumWoundState state = EnumWoundState.HEALTHY;
@@ -31,15 +29,10 @@ public class DamageablePart {
         return state;
     }
 
-    /**
-     * @return true if the {@link EnumWoundState} has changed
-     */
-    public boolean heal(float amount, EntityLivingBase toHeal) {
-        EnumWoundState prev = state;
+    public void heal(float amount, EntityLivingBase toHeal) {
         currentHealth = Math.min(maxHealth, amount + currentHealth);
         state = EnumWoundState.getWoundState(maxHealth, currentHealth);
         toHeal.heal(amount);
-        return prev != state;
     }
 
     /**
@@ -62,8 +55,7 @@ public class DamageablePart {
         }
     }
 
-    public void applyItem(PartHealer healer, UUID playerUUID) {
+    public void applyItem(PartHealer healer) {
         activeHealer = healer;
-        this.playerUUID = playerUUID;
     }
 }

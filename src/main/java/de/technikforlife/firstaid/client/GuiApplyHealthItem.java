@@ -37,25 +37,25 @@ public class GuiApplyHealthItem extends GuiScreen {
 
     public static boolean isOpen = false;
 
-    public void onReceiveData(PlayerDamageModel damageModel, EnumHealingType healingType, EnumHand activeHand) { //TODO I18N
+    public void onReceiveData(PlayerDamageModel damageModel, EnumHealingType healingType, EnumHand activeHand) {
         this.damageModel = damageModel;
         this.healingType = healingType;
         this.activeHand = activeHand;
 
-        GuiButton applyHead = new GuiButton(1, this.guiLeft + 4, this.guiTop + 14, 48, 20, "Head");
+        GuiButton applyHead = new GuiButton(1, this.guiLeft + 4, this.guiTop + 14, 48, 20, I18n.format("gui.head"));
         this.buttonList.add(applyHead);
 
-        GuiButton applyLeftArm = new GuiButton(2, this.guiLeft + 4, this.guiTop + 44, 48, 20, "Left Arm");
+        GuiButton applyLeftArm = new GuiButton(2, this.guiLeft + 4, this.guiTop + 44, 48, 20, I18n.format("gui.left_arm"));
         this.buttonList.add(applyLeftArm);
-        GuiButton applyLeftLeg = new GuiButton(3, this.guiLeft + 4, this.guiTop + 74, 48, 20, "Left Leg");
+        GuiButton applyLeftLeg = new GuiButton(3, this.guiLeft + 4, this.guiTop + 74, 48, 20, I18n.format("gui.left_leg"));
         this.buttonList.add(applyLeftLeg);
 
-        GuiButton applyBody = new GuiButton(4, this.guiLeft + 195, this.guiTop + 14, 48, 20, "Body");
+        GuiButton applyBody = new GuiButton(4, this.guiLeft + 195, this.guiTop + 14, 48, 20, I18n.format("gui.body"));
         this.buttonList.add(applyBody);
 
-        GuiButton applyRightArm = new GuiButton(5, this.guiLeft + 195, this.guiTop + 44, 48, 20, "Right Arm");
+        GuiButton applyRightArm = new GuiButton(5, this.guiLeft + 195, this.guiTop + 44, 48, 20, I18n.format("gui.right_arm"));
         this.buttonList.add(applyRightArm);
-        GuiButton applyRightLeg = new GuiButton(6, this.guiLeft + 195, this.guiTop + 74, 48, 20, "Right Leg");
+        GuiButton applyRightLeg = new GuiButton(6, this.guiLeft + 195, this.guiTop + 74, 48, 20, I18n.format("gui.right_leg"));
         this.buttonList.add(applyRightLeg);
 
         hasData = true;
@@ -80,7 +80,7 @@ public class GuiApplyHealthItem extends GuiScreen {
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
         GuiInventory.drawEntityOnScreen(this.width / 2, this.height / 2 + 28, 40, 0, 0, mc.player);
         if (hasData) {
-            drawCenteredString(this.mc.fontRenderer, "Pick where to apply the bandage", this.guiLeft + (xSize / 2), this.guiTop + ySize - 21, 0xFFFFFF);
+            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - 21, 0xFFFFFF);
             this.mc.getTextureManager().bindTexture(Gui.ICONS);
             drawHealth(damageModel.HEAD, false, 20);
             drawHealth(damageModel.LEFT_ARM, false, 50);
@@ -137,7 +137,7 @@ public class GuiApplyHealthItem extends GuiScreen {
         if (button.id < 7 && hasData) {
             EnumPlayerPart playerPart = EnumPlayerPart.fromID((button.id));
             FirstAid.NETWORKING.sendToServer(new MessageApplyHealth(playerPart, healingType, activeHand));
-            //TODO notify the user somehow
+            //TODO notify the user somehow (sound?)
         }
         Minecraft.getMinecraft().displayGuiScreen(null);
     }

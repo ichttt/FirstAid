@@ -1,13 +1,19 @@
 package de.technikforlife.firstaid.damagesystem;
 
-public enum PartHealer {
-    BANDAGE(400, 3), PLASTER(500, 2);
+public class PartHealer {
+    public static PartHealer getNewBandage() {
+        return new PartHealer(400, 3);
+    }
 
-    public int maxHealth, ticksPerHeal;
+    public static PartHealer getNewPlaster() {
+        return new PartHealer(500, 2);
+    }
+
+    public final int maxHealth, ticksPerHeal;
     private int ticksPassed;
     private int heals = 0;
 
-    PartHealer(int ticksPerHeal, int maxHealth) {
+    public PartHealer(int ticksPerHeal, int maxHealth) {
         this.maxHealth = maxHealth;
         this.ticksPerHeal = ticksPerHeal;
     }

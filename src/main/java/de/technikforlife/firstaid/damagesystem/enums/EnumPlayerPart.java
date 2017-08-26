@@ -1,6 +1,6 @@
 package de.technikforlife.firstaid.damagesystem.enums;
 
-import de.technikforlife.firstaid.damagesystem.capability.DamageEventHandler;
+import de.technikforlife.firstaid.damagesystem.DamageEventHandler;
 
 public enum EnumPlayerPart {
     HEAD(1), LEFT_ARM(2), LEFT_LEG(3), BODY(4), RIGHT_ARM(5), RIGHT_LEG(6);

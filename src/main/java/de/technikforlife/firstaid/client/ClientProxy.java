@@ -11,7 +11,7 @@ public class ClientProxy implements IProxy {
 
     @Override
     public void init() {
-        FirstAid.logger.info("Loading Client");
+        FirstAid.logger.debug("Loading ClientProxy");
         ModelLoader.setCustomModelResourceLocation(FirstAidItems.BANDAGE, 0, new ModelResourceLocation("firstaid:bandage"));
         MinecraftForge.EVENT_BUS.register(ClientEventHandler.class);
     }

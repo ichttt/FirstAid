@@ -1,2 +1,12 @@
 itemGroup.firstaid=First Aid
 item.bandage.name=Bandage
+
+gui.head=Head
+gui.left_arm=Left Arm
+gui.left_leg=Left Leg
+gui.body=Body
+gui.right_arm=Right Arm
+gui.right_leg=Right Leg
+gui.apply_hint=Pick where to apply the bandage
+
+death.attack.criticalOrgan=%s had a critical organ failure

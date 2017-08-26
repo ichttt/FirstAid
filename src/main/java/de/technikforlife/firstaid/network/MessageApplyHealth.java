@@ -48,7 +48,7 @@ public class MessageApplyHealth implements IMessage {
                 PlayerDamageModel damageModel = Objects.requireNonNull(ctx.getServerHandler().player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
                 ctx.getServerHandler().player.getHeldItem(message.hand).shrink(1);
                 DamageablePart damageablePart = damageModel.getFromEnum(message.part);
-                damageablePart.applyItem(message.healingType.partHealer, ctx.getServerHandler().player.getUniqueID());
+                damageablePart.applyItem(message.healingType.createNewHealer(), ctx.getServerHandler().player.getUniqueID());
             });
             return null;
         }

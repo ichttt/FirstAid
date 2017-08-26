@@ -1,8 +1,8 @@
-package de.technikforlife.firstaid.damagesystem.capability;
+package de.technikforlife.firstaid.damagesystem;
 
-import de.technikforlife.firstaid.damagesystem.DamageablePart;
+import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.capability.DataManager;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
-import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -46,9 +46,9 @@ public class DamageEventHandler {
                 toDamage = EnumPlayerPart.getRandomPart();
                 break;
         }
-//        FirstAid.NETWORKING.sendTo(new MessageRequestDamageInfo(toDamage, amountToDamage), (EntityPlayerMP) entity);
         DamageablePart partToDamage = damageModel.getFromEnum(toDamage);
         if (partToDamage.damage(amountToDamage) && partToDamage.canCauseDeath) {
+            source.damageType = "criticalOrgan";
             event.setAmount(Float.MAX_VALUE);
         }
     }

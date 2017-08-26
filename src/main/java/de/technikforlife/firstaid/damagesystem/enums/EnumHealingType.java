@@ -3,15 +3,25 @@ package de.technikforlife.firstaid.damagesystem.enums;
 import de.technikforlife.firstaid.damagesystem.PartHealer;
 
 public enum EnumHealingType {
-    BANDAGE(1, PartHealer.BANDAGE), PLASTER(2, PartHealer.PLASTER);
+    BANDAGE(1) {
+        @Override
+        public PartHealer createNewHealer() {
+            return PartHealer.getNewBandage();
+        }
+    }, PLASTER(2) {
+        @Override
+        public PartHealer createNewHealer() {
+            return PartHealer.getNewPlaster();
+        }
+    };
 
     public final int id;
-    public final PartHealer partHealer;
 
-    EnumHealingType(int id, PartHealer partHealer) {
+    EnumHealingType(int id) {
         this.id = id;
-        this.partHealer = partHealer;
     }
+
+    public abstract PartHealer createNewHealer();
 
     public static EnumHealingType fromID(byte b) {
         switch (b) {

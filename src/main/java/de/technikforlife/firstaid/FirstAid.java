@@ -1,7 +1,7 @@
 package de.technikforlife.firstaid;
 
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
-import de.technikforlife.firstaid.damagesystem.capability.DamageEventHandler;
+import de.technikforlife.firstaid.damagesystem.DamageEventHandler;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import de.technikforlife.firstaid.network.MessageApplyHealth;
 import de.technikforlife.firstaid.network.MessageReceiveDamageInfo;

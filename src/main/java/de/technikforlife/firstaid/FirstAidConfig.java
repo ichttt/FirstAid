@@ -6,10 +6,30 @@ import net.minecraftforge.common.config.Config;
 public class FirstAidConfig {
 
     @Config.RequiresWorldRestart
-    @Config.Comment("Disables natural Regeneration on world start")
+    @Config.Comment("Disable natural Regeneration on world start")
     public static boolean allowNaturalRegeneration = false;
 
-    @Config.RangeDouble(min = 0, max = Float.MAX_VALUE)
-    @Config.Comment("How much bandage heals")
-    public static double healAmount = 2D;
+    @Config.Comment("Settings regarding the max health of the body's parts")
+    public static final DamageSystem damageSystem = new DamageSystem();
+
+    public static class DamageSystem {
+
+        @Config.RangeInt(min = 0, max = 16)
+        public int maxHealthHead = 4;
+
+        @Config.RangeInt
+        public int maxHealthLeftArm = 4;
+
+        @Config.RangeInt
+        public int maxHealthLeftLeg = 4;
+
+        @Config.RangeInt
+        public int maxHealthBody = 6;
+
+        @Config.RangeInt
+        public int maxHealthRightArm = 4;
+
+        @Config.RangeInt
+        public int maxHealthRightLeg = 4;
+    }
 }

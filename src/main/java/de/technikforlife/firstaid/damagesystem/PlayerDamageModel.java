@@ -1,5 +1,6 @@
 package de.technikforlife.firstaid.damagesystem;
 
+import de.technikforlife.firstaid.FirstAidConfig;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -9,13 +10,12 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
     public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, BODY, RIGHT_ARM, RIGHT_LEG;
 
     public PlayerDamageModel() {
-//        this.playerUUID = player.getPersistentID();
-        this.HEAD = new DamageablePart(4.0F, true);
-        this.LEFT_ARM = new DamageablePart(4.0F, false);
-        this.LEFT_LEG = new DamageablePart(4.0F, false);
-        this.BODY = new DamageablePart(6.0F, true);
-        this.RIGHT_ARM = new DamageablePart(4.0F, false);
-        this.RIGHT_LEG = new DamageablePart(4.0F, false);
+        this.HEAD = new DamageablePart(FirstAidConfig.damageSystem.maxHealthHead, true);
+        this.LEFT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftArm, false);
+        this.LEFT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftLeg, false);
+        this.BODY = new DamageablePart(FirstAidConfig.damageSystem.maxHealthBody, true);
+        this.RIGHT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightArm, false);
+        this.RIGHT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightLeg, false);
     }
 
     public DamageablePart getFromEnum(EnumPlayerPart part) {
@@ -51,12 +51,16 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
 
     @Override
     public void deserializeNBT(NBTTagCompound nbt) {
-        HEAD.currentHealth = nbt.getFloat("headHealth");
-        LEFT_ARM.currentHealth = nbt.getFloat("leftArmHealth");
-        LEFT_LEG.currentHealth = nbt.getFloat("leftLegHealth");
-        BODY.currentHealth = nbt.getFloat("bodyHealth");
-        RIGHT_ARM.currentHealth = nbt.getFloat("rightArmHealth");
-        RIGHT_LEG.currentHealth = nbt.getFloat("rightLegHealth");
+        deserializeNBT(nbt, "headHealth", HEAD);
+        deserializeNBT(nbt, "leftArmHealth", LEFT_ARM);
+        deserializeNBT(nbt, "leftLegHealth", LEFT_LEG);
+        deserializeNBT(nbt, "bodyHealth", BODY);
+        deserializeNBT(nbt, "rightArmHealth", RIGHT_ARM);
+        deserializeNBT(nbt, "rightLegHealth", RIGHT_LEG);
+    }
+
+    private static void deserializeNBT(NBTTagCompound nbt, String key, DamageablePart part) {
+        part.currentHealth = Math.min(nbt.getFloat(key), part.maxHealth);
     }
 
     public void tick(World world) {

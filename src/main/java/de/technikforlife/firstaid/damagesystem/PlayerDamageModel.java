@@ -2,12 +2,15 @@ package de.technikforlife.firstaid.damagesystem;
 
 import de.technikforlife.firstaid.FirstAidConfig;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
     public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, BODY, RIGHT_ARM, RIGHT_LEG;
+    private int tickCounter;
 
     public PlayerDamageModel() {
         this.HEAD = new DamageablePart(FirstAidConfig.damageSystem.maxHealthHead, true);
@@ -63,12 +66,18 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
         part.currentHealth = Math.min(nbt.getFloat(key), part.maxHealth);
     }
 
-    public void tick(World world) {
-        HEAD.tick(world);
-        LEFT_ARM.tick(world);
-        LEFT_LEG.tick(world);
-        BODY.tick(world);
-        RIGHT_ARM.tick(world);
-        RIGHT_LEG.tick(world);
+    public void tick(World world, EntityPlayer player) {
+        tickCounter++;
+        if (tickCounter >= 400) {
+            tickCounter = 0;
+            for (PlayerDamageDebuff debuff : PlayerDamageDebuff.possibleDebuffs)
+                debuff.applyDebuff(player, this);
+        }
+        HEAD.tick(world, player);
+        LEFT_ARM.tick(world, player);
+        LEFT_LEG.tick(world, player);
+        BODY.tick(world, player);
+        RIGHT_ARM.tick(world, player);
+        RIGHT_LEG.tick(world, player);
     }
 }

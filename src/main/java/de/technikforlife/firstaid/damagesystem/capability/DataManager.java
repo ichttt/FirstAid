@@ -52,6 +52,6 @@ public class DataManager implements ICapabilityProvider, INBTSerializable<NBTTag
     }
 
     public static void tickAll(World world) {
-        capList.forEach((player, playerDamageModel) -> playerDamageModel.tick(world));
+        capList.forEach((player, playerDamageModel) -> playerDamageModel.tick(world, player));
     }
 }

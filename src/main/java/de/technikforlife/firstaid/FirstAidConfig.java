@@ -17,19 +17,19 @@ public class FirstAidConfig {
         @Config.RangeInt(min = 0, max = 16)
         public int maxHealthHead = 4;
 
-        @Config.RangeInt
+        @Config.RangeInt(min = 0, max = 16)
         public int maxHealthLeftArm = 4;
 
-        @Config.RangeInt
+        @Config.RangeInt(min = 0, max = 16)
         public int maxHealthLeftLeg = 4;
 
-        @Config.RangeInt
+        @Config.RangeInt(min = 0, max = 16)
         public int maxHealthBody = 6;
 
-        @Config.RangeInt
+        @Config.RangeInt(min = 0, max = 16)
         public int maxHealthRightArm = 4;
 
-        @Config.RangeInt
+        @Config.RangeInt(min = 0, max = 16)
         public int maxHealthRightLeg = 4;
     }
 }

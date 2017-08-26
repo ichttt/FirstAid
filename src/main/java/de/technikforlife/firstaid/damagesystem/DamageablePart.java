@@ -4,11 +4,9 @@ import de.technikforlife.firstaid.damagesystem.enums.EnumWoundState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.UUID;
 
 public class DamageablePart {
@@ -49,14 +47,13 @@ public class DamageablePart {
      */
     public boolean damage(float amount) {
         currentHealth = Math.max(0, currentHealth - amount);
+        state = EnumWoundState.getWoundState(maxHealth, currentHealth);
         return currentHealth == 0;
     }
 
-    void tick(World world) {
+    void tick(World world, EntityPlayer player) {
         if (activeHealer != null) {
             if (activeHealer.tick()) {
-                EntityPlayer player = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerByUUID(playerUUID);
-                Objects.requireNonNull(player);
                 heal(1F, player);
                 world.playEvent(2005, player.getPosition(), 0);
             }

@@ -1,10 +1,12 @@
 package de.technikforlife.firstaid.items;
 
 import de.technikforlife.firstaid.FirstAid;
-import de.technikforlife.firstaid.damagesystem.EnumHealingType;
+import de.technikforlife.firstaid.client.GuiApplyHealthItem;
+import de.technikforlife.firstaid.damagesystem.enums.EnumHealingType;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.network.MessageReceiveDamageInfo;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -29,9 +31,12 @@ public class ItemBandage extends Item {
     @Override
     @Nonnull
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
-        if (!world.isRemote) {
+        if (world.isRemote) {
+            GuiApplyHealthItem.INSTANCE = new GuiApplyHealthItem();
+            Minecraft.getMinecraft().displayGuiScreen(GuiApplyHealthItem.INSTANCE);
+        } else {
             PlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
-            FirstAid.NETWORKING.sendTo(new MessageReceiveDamageInfo(damageModel, EnumHealingType.BANDAGE), (EntityPlayerMP) player);
+            FirstAid.NETWORKING.sendTo(new MessageReceiveDamageInfo(damageModel, EnumHealingType.BANDAGE, hand), (EntityPlayerMP) player);
         }
         return super.onItemRightClick(world, player, hand);
     }

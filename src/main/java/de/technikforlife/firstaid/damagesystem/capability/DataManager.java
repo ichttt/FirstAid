@@ -14,7 +14,6 @@ import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 public class DataManager implements ICapabilityProvider, INBTSerializable<NBTTagCompound> {
@@ -25,7 +24,7 @@ public class DataManager implements ICapabilityProvider, INBTSerializable<NBTTag
 
     public DataManager(EntityPlayer player) {
         this.player = player;
-        capList.putIfAbsent(player, new PlayerDamageModel(player.getPersistentID()));
+        capList.putIfAbsent(player, new PlayerDamageModel());
     }
 
     @Override

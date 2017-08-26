@@ -5,8 +5,6 @@ import de.technikforlife.firstaid.damagesystem.capability.DamageEventHandler;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import de.technikforlife.firstaid.network.MessageApplyHealth;
 import de.technikforlife.firstaid.network.MessageReceiveDamageInfo;
-import net.minecraft.command.CommandHandler;
-import net.minecraft.command.ICommandManager;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -15,7 +13,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -57,14 +54,6 @@ public class FirstAid {
         if (FMLCommonHandler.instance().isDisplayCloseRequested()) { //another early exit (forge only covers stage transition)
             logger.info("Early exit requested by user - terminating minecraft");
             FMLCommonHandler.instance().exitJava(0, false);
-        }
-    }
-
-    @Mod.EventHandler
-    public void serverAboutToStart(FMLServerAboutToStartEvent event) {
-        ICommandManager manager = event.getServer().getCommandManager();
-        if (manager instanceof CommandHandler) {
-            ((CommandHandler) manager).registerCommand(new CommandGetHealth());
         }
     }
 

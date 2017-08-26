@@ -1,4 +1,4 @@
-package de.technikforlife.firstaid.damagesystem;
+package de.technikforlife.firstaid.damagesystem.enums;
 
 public enum EnumWoundState {
     HEALTHY, WOUNDED_LIGHT, WOUNDED_HEAVY;

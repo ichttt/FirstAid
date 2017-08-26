@@ -1,7 +1,7 @@
 package de.technikforlife.firstaid.damagesystem.capability;
 
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
-import de.technikforlife.firstaid.damagesystem.EnumPlayerPart;
+import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;

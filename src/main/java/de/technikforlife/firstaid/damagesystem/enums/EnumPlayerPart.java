@@ -1,4 +1,4 @@
-package de.technikforlife.firstaid.damagesystem;
+package de.technikforlife.firstaid.damagesystem.enums;
 
 import de.technikforlife.firstaid.damagesystem.capability.DamageEventHandler;
 

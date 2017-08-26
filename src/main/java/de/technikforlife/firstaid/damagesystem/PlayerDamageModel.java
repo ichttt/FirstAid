@@ -1,23 +1,21 @@
 package de.technikforlife.firstaid.damagesystem;
 
+import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
-import java.util.Random;
-import java.util.UUID;
-
 public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
     public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, BODY, RIGHT_ARM, RIGHT_LEG;
 
-    public PlayerDamageModel(UUID playerUUID) {
+    public PlayerDamageModel() {
 //        this.playerUUID = player.getPersistentID();
-        this.HEAD = new DamageablePart(4.0F, true, playerUUID);
-        this.LEFT_ARM = new DamageablePart(4.0F, false, playerUUID);
-        this.LEFT_LEG = new DamageablePart(4.0F, false, playerUUID);
-        this.BODY = new DamageablePart(6.0F, true, playerUUID);
-        this.RIGHT_ARM = new DamageablePart(4.0F, false, playerUUID);
-        this.RIGHT_LEG = new DamageablePart(4.0F, false, playerUUID);
+        this.HEAD = new DamageablePart(4.0F, true);
+        this.LEFT_ARM = new DamageablePart(4.0F, false);
+        this.LEFT_LEG = new DamageablePart(4.0F, false);
+        this.BODY = new DamageablePart(6.0F, true);
+        this.RIGHT_ARM = new DamageablePart(4.0F, false);
+        this.RIGHT_LEG = new DamageablePart(4.0F, false);
     }
 
     public DamageablePart getFromEnum(EnumPlayerPart part) {

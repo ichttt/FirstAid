@@ -19,12 +19,14 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public class ItemBandage extends Item {
+public class ItemHealing extends Item {
+    private final EnumHealingType type;
 
-    ItemBandage() {
+    ItemHealing(String name, EnumHealingType type) {
+        this.type = type;
         setMaxStackSize(16);
-        setRegistryName(new ResourceLocation(FirstAid.MODID, "bandage"));
-        setUnlocalizedName("bandage");
+        setRegistryName(new ResourceLocation(FirstAid.MODID, name));
+        setUnlocalizedName(name);
         setCreativeTab(FirstAid.creativeTab);
     }
 
@@ -36,7 +38,7 @@ public class ItemBandage extends Item {
             Minecraft.getMinecraft().displayGuiScreen(GuiApplyHealthItem.INSTANCE);
         } else {
             PlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
-            FirstAid.NETWORKING.sendTo(new MessageReceiveDamageInfo(damageModel, EnumHealingType.BANDAGE, hand), (EntityPlayerMP) player);
+            FirstAid.NETWORKING.sendTo(new MessageReceiveDamageInfo(damageModel, type, hand), (EntityPlayerMP) player);
         }
         return super.onItemRightClick(world, player, hand);
     }

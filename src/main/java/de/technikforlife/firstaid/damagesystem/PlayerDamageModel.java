@@ -67,6 +67,8 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
     }
 
     public void tick(World world, EntityPlayer player) {
+        if (player.isCreative())
+            return;
         tickCounter++;
         if (tickCounter >= 400) {
             tickCounter = 0;

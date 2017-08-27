@@ -38,12 +38,14 @@ public class PlayerDamageDebuff {
         for (EnumPlayerPart part : activeParts) {
             count += getDebuffCount(playerDamageModel.getFromEnum(part));
         }
+        if (count == 0)
+            return;
         float rdm = (float) Math.random();
         while (rdm < chance && count > 0) {
             rdm = rdm  * 2;
             count--;
         }
-        count = Math.min(count, 4);
+        count = Math.min(count, 3);
         if (count <= 0)
         {
             if (!canBeRemovedEntirely)

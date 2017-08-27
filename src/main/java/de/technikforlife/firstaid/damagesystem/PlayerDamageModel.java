@@ -10,6 +10,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
     public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, BODY, RIGHT_ARM, RIGHT_LEG;
     private int tickCounter;
+    private int morphineTicksLeft = 0;
 
     public PlayerDamageModel() {
         this.HEAD = new DamageablePart(FirstAidConfig.damageSystem.maxHealthHead, true);
@@ -48,6 +49,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
         tagCompound.setFloat("bodyHealth", BODY.currentHealth);
         tagCompound.setFloat("rightArmHealth", RIGHT_ARM.currentHealth);
         tagCompound.setFloat("rightLegHealth", RIGHT_LEG.currentHealth);
+        tagCompound.setInteger("morphineTicks", morphineTicksLeft);
         return tagCompound;
     }
 
@@ -59,6 +61,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
         deserializeNBT(nbt, "bodyHealth", BODY);
         deserializeNBT(nbt, "rightArmHealth", RIGHT_ARM);
         deserializeNBT(nbt, "rightLegHealth", RIGHT_LEG);
+        morphineTicksLeft = nbt.getInteger("morphineTicks");
     }
 
     private static void deserializeNBT(NBTTagCompound nbt, String key, DamageablePart part) {
@@ -68,11 +71,15 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
     public void tick(World world, EntityPlayer player) {
         if (player.isCreative())
             return;
-        tickCounter++;
-        if (tickCounter >= 400) {
-            tickCounter = 0;
-            for (PlayerDamageDebuff debuff : PlayerDamageDebuff.possibleDebuffs)
-                debuff.applyDebuff(player, this);
+        if (morphineTicksLeft <= 0) {
+            tickCounter++;
+            if (tickCounter >= 400) {
+                tickCounter = 0;
+                for (PlayerDamageDebuff debuff : PlayerDamageDebuff.possibleDebuffs)
+                    debuff.applyDebuff(player, this);
+            }
+        } else {
+            morphineTicksLeft--;
         }
         HEAD.tick(world, player);
         LEFT_ARM.tick(world, player);
@@ -80,5 +87,9 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
         BODY.tick(world, player);
         RIGHT_ARM.tick(world, player);
         RIGHT_LEG.tick(world, player);
+    }
+
+    public void applyMorphine() {
+        morphineTicksLeft = (DamageEventHandler.rand.nextInt(2) * 20 * 45) + 20 * 210;
     }
 }

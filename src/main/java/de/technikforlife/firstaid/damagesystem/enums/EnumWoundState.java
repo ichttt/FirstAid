@@ -6,8 +6,8 @@ public enum EnumWoundState {
     public static EnumWoundState getWoundState(float maxHealth, float currentHealth) {
         if (maxHealth == currentHealth)
             return EnumWoundState.HEALTHY;
-        if (maxHealth / 2 >= currentHealth)
-            return EnumWoundState.WOUNDED_LIGHT;
-        return EnumWoundState.WOUNDED_HEAVY;
+        if ((maxHealth / 2) > currentHealth)
+            return EnumWoundState.WOUNDED_HEAVY;
+        return EnumWoundState.WOUNDED_LIGHT;
     }
 }

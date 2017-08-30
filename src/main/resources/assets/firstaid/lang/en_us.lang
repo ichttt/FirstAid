@@ -1,6 +1,7 @@
 itemGroup.firstaid=First Aid
 item.bandage.name=Bandage
 item.plaster.name=Plaster
+item.morphine.name=Morphine
 
 gui.head=Head
 gui.left_arm=Left Arm
@@ -8,6 +9,6 @@ gui.left_leg=Left Leg
 gui.body=Body
 gui.right_arm=Right Arm
 gui.right_leg=Right Leg
-gui.apply_hint=Pick where to apply the bandage
+gui.apply_hint=Pick where to apply the item
 
-death.attack.criticalOrgan=%s had a critical organ failure
+death.attack.criticalOrgan=%s died because of a critical organ failure

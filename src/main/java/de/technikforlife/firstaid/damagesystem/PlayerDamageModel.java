@@ -1,5 +1,6 @@
 package de.technikforlife.firstaid.damagesystem;
 
+import de.technikforlife.firstaid.EventHandler;
 import de.technikforlife.firstaid.FirstAidConfig;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
@@ -55,17 +56,17 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
 
     @Override
     public void deserializeNBT(NBTTagCompound nbt) {
-        deserializeNBT(nbt, "headHealth", HEAD);
-        deserializeNBT(nbt, "leftArmHealth", LEFT_ARM);
-        deserializeNBT(nbt, "leftLegHealth", LEFT_LEG);
-        deserializeNBT(nbt, "bodyHealth", BODY);
-        deserializeNBT(nbt, "rightArmHealth", RIGHT_ARM);
-        deserializeNBT(nbt, "rightLegHealth", RIGHT_LEG);
+        deserializeNBT(nbt, "head", HEAD);
+        deserializeNBT(nbt, "leftArm", LEFT_ARM);
+        deserializeNBT(nbt, "leftLeg", LEFT_LEG);
+        deserializeNBT(nbt, "body", BODY);
+        deserializeNBT(nbt, "rightArm", RIGHT_ARM);
+        deserializeNBT(nbt, "rightLeg", RIGHT_LEG);
         morphineTicksLeft = nbt.getInteger("morphineTicks");
     }
 
     private static void deserializeNBT(NBTTagCompound nbt, String key, DamageablePart part) {
-        part.currentHealth = Math.min(nbt.getFloat(key), part.maxHealth);
+        part.currentHealth = Math.min(nbt.getFloat(key + "Health"), part.maxHealth);
     }
 
     public void tick(World world, EntityPlayer player) {
@@ -90,6 +91,6 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
     }
 
     public void applyMorphine() {
-        morphineTicksLeft = (DamageEventHandler.rand.nextInt(2) * 20 * 45) + 20 * 210;
+        morphineTicksLeft = (EventHandler.rand.nextInt(2) * 20 * 45) + 20 * 210;
     }
 }

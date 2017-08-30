@@ -1,0 +1,14 @@
+itemGroup.firstaid=First Aid
+item.bandage.name=Bandage
+item.plaster.name=Plaster
+item.morphine.name=Morphium
+
+gui.head=Kopf
+gui.left_arm=Linker Arm
+gui.left_leg=Linkes Bein
+gui.body=Torso
+gui.right_arm=Rechter Arm
+gui.right_leg=Rechtes Bein
+gui.apply_hint=Wähle die Stelle, wo das Item angebracht werden soll
+
+death.attack.criticalOrgan=%s starb Aufgrund von Organversagen

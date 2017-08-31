@@ -11,8 +11,18 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.storage.loot.LootEntry;
+import net.minecraft.world.storage.loot.LootEntryItem;
+import net.minecraft.world.storage.loot.LootPool;
+import net.minecraft.world.storage.loot.LootTableList;
+import net.minecraft.world.storage.loot.RandomValueRange;
+import net.minecraft.world.storage.loot.conditions.LootCondition;
+import net.minecraft.world.storage.loot.functions.LootFunction;
+import net.minecraft.world.storage.loot.functions.SetCount;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -78,6 +88,30 @@ public class EventHandler {
             String username = event.player.getName();
             if (username.equalsIgnoreCase("ichun") || username.equalsIgnoreCase("ohaiichun"))
                 stack.setStackDisplayName("MediChun's Healthkit"); //Yup, I *had* to do this
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLootTableLoad(LootTableLoadEvent event) {
+        ResourceLocation tableName = event.getName();
+        LootPool pool = null;
+        int bandage = 0, plaster = 0, morphine = 0;
+        if (tableName.equals(LootTableList.CHESTS_SPAWN_BONUS_CHEST)) {
+            pool = event.getTable().getPool("main");
+            bandage = 8;
+            plaster = 16;
+            morphine = 4;
+        } else if (tableName.equals(LootTableList.CHESTS_STRONGHOLD_CORRIDOR) || tableName.equals(LootTableList.CHESTS_STRONGHOLD_CROSSING) || tableName.equals(LootTableList.CHESTS_ABANDONED_MINESHAFT)) {
+            pool = event.getTable().getPool("main");
+            bandage = 20;
+            plaster = 24;
+            morphine = 8;
+        }
+
+        if (pool != null) {
+            pool.addEntry(new LootEntryItem(FirstAidItems.BANDAGE, bandage, 0, new SetCount[]{new SetCount(new LootCondition[0], new RandomValueRange(1, 3))}, new LootCondition[0], FirstAid.MODID + "bandage"));
+            pool.addEntry(new LootEntryItem(FirstAidItems.PLASTER, plaster, 0, new SetCount[]{new SetCount(new LootCondition[0], new RandomValueRange(1, 5))}, new LootCondition[0], FirstAid.MODID + "plaster"));
+            pool.addEntry(new LootEntryItem(FirstAidItems.MORPHINE, morphine, 0, new SetCount[]{new SetCount(new LootCondition[0], new RandomValueRange(1, 2))}, new LootCondition[0], FirstAid.MODID + "morphine"));
         }
     }
 }

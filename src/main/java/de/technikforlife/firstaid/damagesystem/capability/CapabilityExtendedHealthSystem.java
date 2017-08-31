@@ -1,5 +1,6 @@
 package de.technikforlife.firstaid.damagesystem.capability;
 
+import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -17,6 +18,7 @@ public class CapabilityExtendedHealthSystem {
     public static Capability<PlayerDamageModel> CAP_EXTENDED_HEALTH_SYSTEM;
 
     public static void register() {
+        FirstAid.logger.debug("Registering capability");
         CapabilityManager.INSTANCE.register(PlayerDamageModel.class, new Capability.IStorage<PlayerDamageModel>() {
             @Nullable
             @Override

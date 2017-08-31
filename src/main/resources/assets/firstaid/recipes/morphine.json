@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:glass_bottle"
+    },
+    {
+      "item": "minecraft:fermented_spider_eye"
+    }, {
+      "item": "minecraft:fermented_spider_eye"
+    }
+  ],
+  "result": {
+    "item": "firstaid:morphine"
+  }
+}

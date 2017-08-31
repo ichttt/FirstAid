@@ -1,6 +1,7 @@
 package de.technikforlife.firstaid;
 
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.capability.DataManager;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import de.technikforlife.firstaid.network.MessageApplyHealth;
 import de.technikforlife.firstaid.network.MessageReceiveDamageInfo;
@@ -13,6 +14,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -61,9 +63,17 @@ public class FirstAid {
 
     @Mod.EventHandler
     public void onServerStart(FMLServerStartedEvent args) {
+        if (FirstAidConfig.allowNaturalRegeneration)
+            return;
         for (World world:DimensionManager.getWorlds()) {
-            world.getGameRules().setOrCreateGameRule(NREG, Boolean.toString(FirstAidConfig.allowNaturalRegeneration));
+            world.getGameRules().setOrCreateGameRule(NREG, "false");
         }
-        logger.info("Gamerule: {} set to {}.", NREG, Boolean.toString(FirstAidConfig.allowNaturalRegeneration));
+        logger.info("Gamerule {} has been set to false for all words.", NREG);
+    }
+
+    @Mod.EventHandler
+    public void onStop(FMLServerStoppedEvent event) {
+        logger.debug("Cleaning up");
+        DataManager.clearData();
     }
 }

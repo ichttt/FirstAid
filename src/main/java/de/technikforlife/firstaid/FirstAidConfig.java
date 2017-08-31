@@ -7,10 +7,11 @@ import net.minecraftforge.common.config.Config;
 public class FirstAidConfig {
 
     @Config.RequiresWorldRestart
-    @Config.Comment("Disable natural Regeneration on world start")
+    @Config.Comment("Allow vanilla's natural regeneration")
     public static boolean allowNaturalRegeneration = false;
 
     @Config.Comment("Settings regarding the max health of the body's parts")
+    @Config.RequiresWorldRestart
     public static final DamageSystem damageSystem = new DamageSystem();
 
     @SuppressWarnings("CanBeFinal")

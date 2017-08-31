@@ -51,6 +51,10 @@ public class DataManager implements ICapabilityProvider, INBTSerializable<NBTTag
         damageModel.deserializeNBT(nbt);
     }
 
+    public static void clearData() {
+        capList.clear();
+    }
+
     public static void tickAll(World world) {
         capList.forEach((player, playerDamageModel) -> playerDamageModel.tick(world, player));
     }

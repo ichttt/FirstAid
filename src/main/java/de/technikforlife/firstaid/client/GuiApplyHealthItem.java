@@ -42,6 +42,12 @@ public class GuiApplyHealthItem extends GuiScreen {
         this.healingType = healingType;
         this.activeHand = activeHand;
 
+        addMainButtons();
+
+        hasData = true;
+    }
+
+    private void addMainButtons() {
         GuiButton applyHead = new GuiButton(1, this.guiLeft + 4, this.guiTop + 14, 48, 20, I18n.format("gui.head"));
         this.buttonList.add(applyHead);
 
@@ -57,8 +63,6 @@ public class GuiApplyHealthItem extends GuiScreen {
         this.buttonList.add(applyRightArm);
         GuiButton applyRightLeg = new GuiButton(6, this.guiLeft + 195, this.guiTop + 74, 48, 20, I18n.format("gui.right_leg"));
         this.buttonList.add(applyRightLeg);
-
-        hasData = true;
     }
 
     @Override
@@ -66,6 +70,10 @@ public class GuiApplyHealthItem extends GuiScreen {
         isOpen = true;
         this.guiLeft = (this.width - xSize) / 2;
         this.guiTop = (this.height - ySize) / 2;
+        if (hasData) {
+            this.buttonList.clear();
+            addMainButtons();
+        }
         GuiButton buttonCancel = new GuiButton(7, this.width / 2 - 100, this.height - 50, I18n.format("gui.cancel"));
         this.buttonList.add(buttonCancel);
         super.initGui();
@@ -115,7 +123,7 @@ public class GuiApplyHealthItem extends GuiScreen {
         int toDraw = Math.min(4, Math.round(available / 2F));
         if (maxHealth > 8) {
             GlStateManager.translate(0, 5, 0);
-            int toDrawSecond = Math.round((available - 8F) / 2F);
+            int toDrawSecond = (int) ((available - 8F) / 2F) + 1;
             if (toDrawSecond > 0)
                 renderTexturedModalRects(toDrawSecond, true, halfTextureX, textureX, textureY);
             GlStateManager.translate(0, -10, 0);

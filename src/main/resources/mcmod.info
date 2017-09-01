@@ -2,10 +2,10 @@
 {
   "modid": "firstaid",
   "name": "First Aid",
-  "description": "Example placeholder mod.",
+  "description": "First Aid is a mod that expands the vanilla health system to respect the different parts of your body",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "technikforlife.de",
+  "url": "",
   "updateUrl": "",
   "authorList": ["TechnikforLife", "ichttt"],
   "credits": "",

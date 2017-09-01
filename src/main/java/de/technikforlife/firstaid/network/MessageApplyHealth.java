@@ -1,12 +1,17 @@
 package de.technikforlife.firstaid.network;
 
+import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.damagesystem.enums.EnumHealingType;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
+import de.technikforlife.firstaid.items.ItemHealing;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -43,11 +48,18 @@ public class MessageApplyHealth implements IMessage {
     public static class Handler implements IMessageHandler<MessageApplyHealth, IMessage> {
 
         @Override
-        public IMessage onMessage(MessageApplyHealth message, MessageContext ctx) {
+        public IMessage onMessage(final MessageApplyHealth message, final MessageContext ctx) {
             //noinspection ConstantConditions
             ctx.getServerHandler().player.getServer().addScheduledTask(() -> {
-                PlayerDamageModel damageModel = Objects.requireNonNull(ctx.getServerHandler().player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
-                ctx.getServerHandler().player.getHeldItem(message.hand).shrink(1);
+                EntityPlayer player = ctx.getServerHandler().player;
+                PlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
+                ItemStack stack = player.getHeldItem(message.hand);
+                if (!(stack.getItem() instanceof ItemHealing)) {
+                    FirstAid.logger.warn("Player {} has invalid item in hand {} while it should be an healing item", player.getName(), stack.getItem().getUnlocalizedName());
+                    player.sendMessage(new TextComponentString("Unable to apply healing item!"));
+                    return;
+                }
+                stack.shrink(1);
                 DamageablePart damageablePart = damageModel.getFromEnum(message.part);
                 damageablePart.applyItem(message.healingType.createNewHealer());
             });

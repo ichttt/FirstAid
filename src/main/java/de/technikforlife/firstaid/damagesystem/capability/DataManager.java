@@ -35,7 +35,9 @@ public class DataManager implements ICapabilityProvider, INBTSerializable<NBTTag
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
-        return (T) capList.get(player);
+        if (capability == CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM)
+            return (T) capList.get(player);
+        return player.getCapability(capability, facing);
     }
 
     @Override

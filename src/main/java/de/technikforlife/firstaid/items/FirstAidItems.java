@@ -12,12 +12,12 @@ public class FirstAidItems {
     public static ItemMorphine MORPHINE;
 
     @SubscribeEvent
-    public void registerItems(RegistryEvent.Register<Item> event) {
+    public static void registerItems(RegistryEvent.Register<Item> event) {
         event.getRegistry().registerAll(BANDAGE, PLASTER, MORPHINE);
     }
 
     public static void init() {
-        MinecraftForge.EVENT_BUS.register(new FirstAidItems());
+        MinecraftForge.EVENT_BUS.register(FirstAidItems.class);
         BANDAGE = new ItemHealing("bandage", EnumHealingType.BANDAGE);
         PLASTER = new ItemHealing("plaster", EnumHealingType.PLASTER);
         MORPHINE = new ItemMorphine();

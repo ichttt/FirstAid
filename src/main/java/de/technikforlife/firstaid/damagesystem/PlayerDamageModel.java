@@ -81,7 +81,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
     public void tick(World world, EntityPlayer player, boolean fake) {
         if (morphineTicksLeft <= 0) {
             tickCounter++;
-            if (tickCounter >= 165) {
+            if (tickCounter >= 160) {
                 tickCounter = 0;
                 if (!fake) {
                     for (PlayerDamageDebuff debuff : PlayerDamageDebuff.possibleDebuffs)

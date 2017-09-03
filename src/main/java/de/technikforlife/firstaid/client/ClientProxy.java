@@ -14,14 +14,22 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SuppressWarnings("unused")
+@SideOnly(Side.CLIENT)
 public class ClientProxy implements IProxy {
 
     @Override
     public void init() {
         FirstAid.logger.debug("Loading ClientProxy");
         MinecraftForge.EVENT_BUS.register(ClientProxy.class);
+    }
+
+    @Override
+    public void showGuiApplyHealth() {
+        GuiApplyHealthItem.INSTANCE = new GuiApplyHealthItem();
+        Minecraft.getMinecraft().displayGuiScreen(GuiApplyHealthItem.INSTANCE);
     }
 
     @SubscribeEvent

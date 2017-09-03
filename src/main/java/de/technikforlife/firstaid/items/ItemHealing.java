@@ -35,8 +35,7 @@ public class ItemHealing extends Item {
     @Nonnull
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
         if (world.isRemote) {
-            GuiApplyHealthItem.INSTANCE = new GuiApplyHealthItem();
-            Minecraft.getMinecraft().displayGuiScreen(GuiApplyHealthItem.INSTANCE);
+            FirstAid.proxy.showGuiApplyHealth();
         } else {
             PlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
             FirstAid.NETWORKING.sendTo(new MessageReceiveDamageInfo(damageModel, type, hand), (EntityPlayerMP) player);

@@ -10,5 +10,6 @@ gui.body=Torso
 gui.right_arm=Rechter Arm
 gui.right_leg=Rechtes Bein
 gui.apply_hint=Wähle die Stelle, wo das Item angebracht werden soll
+gui.morphine_left=Morphium aktiv(%s Sekunden verbleibend)
 
 death.attack.criticalOrgan=%s starb Aufgrund von Organversagen

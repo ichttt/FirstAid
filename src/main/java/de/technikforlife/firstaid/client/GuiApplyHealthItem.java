@@ -30,10 +30,10 @@ public class GuiApplyHealthItem extends GuiScreen {
     private int guiLeft;
     private int guiTop;
 
-    private PlayerDamageModel damageModel;
+    public PlayerDamageModel damageModel;
     private EnumHealingType healingType;
     private EnumHand activeHand;
-    private boolean hasData = false;
+    public boolean hasData = false;
 
     public static boolean isOpen = false;
 
@@ -88,7 +88,10 @@ public class GuiApplyHealthItem extends GuiScreen {
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
         GuiInventory.drawEntityOnScreen(this.width / 2, this.height / 2 + 28, 40, 0, 0, mc.player);
         if (hasData) {
-            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - 21, 0xFFFFFF);
+            int morphineSecs = Math.round(damageModel.getMorphineTicks() / 20F);
+            if (morphineSecs > 0)
+                drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", morphineSecs), this.guiLeft + (xSize / 2), this.guiTop + ySize - 29, 0xFFFFFF);
+            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineSecs == 0 ? 21 : 11), 0xFFFFFF);
             this.mc.getTextureManager().bindTexture(Gui.ICONS);
             drawHealth(damageModel.HEAD, false, 20);
             drawHealth(damageModel.LEFT_ARM, false, 50);

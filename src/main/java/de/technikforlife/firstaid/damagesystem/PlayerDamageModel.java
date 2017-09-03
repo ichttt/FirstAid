@@ -44,53 +44,66 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
     @Override
     public NBTTagCompound serializeNBT() {
         NBTTagCompound tagCompound = new NBTTagCompound();
-        tagCompound.setFloat("headHealth", HEAD.currentHealth);
-        tagCompound.setFloat("leftArmHealth", LEFT_ARM.currentHealth);
-        tagCompound.setFloat("leftLegHealth", LEFT_LEG.currentHealth);
-        tagCompound.setFloat("bodyHealth", BODY.currentHealth);
-        tagCompound.setFloat("rightArmHealth", RIGHT_ARM.currentHealth);
-        tagCompound.setFloat("rightLegHealth", RIGHT_LEG.currentHealth);
+        tagCompound.setTag("head", HEAD.serializeNBT());
+        tagCompound.setTag("leftArm", LEFT_ARM.serializeNBT());
+        tagCompound.setTag("leftLeg", LEFT_LEG.serializeNBT());
+        tagCompound.setTag("body", BODY.serializeNBT());
+        tagCompound.setTag("rightArm", RIGHT_ARM.serializeNBT());
+        tagCompound.setTag("rightLeg", RIGHT_LEG.serializeNBT());
         tagCompound.setInteger("morphineTicks", morphineTicksLeft);
         return tagCompound;
     }
 
     @Override
     public void deserializeNBT(NBTTagCompound nbt) {
-        deserializeNBT(nbt, "head", HEAD);
-        deserializeNBT(nbt, "leftArm", LEFT_ARM);
-        deserializeNBT(nbt, "leftLeg", LEFT_LEG);
-        deserializeNBT(nbt, "body", BODY);
-        deserializeNBT(nbt, "rightArm", RIGHT_ARM);
-        deserializeNBT(nbt, "rightLeg", RIGHT_LEG);
+        if (nbt.hasKey("headHealth")) {
+            deserializeNBT_legacy(nbt, "head", HEAD);
+            deserializeNBT_legacy(nbt, "leftArm", LEFT_ARM);
+            deserializeNBT_legacy(nbt, "leftLeg", LEFT_LEG);
+            deserializeNBT_legacy(nbt, "body", BODY);
+            deserializeNBT_legacy(nbt, "rightArm", RIGHT_ARM);
+            deserializeNBT_legacy(nbt, "rightLeg", RIGHT_LEG);
+        } else {
+            HEAD.deserializeNBT((NBTTagCompound) nbt.getTag("head"));
+            LEFT_ARM.deserializeNBT((NBTTagCompound) nbt.getTag("leftArm"));
+            LEFT_LEG.deserializeNBT((NBTTagCompound) nbt.getTag("leftLeg"));
+            BODY.deserializeNBT((NBTTagCompound) nbt.getTag("body"));
+            RIGHT_ARM.deserializeNBT((NBTTagCompound) nbt.getTag("rightArm"));
+            RIGHT_LEG.deserializeNBT((NBTTagCompound) nbt.getTag("rightLeg"));
+        }
         morphineTicksLeft = nbt.getInteger("morphineTicks");
     }
 
-    private static void deserializeNBT(NBTTagCompound nbt, String key, DamageablePart part) {
+    private static void deserializeNBT_legacy(NBTTagCompound nbt, String key, DamageablePart part) {
         part.currentHealth = Math.min(nbt.getFloat(key + "Health"), part.maxHealth);
     }
 
-    public void tick(World world, EntityPlayer player) {
-        if (player.isCreative())
-            return;
+    public void tick(World world, EntityPlayer player, boolean fake) {
         if (morphineTicksLeft <= 0) {
             tickCounter++;
-            if (tickCounter >= 400) {
+            if (tickCounter >= 165) {
                 tickCounter = 0;
-                for (PlayerDamageDebuff debuff : PlayerDamageDebuff.possibleDebuffs)
-                    debuff.applyDebuff(player, this);
+                if (!fake) {
+                    for (PlayerDamageDebuff debuff : PlayerDamageDebuff.possibleDebuffs)
+                        debuff.applyDebuff(player, this);
+                }
             }
         } else {
             morphineTicksLeft--;
         }
-        HEAD.tick(world, player);
-        LEFT_ARM.tick(world, player);
-        LEFT_LEG.tick(world, player);
-        BODY.tick(world, player);
-        RIGHT_ARM.tick(world, player);
-        RIGHT_LEG.tick(world, player);
+        HEAD.tick(world, player, fake);
+        LEFT_ARM.tick(world, player, fake);
+        LEFT_LEG.tick(world, player, fake);
+        BODY.tick(world, player, fake);
+        RIGHT_ARM.tick(world, player, fake);
+        RIGHT_LEG.tick(world, player, fake);
     }
 
     public void applyMorphine() {
         morphineTicksLeft = (EventHandler.rand.nextInt(2) * 20 * 45) + 20 * 210;
+    }
+
+    public int getMorphineTicks() {
+        return morphineTicksLeft;
     }
 }

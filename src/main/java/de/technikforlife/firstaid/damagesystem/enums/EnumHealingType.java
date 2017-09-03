@@ -6,12 +6,12 @@ public enum EnumHealingType {
     BANDAGE(1) {
         @Override
         public PartHealer createNewHealer() {
-            return PartHealer.getNewBandage();
+            return new PartHealer(400, 3, this);
         }
     }, PLASTER(2) {
         @Override
         public PartHealer createNewHealer() {
-            return PartHealer.getNewPlaster();
+            return new PartHealer(500, 2, this);
         }
     };
 

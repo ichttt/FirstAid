@@ -7,7 +7,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -55,7 +54,12 @@ public class DataManager implements ICapabilityProvider, INBTSerializable<NBTTag
         capList.clear();
     }
 
-    public static void tickAll(World world) {
-        capList.forEach((player, playerDamageModel) -> playerDamageModel.tick(world, player));
+    public static void tickPlayer(EntityPlayer player) {
+        capList.get(player).tick(player.world, player, false);
+    }
+
+    public static void clearPlayer(EntityPlayer player) {
+        capList.remove(player);
+        capList.put(player, new PlayerDamageModel());
     }
 }

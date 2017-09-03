@@ -12,6 +12,8 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
 
 @SuppressWarnings("unused")
 public class ClientProxy implements IProxy {
@@ -36,5 +38,11 @@ public class ClientProxy implements IProxy {
             if (entityLiving.getName().equals(Minecraft.getMinecraft().player.getName()) && GuiApplyHealthItem.isOpen)
                 Minecraft.getMinecraft().displayGuiScreen(null);
         }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END && event.side == Side.CLIENT && GuiApplyHealthItem.INSTANCE != null && GuiApplyHealthItem.INSTANCE.hasData && !event.player.isCreative())
+            GuiApplyHealthItem.INSTANCE.damageModel.tick(event.player.world, event.player, true);
     }
 }

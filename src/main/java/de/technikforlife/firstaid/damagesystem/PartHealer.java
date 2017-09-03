@@ -1,25 +1,28 @@
 package de.technikforlife.firstaid.damagesystem;
 
+import de.technikforlife.firstaid.damagesystem.enums.EnumHealingType;
+
 public class PartHealer {
-    public static PartHealer getNewBandage() {
-        return new PartHealer(400, 3);
-    }
+    private final EnumHealingType healingType;
 
-    public static PartHealer getNewPlaster() {
-        return new PartHealer(500, 2);
-    }
+    public final int maxHeal, ticksPerHeal;
+    int ticksPassed = 0;
+    int heals = 0;
 
-    public final int maxHealth, ticksPerHeal;
-    private int ticksPassed;
-    private int heals = 0;
-
-    public PartHealer(int ticksPerHeal, int maxHealth) {
-        this.maxHealth = maxHealth;
+    public PartHealer(int ticksPerHeal, int maxHeal, EnumHealingType type) {
+        this.maxHeal = maxHeal;
         this.ticksPerHeal = ticksPerHeal;
+        this.healingType = type;
+    }
+
+    public PartHealer loadNBT(int ticksPassed, int heals) {
+        this.ticksPassed = ticksPassed;
+        this.heals = heals;
+        return this;
     }
 
     public boolean hasFinished() {
-        return heals >= maxHealth;
+        return heals >= maxHeal;
     }
 
     public boolean tick() {
@@ -32,5 +35,9 @@ public class PartHealer {
             heals++;
         }
         return nextHeal;
+    }
+
+    public EnumHealingType toEnum() {
+        return healingType;
     }
 }

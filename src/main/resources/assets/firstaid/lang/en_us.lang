@@ -10,5 +10,6 @@ gui.body=Body
 gui.right_arm=Right Arm
 gui.right_leg=Right Leg
 gui.apply_hint=Pick where to apply the item
+gui.morphine_left=Morphine active(%s seconds left)
 
 death.attack.criticalOrgan=%s died because of a critical organ failure

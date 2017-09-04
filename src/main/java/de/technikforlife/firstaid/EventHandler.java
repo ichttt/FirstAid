@@ -77,9 +77,8 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.START || event.side == Side.CLIENT || event.player.isCreative())
-            return;
-        DataManager.tickPlayer(event.player);
+        if (event.phase == TickEvent.Phase.END && event.side == Side.SERVER && !event.player.isCreative())
+            DataManager.tickPlayer(event.player);
     }
 
     @SubscribeEvent

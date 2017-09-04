@@ -23,7 +23,7 @@ import java.io.IOException;
 @SideOnly(Side.CLIENT)
 public class GuiApplyHealthItem extends GuiScreen {
     public static GuiApplyHealthItem INSTANCE;
-    private static final ResourceLocation GUI_BACKGROUND = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
+    private static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
     private static final int xSize = 248;
     private static final int ySize = 132;
 
@@ -84,9 +84,10 @@ public class GuiApplyHealthItem extends GuiScreen {
         this.drawDefaultBackground();
 //        GlStateManager.colorMask(true, false, false, true);
         this.drawGradientRect(this.guiLeft, this.guiTop, this.guiLeft + xSize, this.guiTop + ySize, -16777216, -16777216);
-        this.mc.getTextureManager().bindTexture(GUI_BACKGROUND);
+        this.mc.getTextureManager().bindTexture(GUI_LOCATION);
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
         GuiInventory.drawEntityOnScreen(this.width / 2, this.height / 2 + 28, 40, 0, 0, mc.player);
+        super.drawScreen(mouseX, mouseY, partialTicks);
         if (hasData) {
             int morphineSecs = Math.round(damageModel.getMorphineTicks() / 20F);
             if (morphineSecs > 0)
@@ -103,7 +104,6 @@ public class GuiApplyHealthItem extends GuiScreen {
         } else {
             drawCenteredString(this.mc.fontRenderer, "Waiting for data...", this.guiLeft + (xSize / 2), this.guiTop + ySize - 21, 0xFFFFFF);
         }
-        super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
     private void drawHealth(DamageablePart damageablePart, boolean right, int yOffset) {
@@ -126,9 +126,9 @@ public class GuiApplyHealthItem extends GuiScreen {
         int toDraw = Math.min(4, Math.round(available / 2F));
         if (maxHealth > 8) {
             GlStateManager.translate(0, 5, 0);
-            int toDrawSecond = (int) ((available - 8F) / 2F) + 1;
+            int toDrawSecond = (int) ((available - 8F) / 2F) + (lastOneHalf ? 1 : 0);
             if (toDrawSecond > 0)
-                renderTexturedModalRects(toDrawSecond, true, halfTextureX, textureX, textureY);
+                renderTexturedModalRects(toDrawSecond, lastOneHalf, halfTextureX, textureX, textureY);
             GlStateManager.translate(0, -10, 0);
         }
         renderTexturedModalRects(toDraw, lastOneHalf && availableHealth < 8, halfTextureX, textureX, textureY);

@@ -16,7 +16,7 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
     public final float maxHealth;
     public final boolean canCauseDeath;
     @Nullable
-    private PartHealer activeHealer;
+    public PartHealer activeHealer;
 
     @Nonnull
     private EnumWoundState state = EnumWoundState.HEALTHY;

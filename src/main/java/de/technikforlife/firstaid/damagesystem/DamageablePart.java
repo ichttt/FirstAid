@@ -71,7 +71,7 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
         NBTTagCompound compound = new NBTTagCompound();
         compound.setFloat("health", currentHealth);
         if (activeHealer != null) {
-            compound.setByte("healingItem", (byte) activeHealer.toEnum().id);
+            compound.setByte("healingItem", (byte) activeHealer.healingType.id);
             compound.setInteger("itemTicks", activeHealer.ticksPassed);
             compound.setInteger("itemHeals", activeHealer.heals);
         }

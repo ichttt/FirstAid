@@ -30,6 +30,8 @@ public class GuiApplyHealthItem extends GuiScreen {
     private int guiLeft;
     private int guiTop;
 
+    private GuiButton HEAD, LEFT_ARM, LEFT_LEG, BODY, RIGHT_ARM, RIGHT_LEG;
+
     public PlayerDamageModel damageModel;
     private EnumHealingType healingType;
     private EnumHand activeHand;
@@ -48,21 +50,21 @@ public class GuiApplyHealthItem extends GuiScreen {
     }
 
     private void addMainButtons() {
-        GuiButton applyHead = new GuiButton(1, this.guiLeft + 4, this.guiTop + 14, 48, 20, I18n.format("gui.head"));
-        this.buttonList.add(applyHead);
+        HEAD = new GuiButton(1, this.guiLeft + 4, this.guiTop + 14, 48, 20, I18n.format("gui.head"));
+        this.buttonList.add(HEAD);
 
-        GuiButton applyLeftArm = new GuiButton(2, this.guiLeft + 4, this.guiTop + 44, 48, 20, I18n.format("gui.left_arm"));
-        this.buttonList.add(applyLeftArm);
-        GuiButton applyLeftLeg = new GuiButton(3, this.guiLeft + 4, this.guiTop + 74, 48, 20, I18n.format("gui.left_leg"));
-        this.buttonList.add(applyLeftLeg);
+        LEFT_ARM = new GuiButton(2, this.guiLeft + 4, this.guiTop + 44, 48, 20, I18n.format("gui.left_arm"));
+        this.buttonList.add(LEFT_ARM);
+        LEFT_LEG = new GuiButton(3, this.guiLeft + 4, this.guiTop + 74, 48, 20, I18n.format("gui.left_leg"));
+        this.buttonList.add(LEFT_LEG);
 
-        GuiButton applyBody = new GuiButton(4, this.guiLeft + 195, this.guiTop + 14, 48, 20, I18n.format("gui.body"));
-        this.buttonList.add(applyBody);
+        BODY = new GuiButton(4, this.guiLeft + 195, this.guiTop + 14, 48, 20, I18n.format("gui.body"));
+        this.buttonList.add(BODY);
 
-        GuiButton applyRightArm = new GuiButton(5, this.guiLeft + 195, this.guiTop + 44, 48, 20, I18n.format("gui.right_arm"));
-        this.buttonList.add(applyRightArm);
-        GuiButton applyRightLeg = new GuiButton(6, this.guiLeft + 195, this.guiTop + 74, 48, 20, I18n.format("gui.right_leg"));
-        this.buttonList.add(applyRightLeg);
+        RIGHT_ARM = new GuiButton(5, this.guiLeft + 195, this.guiTop + 44, 48, 20, I18n.format("gui.right_arm"));
+        this.buttonList.add(RIGHT_ARM);
+        RIGHT_LEG = new GuiButton(6, this.guiLeft + 195, this.guiTop + 74, 48, 20, I18n.format("gui.right_leg"));
+        this.buttonList.add(RIGHT_LEG);
     }
 
     @Override
@@ -93,6 +95,17 @@ public class GuiApplyHealthItem extends GuiScreen {
             if (morphineSecs > 0)
                 drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", morphineSecs), this.guiLeft + (xSize / 2), this.guiTop + ySize - 29, 0xFFFFFF);
             drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineSecs == 0 ? 21 : 11), 0xFFFFFF);
+
+            GlStateManager.pushMatrix();
+            tooltipButton(HEAD, damageModel.HEAD, mouseX, mouseY);
+            tooltipButton(LEFT_ARM, damageModel.LEFT_ARM, mouseX, mouseY);
+            tooltipButton(LEFT_LEG, damageModel.LEFT_LEG, mouseX, mouseY);
+            tooltipButton(BODY, damageModel.BODY, mouseX, mouseY);
+            tooltipButton(RIGHT_ARM, damageModel.RIGHT_ARM, mouseX, mouseY);
+            tooltipButton(RIGHT_LEG, damageModel.RIGHT_LEG, mouseX, mouseY);
+            GlStateManager.popMatrix();
+            GlStateManager.disableLighting();
+
             this.mc.getTextureManager().bindTexture(Gui.ICONS);
             drawHealth(damageModel.HEAD, false, 20);
             drawHealth(damageModel.LEFT_ARM, false, 50);
@@ -103,6 +116,13 @@ public class GuiApplyHealthItem extends GuiScreen {
             //TODO color the critical parts of the player red?
         } else {
             drawCenteredString(this.mc.fontRenderer, "Waiting for data...", this.guiLeft + (xSize / 2), this.guiTop + ySize - 21, 0xFFFFFF);
+        }
+    }
+
+    private void tooltipButton(GuiButton button, DamageablePart part, int mouseX, int mouseY) {
+        button.enabled = part.activeHealer == null;
+        if (!button.enabled && button.hovered) {
+            drawHoveringText("Currently active: " + part.activeHealer.healingType, mouseX, mouseY);
         }
     }
 

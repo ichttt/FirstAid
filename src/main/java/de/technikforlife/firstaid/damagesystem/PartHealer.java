@@ -3,7 +3,7 @@ package de.technikforlife.firstaid.damagesystem;
 import de.technikforlife.firstaid.damagesystem.enums.EnumHealingType;
 
 public class PartHealer {
-    private final EnumHealingType healingType;
+    public final EnumHealingType healingType;
 
     public final int maxHeal, ticksPerHeal;
     int ticksPassed = 0;
@@ -35,9 +35,5 @@ public class PartHealer {
             heals++;
         }
         return nextHeal;
-    }
-
-    public EnumHealingType toEnum() {
-        return healingType;
     }
 }

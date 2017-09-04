@@ -37,7 +37,7 @@ public class DataManager implements ICapabilityProvider, INBTSerializable<NBTTag
     public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
         if (capability == CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM)
             return (T) capList.get(player);
-        return player.getCapability(capability, facing);
+        return null;
     }
 
     @Override

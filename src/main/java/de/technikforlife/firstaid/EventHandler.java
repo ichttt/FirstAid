@@ -8,6 +8,7 @@ import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -62,9 +63,12 @@ public class EventHandler {
                 break;
         }
         DamageablePart partToDamage = damageModel.getFromEnum(toDamage);
+        float prev = partToDamage.currentHealth;
         if (partToDamage.damage(amountToDamage) && partToDamage.canCauseDeath) {
             source.damageType = "criticalOrgan";
             event.setAmount(Float.MAX_VALUE);
+        } else {
+            event.setAmount(prev - partToDamage.currentHealth);
         }
     }
 
@@ -73,6 +77,23 @@ public class EventHandler {
         Entity obj = event.getObject();
         if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer) && !obj.getEntityWorld().isRemote) //Server side only
             event.addCapability(DataManager.IDENTIFIER, new DataManager((EntityPlayer) obj));
+    }
+
+    @SubscribeEvent
+    public static void onLogIn(PlayerEvent.PlayerLoggedInEvent event) {
+        setHealth(event.player);
+    }
+
+    private static void setHealth(EntityPlayer player) {
+        if (player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getBaseValue() != FirstAid.playerMaxHealth) {
+            player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(FirstAid.playerMaxHealth);
+            player.heal(FirstAid.playerMaxHealth);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        setHealth(event.player);
     }
 
     @SubscribeEvent

@@ -36,8 +36,18 @@ public class GuiApplyHealthItem extends GuiScreen {
     private EnumHealingType healingType;
     private EnumHand activeHand;
     public boolean hasData = false;
+    private boolean disableButtons = false;
 
     public static boolean isOpen = false;
+
+    public void onReceiveData(PlayerDamageModel damageModel) {
+        this.damageModel = damageModel;
+        hasData = true;
+
+        disableButtons = true;
+
+        addMainButtons();
+    }
 
     public void onReceiveData(PlayerDamageModel damageModel, EnumHealingType healingType, EnumHand activeHand) {
         this.damageModel = damageModel;
@@ -47,6 +57,7 @@ public class GuiApplyHealthItem extends GuiScreen {
         addMainButtons();
 
         hasData = true;
+        disableButtons = false;
     }
 
     private void addMainButtons() {
@@ -65,6 +76,15 @@ public class GuiApplyHealthItem extends GuiScreen {
         this.buttonList.add(RIGHT_ARM);
         RIGHT_LEG = new GuiButton(6, this.guiLeft + 195, this.guiTop + 74, 48, 20, I18n.format("gui.right_leg"));
         this.buttonList.add(RIGHT_LEG);
+
+        if (disableButtons) {
+            HEAD.enabled = false;
+            LEFT_ARM.enabled = false;
+            LEFT_LEG.enabled = false;
+            BODY.enabled = false;
+            RIGHT_ARM.enabled = false;
+            RIGHT_LEG.enabled = false;
+        }
     }
 
     @Override
@@ -96,15 +116,17 @@ public class GuiApplyHealthItem extends GuiScreen {
                 drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", morphineSecs), this.guiLeft + (xSize / 2), this.guiTop + ySize - 29, 0xFFFFFF);
             drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineSecs == 0 ? 21 : 11), 0xFFFFFF);
 
-            GlStateManager.pushMatrix();
-            tooltipButton(HEAD, damageModel.HEAD, mouseX, mouseY);
-            tooltipButton(LEFT_ARM, damageModel.LEFT_ARM, mouseX, mouseY);
-            tooltipButton(LEFT_LEG, damageModel.LEFT_LEG, mouseX, mouseY);
-            tooltipButton(BODY, damageModel.BODY, mouseX, mouseY);
-            tooltipButton(RIGHT_ARM, damageModel.RIGHT_ARM, mouseX, mouseY);
-            tooltipButton(RIGHT_LEG, damageModel.RIGHT_LEG, mouseX, mouseY);
-            GlStateManager.popMatrix();
-            GlStateManager.disableLighting();
+            if (!disableButtons) {
+                GlStateManager.pushMatrix();
+                tooltipButton(HEAD, damageModel.HEAD, mouseX, mouseY);
+                tooltipButton(LEFT_ARM, damageModel.LEFT_ARM, mouseX, mouseY);
+                tooltipButton(LEFT_LEG, damageModel.LEFT_LEG, mouseX, mouseY);
+                tooltipButton(BODY, damageModel.BODY, mouseX, mouseY);
+                tooltipButton(RIGHT_ARM, damageModel.RIGHT_ARM, mouseX, mouseY);
+                tooltipButton(RIGHT_LEG, damageModel.RIGHT_LEG, mouseX, mouseY);
+                GlStateManager.popMatrix();
+                GlStateManager.disableLighting();
+            }
 
             this.mc.getTextureManager().bindTexture(Gui.ICONS);
             drawHealth(damageModel.HEAD, false, 20);

@@ -12,4 +12,6 @@ gui.right_leg=Rechtes Bein
 gui.apply_hint=Wähle die Stelle, wo das Item angebracht werden soll
 gui.morphine_left=Morphium aktiv(%s Sekunden verbleibend)
 
+keybinds.show_wounds=Wunden anzeigen
+
 death.attack.criticalOrgan=%s starb Aufgrund von Organversagen

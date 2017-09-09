@@ -8,7 +8,6 @@ import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -19,17 +18,23 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraft.world.storage.loot.RandomValueRange;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.functions.SetCount;
+import net.minecraftforge.common.ISpecialArmor;
+import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
+import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.Random;
 
@@ -46,6 +51,8 @@ public class EventHandler {
         String sourceType = source.damageType;
         EnumPlayerPart toDamage;
         float amountToDamage = event.getAmount();
+        EntityPlayer player = (EntityPlayer) entity;
+        amountToDamage = ISpecialArmor.ArmorProperties.applyArmor(player, player.inventory.armorInventory, source, amountToDamage);
         switch (sourceType) {
             case "fall":
             case "hotFloor":
@@ -63,12 +70,11 @@ public class EventHandler {
                 break;
         }
         DamageablePart partToDamage = damageModel.getFromEnum(toDamage);
-        float prev = partToDamage.currentHealth;
         if (partToDamage.damage(amountToDamage) && partToDamage.canCauseDeath) {
             source.damageType = "criticalOrgan";
             event.setAmount(Float.MAX_VALUE);
         } else {
-            event.setAmount(prev - partToDamage.currentHealth);
+            event.setCanceled(true);
         }
     }
 
@@ -77,23 +83,6 @@ public class EventHandler {
         Entity obj = event.getObject();
         if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer) && !obj.getEntityWorld().isRemote) //Server side only
             event.addCapability(DataManager.IDENTIFIER, new DataManager((EntityPlayer) obj));
-    }
-
-    @SubscribeEvent
-    public static void onLogIn(PlayerEvent.PlayerLoggedInEvent event) {
-        setHealth(event.player);
-    }
-
-    private static void setHealth(EntityPlayer player) {
-        if (player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getBaseValue() != FirstAid.playerMaxHealth) {
-            player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(FirstAid.playerMaxHealth);
-            player.heal(FirstAid.playerMaxHealth);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        setHealth(event.player);
     }
 
     @SubscribeEvent
@@ -141,6 +130,14 @@ public class EventHandler {
         EntityLivingBase entityLiving = event.getEntityLiving();
         if (entityLiving instanceof EntityPlayer && !(entityLiving instanceof FakePlayer)) {
             DataManager.clearPlayer((EntityPlayer) entityLiving);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onConfigChange(ConfigChangedEvent.OnConfigChangedEvent event) {
+        if (event.getModID().equals(FirstAid.MODID)) {
+            ConfigManager.sync(FirstAid.MODID, Config.Type.INSTANCE);
+            event.setResult(Event.Result.ALLOW);
         }
     }
 }

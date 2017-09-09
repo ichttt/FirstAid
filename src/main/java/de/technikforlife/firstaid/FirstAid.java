@@ -7,16 +7,12 @@ import de.technikforlife.firstaid.network.MessageApplyHealth;
 import de.technikforlife.firstaid.network.MessageGetDamageInfo;
 import de.technikforlife.firstaid.network.MessageReceiveDamageInfo;
 import de.technikforlife.firstaid.network.MessageReceiveDamageInfoWithItem;
-import net.minecraft.world.World;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -28,7 +24,6 @@ public class FirstAid {
     public static Logger logger;
     public static final String MODID ="firstaid";
     public static final String NAME ="First Aid";
-    private static final String NREG ="naturalRegeneration";
 
     @SuppressWarnings("unused")
     @SidedProxy(clientSide = "de.technikforlife.firstaid.client.ClientProxy", serverSide = "de.technikforlife.firstaid.server.ServerProxy")
@@ -36,8 +31,6 @@ public class FirstAid {
 
     public static CreativeTabFirstAid creativeTab;
     public static SimpleNetworkWrapper NETWORKING;
-
-    public static int playerMaxHealth = 0;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent pre) {
@@ -66,22 +59,6 @@ public class FirstAid {
             logger.info("Early exit requested by user - terminating minecraft");
             FMLCommonHandler.instance().exitJava(0, false);
         }
-    }
-
-    @Mod.EventHandler
-    public void beforeServerStart(FMLServerAboutToStartEvent event) {
-        playerMaxHealth = FirstAidConfig.damageSystem.maxHealthHead + FirstAidConfig.damageSystem.maxHealthLeftArm + FirstAidConfig.damageSystem.maxHealthLeftLeg +
-                FirstAidConfig.damageSystem.maxHealthBody + FirstAidConfig.damageSystem.maxHealthRightArm + FirstAidConfig.damageSystem.maxHealthRightLeg;
-    }
-
-    @Mod.EventHandler
-    public void onServerStart(FMLServerStartedEvent args) {
-        if (FirstAidConfig.allowNaturalRegeneration)
-            return;
-        for (World world:DimensionManager.getWorlds()) {
-            world.getGameRules().setOrCreateGameRule(NREG, "false");
-        }
-        logger.info("Gamerule {} has been set to false for all words.", NREG);
     }
 
     @Mod.EventHandler

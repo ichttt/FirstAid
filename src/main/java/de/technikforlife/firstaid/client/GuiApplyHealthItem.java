@@ -19,16 +19,17 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.IOException;
+import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class GuiApplyHealthItem extends GuiScreen {
     public static GuiApplyHealthItem INSTANCE;
-    private static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
-    private static final int xSize = 248;
-    private static final int ySize = 132;
+    public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
+    public static final int xSize = 248;
+    public static final int ySize = 132;
 
-    private int guiLeft;
-    private int guiTop;
+    public int guiLeft;
+    public int guiTop;
 
     private GuiButton HEAD, LEFT_ARM, LEFT_LEG, BODY, RIGHT_ARM, RIGHT_LEG;
 
@@ -205,5 +206,9 @@ public class GuiApplyHealthItem extends GuiScreen {
         INSTANCE = null;
         isOpen = false;
         super.onGuiClosed();
+    }
+
+    public List<GuiButton> getButtons() {
+        return buttonList;
     }
 }

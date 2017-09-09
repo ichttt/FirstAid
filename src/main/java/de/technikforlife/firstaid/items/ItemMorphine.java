@@ -14,6 +14,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public class ItemMorphine extends Item {
@@ -26,7 +27,8 @@ public class ItemMorphine extends Item {
     }
 
     @Override
-    public ItemStack onItemUseFinish(ItemStack stack, World world, EntityLivingBase entityLiving) {
+    @Nonnull
+    public ItemStack onItemUseFinish(@Nonnull ItemStack stack, World world, EntityLivingBase entityLiving) {
         if (!world.isRemote && entityLiving.hasCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null)) {
             PlayerDamageModel damageModel = entityLiving.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null);
             Objects.requireNonNull(damageModel).applyMorphine();
@@ -36,12 +38,14 @@ public class ItemMorphine extends Item {
     }
 
     @Override
+    @Nonnull
     public EnumAction getItemUseAction(ItemStack stack) {
         return EnumAction.EAT;
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
+    @Nonnull
+    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand)
     {
         ItemStack itemstack = player.getHeldItem(hand);
         player.setActiveHand(hand);

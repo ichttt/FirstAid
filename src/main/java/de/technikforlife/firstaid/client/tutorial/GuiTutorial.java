@@ -25,24 +25,24 @@ public class GuiTutorial extends GuiScreen {
         this.parent.onReceiveData(demoModel);
         this.action = new TutorialAction(this);
 
-        this.action.addTextWrapper(new TextWrapper("Welcome to FirstAid! This tutorial will guide you through this mod and explain the different mechanics"));
-        this.action.addTextWrapper(new TextWrapper("As you may already have noticed, the vanilla health bar is gone. It has been replaced by this system."));
-        this.action.addTextWrapper(new TextWrapper("Every part of your body has it's own health. So if you fall from a high place..."));
+        this.action.addTextWrapper("tutorial.welcome");
+        this.action.addTextWrapper("tutorial.line1");
+        this.action.addTextWrapper("tutorial.line2");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_LEG.damage(4F));
-        this.action.addTextWrapper(new TextWrapper("One of your legs will be damaged! This may cause some debuffs to apply, like slowness for damaged feet, mining fatigue for damaged arms and so one"));
+        this.action.addTextWrapper("tutorial.line3");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.applyMorphine());
-        this.action.addTextWrapper(new TextWrapper("This effects may be bypassed by taking morphine or healing the wound."));
-        this.action.addTextWrapper(new TextWrapper("Wounds can be healed by applying bandages or plaster (right click the item)"));
+        this.action.addTextWrapper("tutorial.line4");
+        this.action.addTextWrapper("tutorial.line5");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_LEG.heal(3F, null));
-        this.action.addTextWrapper(new TextWrapper("A player can die, if a critical organ's health (head or body) drop to zero."));
+        this.action.addTextWrapper("tutorial.line6");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.HEAD.damage(16F));
-        this.action.addTextWrapper(new TextWrapper("In this case, the player would be dead, no matter how much health the other organs have."));
-        this.action.addTextWrapper(new TextWrapper("If you want to see your current health, just press " + ClientProxy.showWounds.getDisplayName() + " to open this interface with your health"));
+        this.action.addTextWrapper("tutorial.line7");
+        this.action.addTextWrapper("tutorial.line8", ClientProxy.showWounds.getDisplayName());
         this.action.addActionCallable(guiTutorial -> {
             guiTutorial.buttonList.remove(0);
             this.buttonList.add(new GuiButton(1, parent.guiLeft + GuiApplyHealthItem.xSize - 34, guiTop + 4, 32, 20, "end"));
         });
-        this.action.addTextWrapper(new TextWrapper("That is the end of the tutorial."));
+        this.action.addTextWrapper("tutorial.end");
 
         this.action.next();
     }

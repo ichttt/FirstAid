@@ -12,7 +12,7 @@ public class TextWrapper {
     private static final int minimumChars = 28;
 
     private int currentLine = 0;
-    private List<String> lines = new ArrayList<>();
+    private final List<String> lines = new ArrayList<>();
 
     public TextWrapper(String text) {
         char[] chars = text.toCharArray();

@@ -34,7 +34,6 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.Random;
 

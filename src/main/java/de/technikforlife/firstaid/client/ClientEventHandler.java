@@ -3,8 +3,6 @@ package de.technikforlife.firstaid.client;
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.FirstAidConfig;
 import de.technikforlife.firstaid.client.tutorial.GuiTutorial;
-import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
-import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import de.technikforlife.firstaid.network.MessageGetDamageInfo;
 import net.minecraft.client.Minecraft;
@@ -22,12 +20,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-import net.minecraftforge.fml.common.network.NetworkCheckHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
 public class ClientEventHandler {

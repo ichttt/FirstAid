@@ -1,11 +1,9 @@
 package de.technikforlife.firstaid.client;
 
 import de.technikforlife.firstaid.FirstAid;
-import de.technikforlife.firstaid.FirstAidConfig;
 import de.technikforlife.firstaid.IProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;

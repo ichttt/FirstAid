@@ -45,6 +45,8 @@ public class TutorialAction {
             consumer.accept(guiContext);
             pos++;
             next();
+        } else {
+            throw new RuntimeException("Found invalid object " + obj.toString());
         }
     }
 
@@ -58,12 +60,8 @@ public class TutorialAction {
             activeWrapper = null;
     }
 
-    public void addTextWrapper(TextWrapper wrapper) {
-        queue.add(wrapper);
-    }
-
-    public void addTextWrapper(String i18nKey) {
-        queue.add(new TextWrapper(I18n.format(i18nKey)));
+    public void addTextWrapper(String i18nKey, String... format) {
+        queue.add(new TextWrapper(I18n.format(i18nKey, (Object[]) format)));
     }
 
     public void addActionCallable(Consumer<GuiTutorial> callable) {

@@ -12,6 +12,17 @@ gui.right_leg=Rechtes Bein
 gui.apply_hint=Wähle die Stelle, wo das Item angebracht werden soll
 gui.morphine_left=Morphium aktiv(%s Sekunden verbleibend)
 
+tutorial.welcome=Welcome to FirstAid! This tutorial will guide you through this mod and explain the different mechanics.
+tutorial.line1=As you may already have noticed, the vanilla health bar is gone. It has been replaced by this system.
+tutorial.line2=Every part of your body has it's own health. So if you fall from a high place...
+tutorial.line3=One of your legs will be damaged! This may cause some debuffs to apply, like slowness for damaged feet, mining fatigue for damaged arms and so one.
+tutorial.line4=This effects may be bypassed by taking morphine or healing the wound.
+tutorial.line5=Wounds can be healed by applying bandages or plaster (right click the item).
+tutorial.line6=A player can die, if a critical organ's health (head or body) drop to zero.
+tutorial.line7=In this case, the player would be dead, no matter how much health the other organs have.
+tutorial.line8=If you want to see your current health, just press %s to open this interface with your health.
+tutorial.end=That is the end of the tutorial.
+
 keybinds.show_wounds=Wunden anzeigen
 
 death.attack.criticalOrgan=%s starb Aufgrund von Organversagen

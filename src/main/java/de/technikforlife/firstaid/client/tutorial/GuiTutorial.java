@@ -33,7 +33,7 @@ public class GuiTutorial extends GuiScreen {
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.applyMorphine());
         this.action.addTextWrapper("tutorial.line4");
         this.action.addTextWrapper("tutorial.line5");
-        this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_LEG.heal(3F, null));
+        this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_LEG.heal(3F));
         this.action.addTextWrapper("tutorial.line6");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.HEAD.damage(16F));
         this.action.addTextWrapper("tutorial.line7");

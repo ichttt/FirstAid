@@ -1,14 +1,20 @@
 package de.technikforlife.firstaid.damagesystem;
 
 import de.technikforlife.firstaid.EventHandler;
+import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.FirstAidConfig;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
+import de.technikforlife.firstaid.damagesystem.enums.EnumWoundState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
+import javax.annotation.Nonnull;
+import java.util.Iterator;
+import java.util.function.Consumer;
+
+public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iterable<DamageablePart> {
     public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, BODY, RIGHT_ARM, RIGHT_LEG;
     private int tickCounter;
     private int morphineTicksLeft = 0;
@@ -79,9 +85,22 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
     }
 
     public void tick(World world, EntityPlayer player, boolean fake) {
+        if (player.isDead || player.getHealth() <= 0F)
+            return;
+        if (FirstAidConfig.allowNaturalRegeneration) {
+            boolean isFullLife = true;
+            for (DamageablePart part : this) {
+                if (part.currentHealth != part.maxHealth) {
+                    isFullLife = false;
+                    break;
+                }
+            }
+            player.setHealth(isFullLife ? player.getMaxHealth() : 2F);
+        }
+
         if (morphineTicksLeft <= 0) {
             tickCounter++;
-            if (tickCounter >= 160) {
+            if (tickCounter >= 140) {
                 tickCounter = 0;
                 if (!fake) {
                     for (PlayerDamageDebuff debuff : PlayerDamageDebuff.possibleDebuffs)
@@ -105,5 +124,35 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound> {
 
     public int getMorphineTicks() {
         return morphineTicksLeft;
+    }
+
+    public DamageablePart getHealthyLeg() {
+        DamageablePart playerPart = EventHandler.rand.nextBoolean() ? LEFT_LEG : RIGHT_LEG;
+        if (playerPart.getWoundState() == EnumWoundState.WOUNDED_HEAVY) {
+            if (playerPart == LEFT_LEG)
+                playerPart = RIGHT_LEG;
+            else
+                playerPart = LEFT_LEG;
+        }
+        return playerPart;
+    }
+
+    @Override
+    @Nonnull
+    public Iterator<DamageablePart> iterator() {
+        return new Iterator<DamageablePart>() {
+            byte count = 1;
+            @Override
+            public boolean hasNext() {
+                return count <= 6;
+            }
+
+            @Override
+            public DamageablePart next() {
+                DamageablePart part = getFromEnum(EnumPlayerPart.fromID(count));
+                count++;
+                return part;
+            }
+        };
     }
 }

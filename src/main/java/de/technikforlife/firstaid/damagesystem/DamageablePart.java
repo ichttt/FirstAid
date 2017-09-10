@@ -32,11 +32,9 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
         return state;
     }
 
-    public void heal(float amount, EntityLivingBase toHeal) {
+    public void heal(float amount) {
         currentHealth = Math.min(maxHealth, amount + currentHealth);
         state = EnumWoundState.getWoundState(maxHealth, currentHealth);
-        if (toHeal != null)
-            toHeal.heal(amount);
     }
 
     /**
@@ -51,10 +49,8 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
     void tick(World world, EntityPlayer player, boolean fake) {
         if (activeHealer != null) {
             if (activeHealer.tick()) {
-                currentHealth = Math.min(maxHealth, 1F + currentHealth);
-                state = EnumWoundState.getWoundState(maxHealth, currentHealth);
+                heal(1F);
                 if (!fake) {
-                    player.heal(1F);
                     world.playEvent(2005, player.getPosition(), 0);
                 }
             }

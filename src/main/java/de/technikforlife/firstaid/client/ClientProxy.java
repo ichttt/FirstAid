@@ -3,6 +3,7 @@ package de.technikforlife.firstaid.client;
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.IProxy;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,5 +29,12 @@ public class ClientProxy implements IProxy {
     public void showGuiApplyHealth() {
         GuiApplyHealthItem.INSTANCE = new GuiApplyHealthItem();
         Minecraft.getMinecraft().displayGuiScreen(GuiApplyHealthItem.INSTANCE);
+    }
+
+    @Override
+    public void healClient(float amount) {
+        if (GuiApplyHealthItem.INSTANCE != null && GuiApplyHealthItem.isOpen) {
+            GuiApplyHealthItem.INSTANCE.damageModel.forEach(part -> part.heal(amount));
+        }
     }
 }

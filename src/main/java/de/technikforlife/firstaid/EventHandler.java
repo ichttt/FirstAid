@@ -25,6 +25,7 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -42,33 +43,34 @@ public class EventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOW) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
+        if (event.isCanceled())
+            return;
         EntityLivingBase entity = event.getEntityLiving();
         if (entity.getEntityWorld().isRemote || !entity.hasCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null))
             return;
         PlayerDamageModel damageModel = Objects.requireNonNull(entity.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
         DamageSource source = event.getSource();
         String sourceType = source.damageType;
-        EnumPlayerPart toDamage;
         float amountToDamage = event.getAmount();
         EntityPlayer player = (EntityPlayer) entity;
         amountToDamage = ISpecialArmor.ArmorProperties.applyArmor(player, player.inventory.armorInventory, source, amountToDamage);
+        DamageablePart partToDamage;
         switch (sourceType) {
             case "fall":
             case "hotFloor":
-                toDamage = rand.nextBoolean() ? EnumPlayerPart.LEFT_LEG : EnumPlayerPart.RIGHT_LEG;
+                partToDamage = damageModel.getHealthyLeg();
                 break;
             case "fallingBlock":
             case "anvil":
-                toDamage = EnumPlayerPart.HEAD;
+                partToDamage = damageModel.HEAD;
                 break;
             case "starve":
-                toDamage = EnumPlayerPart.BODY;
+                partToDamage = damageModel.BODY;
                 break;
             default:
-                toDamage = EnumPlayerPart.getRandomPart();
+                partToDamage = damageModel.getFromEnum(EnumPlayerPart.getRandomPart());
                 break;
         }
-        DamageablePart partToDamage = damageModel.getFromEnum(toDamage);
         if (partToDamage.damage(amountToDamage) && partToDamage.canCauseDeath) {
             source.damageType = "criticalOrgan";
             event.setAmount(Float.MAX_VALUE);
@@ -138,5 +140,21 @@ public class EventHandler {
             ConfigManager.sync(FirstAid.MODID, Config.Type.INSTANCE);
             event.setResult(Event.Result.ALLOW);
         }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onHeal(LivingHealEvent event) {
+        if (event.isCanceled())
+            return;
+        EntityLivingBase entity = event.getEntityLiving();
+        if (!entity.hasCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null))
+            return;
+        event.setCanceled(true);
+        if (!FirstAidConfig.allowOtherHealingItems)
+            return;
+        PlayerDamageModel damageModel = Objects.requireNonNull(entity.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
+        float amount = event.getAmount() / 6F;
+        damageModel.forEach(part -> part.heal(amount));
+        FirstAid.proxy.healClient(amount);
     }
 }

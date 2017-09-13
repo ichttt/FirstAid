@@ -1,5 +1,6 @@
 package de.technikforlife.firstaid;
 
+import de.technikforlife.firstaid.damagesystem.PlayerDamageDebuff;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.damagesystem.capability.DataManager;
 import de.technikforlife.firstaid.items.FirstAidItems;
@@ -49,11 +50,14 @@ public class FirstAid {
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
         CapabilityExtendedHealthSystem.register();
+        logger.debug("Registering networking");
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
         NETWORKING.registerMessage(MessageReceiveDamageInfoWithItem.Handler.class, MessageReceiveDamageInfoWithItem.class, 1, Side.CLIENT);
         NETWORKING.registerMessage(MessageApplyHealth.Handler.class, MessageApplyHealth.class, 2 , Side.SERVER);
         NETWORKING.registerMessage(MessageReceiveDamageInfo.Handler.class, MessageReceiveDamageInfo.class, 3, Side.CLIENT);
         NETWORKING.registerMessage(MessageGetDamageInfo.Handler.class, MessageGetDamageInfo.class, 4, Side.SERVER);
+        //invoke static constructor of class
+        logger.info("Initialized {} possible player debuffs", PlayerDamageDebuff.possibleDebuffs.size());
         checkEarlyExit();
     }
 

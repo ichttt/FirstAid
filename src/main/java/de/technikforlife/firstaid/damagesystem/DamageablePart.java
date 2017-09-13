@@ -2,8 +2,8 @@ package de.technikforlife.firstaid.damagesystem;
 
 import de.technikforlife.firstaid.damagesystem.enums.EnumHealingType;
 import de.technikforlife.firstaid.damagesystem.enums.EnumWoundState;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -17,15 +17,18 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
     public final boolean canCauseDeath;
     @Nullable
     public PartHealer activeHealer;
+    @Nonnull
+    public final EntityEquipmentSlot equipmentSlot;
 
     @Nonnull
     private EnumWoundState state = EnumWoundState.HEALTHY;
     public float currentHealth;
 
-    public DamageablePart(float maxHealth, boolean canCauseDeath) {
+    public DamageablePart(float maxHealth, boolean canCauseDeath, @Nonnull EntityEquipmentSlot equipmentSlot) {
         this.maxHealth = maxHealth;
         this.canCauseDeath = canCauseDeath;
         currentHealth = maxHealth;
+        this.equipmentSlot = equipmentSlot;
     }
 
     public EnumWoundState getWoundState() {
@@ -76,7 +79,9 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
+    public void deserializeNBT(@Nullable NBTTagCompound nbt) {
+        if (nbt == null)
+            return;
         currentHealth = nbt.getFloat("health");
         if (nbt.hasKey("healingItem"))
             activeHealer = EnumHealingType.fromID(nbt.getByte("healingItem")).createNewHealer().loadNBT(nbt.getInteger("itemTicks"), nbt.getInteger("itemHeals"));

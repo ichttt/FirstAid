@@ -75,7 +75,7 @@ public class GuiTutorial extends GuiScreen {
         parent.drawScreen(mouseX, mouseY, partialTicks);
         GlStateManager.popMatrix();
         mc.getTextureManager().bindTexture(GuiApplyHealthItem.GUI_LOCATION);
-        drawTexturedModalRect(parent.guiLeft, guiTop ,0, 135, GuiApplyHealthItem.xSize, 28);
+        drawTexturedModalRect(parent.guiLeft, guiTop ,0, 139, GuiApplyHealthItem.xSize, 28);
         GlStateManager.pushMatrix();
         this.action.draw();
         GlStateManager.popMatrix();

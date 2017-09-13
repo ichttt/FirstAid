@@ -1,31 +1,32 @@
 package de.technikforlife.firstaid.damagesystem;
 
 import de.technikforlife.firstaid.EventHandler;
-import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.FirstAidConfig;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import de.technikforlife.firstaid.damagesystem.enums.EnumWoundState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
-import java.util.function.Consumer;
 
 public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iterable<DamageablePart> {
-    public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, BODY, RIGHT_ARM, RIGHT_LEG;
+    public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, LEFT_FOOT, BODY, RIGHT_ARM, RIGHT_LEG, RIGHT_FOOT;
     private int tickCounter;
     private int morphineTicksLeft = 0;
 
     public PlayerDamageModel() {
-        this.HEAD = new DamageablePart(FirstAidConfig.damageSystem.maxHealthHead, true);
-        this.LEFT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftArm, false);
-        this.LEFT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftLeg, false);
-        this.BODY = new DamageablePart(FirstAidConfig.damageSystem.maxHealthBody, true);
-        this.RIGHT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightArm, false);
-        this.RIGHT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightLeg, false);
+        this.HEAD = new DamageablePart(FirstAidConfig.damageSystem.maxHealthHead, true, EntityEquipmentSlot.HEAD);
+        this.LEFT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftArm, false, EntityEquipmentSlot.CHEST);
+        this.LEFT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftLeg, false, EntityEquipmentSlot.LEGS);
+        this.LEFT_FOOT = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftFoot, false, EntityEquipmentSlot.FEET);
+        this.BODY = new DamageablePart(FirstAidConfig.damageSystem.maxHealthBody, true, EntityEquipmentSlot.CHEST);
+        this.RIGHT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightArm, false, EntityEquipmentSlot.CHEST);
+        this.RIGHT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightLeg, false, EntityEquipmentSlot.LEGS);
+        this.RIGHT_FOOT = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightFoot, false, EntityEquipmentSlot.FEET);
     }
 
     public DamageablePart getFromEnum(EnumPlayerPart part) {
@@ -42,6 +43,10 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
                 return RIGHT_ARM;
             case RIGHT_LEG:
                 return RIGHT_LEG;
+            case LEFT_FOOT:
+                return LEFT_FOOT;
+            case RIGHT_FOOT:
+                return RIGHT_FOOT;
             default:
                 throw new RuntimeException("Unknown enum " + part);
         }
@@ -53,9 +58,11 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
         tagCompound.setTag("head", HEAD.serializeNBT());
         tagCompound.setTag("leftArm", LEFT_ARM.serializeNBT());
         tagCompound.setTag("leftLeg", LEFT_LEG.serializeNBT());
+        tagCompound.setTag("leftFoot", LEFT_FOOT.serializeNBT());
         tagCompound.setTag("body", BODY.serializeNBT());
         tagCompound.setTag("rightArm", RIGHT_ARM.serializeNBT());
         tagCompound.setTag("rightLeg", RIGHT_LEG.serializeNBT());
+        tagCompound.setTag("rightFoot", RIGHT_FOOT.serializeNBT());
         tagCompound.setInteger("morphineTicks", morphineTicksLeft);
         return tagCompound;
     }
@@ -73,9 +80,11 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
             HEAD.deserializeNBT((NBTTagCompound) nbt.getTag("head"));
             LEFT_ARM.deserializeNBT((NBTTagCompound) nbt.getTag("leftArm"));
             LEFT_LEG.deserializeNBT((NBTTagCompound) nbt.getTag("leftLeg"));
+            LEFT_FOOT.deserializeNBT((NBTTagCompound) nbt.getTag("leftFoot"));
             BODY.deserializeNBT((NBTTagCompound) nbt.getTag("body"));
             RIGHT_ARM.deserializeNBT((NBTTagCompound) nbt.getTag("rightArm"));
             RIGHT_LEG.deserializeNBT((NBTTagCompound) nbt.getTag("rightLeg"));
+            RIGHT_FOOT.deserializeNBT((NBTTagCompound) nbt.getTag("rightFoot"));
         }
         morphineTicksLeft = nbt.getInteger("morphineTicks");
     }
@@ -110,12 +119,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
         } else {
             morphineTicksLeft--;
         }
-        HEAD.tick(world, player, fake);
-        LEFT_ARM.tick(world, player, fake);
-        LEFT_LEG.tick(world, player, fake);
-        BODY.tick(world, player, fake);
-        RIGHT_ARM.tick(world, player, fake);
-        RIGHT_LEG.tick(world, player, fake);
+        forEach(part -> part.tick(world, player, fake));
     }
 
     public void applyMorphine() {
@@ -126,13 +130,13 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
         return morphineTicksLeft;
     }
 
-    public DamageablePart getHealthyLeg() {
-        DamageablePart playerPart = EventHandler.rand.nextBoolean() ? LEFT_LEG : RIGHT_LEG;
+    public DamageablePart getHealthyFoot() {
+        DamageablePart playerPart = EventHandler.rand.nextBoolean() ? LEFT_FOOT : RIGHT_FOOT;
         if (playerPart.getWoundState() == EnumWoundState.WOUNDED_HEAVY) {
-            if (playerPart == LEFT_LEG)
-                playerPart = RIGHT_LEG;
+            if (playerPart == LEFT_FOOT)
+                playerPart = RIGHT_FOOT;
             else
-                playerPart = LEFT_LEG;
+                playerPart = LEFT_FOOT;
         }
         return playerPart;
     }
@@ -144,7 +148,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
             byte count = 1;
             @Override
             public boolean hasNext() {
-                return count <= 6;
+                return count <= 8;
             }
 
             @Override

@@ -1,5 +1,6 @@
 package de.technikforlife.firstaid.damagesystem;
 
+import com.google.common.collect.ImmutableList;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.potion.Potion;
@@ -7,18 +8,20 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
+import static de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart.*;
+
 public class PlayerDamageDebuff {
-    public static final ArrayList<PlayerDamageDebuff> possibleDebuffs = new ArrayList<>();
+    public static final ImmutableList<PlayerDamageDebuff> possibleDebuffs;
     static {
-        possibleDebuffs.add(new PlayerDamageDebuff("slowness", 0.1F, false, EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG));
-        possibleDebuffs.add(new PlayerDamageDebuff("mining_fatigue", 0.25F, false, EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM));
-        possibleDebuffs.add(new PlayerDamageDebuff("blindness", 0.9F, true, EnumPlayerPart.HEAD));
-        possibleDebuffs.add(new PlayerDamageDebuff("nausea", 0.92F, true, EnumPlayerPart.HEAD));
-        possibleDebuffs.add(new PlayerDamageDebuff("weakness", 0.5F, false, EnumPlayerPart.BODY));
-        possibleDebuffs.trimToSize();
+        possibleDebuffs = ImmutableList.<PlayerDamageDebuff>builder().
+        add(new PlayerDamageDebuff("slowness", 0.2F, false, LEFT_FOOT, RIGHT_FOOT, LEFT_LEG, RIGHT_LEG)).
+        add(new PlayerDamageDebuff("mining_fatigue", 0.25F, false, LEFT_ARM, RIGHT_ARM)).
+        add(new PlayerDamageDebuff("blindness", 0.9F, true, HEAD)).
+        add(new PlayerDamageDebuff("nausea", 0.92F, true, HEAD)).
+        add(new PlayerDamageDebuff("weakness", 0.5F, false, BODY)).
+        build();
     }
 
     private final Potion effect;
@@ -51,7 +54,7 @@ public class PlayerDamageDebuff {
             else
                 count = 0;
         }
-        count = Math.min(count, 3);
+        count = Math.min(count, 2);
         player.addPotionEffect(new PotionEffect(effect, 200, count, false, false));
     }
 

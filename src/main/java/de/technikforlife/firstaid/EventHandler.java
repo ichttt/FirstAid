@@ -1,5 +1,6 @@
 package de.technikforlife.firstaid;
 
+import de.technikforlife.firstaid.damagesystem.ArmorCalculator;
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
@@ -18,7 +19,6 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraft.world.storage.loot.RandomValueRange;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.functions.SetCount;
-import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.util.FakePlayer;
@@ -53,12 +53,11 @@ public class EventHandler {
         String sourceType = source.damageType;
         float amountToDamage = event.getAmount();
         EntityPlayer player = (EntityPlayer) entity;
-        amountToDamage = ISpecialArmor.ArmorProperties.applyArmor(player, player.inventory.armorInventory, source, amountToDamage);
         DamageablePart partToDamage;
         switch (sourceType) {
             case "fall":
             case "hotFloor":
-                partToDamage = damageModel.getHealthyLeg();
+                partToDamage = damageModel.getHealthyFoot();
                 break;
             case "fallingBlock":
             case "anvil":
@@ -71,6 +70,7 @@ public class EventHandler {
                 partToDamage = damageModel.getFromEnum(EnumPlayerPart.getRandomPart());
                 break;
         }
+        amountToDamage = ArmorCalculator.applyArmor(player, player.getItemStackFromSlot(partToDamage.equipmentSlot), source, amountToDamage, partToDamage.equipmentSlot);
         if (partToDamage.damage(amountToDamage) && partToDamage.canCauseDeath) {
             source.damageType = "criticalOrgan";
             event.setAmount(Float.MAX_VALUE);

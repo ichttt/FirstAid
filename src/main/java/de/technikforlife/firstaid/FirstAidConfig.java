@@ -33,6 +33,9 @@ public class FirstAidConfig {
         public int maxHealthLeftLeg = 4;
 
         @Config.RangeInt(min = 0, max = 16)
+        public int maxHealthLeftFoot = 4;
+
+        @Config.RangeInt(min = 0, max = 16)
         public int maxHealthBody = 6;
 
         @Config.RangeInt(min = 0, max = 16)
@@ -40,5 +43,8 @@ public class FirstAidConfig {
 
         @Config.RangeInt(min = 0, max = 16)
         public int maxHealthRightLeg = 4;
+
+        @Config.RangeInt(min = 0, max = 16)
+        public int maxHealthRightFoot = 4;
     }
 }

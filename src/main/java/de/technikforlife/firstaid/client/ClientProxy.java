@@ -3,8 +3,8 @@ package de.technikforlife.firstaid.client;
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.IProxy;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -23,6 +23,7 @@ public class ClientProxy implements IProxy {
         FirstAid.logger.debug("Loading ClientProxy");
         MinecraftForge.EVENT_BUS.register(ClientEventHandler.class);
         ClientRegistry.registerKeyBinding(showWounds);
+        GuiIngameForge.renderHealth = false;
     }
 
     @Override
@@ -33,7 +34,7 @@ public class ClientProxy implements IProxy {
 
     @Override
     public void healClient(float amount) {
-        if (GuiApplyHealthItem.INSTANCE != null && GuiApplyHealthItem.isOpen) {
+        if (GuiApplyHealthItem.isOpen && GuiApplyHealthItem.INSTANCE != null && GuiApplyHealthItem.INSTANCE.hasData) {
             GuiApplyHealthItem.INSTANCE.damageModel.forEach(part -> part.heal(amount));
         }
     }

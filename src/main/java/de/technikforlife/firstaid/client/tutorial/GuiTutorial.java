@@ -28,12 +28,12 @@ public class GuiTutorial extends GuiScreen {
         this.action.addTextWrapper("tutorial.welcome");
         this.action.addTextWrapper("tutorial.line1");
         this.action.addTextWrapper("tutorial.line2");
-        this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_LEG.damage(4F));
+        this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_FOOT.damage(4F));
         this.action.addTextWrapper("tutorial.line3");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.applyMorphine());
         this.action.addTextWrapper("tutorial.line4");
         this.action.addTextWrapper("tutorial.line5");
-        this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_LEG.heal(3F));
+        this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_FOOT.heal(3F));
         this.action.addTextWrapper("tutorial.line6");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.HEAD.damage(16F));
         this.action.addTextWrapper("tutorial.line7");

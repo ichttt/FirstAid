@@ -122,19 +122,17 @@ public class GuiApplyHealthItem extends GuiScreen {
                 drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", morphineSecs), this.guiLeft + (xSize / 2), this.guiTop + ySize - 29, 0xFFFFFF);
             drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineSecs == 0 ? 21 : 11), 0xFFFFFF);
 
-            if (!disableButtons) {
-                GlStateManager.pushMatrix();
-                tooltipButton(HEAD, damageModel.HEAD, mouseX, mouseY);
-                tooltipButton(LEFT_ARM, damageModel.LEFT_ARM, mouseX, mouseY);
-                tooltipButton(LEFT_LEG, damageModel.LEFT_LEG, mouseX, mouseY);
-                tooltipButton(LEFT_FOOT, damageModel.LEFT_FOOT, mouseX, mouseY);
-                tooltipButton(BODY, damageModel.BODY, mouseX, mouseY);
-                tooltipButton(RIGHT_ARM, damageModel.RIGHT_ARM, mouseX, mouseY);
-                tooltipButton(RIGHT_LEG, damageModel.RIGHT_LEG, mouseX, mouseY);
-                tooltipButton(RIGHT_FOOT, damageModel.RIGHT_FOOT, mouseX, mouseY);
-                GlStateManager.popMatrix();
-                GlStateManager.disableLighting();
-            }
+            GlStateManager.pushMatrix();
+            tooltipButton(HEAD, damageModel.HEAD, mouseX, mouseY);
+            tooltipButton(LEFT_ARM, damageModel.LEFT_ARM, mouseX, mouseY);
+            tooltipButton(LEFT_LEG, damageModel.LEFT_LEG, mouseX, mouseY);
+            tooltipButton(LEFT_FOOT, damageModel.LEFT_FOOT, mouseX, mouseY);
+            tooltipButton(BODY, damageModel.BODY, mouseX, mouseY);
+            tooltipButton(RIGHT_ARM, damageModel.RIGHT_ARM, mouseX, mouseY);
+            tooltipButton(RIGHT_LEG, damageModel.RIGHT_LEG, mouseX, mouseY);
+            tooltipButton(RIGHT_FOOT, damageModel.RIGHT_FOOT, mouseX, mouseY);
+            GlStateManager.popMatrix();
+            GlStateManager.disableLighting();
 
             this.mc.getTextureManager().bindTexture(Gui.ICONS);
             drawHealth(damageModel.HEAD, false, 14);
@@ -152,10 +150,12 @@ public class GuiApplyHealthItem extends GuiScreen {
     }
 
     private void tooltipButton(GuiButton button, DamageablePart part, int mouseX, int mouseY) {
-        button.enabled = part.activeHealer == null;
-        if (!button.enabled && button.hovered) {
+        boolean enabled = part.activeHealer == null;
+        if (!enabled && button.hovered) {
             drawHoveringText("Currently active: " + part.activeHealer.healingType, mouseX, mouseY);
         }
+        if (!disableButtons)
+            button.enabled = enabled;
     }
 
     private void drawHealth(DamageablePart damageablePart, boolean right, int yOffset) {

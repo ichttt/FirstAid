@@ -2,6 +2,7 @@ package de.technikforlife.firstaid.client.tutorial;
 
 import de.technikforlife.firstaid.client.ClientProxy;
 import de.technikforlife.firstaid.client.GuiApplyHealthItem;
+import de.technikforlife.firstaid.client.RenderUtils;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -20,9 +21,8 @@ public class GuiTutorial extends GuiScreen {
     private final TutorialAction action;
 
     public GuiTutorial() {
-        this.parent = new GuiApplyHealthItem();
         this.demoModel = new PlayerDamageModel();
-        this.parent.onReceiveData(demoModel);
+        this.parent = new GuiApplyHealthItem(demoModel);
         this.action = new TutorialAction(this);
 
         this.action.addTextWrapper("tutorial.welcome");
@@ -74,7 +74,7 @@ public class GuiTutorial extends GuiScreen {
         GlStateManager.pushMatrix();
         parent.drawScreen(mouseX, mouseY, partialTicks);
         GlStateManager.popMatrix();
-        mc.getTextureManager().bindTexture(GuiApplyHealthItem.GUI_LOCATION);
+        mc.getTextureManager().bindTexture(RenderUtils.GUI_LOCATION);
         drawTexturedModalRect(parent.guiLeft, guiTop ,0, 139, GuiApplyHealthItem.xSize, 28);
         GlStateManager.pushMatrix();
         this.action.draw();

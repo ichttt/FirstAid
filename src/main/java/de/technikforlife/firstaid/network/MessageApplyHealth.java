@@ -9,6 +9,7 @@ import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import de.technikforlife.firstaid.items.ItemHealing;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextComponentString;
@@ -54,10 +55,18 @@ public class MessageApplyHealth implements IMessage {
                 EntityPlayer player = ctx.getServerHandler().player;
                 PlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
                 ItemStack stack = player.getHeldItem(message.hand);
-                if (!(stack.getItem() instanceof ItemHealing)) {
-                    FirstAid.logger.warn("Player {} has invalid item in hand {} while it should be an healing item", player.getName(), stack.getItem().getUnlocalizedName());
+                Item item = stack.getItem();
+                if (!(item instanceof ItemHealing)) {
+                    FirstAid.logger.warn("Player {} has invalid item in hand {} while it should be an healing item", player.getName(), item.getUnlocalizedName());
                     player.sendMessage(new TextComponentString("Unable to apply healing item!"));
                     return;
+                } else {
+                    ItemHealing itemHealing = (ItemHealing) item;
+                    if (itemHealing.type != message.healingType) {
+                        FirstAid.logger.warn("Player {} has invalid item with type {} in hand while it should be {}", player.getName(), itemHealing.type, message.healingType);
+                        player.sendMessage(new TextComponentString("Unable to apply healing item!"));
+                        return;
+                    }
                 }
                 stack.shrink(1);
                 DamageablePart damageablePart = damageModel.getFromEnum(message.part);

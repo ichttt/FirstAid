@@ -2,12 +2,11 @@ package de.technikforlife.firstaid;
 
 import de.technikforlife.firstaid.damagesystem.PlayerDamageDebuff;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
-import de.technikforlife.firstaid.damagesystem.capability.DataManager;
+import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import de.technikforlife.firstaid.network.MessageApplyHealth;
-import de.technikforlife.firstaid.network.MessageGetDamageInfo;
-import de.technikforlife.firstaid.network.MessageReceiveDamageInfo;
-import de.technikforlife.firstaid.network.MessageReceiveDamageInfoWithItem;
+import de.technikforlife.firstaid.network.MessageReceiveDamage;
+import de.technikforlife.firstaid.network.MessageReceiveDamageModel;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -52,10 +51,9 @@ public class FirstAid {
         CapabilityExtendedHealthSystem.register();
         logger.debug("Registering networking");
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
-        NETWORKING.registerMessage(MessageReceiveDamageInfoWithItem.Handler.class, MessageReceiveDamageInfoWithItem.class, 1, Side.CLIENT);
+        NETWORKING.registerMessage(MessageReceiveDamage.Handler.class, MessageReceiveDamage.class, 1, Side.CLIENT);
         NETWORKING.registerMessage(MessageApplyHealth.Handler.class, MessageApplyHealth.class, 2 , Side.SERVER);
-        NETWORKING.registerMessage(MessageReceiveDamageInfo.Handler.class, MessageReceiveDamageInfo.class, 3, Side.CLIENT);
-        NETWORKING.registerMessage(MessageGetDamageInfo.Handler.class, MessageGetDamageInfo.class, 4, Side.SERVER);
+        NETWORKING.registerMessage(MessageReceiveDamageModel.Handler.class, MessageReceiveDamageModel.class, 3, Side.CLIENT);
         //invoke static constructor of class
         logger.info("Initialized {} possible player debuffs", PlayerDamageDebuff.possibleDebuffs.size());
         checkEarlyExit();
@@ -79,6 +77,6 @@ public class FirstAid {
     @Mod.EventHandler
     public void onStop(FMLServerStoppedEvent event) {
         logger.debug("Cleaning up");
-        DataManager.clearData();
+        PlayerDataManager.clearData();
     }
 }

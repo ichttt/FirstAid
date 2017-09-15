@@ -48,14 +48,14 @@ public class PlayerDamageDebuff {
             rdm = rdm  * 2;
             count--;
         }
-        if (count <= 0) {
+        if (count <= 1) {
             if (canBeRemovedEntirely)
                 return;
             else
                 count = 0;
         }
-        count = Math.min(count, 2);
-        player.addPotionEffect(new PotionEffect(effect, 200, count, false, false));
+        count = Math.min(count, 3);
+        player.addPotionEffect(new PotionEffect(effect, 200, count - 1, false, false));
     }
 
     private static int getDebuffCount(DamageablePart part) {

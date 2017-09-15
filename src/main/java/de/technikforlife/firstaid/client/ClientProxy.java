@@ -2,8 +2,12 @@ package de.technikforlife.firstaid.client;
 
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.IProxy;
+import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
+import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.enums.EnumHealingType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.EnumHand;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
@@ -12,10 +16,11 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
 
+import java.util.Objects;
+
 @SuppressWarnings("unused")
 @SideOnly(Side.CLIENT)
 public class ClientProxy implements IProxy {
-
     public static final KeyBinding showWounds = new KeyBinding("keybinds.show_wounds", KeyConflictContext.IN_GAME, Keyboard.KEY_H, FirstAid.NAME);
 
     @Override
@@ -27,15 +32,14 @@ public class ClientProxy implements IProxy {
     }
 
     @Override
-    public void showGuiApplyHealth() {
-        GuiApplyHealthItem.INSTANCE = new GuiApplyHealthItem();
+    public void showGuiApplyHealth(EnumHealingType healingType, EnumHand activeHand) {
+        GuiApplyHealthItem.INSTANCE = new GuiApplyHealthItem(Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null), healingType, activeHand);
         Minecraft.getMinecraft().displayGuiScreen(GuiApplyHealthItem.INSTANCE);
     }
 
     @Override
     public void healClient(float amount) {
-        if (GuiApplyHealthItem.isOpen && GuiApplyHealthItem.INSTANCE != null && GuiApplyHealthItem.INSTANCE.hasData) {
-            GuiApplyHealthItem.INSTANCE.damageModel.forEach(part -> part.heal(amount));
-        }
+        PlayerDamageModel damageModel = Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null);
+        Objects.requireNonNull(damageModel).forEach(part -> part.heal(amount));
     }
 }

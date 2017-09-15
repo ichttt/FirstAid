@@ -3,8 +3,8 @@ package de.technikforlife.firstaid.client;
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.FirstAidConfig;
 import de.technikforlife.firstaid.client.tutorial.GuiTutorial;
+import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.items.FirstAidItems;
-import de.technikforlife.firstaid.network.MessageGetDamageInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.EntityLivingBase;
@@ -12,6 +12,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
@@ -51,8 +52,7 @@ public class ClientEventHandler {
                 Minecraft.getMinecraft().displayGuiScreen(new GuiTutorial());
             }
             else {
-                FirstAid.proxy.showGuiApplyHealth();
-                FirstAid.NETWORKING.sendToServer(new MessageGetDamageInfo());
+                Minecraft.getMinecraft().displayGuiScreen(new GuiApplyHealthItem(Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null)));
             }
         }
     }
@@ -64,10 +64,13 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && event.side == Side.CLIENT && GuiApplyHealthItem.INSTANCE != null && GuiApplyHealthItem.INSTANCE.hasData && !event.player.isCreative())
-            GuiApplyHealthItem.INSTANCE.damageModel.tick(event.player.world, event.player, true);
-        if (event.phase == TickEvent.Phase.END && event.side == Side.CLIENT)
-            GuiIngameForge.renderHealth = false;
+    public static void renderOverlay(RenderGameOverlayEvent.Post event) {
+        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL)
+            return;
+        try {
+            HUDHandler.renderOverlay(event.getResolution());
+        } catch (RuntimeException e) {
+            FirstAid.logger.warn("Error rendering overlay! GL State might be messed up!", e);
+        }
     }
 }

@@ -19,14 +19,14 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
     private int morphineTicksLeft = 0;
 
     public PlayerDamageModel() {
-        this.HEAD = new DamageablePart(FirstAidConfig.damageSystem.maxHealthHead, true, EntityEquipmentSlot.HEAD);
-        this.LEFT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftArm, false, EntityEquipmentSlot.CHEST);
-        this.LEFT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftLeg, false, EntityEquipmentSlot.LEGS);
-        this.LEFT_FOOT = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftFoot, false, EntityEquipmentSlot.FEET);
-        this.BODY = new DamageablePart(FirstAidConfig.damageSystem.maxHealthBody, true, EntityEquipmentSlot.CHEST);
-        this.RIGHT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightArm, false, EntityEquipmentSlot.CHEST);
-        this.RIGHT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightLeg, false, EntityEquipmentSlot.LEGS);
-        this.RIGHT_FOOT = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightFoot, false, EntityEquipmentSlot.FEET);
+        this.HEAD = new DamageablePart(FirstAidConfig.damageSystem.maxHealthHead, true, EntityEquipmentSlot.HEAD, EnumPlayerPart.HEAD);
+        this.LEFT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftArm, false, EntityEquipmentSlot.CHEST, EnumPlayerPart.LEFT_ARM);
+        this.LEFT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftLeg, false, EntityEquipmentSlot.LEGS, EnumPlayerPart.LEFT_LEG);
+        this.LEFT_FOOT = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftFoot, false, EntityEquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT);
+        this.BODY = new DamageablePart(FirstAidConfig.damageSystem.maxHealthBody, true, EntityEquipmentSlot.CHEST, EnumPlayerPart.BODY);
+        this.RIGHT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightArm, false, EntityEquipmentSlot.CHEST, EnumPlayerPart.RIGHT_ARM);
+        this.RIGHT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightLeg, false, EntityEquipmentSlot.LEGS, EnumPlayerPart.RIGHT_LEG);
+        this.RIGHT_FOOT = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightFoot, false, EntityEquipmentSlot.FEET, EnumPlayerPart.RIGHT_FOOT);
     }
 
     public DamageablePart getFromEnum(EnumPlayerPart part) {

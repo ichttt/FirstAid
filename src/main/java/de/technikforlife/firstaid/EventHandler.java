@@ -3,13 +3,17 @@ package de.technikforlife.firstaid;
 import de.technikforlife.firstaid.damagesystem.ArmorCalculator;
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
+import de.technikforlife.firstaid.damagesystem.capability.CapHandler;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
-import de.technikforlife.firstaid.damagesystem.capability.DataManager;
+import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import de.technikforlife.firstaid.items.FirstAidItems;
+import de.technikforlife.firstaid.network.MessageReceiveDamage;
+import de.technikforlife.firstaid.network.MessageReceiveDamageModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
@@ -76,20 +80,21 @@ public class EventHandler {
             event.setAmount(Float.MAX_VALUE);
         } else {
             event.setCanceled(true);
+            FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(partToDamage.part, amountToDamage), (EntityPlayerMP) player);
         }
     }
 
     @SubscribeEvent
     public static void registerCapability(AttachCapabilitiesEvent<Entity> event) {
         Entity obj = event.getObject();
-        if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer) && !obj.getEntityWorld().isRemote) //Server side only
-            event.addCapability(DataManager.IDENTIFIER, new DataManager((EntityPlayer) obj));
+        if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer))
+            event.addCapability(CapHandler.IDENTIFIER, new CapHandler((EntityPlayer) obj));
     }
 
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && event.side == Side.SERVER && !event.player.isCreative())
-            DataManager.tickPlayer(event.player);
+        if (event.phase == TickEvent.Phase.END && !event.player.isCreative())
+            PlayerDataManager.tickPlayer(event.player, event.side == Side.CLIENT);
     }
 
     @SubscribeEvent
@@ -97,7 +102,7 @@ public class EventHandler {
         ItemStack stack = event.crafting;
         if (stack.getItem() == FirstAidItems.BANDAGE) {
             String username = event.player.getName();
-            if (username.equalsIgnoreCase("ichun") || username.equalsIgnoreCase("ohaiichun"))
+            if (username.equalsIgnoreCase("ichun"))
                 stack.setStackDisplayName("MediChun's Healthkit"); //Yup, I *had* to do this
         }
     }
@@ -130,7 +135,7 @@ public class EventHandler {
     public static void onLivingDeath(LivingDeathEvent event) {
         EntityLivingBase entityLiving = event.getEntityLiving();
         if (entityLiving instanceof EntityPlayer && !(entityLiving instanceof FakePlayer)) {
-            DataManager.clearPlayer((EntityPlayer) entityLiving);
+            PlayerDataManager.clearPlayer((EntityPlayer) entityLiving);
         }
     }
 
@@ -156,5 +161,13 @@ public class EventHandler {
         float amount = event.getAmount() / 6F;
         damageModel.forEach(part -> part.heal(amount));
         FirstAid.proxy.healClient(amount);
+    }
+
+    @SubscribeEvent
+    public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!event.player.world.isRemote) {
+            FirstAid.logger.debug("Sending damage model to " + event.player.getDisplayNameString());
+            FirstAid.NETWORKING.sendTo(new MessageReceiveDamageModel(event.player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null)), (EntityPlayerMP) event.player);
+        }
     }
 }

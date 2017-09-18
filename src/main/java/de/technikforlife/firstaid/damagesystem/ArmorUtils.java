@@ -1,6 +1,9 @@
 package de.technikforlife.firstaid.damagesystem;
 
+import com.google.common.collect.Iterators;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
@@ -12,7 +15,7 @@ import net.minecraftforge.common.ISpecialArmor;
 
 import javax.annotation.Nonnull;
 
-public class ArmorCalculator {
+public class ArmorUtils {
 
     private static float getModifier(EntityEquipmentSlot slot) {
         switch (slot) {
@@ -84,5 +87,36 @@ public class ArmorCalculator {
         }
 
         return (float)damage;
+    }
+
+    /**
+     * Changed copy of the first part from {@link EnchantmentHelper#applyEnchantmentModifier(EnchantmentHelper.IModifier, ItemStack)}
+     */
+    public static float applyGlobalPotionModifieres(EntityPlayer player, DamageSource source, float damage) {
+        if (source.isDamageAbsolute())
+            return damage;
+        if (player.isPotionActive(MobEffects.RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
+            @SuppressWarnings("ConstantConditions")
+            int i = (player.getActivePotionEffect(MobEffects.RESISTANCE).getAmplifier() + 1) * 5;
+            int j = 25 - i;
+            float f = damage * (float) j;
+            damage = f / 25.0F;
+        }
+
+        if (damage <= 0.0F)
+            return 0.0F;
+
+        return damage;
+    }
+
+    /**
+     * Changed copy of the second part from {@link EnchantmentHelper#applyEnchantmentModifier(EnchantmentHelper.IModifier, ItemStack)}
+     */
+    public static float applyEnchantmentModifieres(ItemStack stack, DamageSource source, float damage) {
+        int k = EnchantmentHelper.getEnchantmentModifierDamage(() -> Iterators.singletonIterator(stack), source);
+
+        if (k > 0)
+            damage = CombatRules.getDamageAfterMagicAbsorb(damage, (float) k);
+        return damage;
     }
 }

@@ -45,7 +45,7 @@ public class MessageReceiveDamage implements IMessage {
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(MessageReceiveDamage message, MessageContext ctx) {
             Minecraft.getMinecraft().addScheduledTask(() -> {
-               PlayerDamageModel damageModel = Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null);
+               PlayerDamageModel damageModel = Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
                 Objects.requireNonNull(damageModel);
                 DamageablePart part = damageModel.getFromEnum(message.part);
                 part.damage(message.damageAmount);

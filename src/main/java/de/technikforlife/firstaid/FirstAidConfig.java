@@ -10,6 +10,9 @@ public class FirstAidConfig {
     @Config.RequiresWorldRestart
     public static final DamageSystem damageSystem = new DamageSystem();
 
+    @Config.Comment("Settings regarding the health overlay when ingame")
+    public static final Overlay overlay = new Overlay();
+
     @Config.Comment("False if the tutorial message should be shown. Client side only")
     public static boolean hasTutorial = false;
 
@@ -20,7 +23,26 @@ public class FirstAidConfig {
     @Config.Comment("If false, healing potions and other healing items will have no effect")
     public static boolean allowOtherHealingItems = true;
 
-    @SuppressWarnings("CanBeFinal")
+    @Config.Comment("Set to false to disable dynamic debuffs based on the health. Makes morphine useless")
+    public static boolean enableDebuffs = true;
+
+
+    public static class Overlay {
+
+        @Config.Comment("True if the overlay should be shown, false otherwise")
+        public boolean showOverlay = true;
+
+        @Config.RangeInt(min = 0, max = 3)
+        @Config.Comment("The relative point of the overlay. 0=top+left, 1=top+right, 2=bottom+left, 3=bottom+right")
+        public int position = 0;
+
+        @Config.Comment("The offset on the x axis")
+        public int xOffset = 0;
+
+        @Config.Comment("The offset on the y axis")
+        public int yOffset = 1;
+    }
+
     public static class DamageSystem {
 
         @Config.RangeInt(min = 0, max = 16)

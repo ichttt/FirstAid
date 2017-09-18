@@ -4,7 +4,6 @@ import de.technikforlife.firstaid.damagesystem.enums.EnumHealingType;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import de.technikforlife.firstaid.damagesystem.enums.EnumWoundState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -19,19 +18,16 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
     @Nullable
     public PartHealer activeHealer;
     @Nonnull
-    public final EntityEquipmentSlot equipmentSlot;
-    @Nonnull
     public final EnumPlayerPart part;
 
     @Nonnull
     private EnumWoundState state = EnumWoundState.HEALTHY;
     public float currentHealth;
 
-    public DamageablePart(float maxHealth, boolean canCauseDeath, @Nonnull EntityEquipmentSlot equipmentSlot, @Nonnull EnumPlayerPart playerPart) {
+    public DamageablePart(float maxHealth, boolean canCauseDeath, @Nonnull EnumPlayerPart playerPart) {
         this.maxHealth = maxHealth;
         this.canCauseDeath = canCauseDeath;
         this.currentHealth = maxHealth;
-        this.equipmentSlot = equipmentSlot;
         this.part = playerPart;
     }
 
@@ -47,10 +43,11 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
     /**
      * @return true if the player drops below/ has 0 HP
      */
-    public boolean damage(float amount) {
+    public float damage(float amount) {
+        float notFitting = Math.abs(Math.min(0, currentHealth - amount));
         currentHealth = Math.max(0, currentHealth - amount);
         state = EnumWoundState.getWoundState(maxHealth, currentHealth);
-        return currentHealth == 0;
+        return notFitting;
     }
 
     void tick(World world, EntityPlayer player, boolean fake) {

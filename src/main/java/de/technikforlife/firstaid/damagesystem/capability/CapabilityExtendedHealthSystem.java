@@ -15,7 +15,7 @@ public class CapabilityExtendedHealthSystem {
 
     @SuppressWarnings("unused")
     @CapabilityInject(PlayerDamageModel.class)
-    public static Capability<PlayerDamageModel> CAP_EXTENDED_HEALTH_SYSTEM;
+    public static Capability<PlayerDamageModel> INSTANCE;
 
     public static void register() {
         FirstAid.logger.debug("Registering capability");

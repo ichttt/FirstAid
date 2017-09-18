@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.model.ModelLoader;
@@ -20,7 +19,6 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -52,7 +50,7 @@ public class ClientEventHandler {
                 Minecraft.getMinecraft().displayGuiScreen(new GuiTutorial());
             }
             else {
-                Minecraft.getMinecraft().displayGuiScreen(new GuiApplyHealthItem(Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null)));
+                Minecraft.getMinecraft().displayGuiScreen(new GuiApplyHealthItem(Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)));
             }
         }
     }

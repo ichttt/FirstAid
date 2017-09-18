@@ -53,7 +53,7 @@ public class MessageApplyHealth implements IMessage {
             //noinspection ConstantConditions
             ctx.getServerHandler().player.getServer().addScheduledTask(() -> {
                 EntityPlayer player = ctx.getServerHandler().player;
-                PlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null));
+                PlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
                 ItemStack stack = player.getHeldItem(message.hand);
                 Item item = stack.getItem();
                 if (!(item instanceof ItemHealing)) {

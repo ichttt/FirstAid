@@ -29,8 +29,8 @@ public class ItemMorphine extends Item {
     @Override
     @Nonnull
     public ItemStack onItemUseFinish(@Nonnull ItemStack stack, World world, EntityLivingBase entityLiving) {
-        if (!world.isRemote && entityLiving.hasCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null)) {
-            PlayerDamageModel damageModel = entityLiving.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null);
+        if (!world.isRemote && entityLiving.hasCapability(CapabilityExtendedHealthSystem.INSTANCE, null)) {
+            PlayerDamageModel damageModel = entityLiving.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
             Objects.requireNonNull(damageModel).applyMorphine();
         }
         stack.shrink(1);

@@ -1,7 +1,5 @@
 package de.technikforlife.firstaid.damagesystem.enums;
 
-import de.technikforlife.firstaid.EventHandler;
-
 public enum EnumPlayerPart {
     HEAD(1), LEFT_ARM(2), LEFT_LEG(3), LEFT_FOOT(4), BODY(5), RIGHT_ARM(6), RIGHT_LEG(7), RIGHT_FOOT(8);
 
@@ -32,8 +30,4 @@ public enum EnumPlayerPart {
         throw new IndexOutOfBoundsException("Invalid id " + id);
     }
 
-    public static EnumPlayerPart getRandomPart() {
-        int value = EventHandler.rand.nextInt(8);
-        return fromID(value + 1);
-    }
 }

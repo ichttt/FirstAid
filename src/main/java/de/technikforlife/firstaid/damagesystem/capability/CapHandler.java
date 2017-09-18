@@ -25,14 +25,14 @@ public class CapHandler implements ICapabilityProvider, INBTSerializable<NBTTagC
 
     @Override
     public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
-        return capability == CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM;
+        return capability == CapabilityExtendedHealthSystem.INSTANCE;
     }
 
     @Nullable
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
-        if (capability == CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM)
+        if (capability == CapabilityExtendedHealthSystem.INSTANCE)
             return (T) PlayerDataManager.capList.get(player);
         return null;
     }

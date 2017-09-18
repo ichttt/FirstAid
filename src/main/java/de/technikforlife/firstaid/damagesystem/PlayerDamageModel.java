@@ -3,9 +3,7 @@ package de.technikforlife.firstaid.damagesystem;
 import de.technikforlife.firstaid.EventHandler;
 import de.technikforlife.firstaid.FirstAidConfig;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
-import de.technikforlife.firstaid.damagesystem.enums.EnumWoundState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -19,14 +17,14 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
     private int morphineTicksLeft = 0;
 
     public PlayerDamageModel() {
-        this.HEAD = new DamageablePart(FirstAidConfig.damageSystem.maxHealthHead, true, EntityEquipmentSlot.HEAD, EnumPlayerPart.HEAD);
-        this.LEFT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftArm, false, EntityEquipmentSlot.CHEST, EnumPlayerPart.LEFT_ARM);
-        this.LEFT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftLeg, false, EntityEquipmentSlot.LEGS, EnumPlayerPart.LEFT_LEG);
-        this.LEFT_FOOT = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftFoot, false, EntityEquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT);
-        this.BODY = new DamageablePart(FirstAidConfig.damageSystem.maxHealthBody, true, EntityEquipmentSlot.CHEST, EnumPlayerPart.BODY);
-        this.RIGHT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightArm, false, EntityEquipmentSlot.CHEST, EnumPlayerPart.RIGHT_ARM);
-        this.RIGHT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightLeg, false, EntityEquipmentSlot.LEGS, EnumPlayerPart.RIGHT_LEG);
-        this.RIGHT_FOOT = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightFoot, false, EntityEquipmentSlot.FEET, EnumPlayerPart.RIGHT_FOOT);
+        this.HEAD = new DamageablePart(FirstAidConfig.damageSystem.maxHealthHead, true, EnumPlayerPart.HEAD);
+        this.LEFT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftArm, false, EnumPlayerPart.LEFT_ARM);
+        this.LEFT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftLeg, false, EnumPlayerPart.LEFT_LEG);
+        this.LEFT_FOOT = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftFoot, false, EnumPlayerPart.LEFT_FOOT);
+        this.BODY = new DamageablePart(FirstAidConfig.damageSystem.maxHealthBody, true, EnumPlayerPart.BODY);
+        this.RIGHT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightArm, false, EnumPlayerPart.RIGHT_ARM);
+        this.RIGHT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightLeg, false, EnumPlayerPart.RIGHT_LEG);
+        this.RIGHT_FOOT = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightFoot, false, EnumPlayerPart.RIGHT_FOOT);
     }
 
     public DamageablePart getFromEnum(EnumPlayerPart part) {
@@ -111,7 +109,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
             tickCounter++;
             if (tickCounter >= 140) {
                 tickCounter = 0;
-                if (!fake) {
+                if (!fake && FirstAidConfig.enableDebuffs) {
                     for (PlayerDamageDebuff debuff : PlayerDamageDebuff.possibleDebuffs)
                         debuff.applyDebuff(player, this);
                 }
@@ -128,17 +126,6 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
 
     public int getMorphineTicks() {
         return morphineTicksLeft;
-    }
-
-    public DamageablePart getHealthyFoot() {
-        DamageablePart playerPart = EventHandler.rand.nextBoolean() ? LEFT_FOOT : RIGHT_FOOT;
-        if (playerPart.getWoundState() == EnumWoundState.WOUNDED_HEAVY) {
-            if (playerPart == LEFT_FOOT)
-                playerPart = RIGHT_FOOT;
-            else
-                playerPart = LEFT_FOOT;
-        }
-        return playerPart;
     }
 
     @Override
@@ -158,5 +145,13 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
                 return part;
             }
         };
+    }
+
+    public boolean isDead() {
+        for (DamageablePart part : this) {
+            if (part.canCauseDeath && part.currentHealth <= 0)
+                return true;
+        }
+        return false;
     }
 }

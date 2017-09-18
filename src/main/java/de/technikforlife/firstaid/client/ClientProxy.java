@@ -33,13 +33,13 @@ public class ClientProxy implements IProxy {
 
     @Override
     public void showGuiApplyHealth(EnumHealingType healingType, EnumHand activeHand) {
-        GuiApplyHealthItem.INSTANCE = new GuiApplyHealthItem(Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null), healingType, activeHand);
+        GuiApplyHealthItem.INSTANCE = new GuiApplyHealthItem(Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null), healingType, activeHand);
         Minecraft.getMinecraft().displayGuiScreen(GuiApplyHealthItem.INSTANCE);
     }
 
     @Override
     public void healClient(float amount) {
-        PlayerDamageModel damageModel = Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.CAP_EXTENDED_HEALTH_SYSTEM, null);
+        PlayerDamageModel damageModel = Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
         Objects.requireNonNull(damageModel).forEach(part -> part.heal(amount));
     }
 }

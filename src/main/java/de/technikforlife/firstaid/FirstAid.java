@@ -7,6 +7,7 @@ import de.technikforlife.firstaid.items.FirstAidItems;
 import de.technikforlife.firstaid.network.MessageApplyHealth;
 import de.technikforlife.firstaid.network.MessageReceiveDamage;
 import de.technikforlife.firstaid.network.MessageReceiveDamageModel;
+import de.technikforlife.firstaid.damagesystem.DamageDistribution;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -54,8 +55,9 @@ public class FirstAid {
         NETWORKING.registerMessage(MessageReceiveDamage.Handler.class, MessageReceiveDamage.class, 1, Side.CLIENT);
         NETWORKING.registerMessage(MessageApplyHealth.Handler.class, MessageApplyHealth.class, 2 , Side.SERVER);
         NETWORKING.registerMessage(MessageReceiveDamageModel.Handler.class, MessageReceiveDamageModel.class, 3, Side.CLIENT);
-        //invoke static constructor of class
+        //invoke static constructor of classes
         logger.info("Initialized {} possible player debuffs", PlayerDamageDebuff.possibleDebuffs.size());
+        logger.debug("DamageDist RDM hashCode is {}", DamageDistribution.RANDOM_DIST.hashCode());
         checkEarlyExit();
     }
 

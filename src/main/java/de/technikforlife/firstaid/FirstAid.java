@@ -23,7 +23,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.1.1", acceptedMinecraftVersions = "[1.12,1.13)")
+@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.2.0", acceptedMinecraftVersions = "[1.12,1.13)")
 public class FirstAid {
     public static Logger logger;
     public static final String MODID ="firstaid";

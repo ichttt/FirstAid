@@ -22,7 +22,7 @@ tutorial.line4=Diese Effekte können durch Morphium oder durch das Heilen der Wu
 tutorial.line5=Wunden können durch Bandagen oder Plaster geheilt werden (Rechtsklick auf den Gegenstand).
 tutorial.line6=Ein Spieler stirbt dann, wenn ein kritisches Organ (Kopf oder Torso) kein Leben mehr hat.
 tutorial.line7=In diesem Fall wäre der Spieler z.B. tot, egal wie viel Leben die anderen Organe haben.
-tutorial.line8=Wenn du dein derzeitiges Leben sehen willst, drücke %s, um dieses Fenster wieder zu öffnen.
+tutorial.line8=Wenn du dein derzeitiges Leben und aktive Heilungsgegenstände sehen willst, drücke %s, um dieses Fenster wieder zu öffnen.
 tutorial.end=Das ist das Ende des Tutorials.
 
 keybinds.show_wounds=Wunden anzeigen

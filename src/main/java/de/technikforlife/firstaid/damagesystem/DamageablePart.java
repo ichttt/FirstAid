@@ -83,7 +83,7 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
     public void deserializeNBT(@Nullable NBTTagCompound nbt) {
         if (nbt == null)
             return;
-        currentHealth = nbt.getFloat("health");
+        currentHealth = Math.min(maxHealth, nbt.getFloat("health"));
         if (nbt.hasKey("healingItem"))
             activeHealer = EnumHealingType.fromID(nbt.getByte("healingItem")).createNewHealer().loadNBT(nbt.getInteger("itemTicks"), nbt.getInteger("itemHeals"));
         state = EnumWoundState.getWoundState(maxHealth, currentHealth);

@@ -40,9 +40,6 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
         state = EnumWoundState.getWoundState(maxHealth, currentHealth);
     }
 
-    /**
-     * @return true if the player drops below/ has 0 HP
-     */
     public float damage(float amount) {
         float notFitting = Math.abs(Math.min(0, currentHealth - amount));
         currentHealth = Math.max(0, currentHealth - amount);
@@ -50,11 +47,11 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
         return notFitting;
     }
 
-    void tick(World world, EntityPlayer player, boolean fake) {
+    void tick(World world, EntityPlayer player) {
         if (activeHealer != null) {
             if (activeHealer.tick()) {
                 heal(1F);
-                if (!fake) {
+                if (!world.isRemote) {
                     world.playEvent(2005, player.getPosition(), 0);
                 }
             }

@@ -13,8 +13,8 @@ public class PlayerDataManager {
         capList.clear();
     }
 
-    public static void tickPlayer(EntityPlayer player, boolean fake) {
-        capList.get(player).tick(player.world, player, fake);
+    public static void tickPlayer(EntityPlayer player) {
+        capList.get(player).tick(player.world, player);
     }
 
     public static void clearPlayer(EntityPlayer player) {

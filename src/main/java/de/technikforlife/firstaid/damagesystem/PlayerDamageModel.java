@@ -91,7 +91,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
         part.currentHealth = Math.min(nbt.getFloat(key + "Health"), part.maxHealth);
     }
 
-    public void tick(World world, EntityPlayer player, boolean fake) {
+    public void tick(World world, EntityPlayer player) {
         if (player.isDead || player.getHealth() <= 0F)
             return;
         if (FirstAidConfig.allowNaturalRegeneration) {
@@ -109,7 +109,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
             tickCounter++;
             if (tickCounter >= 140) {
                 tickCounter = 0;
-                if (!fake && FirstAidConfig.enableDebuffs) {
+                if (!world.isRemote && FirstAidConfig.enableDebuffs) {
                     for (PlayerDamageDebuff debuff : PlayerDamageDebuff.possibleDebuffs)
                         debuff.applyDebuff(player, this);
                 }
@@ -117,7 +117,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
         } else {
             morphineTicksLeft--;
         }
-        forEach(part -> part.tick(world, player, fake));
+        forEach(part -> part.tick(world, player));
     }
 
     public void applyMorphine() {

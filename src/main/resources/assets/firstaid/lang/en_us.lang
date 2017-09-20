@@ -26,5 +26,3 @@ tutorial.line8=If you want to see your current health and active healers, just p
 tutorial.end=That is the end of the tutorial.
 
 keybinds.show_wounds=Show wounds
-
-death.attack.criticalOrgan=%s died because of a critical organ failure

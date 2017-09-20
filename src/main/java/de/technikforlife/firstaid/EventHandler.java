@@ -4,14 +4,18 @@ import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import de.technikforlife.firstaid.damagesystem.capability.CapHandler;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
+import de.technikforlife.firstaid.damagesystem.distribution.DamageDistribution;
+import de.technikforlife.firstaid.damagesystem.distribution.RandomDamageDistribution;
+import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import de.technikforlife.firstaid.network.MessageReceiveDamageModel;
 import de.technikforlife.firstaid.damagesystem.ArmorUtils;
-import de.technikforlife.firstaid.damagesystem.DamageDistribution;
+import de.technikforlife.firstaid.damagesystem.distribution.StandardDamageDistribution;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
@@ -35,12 +39,15 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.Objects;
 import java.util.Random;
 
 public class EventHandler {
+    private static final DamageDistribution FALL_DMG = new StandardDamageDistribution().addParts(EntityEquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT).addParts(EntityEquipmentSlot.LEGS, EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG);
+    private static final DamageDistribution HEAD = new StandardDamageDistribution().addParts(EntityEquipmentSlot.HEAD, EnumPlayerPart.HEAD);
+    private static final DamageDistribution STARVE = new StandardDamageDistribution().addParts(EntityEquipmentSlot.CHEST, EnumPlayerPart.BODY);
+    private static final DamageDistribution RANDOM_DIST = new RandomDamageDistribution();
     public static final Random rand = new Random();
 
     @SubscribeEvent(priority = EventPriority.LOW) //so all other can modify their damage first, and we apply after that
@@ -59,17 +66,17 @@ public class EventHandler {
         switch (sourceType) {
             case "fall":
             case "hotFloor":
-                damageDistribution = DamageDistribution.FALL_DMG;
+                damageDistribution = FALL_DMG;
                 break;
             case "fallingBlock":
             case "anvil":
-                damageDistribution = DamageDistribution.HEAD;
+                damageDistribution = HEAD;
                 break;
             case "starve":
-                damageDistribution = DamageDistribution.STARVE;
+                damageDistribution = STARVE;
                 break;
             default:
-                damageDistribution = DamageDistribution.RANDOM_DIST;
+                damageDistribution = RANDOM_DIST;
         }
         amountToDamage = ArmorUtils.applyGlobalPotionModifieres(player, source, amountToDamage);
         //VANILLA COPY - absorbtion
@@ -84,11 +91,13 @@ public class EventHandler {
             player.getCombatTracker().trackDamage(source, -1, amountToDamage);
         }
 
-        float left = damageDistribution.distributeDamage(amountToDamage, player, source);
+        boolean addStat = amountToDamage < 3.4028235E37F;
+        float left = damageDistribution.distributeDamage(amountToDamage, player, source, addStat);
         if (left > 0) {
-            damageDistribution = DamageDistribution.RANDOM_DIST;
-            damageDistribution.distributeDamage(left, player, source);
+            damageDistribution = RANDOM_DIST;
+            damageDistribution.distributeDamage(left, player, source, addStat);
         }
+
         if (damageModel.isDead()) {
             event.setAmount(Float.MAX_VALUE);
         } else {
@@ -106,7 +115,7 @@ public class EventHandler {
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END && !event.player.isCreative())
-            PlayerDataManager.tickPlayer(event.player, event.side == Side.CLIENT);
+            PlayerDataManager.tickPlayer(event.player);
     }
 
     @SubscribeEvent

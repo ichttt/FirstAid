@@ -5,6 +5,7 @@ import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import de.technikforlife.firstaid.damagesystem.enums.EnumWoundState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -35,9 +36,11 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
         return state;
     }
 
-    public void heal(float amount) {
-        currentHealth = Math.min(maxHealth, amount + currentHealth);
+    public float heal(float amount) {
+        float notFitting = Math.abs(Math.min(0F, maxHealth - (currentHealth + amount)));
+        currentHealth = Math.min(maxHealth, currentHealth + amount);
         state = EnumWoundState.getWoundState(maxHealth, currentHealth);
+        return notFitting;
     }
 
     public float damage(float amount) {

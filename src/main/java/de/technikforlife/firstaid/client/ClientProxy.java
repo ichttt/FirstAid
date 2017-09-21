@@ -5,6 +5,7 @@ import de.technikforlife.firstaid.IProxy;
 import de.technikforlife.firstaid.client.gui.GuiApplyHealthItem;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.distribution.HealthDistribution;
 import de.technikforlife.firstaid.damagesystem.enums.EnumHealingType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
@@ -40,7 +41,6 @@ public class ClientProxy implements IProxy {
 
     @Override
     public void healClient(float amount) {
-        PlayerDamageModel damageModel = Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
-        Objects.requireNonNull(damageModel).forEach(part -> part.heal(amount));
+        HealthDistribution.distributeHealth(amount, Minecraft.getMinecraft().player);
     }
 }

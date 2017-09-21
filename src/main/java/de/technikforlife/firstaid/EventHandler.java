@@ -6,6 +6,7 @@ import de.technikforlife.firstaid.damagesystem.capability.CapWrapper;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
 import de.technikforlife.firstaid.damagesystem.distribution.DamageDistribution;
+import de.technikforlife.firstaid.damagesystem.distribution.HealthDistribution;
 import de.technikforlife.firstaid.damagesystem.distribution.RandomDamageDistribution;
 import de.technikforlife.firstaid.damagesystem.distribution.StandardDamageDistribution;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
@@ -174,9 +175,8 @@ public class EventHandler {
         event.setCanceled(true);
         if (!FirstAidConfig.allowOtherHealingItems)
             return;
-        PlayerDamageModel damageModel = Objects.requireNonNull(entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
-        float amount = event.getAmount() / 8F;
-        damageModel.forEach(part -> part.heal(amount));
+        float amount = event.getAmount();
+        HealthDistribution.distributeHealth(amount, (EntityPlayer) entity);
         FirstAid.proxy.healClient(amount);
     }
 

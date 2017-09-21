@@ -2,6 +2,8 @@ package de.technikforlife.firstaid.client;
 
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.FirstAidConfig;
+import de.technikforlife.firstaid.client.gui.GuiApplyHealthItem;
+import de.technikforlife.firstaid.client.gui.HUDHandler;
 import de.technikforlife.firstaid.client.tutorial.GuiTutorial;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.items.FirstAidItems;

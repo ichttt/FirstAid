@@ -13,12 +13,12 @@ import net.minecraftforge.common.util.INBTSerializable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class CapHandler implements ICapabilityProvider, INBTSerializable<NBTTagCompound> {
+public class CapWrapper implements ICapabilityProvider, INBTSerializable<NBTTagCompound> {
     public static final ResourceLocation IDENTIFIER = new ResourceLocation(FirstAid.MODID, "capExtendedHealthSystem");
 
     private final EntityPlayer player;
 
-    public CapHandler(EntityPlayer player) {
+    public CapWrapper(EntityPlayer player) {
         this.player = player;
         PlayerDataManager.capList.putIfAbsent(player, new PlayerDamageModel());
     }

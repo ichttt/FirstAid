@@ -2,6 +2,7 @@ package de.technikforlife.firstaid.client;
 
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.IProxy;
+import de.technikforlife.firstaid.client.gui.GuiApplyHealthItem;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.damagesystem.enums.EnumHealingType;

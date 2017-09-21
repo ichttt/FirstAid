@@ -1,4 +1,4 @@
-package de.technikforlife.firstaid.client;
+package de.technikforlife.firstaid.client.gui;
 
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
@@ -9,15 +9,15 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class RenderUtils {
+public class GuiUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
 
     public static void drawHealth(DamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean secondLine) {
         GlStateManager.pushMatrix();
         GlStateManager.translate(xTranslation, yTranslation, 0);
         int yTexture = damageablePart.canCauseDeath ? 45 : 0;
-        RenderUtils.renderIcon(damageablePart.maxHealth, damageablePart.maxHealth, yTexture, 16, 16, gui, secondLine);
-        RenderUtils.renderIcon(damageablePart.maxHealth, damageablePart.currentHealth, yTexture, 52, 61, gui, secondLine);
+        GuiUtils.renderIcon(damageablePart.maxHealth, damageablePart.maxHealth, yTexture, 16, 16, gui, secondLine);
+        GuiUtils.renderIcon(damageablePart.maxHealth, damageablePart.currentHealth, yTexture, 52, 61, gui, secondLine);
         GlStateManager.popMatrix();
     }
 

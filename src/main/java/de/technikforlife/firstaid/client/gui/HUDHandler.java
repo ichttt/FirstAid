@@ -1,4 +1,4 @@
-package de.technikforlife.firstaid.client;
+package de.technikforlife.firstaid.client.gui;
 
 import de.technikforlife.firstaid.FirstAidConfig;
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
@@ -49,7 +49,7 @@ public class HUDHandler {
         for (DamageablePart part : damageModel) {
             mc.fontRenderer.drawString(I18n.format("gui." + part.part.toString().toLowerCase(Locale.ENGLISH)), 0, 0, 0xFFFFFF);
             mc.getTextureManager().bindTexture(Gui.ICONS);
-            RenderUtils.drawHealth(part, 60, 0, gui, false);
+            GuiUtils.drawHealth(part, 60, 0, gui, false);
             GlStateManager.translate(0, 10F, 0F);
         }
         GlStateManager.popMatrix();

@@ -1,16 +1,16 @@
 package de.technikforlife.firstaid;
 
+import de.technikforlife.firstaid.damagesystem.ArmorUtils;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
-import de.technikforlife.firstaid.damagesystem.capability.CapHandler;
+import de.technikforlife.firstaid.damagesystem.capability.CapWrapper;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
 import de.technikforlife.firstaid.damagesystem.distribution.DamageDistribution;
 import de.technikforlife.firstaid.damagesystem.distribution.RandomDamageDistribution;
+import de.technikforlife.firstaid.damagesystem.distribution.StandardDamageDistribution;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import de.technikforlife.firstaid.network.MessageReceiveDamageModel;
-import de.technikforlife.firstaid.damagesystem.ArmorUtils;
-import de.technikforlife.firstaid.damagesystem.distribution.StandardDamageDistribution;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -52,8 +52,6 @@ public class EventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOW) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
-        if (event.isCanceled())
-            return;
         EntityLivingBase entity = event.getEntityLiving();
         if (entity.getEntityWorld().isRemote || !entity.hasCapability(CapabilityExtendedHealthSystem.INSTANCE, null))
             return;
@@ -87,7 +85,7 @@ public class EventHandler {
         //VANILLA COPY - combat tracker and exhaustion
         if (amountToDamage != 0.0F) {
             player.addExhaustion(source.getHungerDamage());
-            //2nd param is actually never quarried, no need to worry about wrong values
+            //2nd param is actually never queried, no need to worry about wrong values
             player.getCombatTracker().trackDamage(source, -1, amountToDamage);
         }
 
@@ -109,7 +107,7 @@ public class EventHandler {
     public static void registerCapability(AttachCapabilitiesEvent<Entity> event) {
         Entity obj = event.getObject();
         if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer))
-            event.addCapability(CapHandler.IDENTIFIER, new CapHandler((EntityPlayer) obj));
+            event.addCapability(CapWrapper.IDENTIFIER, new CapWrapper((EntityPlayer) obj));
     }
 
     @SubscribeEvent
@@ -170,8 +168,6 @@ public class EventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onHeal(LivingHealEvent event) {
-        if (event.isCanceled())
-            return;
         EntityLivingBase entity = event.getEntityLiving();
         if (!entity.hasCapability(CapabilityExtendedHealthSystem.INSTANCE, null))
             return;
@@ -184,7 +180,7 @@ public class EventHandler {
         FirstAid.proxy.healClient(amount);
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!event.player.world.isRemote) {
             FirstAid.logger.debug("Sending damage model to " + event.player.getDisplayNameString());

@@ -1,4 +1,4 @@
-package de.technikforlife.firstaid.client;
+package de.technikforlife.firstaid.client.gui;
 
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
@@ -98,7 +98,7 @@ public class GuiApplyHealthItem extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
         this.drawGradientRect(this.guiLeft, this.guiTop, this.guiLeft + xSize, this.guiTop + ySize, -16777216, -16777216);
-        this.mc.getTextureManager().bindTexture(RenderUtils.GUI_LOCATION);
+        this.mc.getTextureManager().bindTexture(GuiUtils.GUI_LOCATION);
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
         GuiInventory.drawEntityOnScreen(this.width / 2, this.height / 2 + 30, 45, 0, 0, mc.player);
         super.drawScreen(mouseX, mouseY, partialTicks);
@@ -140,7 +140,7 @@ public class GuiApplyHealthItem extends GuiScreen {
     }
 
     public void drawHealth(DamageablePart damageablePart, boolean right, int yOffset) {
-        RenderUtils.drawHealth(damageablePart, guiLeft + (right ? 194 - (Math.min(4F, Math.round(damageablePart.maxHealth) / 2F) * 9F) : 53), guiTop + yOffset, this, true);
+        GuiUtils.drawHealth(damageablePart, guiLeft + (right ? 194 - (Math.min(4F, Math.round(damageablePart.maxHealth) / 2F) * 9F) : 53), guiTop + yOffset, this, true);
     }
 
     @Override

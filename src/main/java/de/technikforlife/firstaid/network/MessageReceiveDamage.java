@@ -48,7 +48,7 @@ public class MessageReceiveDamage implements IMessage {
                PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(Minecraft.getMinecraft().player);
                 Objects.requireNonNull(damageModel);
                 DamageablePart part = damageModel.getFromEnum(message.part);
-                part.damage(message.damageAmount);
+                part.damage(message.damageAmount, null, false);
             });
             return null;
         }

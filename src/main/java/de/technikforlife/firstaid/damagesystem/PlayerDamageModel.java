@@ -2,6 +2,9 @@ package de.technikforlife.firstaid.damagesystem;
 
 import de.technikforlife.firstaid.EventHandler;
 import de.technikforlife.firstaid.FirstAidConfig;
+import de.technikforlife.firstaid.damagesystem.debuff.AbstractDebuff;
+import de.technikforlife.firstaid.damagesystem.debuff.Debuffs;
+import de.technikforlife.firstaid.damagesystem.debuff.SharedDebuff;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -9,22 +12,31 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iterable<DamageablePart> {
     public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, LEFT_FOOT, BODY, RIGHT_ARM, RIGHT_LEG, RIGHT_FOOT;
-    private int tickCounter;
     private int morphineTicksLeft = 0;
+    private final List<SharedDebuff> sharedDebuffs = new ArrayList<>(2);
 
     public PlayerDamageModel() {
-        this.HEAD = new DamageablePart(FirstAidConfig.damageSystem.maxHealthHead, true, EnumPlayerPart.HEAD);
-        this.LEFT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftArm, false, EnumPlayerPart.LEFT_ARM);
-        this.LEFT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftLeg, false, EnumPlayerPart.LEFT_LEG);
-        this.LEFT_FOOT = new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftFoot, false, EnumPlayerPart.LEFT_FOOT);
-        this.BODY = new DamageablePart(FirstAidConfig.damageSystem.maxHealthBody, true, EnumPlayerPart.BODY);
-        this.RIGHT_ARM = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightArm, false, EnumPlayerPart.RIGHT_ARM);
-        this.RIGHT_LEG = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightLeg, false, EnumPlayerPart.RIGHT_LEG);
-        this.RIGHT_FOOT = new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightFoot, false, EnumPlayerPart.RIGHT_FOOT);
+        FirstAidConfig.DamageSystem config = FirstAidConfig.damageSystem;
+        AbstractDebuff[] headDebuffs = Debuffs.getHeadDebuffs();
+        AbstractDebuff[] bodyDebuffs = Debuffs.getBodyDebuffs();
+        SharedDebuff armDebuff = Debuffs.getArmDebuffs();
+        SharedDebuff legFootDebuff = Debuffs.getLegFootDebuffs();
+        sharedDebuffs.add(armDebuff);
+        sharedDebuffs.add(legFootDebuff);
+        this.HEAD       = new DamageablePart(config.maxHealthHead, true, EnumPlayerPart.HEAD, headDebuffs);
+        this.LEFT_ARM   = new DamageablePart(config.maxHealthLeftArm, false, EnumPlayerPart.LEFT_ARM, armDebuff);
+        this.LEFT_LEG   = new DamageablePart(config.maxHealthLeftLeg, false, EnumPlayerPart.LEFT_LEG, legFootDebuff);
+        this.LEFT_FOOT  = new DamageablePart(config.maxHealthLeftFoot, false, EnumPlayerPart.LEFT_FOOT, legFootDebuff);
+        this.BODY       = new DamageablePart(config.maxHealthBody, true, EnumPlayerPart.BODY, bodyDebuffs);
+        this.RIGHT_ARM  = new DamageablePart(config.maxHealthRightArm, false, EnumPlayerPart.RIGHT_ARM, armDebuff);
+        this.RIGHT_LEG  = new DamageablePart(config.maxHealthRightLeg, false, EnumPlayerPart.RIGHT_LEG, legFootDebuff);
+        this.RIGHT_FOOT = new DamageablePart(config.maxHealthRightFoot, false, EnumPlayerPart.RIGHT_FOOT, legFootDebuff);
     }
 
     public DamageablePart getFromEnum(EnumPlayerPart part) {
@@ -105,19 +117,11 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
             player.setHealth(isFullLife ? player.getMaxHealth() : 2F);
         }
 
-        if (morphineTicksLeft <= 0) {
-            tickCounter++;
-            if (tickCounter >= 140) {
-                tickCounter = 0;
-                if (!world.isRemote && FirstAidConfig.enableDebuffs) {
-                    for (PlayerDamageDebuff debuff : PlayerDamageDebuff.possibleDebuffs)
-                        debuff.applyDebuff(player, this);
-                }
-            }
-        } else {
+        forEach(part -> part.tick(world, player, morphineTicksLeft == 0));
+        if (morphineTicksLeft <= 0)
+            sharedDebuffs.forEach(sharedDebuff -> sharedDebuff.tick(player));
+        else
             morphineTicksLeft--;
-        }
-        forEach(part -> part.tick(world, player));
     }
 
     public void applyMorphine() {

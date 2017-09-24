@@ -28,7 +28,7 @@ public abstract class DamageDistribution {
         Collections.shuffle(damageableParts);
         for (DamageablePart part : damageableParts) {
             FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part.part, damage), (EntityPlayerMP) player);
-            float dmgDone = damage - part.damage(damage);
+            float dmgDone = damage - part.damage(damage, player, damageModel.getMorphineTicks() == 0);
             if (addStat)
                 player.addStat(StatList.DAMAGE_TAKEN, Math.round(dmgDone * 10.0F));
             damage -= dmgDone;

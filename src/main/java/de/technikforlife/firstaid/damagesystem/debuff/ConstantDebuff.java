@@ -28,15 +28,12 @@ public class ConstantDebuff extends AbstractDebuff {
             if (healthPerMax < entry.getFloatKey()) {
                 ticks = 0;
                 activeMultiplier = entry.getIntValue();
-                System.out.println("Setting active multiplier");
                 found = true;
                 break;
             }
         }
-        if (!found) {
-            System.out.println("Resetting active multiplier");
+        if (!found)
             activeMultiplier = 0;
-        }
     }
 
     @Override

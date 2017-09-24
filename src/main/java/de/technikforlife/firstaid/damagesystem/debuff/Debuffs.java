@@ -1,5 +1,7 @@
 package de.technikforlife.firstaid.damagesystem.debuff;
 
+import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
+
 public class Debuffs {
 
     public static AbstractDebuff[] getHeadDebuffs() {
@@ -25,13 +27,13 @@ public class Debuffs {
         return new SharedDebuff(new ConstantDebuff("mining_fatigue")
                 .addBound(0.25F, 3)
                 .addBound(0.50F, 2)
-                .addBound(0.75F, 1));
+                .addBound(0.75F, 1), EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM);
     }
 
     public static SharedDebuff getLegFootDebuffs() {
         return new SharedDebuff(new ConstantDebuff("slowness")
-                .addBound(0.25F, 3)
-                .addBound(0.5F, 2)
-                .addBound(0.75F, 1));
+                .addBound(0.35F, 3)
+                .addBound(0.6F, 2)
+                .addBound(0.85F, 1), EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_FOOT, EnumPlayerPart.RIGHT_LEG);
     }
 }

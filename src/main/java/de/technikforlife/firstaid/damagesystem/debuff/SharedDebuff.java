@@ -1,18 +1,23 @@
 package de.technikforlife.firstaid.damagesystem.debuff;
 
 import de.technikforlife.firstaid.FirstAidConfig;
+import de.technikforlife.firstaid.damagesystem.DamageablePart;
+import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
+import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
+import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class SharedDebuff implements IDebuff {
     private final AbstractDebuff debuff;
+    private final EnumPlayerPart[] parts;
     private int damage;
-    private int healthPerMax;
     private int healingDone;
     private int damageCount;
     private int healingCount;
 
-    public SharedDebuff(AbstractDebuff debuff) {
+    public SharedDebuff(AbstractDebuff debuff, EnumPlayerPart... parts) {
         this.debuff = debuff;
+        this.parts = parts;
     }
 
     @Override
@@ -20,7 +25,6 @@ public class SharedDebuff implements IDebuff {
         if (!FirstAidConfig.enableDebuffs)
             return;
         this.damage += damage;
-        this.healthPerMax += healthPerMax;
         this.damageCount++;
     }
 
@@ -29,7 +33,6 @@ public class SharedDebuff implements IDebuff {
         if (!FirstAidConfig.enableDebuffs)
             return;
         this.healingDone += healingDone;
-        this.healthPerMax += healthPerMax;
         this.healingCount++;
     }
 
@@ -40,18 +43,23 @@ public class SharedDebuff implements IDebuff {
             return;
         int count = healingCount + damageCount;
         if (count > 0) {
-            this.healthPerMax /= (healingCount + damageCount);
+            PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+            float healthPerMax = 0;
+            for (EnumPlayerPart part : parts) {
+                DamageablePart damageablePart = damageModel.getFromEnum(part);
+                healthPerMax += damageablePart.currentHealth / damageablePart.maxHealth;
+            }
+            healthPerMax /= parts.length;
             if (healingCount > 0) {
                 this.healingDone /= healingCount;
-                debuff.handleHealing(this.healingDone, this.healthPerMax, player);
+                debuff.handleHealing(this.healingDone, healthPerMax, player);
             }
             if (damageCount > 0) {
                 this.damage /= damageCount;
-                debuff.handleDamageTaken(this.damage, this.healthPerMax, player);
+                debuff.handleDamageTaken(this.damage, healthPerMax, player);
             }
             this.healingDone = 0;
             this.damage = 0;
-            this.healthPerMax = 0;
             this.damageCount = 0;
             this.healingCount = 0;
         }

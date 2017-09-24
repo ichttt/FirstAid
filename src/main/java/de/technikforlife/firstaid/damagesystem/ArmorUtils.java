@@ -114,6 +114,7 @@ public class ArmorUtils {
      */
     public static float applyEnchantmentModifieres(ItemStack stack, DamageSource source, float damage) {
         int k = EnchantmentHelper.getEnchantmentModifierDamage(() -> Iterators.singletonIterator(stack), source);
+        k *= 4;
 
         if (k > 0)
             damage = CombatRules.getDamageAfterMagicAbsorb(damage, (float) k);

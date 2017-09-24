@@ -7,7 +7,6 @@ import de.technikforlife.firstaid.items.FirstAidItems;
 import de.technikforlife.firstaid.network.MessageApplyHealth;
 import de.technikforlife.firstaid.network.MessageReceiveDamage;
 import de.technikforlife.firstaid.network.MessageReceiveDamageModel;
-import de.technikforlife.firstaid.damagesystem.distribution.StandardDamageDistribution;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -77,6 +76,6 @@ public class FirstAid {
     @Mod.EventHandler
     public void onStop(FMLServerStoppedEvent event) {
         logger.debug("Cleaning up");
-        PlayerDataManager.clearData();
+        PlayerDataManager.capList.clear();
     }
 }

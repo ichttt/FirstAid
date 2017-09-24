@@ -3,7 +3,7 @@ package de.technikforlife.firstaid.network;
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
-import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
 import de.technikforlife.firstaid.damagesystem.enums.EnumHealingType;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import de.technikforlife.firstaid.items.ItemHealing;
@@ -16,8 +16,6 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-
-import java.util.Objects;
 
 public class MessageApplyHealth implements IMessage {
     private EnumPlayerPart part;
@@ -53,7 +51,7 @@ public class MessageApplyHealth implements IMessage {
             //noinspection ConstantConditions
             ctx.getServerHandler().player.getServer().addScheduledTask(() -> {
                 EntityPlayer player = ctx.getServerHandler().player;
-                PlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
                 ItemStack stack = player.getHeldItem(message.hand);
                 Item item = stack.getItem();
                 if (!(item instanceof ItemHealing)) {

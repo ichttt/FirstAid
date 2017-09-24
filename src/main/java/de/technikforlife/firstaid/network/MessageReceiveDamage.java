@@ -2,7 +2,7 @@ package de.technikforlife.firstaid.network;
 
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
-import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -45,7 +45,7 @@ public class MessageReceiveDamage implements IMessage {
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(MessageReceiveDamage message, MessageContext ctx) {
             Minecraft.getMinecraft().addScheduledTask(() -> {
-               PlayerDamageModel damageModel = Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+               PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(Minecraft.getMinecraft().player);
                 Objects.requireNonNull(damageModel);
                 DamageablePart part = damageModel.getFromEnum(message.part);
                 part.damage(message.damageAmount);

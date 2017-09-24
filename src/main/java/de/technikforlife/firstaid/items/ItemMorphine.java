@@ -2,7 +2,7 @@ package de.technikforlife.firstaid.items;
 
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
-import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
@@ -29,8 +29,8 @@ public class ItemMorphine extends Item {
     @Override
     @Nonnull
     public ItemStack onItemUseFinish(@Nonnull ItemStack stack, World world, EntityLivingBase entityLiving) {
-        if (!world.isRemote && entityLiving.hasCapability(CapabilityExtendedHealthSystem.INSTANCE, null)) {
-            PlayerDamageModel damageModel = entityLiving.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+        if (!world.isRemote && entityLiving instanceof EntityPlayer) {
+            PlayerDamageModel damageModel = PlayerDataManager.getDamageModel((EntityPlayer) entityLiving);
             Objects.requireNonNull(damageModel).applyMorphine();
         }
         stack.shrink(1);

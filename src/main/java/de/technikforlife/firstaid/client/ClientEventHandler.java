@@ -5,7 +5,7 @@ import de.technikforlife.firstaid.FirstAidConfig;
 import de.technikforlife.firstaid.client.gui.GuiApplyHealthItem;
 import de.technikforlife.firstaid.client.gui.HUDHandler;
 import de.technikforlife.firstaid.client.tutorial.GuiTutorial;
-import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -52,7 +52,7 @@ public class ClientEventHandler {
                 Minecraft.getMinecraft().displayGuiScreen(new GuiTutorial());
             }
             else {
-                Minecraft.getMinecraft().displayGuiScreen(new GuiApplyHealthItem(Minecraft.getMinecraft().player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)));
+                Minecraft.getMinecraft().displayGuiScreen(new GuiApplyHealthItem(PlayerDataManager.getDamageModel(Minecraft.getMinecraft().player)));
             }
         }
     }

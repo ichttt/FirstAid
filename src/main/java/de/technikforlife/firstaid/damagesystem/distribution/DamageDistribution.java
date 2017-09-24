@@ -4,7 +4,7 @@ import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.damagesystem.ArmorUtils;
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
-import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import de.technikforlife.firstaid.network.MessageReceiveDamage;
 import net.minecraft.entity.player.EntityPlayer;
@@ -17,7 +17,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 public abstract class DamageDistribution {
 
@@ -46,7 +45,7 @@ public abstract class DamageDistribution {
     protected abstract List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> getPartList();
 
     public float distributeDamage(float damage, EntityPlayer player, DamageSource source, boolean addStat) {
-        PlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+        PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
         for (Pair<EntityEquipmentSlot, EnumPlayerPart[]> pair : getPartList()) {
             EntityEquipmentSlot slot = pair.getLeft();
             damage = ArmorUtils.applyArmor(player, player.getItemStackFromSlot(slot), source, damage, slot);

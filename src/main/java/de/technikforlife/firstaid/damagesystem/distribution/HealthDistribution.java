@@ -2,7 +2,7 @@ package de.technikforlife.firstaid.damagesystem.distribution;
 
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
-import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 public class HealthDistribution {
     private static final List<EnumPlayerPart> parts;
@@ -46,7 +45,7 @@ public class HealthDistribution {
 
     //TODO optimise this
     public static void distributeHealth(float health, EntityPlayer player) {
-        PlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+        PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
         float rest = distribute(health, damageModel);
         if (rest > 0) //try a second time. Not optimal. Should really try to find a better way
             distribute(rest, damageModel);

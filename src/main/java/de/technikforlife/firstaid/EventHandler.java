@@ -41,7 +41,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-import java.util.Objects;
 import java.util.Random;
 
 public class EventHandler {
@@ -56,11 +55,11 @@ public class EventHandler {
         EntityLivingBase entity = event.getEntityLiving();
         if (entity.getEntityWorld().isRemote || !entity.hasCapability(CapabilityExtendedHealthSystem.INSTANCE, null))
             return;
-        PlayerDamageModel damageModel = Objects.requireNonNull(entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+        EntityPlayer player = (EntityPlayer) entity;
+        PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
         DamageSource source = event.getSource();
         String sourceType = source.damageType;
         float amountToDamage = event.getAmount();
-        EntityPlayer player = (EntityPlayer) entity;
         DamageDistribution damageDistribution;
         switch (sourceType) {
             case "fall":
@@ -184,7 +183,7 @@ public class EventHandler {
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!event.player.world.isRemote) {
             FirstAid.logger.debug("Sending damage model to " + event.player.getDisplayNameString());
-            FirstAid.NETWORKING.sendTo(new MessageReceiveDamageModel(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)), (EntityPlayerMP) event.player);
+            FirstAid.NETWORKING.sendTo(new MessageReceiveDamageModel(PlayerDataManager.getDamageModel(event.player)), (EntityPlayerMP) event.player);
         }
     }
 }

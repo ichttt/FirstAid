@@ -3,7 +3,7 @@ package de.technikforlife.firstaid.client.gui;
 import de.technikforlife.firstaid.FirstAidConfig;
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
-import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
@@ -22,7 +22,7 @@ public class HUDHandler {
         Minecraft mc = Minecraft.getMinecraft();
         if (!FirstAidConfig.overlay.showOverlay || mc.player == null || GuiApplyHealthItem.isOpen || mc.player.isCreative())
             return;
-        PlayerDamageModel damageModel = mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+        PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(mc.player);
         Objects.requireNonNull(damageModel);
         mc.getTextureManager().bindTexture(Gui.ICONS);
         Gui gui = mc.ingameGUI;

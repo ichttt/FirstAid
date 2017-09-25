@@ -76,7 +76,9 @@ public class EventHandler {
             default:
                 damageDistribution = RANDOM_DIST;
         }
+        float origAmount =amountToDamage;
         amountToDamage = ArmorUtils.applyGlobalPotionModifieres(player, source, amountToDamage);
+        FirstAid.logger.debug("Dealing {} ({} after global modifiers) damage", origAmount, amountToDamage);
         //VANILLA COPY - absorbtion
         float f = amountToDamage;
         amountToDamage = Math.max(amountToDamage - player.getAbsorptionAmount(), 0.0F);

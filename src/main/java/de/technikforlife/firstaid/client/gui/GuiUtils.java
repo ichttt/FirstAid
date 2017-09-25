@@ -17,7 +17,7 @@ public class GuiUtils {
         GlStateManager.translate(xTranslation, yTranslation, 0);
         int yTexture = damageablePart.canCauseDeath ? 45 : 0;
         GuiUtils.renderIcon(damageablePart.maxHealth, damageablePart.maxHealth, yTexture, 16, 16, gui, secondLine);
-        GuiUtils.renderIcon(damageablePart.maxHealth, damageablePart.currentHealth, yTexture, 52, 61, gui, secondLine);
+        GuiUtils.renderIcon(damageablePart.maxHealth, damageablePart.currentHealth + 0.4999F, yTexture, 52, 61, gui, secondLine);
         GlStateManager.popMatrix();
     }
 

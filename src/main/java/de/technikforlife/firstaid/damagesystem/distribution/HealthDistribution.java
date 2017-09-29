@@ -35,7 +35,7 @@ public class HealthDistribution {
             //prevent inaccuracy
             diff = Math.round(diff * 10000.0F) / 10000.0F;
 
-            health -= (diff);
+            health -= (toHeal - diff);
             if (i < 7)
                 toHeal = health / (7F - i);
         }

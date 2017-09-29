@@ -7,7 +7,9 @@ import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
 import de.technikforlife.firstaid.damagesystem.distribution.HealthDistribution;
 import de.technikforlife.firstaid.damagesystem.enums.EnumHealingType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.settings.KeyConflictContext;
@@ -38,6 +40,8 @@ public class ClientProxy implements IProxy {
 
     @Override
     public void healClient(float amount) {
-        HealthDistribution.distributeHealth(amount, Minecraft.getMinecraft().player);
+        EntityPlayerSP playerSP = Minecraft.getMinecraft().player;
+        if (playerSP != null)
+            HealthDistribution.distributeHealth(amount, playerSP);
     }
 }

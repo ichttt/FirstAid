@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.model.ModelLoader;
@@ -65,12 +66,11 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public static void renderOverlay(RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL)
-            return;
-        try {
+        RenderGameOverlayEvent.ElementType type = event.getType();
+        if (type == RenderGameOverlayEvent.ElementType.HEALTH) {
+            GuiIngameForge.renderHealth = false;
+            event.setCanceled(true);
+        } else if (type == RenderGameOverlayEvent.ElementType.ALL)
             HUDHandler.renderOverlay(event.getResolution());
-        } catch (RuntimeException e) {
-            FirstAid.logger.warn("Error rendering overlay! GL State might be messed up!", e);
-        }
     }
 }

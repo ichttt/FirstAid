@@ -7,18 +7,15 @@ import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHeal
 import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
 import de.technikforlife.firstaid.damagesystem.distribution.DamageDistribution;
 import de.technikforlife.firstaid.damagesystem.distribution.HealthDistribution;
-import de.technikforlife.firstaid.damagesystem.distribution.RandomDamageDistribution;
-import de.technikforlife.firstaid.damagesystem.distribution.StandardDamageDistribution;
-import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import de.technikforlife.firstaid.network.MessageReceiveDamageModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.FoodStats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.LootEntryItem;
 import net.minecraft.world.storage.loot.LootPool;
@@ -41,13 +38,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.util.Arrays;
 import java.util.Random;
 
+import static de.technikforlife.firstaid.damagesystem.distribution.DamageDistributions.*;
+
 public class EventHandler {
-    private static final DamageDistribution FALL_DMG = new StandardDamageDistribution().addParts(EntityEquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT).addParts(EntityEquipmentSlot.LEGS, EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG);
-    private static final DamageDistribution HEAD = new StandardDamageDistribution().addParts(EntityEquipmentSlot.HEAD, EnumPlayerPart.HEAD);
-    private static final DamageDistribution STARVE = new StandardDamageDistribution().addParts(EntityEquipmentSlot.CHEST, EnumPlayerPart.BODY);
-    private static final DamageDistribution RANDOM_DIST = new RandomDamageDistribution();
     public static final Random rand = new Random();
 
     @SubscribeEvent(priority = EventPriority.LOW) //so all other can modify their damage first, and we apply after that
@@ -73,8 +69,12 @@ public class EventHandler {
             case "starve":
                 damageDistribution = STARVE;
                 break;
+            case "magic":
+            case "drown":
+                damageDistribution = FULL_RANDOM_DIST;
+                break;
             default:
-                damageDistribution = RANDOM_DIST;
+                damageDistribution = SEMI_RANDOM_DIST;
         }
         float origAmount =amountToDamage;
         amountToDamage = ArmorUtils.applyGlobalPotionModifieres(player, source, amountToDamage);
@@ -94,7 +94,7 @@ public class EventHandler {
         boolean addStat = amountToDamage < 3.4028235E37F;
         float left = damageDistribution.distributeDamage(amountToDamage, player, source, addStat);
         if (left > 0) {
-            damageDistribution = RANDOM_DIST;
+            damageDistribution = SEMI_RANDOM_DIST;
             damageDistribution.distributeDamage(left, player, source, addStat);
         }
 
@@ -177,6 +177,9 @@ public class EventHandler {
         if (!FirstAidConfig.allowOtherHealingItems)
             return;
         float amount = event.getAmount();
+        //Hacky shit to reduce vanilla regen
+        if (FirstAidConfig.allowNaturalRegeneration && Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch(stackTraceElement -> stackTraceElement.getClassName().equals(FoodStats.class.getName())))
+            amount = amount * 0.75F;
         HealthDistribution.distributeHealth(amount, (EntityPlayer) entity);
         FirstAid.proxy.healClient(amount);
     }

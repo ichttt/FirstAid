@@ -2,6 +2,7 @@ package de.technikforlife.firstaid;
 
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
+import de.technikforlife.firstaid.damagesystem.debuff.Debuffs;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import de.technikforlife.firstaid.network.MessageApplyHealth;
 import de.technikforlife.firstaid.network.MessageReceiveDamage;
@@ -53,6 +54,9 @@ public class FirstAid {
         NETWORKING.registerMessage(MessageReceiveDamage.Handler.class, MessageReceiveDamage.class, 1, Side.CLIENT);
         NETWORKING.registerMessage(MessageApplyHealth.Handler.class, MessageApplyHealth.class, 2 , Side.SERVER);
         NETWORKING.registerMessage(MessageReceiveDamageModel.Handler.class, MessageReceiveDamageModel.class, 3, Side.CLIENT);
+        logger.debug("Initializing debuffs");
+        Debuffs.getArmDebuffs().toString();
+        logger.info("Initialized 4 debuffs");
         checkEarlyExit();
     }
 

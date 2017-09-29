@@ -14,6 +14,7 @@ import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +44,7 @@ public abstract class DamageDistribution {
         return damage;
     }
 
+    @Nonnull
     protected abstract List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> getPartList();
 
     public float distributeDamage(float damage, EntityPlayer player, DamageSource source, boolean addStat) {

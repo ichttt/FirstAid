@@ -36,7 +36,6 @@ public class StandardDamageDistribution extends DamageDistribution {
             Optional<EnumPlayerPart> playerPart = Arrays.stream(parts).filter(enumPlayerPart -> !enumPlayerPart.getNeighbours().isEmpty()).findAny();
             if (playerPart.isPresent()) {
                 List<EnumPlayerPart> neighbours = playerPart.get().getNeighbours();
-                //TODO can we simplify this?
                 neighbours = neighbours.stream().filter(part -> partList.stream().noneMatch(pair -> Arrays.stream(pair.getRight()).anyMatch(p2 -> p2 == part))).collect(Collectors.toList());
                 for (EnumPlayerPart part : neighbours)
                     rest = new PreferredDamageDistribution(part).distributeDamage(rest, player, source, addStat);

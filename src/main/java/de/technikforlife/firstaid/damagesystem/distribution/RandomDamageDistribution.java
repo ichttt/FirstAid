@@ -14,25 +14,11 @@ import java.util.Map;
 import java.util.Random;
 
 public class RandomDamageDistribution extends DamageDistribution {
-    protected static final Map<EntityEquipmentSlot, List<EnumPlayerPart>> slotToParts = new HashMap<>();
-    protected static final EntityEquipmentSlot[] ARMOR_SLOTS;
     private static final Random RANDOM = new Random();
     private final boolean nearestFirst;
 
-    public RandomDamageDistribution(boolean nearestFirst) { //TODO refactor into own class?
+    public RandomDamageDistribution(boolean nearestFirst) {
         this.nearestFirst = nearestFirst;
-    }
-
-    static {
-        slotToParts.put(EntityEquipmentSlot.HEAD, Collections.singletonList(EnumPlayerPart.HEAD));
-        slotToParts.put(EntityEquipmentSlot.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY));
-        slotToParts.put(EntityEquipmentSlot.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG));
-        slotToParts.put(EntityEquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT));
-        ARMOR_SLOTS = new EntityEquipmentSlot[4];
-        ARMOR_SLOTS[3] = EntityEquipmentSlot.HEAD;
-        ARMOR_SLOTS[2] = EntityEquipmentSlot.CHEST;
-        ARMOR_SLOTS[1] = EntityEquipmentSlot.LEGS;
-        ARMOR_SLOTS[0] = EntityEquipmentSlot.FEET;
     }
 
     @Override

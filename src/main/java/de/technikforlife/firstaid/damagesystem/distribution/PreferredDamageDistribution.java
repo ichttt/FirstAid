@@ -19,7 +19,11 @@ public class PreferredDamageDistribution extends DamageDistribution {
 
     @Nonnull
     @Override
-    protected List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> getPartList() { //TODO refactor this to only return ONE list entry Pair<preferred, allOfPreferred>
-        return Collections.singletonList(RandomDamageDistribution.addAllRandom(slot.getIndex(), true).get(0));
+    protected List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> getPartList() {
+        int posInArray = slot.getIndex();
+        EntityEquipmentSlot slot = ARMOR_SLOTS[posInArray];
+        List<EnumPlayerPart> parts = slotToParts.get(slot);
+        Collections.shuffle(parts);
+        return Collections.singletonList(Pair.of(slot, parts.toArray(new EnumPlayerPart[0])));
     }
 }

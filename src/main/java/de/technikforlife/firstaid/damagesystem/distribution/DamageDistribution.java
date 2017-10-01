@@ -16,10 +16,27 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class DamageDistribution {
+    protected static final EntityEquipmentSlot[] ARMOR_SLOTS;
+    protected static final Map<EntityEquipmentSlot, List<EnumPlayerPart>> slotToParts = new HashMap<>();
+
+    static {
+        ARMOR_SLOTS = new EntityEquipmentSlot[4];
+        ARMOR_SLOTS[3] = EntityEquipmentSlot.HEAD;
+        ARMOR_SLOTS[2] = EntityEquipmentSlot.CHEST;
+        ARMOR_SLOTS[1] = EntityEquipmentSlot.LEGS;
+        ARMOR_SLOTS[0] = EntityEquipmentSlot.FEET;
+        slotToParts.put(EntityEquipmentSlot.HEAD, Collections.singletonList(EnumPlayerPart.HEAD));
+        slotToParts.put(EntityEquipmentSlot.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY));
+        slotToParts.put(EntityEquipmentSlot.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG));
+        slotToParts.put(EntityEquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT));
+    }
 
     protected static float distributeDamageOnParts(float damage, PlayerDamageModel damageModel, EnumPlayerPart[] enumParts, EntityPlayer player, boolean addStat) {
         ArrayList<DamageablePart> damageableParts = new ArrayList<>(enumParts.length);

@@ -45,28 +45,28 @@ public class FirstAidConfig {
 
     public static class DamageSystem {
 
-        @Config.RangeInt(min = 0, max = 16)
+        @Config.RangeInt(min = 0, max = 12)
         public int maxHealthHead = 4;
 
-        @Config.RangeInt(min = 0, max = 16)
+        @Config.RangeInt(min = 0, max = 12)
         public int maxHealthLeftArm = 4;
 
-        @Config.RangeInt(min = 0, max = 16)
+        @Config.RangeInt(min = 0, max = 12)
         public int maxHealthLeftLeg = 4;
 
-        @Config.RangeInt(min = 0, max = 16)
+        @Config.RangeInt(min = 0, max = 12)
         public int maxHealthLeftFoot = 4;
 
-        @Config.RangeInt(min = 0, max = 16)
+        @Config.RangeInt(min = 0, max = 12)
         public int maxHealthBody = 6;
 
-        @Config.RangeInt(min = 0, max = 16)
+        @Config.RangeInt(min = 0, max = 12)
         public int maxHealthRightArm = 4;
 
         @Config.RangeInt(min = 0, max = 16)
         public int maxHealthRightLeg = 4;
 
-        @Config.RangeInt(min = 0, max = 16)
+        @Config.RangeInt(min = 0, max = 12)
         public int maxHealthRightFoot = 4;
     }
 }

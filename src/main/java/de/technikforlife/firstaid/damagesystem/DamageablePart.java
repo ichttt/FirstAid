@@ -25,6 +25,7 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
     private final IDebuff[] debuffs;
 
     public float currentHealth;
+    private float absorption;
 
     public DamageablePart(float maxHealth, boolean canCauseDeath, @Nonnull EnumPlayerPart playerPart, @Nonnull IDebuff... debuffs) {
         this.maxHealth = maxHealth;
@@ -37,16 +38,27 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
     public float heal(float amount, EntityPlayer player, boolean applyDebuff) {
         float notFitting = Math.abs(Math.min(0F, maxHealth - (currentHealth + amount)));
         currentHealth = Math.min(maxHealth, currentHealth + amount);
+        if (notFitting > 0) {
+            float oldHealth = currentHealth;
+            currentHealth = Math.min(currentHealth + notFitting, currentHealth + absorption);
+            notFitting = notFitting - (currentHealth - oldHealth);
+        }
+        final float finalNotFitting = notFitting;
         if (applyDebuff)
-            Arrays.stream(debuffs).forEach(debuff -> debuff.handleHealing(amount - notFitting, currentHealth / maxHealth, player));
+            Arrays.stream(debuffs).forEach(debuff -> debuff.handleHealing(amount - finalNotFitting, currentHealth / maxHealth, player));
         return notFitting;
     }
 
     public float damage(float amount, EntityPlayer player, boolean applyDebuff) {
+        float origAmount = amount;
+        if (absorption > 0) {
+            amount = Math.abs(Math.min(0, absorption - origAmount));
+            absorption = Math.max(0, absorption - origAmount);
+        }
         float notFitting = Math.abs(Math.min(0, currentHealth - amount));
         currentHealth = Math.max(0, currentHealth - amount);
         if (applyDebuff)
-            Arrays.stream(debuffs).forEach(debuff -> debuff.handleDamageTaken(amount - notFitting, currentHealth / maxHealth, player));
+            Arrays.stream(debuffs).forEach(debuff -> debuff.handleDamageTaken(origAmount - notFitting, currentHealth / maxHealth, player));
         return notFitting;
     }
 
@@ -73,6 +85,8 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
     public NBTTagCompound serializeNBT() {
         NBTTagCompound compound = new NBTTagCompound();
         compound.setFloat("health", currentHealth);
+        if (absorption > 0F)
+            compound.setFloat("absorption", absorption);
         if (activeHealer != null) {
             compound.setByte("healingItem", (byte) activeHealer.healingType.id);
             compound.setInteger("itemTicks", activeHealer.ticksPassed);
@@ -88,7 +102,18 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
         currentHealth = Math.min(maxHealth, nbt.getFloat("health"));
         if (nbt.hasKey("healingItem"))
             activeHealer = EnumHealingType.fromID(nbt.getByte("healingItem")).createNewHealer().loadNBT(nbt.getInteger("itemTicks"), nbt.getInteger("itemHeals"));
+        if (nbt.hasKey("absorption"))
+            absorption = nbt.getFloat("absorption");
         //kick constant debuffs active
         Arrays.stream(debuffs).forEach(debuff -> debuff.handleHealing(0F, currentHealth / maxHealth, null));
+    }
+
+    public void setAbsorption(float absorption) {
+        this.absorption = absorption;
+        currentHealth = Math.min(maxHealth + absorption, currentHealth);
+    }
+
+    public float getAbsorption() {
+        return absorption;
     }
 }

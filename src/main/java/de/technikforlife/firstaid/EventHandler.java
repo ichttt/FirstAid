@@ -1,6 +1,7 @@
 package de.technikforlife.firstaid;
 
 import de.technikforlife.firstaid.damagesystem.ArmorUtils;
+import de.technikforlife.firstaid.damagesystem.DataManagerWrapper;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import de.technikforlife.firstaid.damagesystem.capability.CapWrapper;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
@@ -79,10 +80,6 @@ public class EventHandler {
         float origAmount =amountToDamage;
         amountToDamage = ArmorUtils.applyGlobalPotionModifieres(player, source, amountToDamage);
         FirstAid.logger.debug("Dealing {} ({} after global modifiers) damage", origAmount, amountToDamage);
-        //VANILLA COPY - absorbtion
-        float f = amountToDamage;
-        amountToDamage = Math.max(amountToDamage - player.getAbsorptionAmount(), 0.0F);
-        player.setAbsorptionAmount(player.getAbsorptionAmount() - (f - amountToDamage));
 
         //VANILLA COPY - combat tracker and exhaustion
         if (amountToDamage != 0.0F) {
@@ -108,8 +105,12 @@ public class EventHandler {
     @SubscribeEvent
     public static void registerCapability(AttachCapabilitiesEvent<Entity> event) {
         Entity obj = event.getObject();
-        if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer))
-            event.addCapability(CapWrapper.IDENTIFIER, new CapWrapper((EntityPlayer) obj));
+        if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer)) {
+            EntityPlayer player = (EntityPlayer) obj;
+            event.addCapability(CapWrapper.IDENTIFIER, new CapWrapper(player));
+            //replace the data manager with our wrapper to grab absorption
+            player.dataManager = new DataManagerWrapper(player, player.dataManager);
+        }
     }
 
     @SubscribeEvent

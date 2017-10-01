@@ -5,6 +5,7 @@ import de.technikforlife.firstaid.damagesystem.DamageablePart;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -16,8 +17,12 @@ public class GuiUtils {
         GlStateManager.pushMatrix();
         GlStateManager.translate(xTranslation, yTranslation, 0);
         int yTexture = damageablePart.canCauseDeath ? 45 : 0;
-        GuiUtils.renderIcon(damageablePart.maxHealth, damageablePart.maxHealth, yTexture, 16, 16, gui, secondLine);
-        GuiUtils.renderIcon(damageablePart.maxHealth, damageablePart.currentHealth + 0.4999F, yTexture, 52, 61, gui, secondLine);
+        float max = damageablePart.maxHealth + damageablePart.getAbsorption() + 0.4999F;
+        float currentPlusAbsorption = damageablePart.currentHealth + 0.4999F + damageablePart.getAbsorption();
+        renderIcon(max, Math.max(damageablePart.maxHealth, currentPlusAbsorption), yTexture, 16, 16, gui, secondLine);
+        renderIcon(max, currentPlusAbsorption, yTexture, 160, 169, gui, secondLine);
+        GlStateManager.translate(0, 0, 1);
+        renderIcon(max, damageablePart.currentHealth + 0.4999F, yTexture, 52, 61, gui, secondLine);
         GlStateManager.popMatrix();
     }
 

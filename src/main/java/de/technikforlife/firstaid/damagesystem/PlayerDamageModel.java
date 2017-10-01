@@ -158,4 +158,16 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
         }
         return false;
     }
+
+    public Float getAbsorption() {
+        float value = 0;
+        for (DamageablePart part : this)
+                value += part.getAbsorption();
+        return value;
+    }
+
+    public void setAbsorption(float absorption) {
+        float newAbsorption = Math.min(4F, absorption / 8F);
+        forEach(damageablePart -> damageablePart.setAbsorption(newAbsorption));
+    }
 }

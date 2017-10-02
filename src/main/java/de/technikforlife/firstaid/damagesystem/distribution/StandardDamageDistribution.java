@@ -1,6 +1,5 @@
 package de.technikforlife.firstaid.damagesystem.distribution;
 
-import de.technikforlife.firstaid.EventHandler;
 import de.technikforlife.firstaid.damagesystem.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;

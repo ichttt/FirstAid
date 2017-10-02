@@ -1,7 +1,5 @@
 package de.technikforlife.firstaid;
 
-import de.technikforlife.firstaid.damagesystem.ArmorUtils;
-import de.technikforlife.firstaid.damagesystem.DataManagerWrapper;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import de.technikforlife.firstaid.damagesystem.capability.CapWrapper;
 import de.technikforlife.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
@@ -10,6 +8,8 @@ import de.technikforlife.firstaid.damagesystem.distribution.DamageDistribution;
 import de.technikforlife.firstaid.damagesystem.distribution.HealthDistribution;
 import de.technikforlife.firstaid.items.FirstAidItems;
 import de.technikforlife.firstaid.network.MessageReceiveDamageModel;
+import de.technikforlife.firstaid.util.ArmorUtils;
+import de.technikforlife.firstaid.util.DataManagerWrapper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -50,13 +50,17 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.LOW) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
+        float amountToDamage = event.getAmount();
         if (entity.getEntityWorld().isRemote || !entity.hasCapability(CapabilityExtendedHealthSystem.INSTANCE, null))
             return;
+        if (amountToDamage == Float.MAX_VALUE) {
+            event.setCanceled(true);
+            return;
+        }
         EntityPlayer player = (EntityPlayer) entity;
         PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
         DamageSource source = event.getSource();
         String sourceType = source.damageType;
-        float amountToDamage = event.getAmount();
         DamageDistribution damageDistribution;
         switch (sourceType) {
             case "fall":
@@ -95,11 +99,9 @@ public class EventHandler {
             damageDistribution.distributeDamage(left, player, source, addStat);
         }
 
-        if (damageModel.isDead()) {
-            event.setAmount(Float.MAX_VALUE);
-        } else {
-            event.setCanceled(true);
-        }
+        event.setCanceled(true);
+        if (damageModel.isDead() && (!FirstAidConfig.allowOtherHealingItems || !player.checkTotemDeathProtection(source)))
+            player.setHealth(0F);
     }
 
     @SubscribeEvent

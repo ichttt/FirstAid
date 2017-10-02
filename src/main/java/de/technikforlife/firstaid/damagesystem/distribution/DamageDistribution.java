@@ -1,7 +1,7 @@
 package de.technikforlife.firstaid.damagesystem.distribution;
 
 import de.technikforlife.firstaid.FirstAid;
-import de.technikforlife.firstaid.damagesystem.ArmorUtils;
+import de.technikforlife.firstaid.util.ArmorUtils;
 import de.technikforlife.firstaid.damagesystem.DamageablePart;
 import de.technikforlife.firstaid.damagesystem.PlayerDamageModel;
 import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;

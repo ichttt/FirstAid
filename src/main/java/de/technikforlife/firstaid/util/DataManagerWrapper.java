@@ -1,4 +1,4 @@
-package de.technikforlife.firstaid.damagesystem;
+package de.technikforlife.firstaid.util;
 
 import de.technikforlife.firstaid.FirstAid;
 import de.technikforlife.firstaid.damagesystem.capability.PlayerDataManager;
@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * This is a hack to intervene all calls to absorption. It's not optimal but it's the best I could come up with without a coremod
- * + this should be compatible with other mods which do so as I respect the parent in any other case.
+ * This should be compatible with other mods which do so as I respect the parent in any other case.
  */
 public class DataManagerWrapper extends EntityDataManager {
     private final EntityPlayer player;
@@ -30,11 +30,11 @@ public class DataManagerWrapper extends EntityDataManager {
         this.parent = parent;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     @Nonnull
     public <T> T get(@Nonnull DataParameter<T> key) {
         if (key == EntityPlayer.ABSORPTION)
-            //noinspection unchecked
             parent.set(key, (T) PlayerDataManager.getDamageModel(player).getAbsorption());
         return parent.get(key);
     }

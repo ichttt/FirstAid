@@ -1,4 +1,4 @@
-package de.technikforlife.firstaid.damagesystem;
+package de.technikforlife.firstaid.util;
 
 import com.google.common.collect.Iterators;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -32,6 +32,7 @@ public class ArmorUtils {
     }
 
     public static float applyArmor(@Nonnull EntityPlayer entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, double damage, @Nonnull EntityEquipmentSlot slot) {
+        System.out.println(entity.world.isRemote);
         if (source.isUnblockable() || itemStack.isEmpty())
             return (float)damage;
         NonNullList<ItemStack> inventory = entity.inventory.armorInventory;
@@ -81,8 +82,12 @@ public class ArmorUtils {
         if (damage > 0 && (totalArmor > 0 || totalToughness > 0)) {
             double armorDamage = Math.max(1.0F, damage);
 
-            if (item instanceof ItemArmor)
-                itemStack.damageItem((int)armorDamage, entity);
+            if (item instanceof ItemArmor) {
+                if (armorDamage > 100)
+                    System.out.println("Wow there whats going on ?!");
+                System.out.println("Damaging item " + itemStack.getItem().getUnlocalizedName() + " for " + armorDamage);
+                itemStack.damageItem((int) armorDamage, entity);
+            }
             damage = CombatRules.getDamageAfterAbsorb((float)damage, (float)totalArmor, (float)totalToughness);
         }
 

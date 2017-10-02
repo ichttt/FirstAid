@@ -9,7 +9,6 @@ import de.technikforlife.firstaid.damagesystem.enums.EnumHealingType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.settings.KeyConflictContext;

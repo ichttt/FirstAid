@@ -83,7 +83,6 @@ public class EventHandler {
         }
         float origAmount =amountToDamage;
         amountToDamage = ArmorUtils.applyGlobalPotionModifieres(player, source, amountToDamage);
-        FirstAid.logger.debug("Dealing {} ({} after global modifiers) damage", origAmount, amountToDamage);
 
         //VANILLA COPY - combat tracker and exhaustion
         if (amountToDamage != 0.0F) {

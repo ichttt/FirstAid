@@ -47,7 +47,6 @@ public abstract class DamageDistribution {
         for (DamageablePart part : damageableParts) {
             FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part.part, damage), (EntityPlayerMP) player);
             float dmgDone = damage - part.damage(damage, player, damageModel.getMorphineTicks() == 0);
-            FirstAid.logger.debug("Dealt {} damage to part {}", dmgDone, part);
             if (addStat)
                 player.addStat(StatList.DAMAGE_TAKEN, Math.round(dmgDone * 10.0F));
             damage -= dmgDone;
@@ -70,7 +69,6 @@ public abstract class DamageDistribution {
             EntityEquipmentSlot slot = pair.getLeft();
             float origDamage = damage;
             damage = ArmorUtils.applyArmor(player, player.getItemStackFromSlot(slot), source, damage, slot);
-            FirstAid.logger.debug("Applied armor to part {}: {} -> {}", slot, origDamage, damage);
             if (damage <= 0F)
                 return 0F;
             damage = ArmorUtils.applyEnchantmentModifieres(player.getItemStackFromSlot(slot), source, damage);

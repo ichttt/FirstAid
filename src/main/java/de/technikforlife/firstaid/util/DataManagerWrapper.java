@@ -43,9 +43,11 @@ public class DataManagerWrapper extends EntityDataManager {
     public <T> void set(@Nonnull DataParameter<T> key, @Nonnull T value) {
         if (key == EntityPlayer.ABSORPTION) {
             float floatValue = (Float) value;
-            EntityPlayerMP playerMP = (EntityPlayerMP) player;
-            if (playerMP.connection != null) //also fired when connecting, ignore(otherwise the net handler would crash)
-                FirstAid.NETWORKING.sendTo(new MessageApplyAbsorption(floatValue), playerMP);
+            if (player instanceof EntityPlayerMP) { //may be EntityOtherPlayerMP as well
+                EntityPlayerMP playerMP = (EntityPlayerMP) player;
+                if (playerMP.connection != null) //also fired when connecting, ignore(otherwise the net handler would crash)
+                    FirstAid.NETWORKING.sendTo(new MessageApplyAbsorption(floatValue), playerMP);
+            }
             PlayerDataManager.getDamageModel(player).setAbsorption(floatValue);
         }
         parent.set(key, value);

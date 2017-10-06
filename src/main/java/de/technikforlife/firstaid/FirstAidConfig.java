@@ -13,19 +13,32 @@ public class FirstAidConfig {
     @Config.Comment("Settings regarding the health overlay when ingame")
     public static final Overlay overlay = new Overlay();
 
+    @Config.Comment("Settings regarding external healing system(like vanilla potions or natural regeneration")
+    public static final ExternalHealing externalHealing = new ExternalHealing();
+
     @Config.Comment("False if the tutorial message should be shown. Client side only")
     public static boolean hasTutorial = false;
-
-    @Config.RequiresWorldRestart
-    @Config.Comment("Allow vanilla's natural regeneration. Requires \"allowOtherHealingItems\" to be true")
-    public static boolean allowNaturalRegeneration = false;
-
-    @Config.Comment("If false, healing potions and other healing items will have no effect")
-    public static boolean allowOtherHealingItems = true;
 
     @Config.Comment("Set to false to disable dynamic debuffs based on the health. Makes morphine useless")
     public static boolean enableDebuffs = true;
 
+    public static class ExternalHealing {
+
+        @Config.RequiresWorldRestart
+        @Config.Comment("Allow vanilla's natural regeneration. Requires \"allowOtherHealingItems\" to be true")
+        public boolean allowNaturalRegeneration = false;
+
+        @Config.Comment("If false, healing potions and other healing items will have no effect")
+        public boolean allowOtherHealingItems = true;
+
+        @Config.Comment("The value external regen will be multiplied with. Has no effect if allowOtherHealingItems is disabled")
+        @Config.RangeDouble(min = 0D)
+        public double otherRegenMultiplier = 0.75D;
+
+        @Config.Comment("The value vanilla's natural regeneration will be multiplied with. Has no effect if allowNaturalRegeneration is disabled")
+        @Config.RangeDouble(min = 0D)
+        public double naturalRegenMultiplier = 0.5D;
+    }
 
     public static class Overlay {
 

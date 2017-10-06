@@ -99,7 +99,7 @@ public class EventHandler {
         }
 
         event.setCanceled(true);
-        if (damageModel.isDead() && (!FirstAidConfig.allowOtherHealingItems || !player.checkTotemDeathProtection(source)))
+        if (damageModel.isDead() && (!FirstAidConfig.externalHealing.allowOtherHealingItems || !player.checkTotemDeathProtection(source)))
             player.setHealth(0F);
     }
 
@@ -176,12 +176,14 @@ public class EventHandler {
         if (!entity.hasCapability(CapabilityExtendedHealthSystem.INSTANCE, null))
             return;
         event.setCanceled(true);
-        if (!FirstAidConfig.allowOtherHealingItems)
+        if (!FirstAidConfig.externalHealing.allowOtherHealingItems)
             return;
         float amount = event.getAmount();
         //Hacky shit to reduce vanilla regen
-        if (FirstAidConfig.allowNaturalRegeneration && Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch(stackTraceElement -> stackTraceElement.getClassName().equals(FoodStats.class.getName())))
-            amount = amount * 0.75F;
+        if (FirstAidConfig.externalHealing.allowNaturalRegeneration && Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch(stackTraceElement -> stackTraceElement.getClassName().equals(FoodStats.class.getName())))
+            amount = amount * (float) FirstAidConfig.externalHealing.naturalRegenMultiplier;
+        else
+            amount = amount * (float) FirstAidConfig.externalHealing.otherRegenMultiplier;
         HealthDistribution.distributeHealth(amount, (EntityPlayer) entity);
         FirstAid.proxy.healClient(amount);
     }

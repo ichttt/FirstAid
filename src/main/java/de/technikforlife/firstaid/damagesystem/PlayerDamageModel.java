@@ -106,7 +106,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
     public void tick(World world, EntityPlayer player) {
         if (player.isDead || player.getHealth() <= 0F)
             return;
-        if (FirstAidConfig.allowNaturalRegeneration) {
+        if (FirstAidConfig.externalHealing.allowNaturalRegeneration) {
             boolean isFullLife = true;
             for (DamageablePart part : this) {
                 if (part.currentHealth != part.maxHealth) {

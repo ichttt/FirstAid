@@ -73,8 +73,8 @@ public class FirstAid {
     @Mod.EventHandler
     public void onServerStart(FMLServerStartedEvent event) {
         for (World world : DimensionManager.getWorlds())
-            world.getGameRules().setOrCreateGameRule("naturalRegeneration", Boolean.toString(FirstAidConfig.allowNaturalRegeneration));
-        logger.debug("Natural regeneration has been set to {}", FirstAidConfig.allowNaturalRegeneration);
+            world.getGameRules().setOrCreateGameRule("naturalRegeneration", Boolean.toString(FirstAidConfig.externalHealing.allowNaturalRegeneration));
+        logger.debug("Natural regeneration has been set to {}", FirstAidConfig.externalHealing.allowNaturalRegeneration);
     }
 
     @Mod.EventHandler

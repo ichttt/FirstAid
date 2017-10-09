@@ -7,6 +7,4 @@ public interface IProxy {
     void init();
 
     default void showGuiApplyHealth(EnumHealingType healingType, EnumHand activeHand) {}
-
-    default void healClient(float amount) {}
 }

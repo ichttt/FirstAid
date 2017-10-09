@@ -18,9 +18,9 @@ public class CapWrapper implements ICapabilityProvider, INBTSerializable<NBTTagC
 
     private final EntityPlayer player;
 
-    public CapWrapper(EntityPlayer player) {
+    public CapWrapper(EntityPlayer player, PlayerDamageModel damageModel) {
         this.player = player;
-        PlayerDataManager.capList.putIfAbsent(player, new PlayerDamageModel());
+        PlayerDataManager.capList.put(player, damageModel);
     }
 
     @Override

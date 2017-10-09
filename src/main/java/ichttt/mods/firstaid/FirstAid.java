@@ -4,10 +4,11 @@ import ichttt.mods.firstaid.damagesystem.capability.CapabilityExtendedHealthSyst
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.debuff.Debuffs;
 import ichttt.mods.firstaid.items.FirstAidItems;
+import ichttt.mods.firstaid.network.MessageAddHealth;
 import ichttt.mods.firstaid.network.MessageApplyAbsorption;
 import ichttt.mods.firstaid.network.MessageApplyHealth;
+import ichttt.mods.firstaid.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.network.MessageReceiveDamage;
-import ichttt.mods.firstaid.network.MessageReceiveDamageModel;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -26,8 +27,10 @@ import org.apache.logging.log4j.Logger;
 @Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.2.3", acceptedMinecraftVersions = "[1.12,1.13)")
 public class FirstAid {
     public static Logger logger;
-    public static final String MODID ="firstaid";
+    public static final String MODID = "firstaid";
     public static final String NAME ="First Aid";
+    public static FirstAidConfig.DamageSystem activeDamageConfig;
+    public static FirstAidConfig.ExternalHealing activeHealingConfig;
 
     @SuppressWarnings("unused")
     @SidedProxy(clientSide = "ichttt.mods.firstaid.client.ClientProxy", serverSide = "ichttt.mods.firstaid.server.ServerProxy")
@@ -54,8 +57,10 @@ public class FirstAid {
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
         NETWORKING.registerMessage(MessageReceiveDamage.Handler.class, MessageReceiveDamage.class, 1, Side.CLIENT);
         NETWORKING.registerMessage(MessageApplyHealth.Handler.class, MessageApplyHealth.class, 2 , Side.SERVER);
-        NETWORKING.registerMessage(MessageReceiveDamageModel.Handler.class, MessageReceiveDamageModel.class, 3, Side.CLIENT);
+        NETWORKING.registerMessage(MessageReceiveConfiguration.Handler.class, MessageReceiveConfiguration.class, 3, Side.CLIENT);
         NETWORKING.registerMessage(MessageApplyAbsorption.Handler.class, MessageApplyAbsorption.class, 4, Side.CLIENT);
+        NETWORKING.registerMessage(MessageAddHealth.Handler.class, MessageAddHealth.class, 5, Side.CLIENT);
+        MessageReceiveConfiguration.validate();
         logger.debug("Initializing debuffs");
         //noinspection ResultOfMethodCallIgnored
         Debuffs.getArmDebuffs().toString();

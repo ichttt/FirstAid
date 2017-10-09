@@ -1,9 +1,11 @@
 package ichttt.mods.firstaid.damagesystem;
 
 import ichttt.mods.firstaid.EventHandler;
+import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.damagesystem.debuff.AbstractDebuff;
 import ichttt.mods.firstaid.damagesystem.debuff.Debuffs;
+import ichttt.mods.firstaid.damagesystem.debuff.IDebuff;
 import ichttt.mods.firstaid.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
@@ -15,14 +17,22 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iterable<DamageablePart> {
     public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, LEFT_FOOT, BODY, RIGHT_ARM, RIGHT_LEG, RIGHT_FOOT;
     private int morphineTicksLeft = 0;
     private final List<SharedDebuff> sharedDebuffs = new ArrayList<>(2);
 
-    public PlayerDamageModel() {
-        FirstAidConfig.DamageSystem config = FirstAidConfig.damageSystem;
+    public static PlayerDamageModel create() {
+        return new PlayerDamageModel(Objects.requireNonNull(FirstAid.activeDamageConfig));
+    }
+
+    public static PlayerDamageModel createTemp() {
+        return new PlayerDamageModel(FirstAidConfig.damageSystem);
+    }
+
+    protected PlayerDamageModel(FirstAidConfig.DamageSystem config) {
         AbstractDebuff[] headDebuffs = Debuffs.getHeadDebuffs();
         AbstractDebuff[] bodyDebuffs = Debuffs.getBodyDebuffs();
         SharedDebuff armDebuff = Debuffs.getArmDebuffs();
@@ -106,7 +116,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
     public void tick(World world, EntityPlayer player) {
         if (player.isDead || player.getHealth() <= 0F)
             return;
-        if (FirstAidConfig.externalHealing.allowNaturalRegeneration) {
+        if (FirstAid.activeHealingConfig.allowNaturalRegeneration) {
             boolean isFullLife = true;
             for (DamageablePart part : this) {
                 if (part.currentHealth != part.maxHealth) {

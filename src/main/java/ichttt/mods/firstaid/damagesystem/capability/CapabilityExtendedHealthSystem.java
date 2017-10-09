@@ -31,6 +31,6 @@ public class CapabilityExtendedHealthSystem {
                 instance.deserializeNBT((NBTTagCompound) nbt);
             }
         }
-        , PlayerDamageModel::new);
+        , PlayerDamageModel::create);
     }
 }

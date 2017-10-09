@@ -7,9 +7,11 @@ import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.items.FirstAidItems;
-import ichttt.mods.firstaid.network.MessageReceiveDamageModel;
+import ichttt.mods.firstaid.network.MessageAddHealth;
+import ichttt.mods.firstaid.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.util.ArmorUtils;
 import ichttt.mods.firstaid.util.DataManagerWrapper;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -99,7 +101,7 @@ public class EventHandler {
         }
 
         event.setCanceled(true);
-        if (damageModel.isDead() && (!FirstAidConfig.externalHealing.allowOtherHealingItems || !player.checkTotemDeathProtection(source)))
+        if (damageModel.isDead() && (!FirstAid.activeHealingConfig.allowOtherHealingItems || !player.checkTotemDeathProtection(source)))
             player.setHealth(0F);
     }
 
@@ -108,7 +110,15 @@ public class EventHandler {
         Entity obj = event.getObject();
         if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer)) {
             EntityPlayer player = (EntityPlayer) obj;
-            event.addCapability(CapWrapper.IDENTIFIER, new CapWrapper(player));
+            PlayerDamageModel damageModel;
+            if (player.world.isRemote)
+                damageModel = PlayerDamageModel.createTemp();
+            else {
+                FirstAid.activeDamageConfig = FirstAidConfig.damageSystem;
+                FirstAid.activeHealingConfig = FirstAidConfig.externalHealing;
+                damageModel = PlayerDamageModel.create();
+            }
+            event.addCapability(CapWrapper.IDENTIFIER, new CapWrapper(player, damageModel));
             //replace the data manager with our wrapper to grab absorption
             player.dataManager = new DataManagerWrapper(player, player.dataManager);
         }
@@ -176,23 +186,23 @@ public class EventHandler {
         if (!entity.hasCapability(CapabilityExtendedHealthSystem.INSTANCE, null))
             return;
         event.setCanceled(true);
-        if (!FirstAidConfig.externalHealing.allowOtherHealingItems)
+        if (!FirstAid.activeHealingConfig.allowOtherHealingItems)
             return;
         float amount = event.getAmount();
         //Hacky shit to reduce vanilla regen
-        if (FirstAidConfig.externalHealing.allowNaturalRegeneration && Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch(stackTraceElement -> stackTraceElement.getClassName().equals(FoodStats.class.getName())))
-            amount = amount * (float) FirstAidConfig.externalHealing.naturalRegenMultiplier;
+        if (FirstAid.activeHealingConfig.allowNaturalRegeneration && Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch(stackTraceElement -> stackTraceElement.getClassName().equals(FoodStats.class.getName())))
+            amount = amount * (float) FirstAid.activeHealingConfig.naturalRegenMultiplier;
         else
-            amount = amount * (float) FirstAidConfig.externalHealing.otherRegenMultiplier;
+            amount = amount * (float) FirstAid.activeHealingConfig.otherRegenMultiplier;
         HealthDistribution.distributeHealth(amount, (EntityPlayer) entity);
-        FirstAid.proxy.healClient(amount);
+        FirstAid.NETWORKING.sendTo(new MessageAddHealth(amount), (EntityPlayerMP) entity);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!event.player.world.isRemote) {
             FirstAid.logger.debug("Sending damage model to " + event.player.getDisplayNameString());
-            FirstAid.NETWORKING.sendTo(new MessageReceiveDamageModel(PlayerDataManager.getDamageModel(event.player)), (EntityPlayerMP) event.player);
+            FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(PlayerDataManager.getDamageModel(event.player), FirstAidConfig.externalHealing, FirstAidConfig.damageSystem), (EntityPlayerMP) event.player);
         }
     }
 }

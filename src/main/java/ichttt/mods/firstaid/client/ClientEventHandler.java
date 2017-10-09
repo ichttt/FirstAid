@@ -39,7 +39,7 @@ public class ClientEventHandler {
     public static void onLivingHurt(LivingHurtEvent event) {
         EntityLivingBase entityLiving = event.getEntityLiving();
         if (entityLiving instanceof EntityPlayer) {
-            if (entityLiving.getName().equals(Minecraft.getMinecraft().player.getName()) && GuiApplyHealthItem.isOpen)
+            if (entityLiving.equals(Minecraft.getMinecraft().player) && GuiApplyHealthItem.isOpen)
                 Minecraft.getMinecraft().displayGuiScreen(null);
         }
     }

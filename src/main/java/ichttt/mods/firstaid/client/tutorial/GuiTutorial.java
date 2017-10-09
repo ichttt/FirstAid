@@ -21,7 +21,7 @@ public class GuiTutorial extends GuiScreen {
     private final TutorialAction action;
 
     public GuiTutorial() {
-        this.demoModel = new PlayerDamageModel();
+        this.demoModel = PlayerDamageModel.create();
         this.parent = new GuiApplyHealthItem(demoModel);
         this.action = new TutorialAction(this);
 

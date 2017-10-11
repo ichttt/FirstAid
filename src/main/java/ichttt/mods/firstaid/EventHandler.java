@@ -11,7 +11,7 @@ import ichttt.mods.firstaid.network.MessageAddHealth;
 import ichttt.mods.firstaid.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.util.ArmorUtils;
 import ichttt.mods.firstaid.util.DataManagerWrapper;
-import net.minecraft.client.entity.EntityPlayerSP;
+import ichttt.mods.firstaid.util.DimensionHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -20,6 +20,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.loot.LootEntryItem;
 import net.minecraft.world.storage.loot.LootPool;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -34,6 +36,7 @@ import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -204,5 +207,12 @@ public class EventHandler {
             FirstAid.logger.debug("Sending damage model to " + event.player.getDisplayNameString());
             FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(PlayerDataManager.getDamageModel(event.player), FirstAidConfig.externalHealing, FirstAidConfig.damageSystem), (EntityPlayerMP) event.player);
         }
+    }
+
+    @SubscribeEvent
+    public static void onWorldLoad(WorldEvent.Load event) {
+        World world = event.getWorld();
+        if (!world.isRemote)
+            DimensionHandler.checkHandled((WorldServer) world);
     }
 }

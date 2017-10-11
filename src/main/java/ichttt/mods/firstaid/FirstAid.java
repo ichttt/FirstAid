@@ -9,8 +9,7 @@ import ichttt.mods.firstaid.network.MessageApplyAbsorption;
 import ichttt.mods.firstaid.network.MessageApplyHealth;
 import ichttt.mods.firstaid.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.network.MessageReceiveDamage;
-import net.minecraft.world.World;
-import net.minecraftforge.common.DimensionManager;
+import ichttt.mods.firstaid.util.DimensionHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
@@ -19,6 +18,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -77,14 +77,18 @@ public class FirstAid {
 
     @Mod.EventHandler
     public void onServerStart(FMLServerStartedEvent event) {
-        for (World world : DimensionManager.getWorlds())
-            world.getGameRules().setOrCreateGameRule("naturalRegeneration", Boolean.toString(FirstAidConfig.externalHealing.allowNaturalRegeneration));
-        logger.debug("Natural regeneration has been set to {}", FirstAidConfig.externalHealing.allowNaturalRegeneration);
+        DimensionHandler.onLoad();
     }
 
     @Mod.EventHandler
-    public void onStop(FMLServerStoppedEvent event) {
+    public void onServerStopping(FMLServerStoppingEvent event) {
+        DimensionHandler.revert();
+    }
+
+    @Mod.EventHandler
+    public void onServerStop(FMLServerStoppedEvent event) {
         logger.debug("Cleaning up");
         PlayerDataManager.capList.clear();
+        DimensionHandler.clear();
     }
 }

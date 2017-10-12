@@ -4,6 +4,7 @@ import ichttt.mods.firstaid.FirstAidConfig;
 import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.floats.Float2IntMap;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.potion.PotionEffect;
 
 public class ConstantDebuff extends AbstractDebuff {
@@ -37,12 +38,12 @@ public class ConstantDebuff extends AbstractDebuff {
     }
 
     @Override
-    public void handleDamageTaken(float damage, float healthPerMax, EntityPlayer player) {
+    public void handleDamageTaken(float damage, float healthPerMax, EntityPlayerMP player) {
         syncMultiplier(healthPerMax);
     }
 
     @Override
-    public void handleHealing(float healingDone, float healthPerMax, EntityPlayer player) {
+    public void handleHealing(float healingDone, float healthPerMax, EntityPlayerMP player) {
         syncMultiplier(healthPerMax);
     }
 

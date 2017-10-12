@@ -42,6 +42,9 @@ public class FirstAidConfig {
 
     public static class Overlay {
 
+        @Config.Comment("True if the main health bar should be rendered (Will be average health)")
+        public boolean showVanillaHealthBar = false;
+
         @Config.Comment("True if the overlay should be shown, false otherwise")
         public boolean showOverlay = true;
 

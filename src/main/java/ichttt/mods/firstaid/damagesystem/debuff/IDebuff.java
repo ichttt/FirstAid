@@ -1,10 +1,10 @@
 package ichttt.mods.firstaid.damagesystem.debuff;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 
 public interface IDebuff {
 
-    void handleDamageTaken(float damage, float healthPerMax, EntityPlayer player);
+    void handleDamageTaken(float damage, float healthPerMax, EntityPlayerMP player);
 
-    void handleHealing(float healingDone, float healthPerMax, EntityPlayer player);
+    void handleHealing(float healingDone, float healthPerMax, EntityPlayerMP player);
 }

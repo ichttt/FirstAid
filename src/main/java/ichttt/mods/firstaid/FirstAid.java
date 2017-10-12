@@ -7,18 +7,21 @@ import ichttt.mods.firstaid.items.FirstAidItems;
 import ichttt.mods.firstaid.network.MessageAddHealth;
 import ichttt.mods.firstaid.network.MessageApplyAbsorption;
 import ichttt.mods.firstaid.network.MessageApplyHealth;
+import ichttt.mods.firstaid.network.MessagePlayHurtSound;
 import ichttt.mods.firstaid.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.network.MessageReceiveDamage;
-import ichttt.mods.firstaid.util.DimensionHandler;
+import ichttt.mods.firstaid.util.DebugDamageCommand;
+import net.minecraft.command.CommandHandler;
+import net.minecraft.command.ICommandManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
-import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -31,6 +34,7 @@ public class FirstAid {
     public static final String NAME ="First Aid";
     public static FirstAidConfig.DamageSystem activeDamageConfig;
     public static FirstAidConfig.ExternalHealing activeHealingConfig;
+    public static int playerMaxHealth;
 
     @SuppressWarnings("unused")
     @SidedProxy(clientSide = "ichttt.mods.firstaid.client.ClientProxy", serverSide = "ichttt.mods.firstaid.server.ServerProxy")
@@ -60,6 +64,7 @@ public class FirstAid {
         NETWORKING.registerMessage(MessageReceiveConfiguration.Handler.class, MessageReceiveConfiguration.class, 3, Side.CLIENT);
         NETWORKING.registerMessage(MessageApplyAbsorption.Handler.class, MessageApplyAbsorption.class, 4, Side.CLIENT);
         NETWORKING.registerMessage(MessageAddHealth.Handler.class, MessageAddHealth.class, 5, Side.CLIENT);
+        NETWORKING.registerMessage(MessagePlayHurtSound.Handler.class, MessagePlayHurtSound.class, 6, Side.CLIENT);
         MessageReceiveConfiguration.validate();
         logger.debug("Initializing debuffs");
         //noinspection ResultOfMethodCallIgnored
@@ -76,19 +81,24 @@ public class FirstAid {
     }
 
     @Mod.EventHandler
-    public void onServerStart(FMLServerStartedEvent event) {
-        DimensionHandler.onLoad();
+    public void beforeServerStart(FMLServerAboutToStartEvent event) {
+        ICommandManager manager = event.getServer().getCommandManager();
+        if (manager instanceof CommandHandler) {
+            ((CommandHandler) manager).registerCommand(new DebugDamageCommand());
+        }
     }
 
     @Mod.EventHandler
-    public void onServerStopping(FMLServerStoppingEvent event) {
-        DimensionHandler.revert();
+    public void onServerStart(FMLServerStartedEvent event) {
+        playerMaxHealth = FirstAidConfig.damageSystem.maxHealthHead + FirstAidConfig.damageSystem.maxHealthLeftArm
+                + FirstAidConfig.damageSystem.maxHealthLeftLeg + FirstAidConfig.damageSystem.maxHealthLeftFoot
+                + FirstAidConfig.damageSystem.maxHealthBody + FirstAidConfig.damageSystem.maxHealthRightArm
+                + FirstAidConfig.damageSystem.maxHealthRightLeg + FirstAidConfig.damageSystem.maxHealthRightFoot;
     }
 
     @Mod.EventHandler
     public void onServerStop(FMLServerStoppedEvent event) {
         logger.debug("Cleaning up");
         PlayerDataManager.capList.clear();
-        DimensionHandler.clear();
     }
 }

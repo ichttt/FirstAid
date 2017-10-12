@@ -26,3 +26,5 @@ tutorial.line8=If you want to see your current health and active healers, just p
 tutorial.end=That is the end of the tutorial.
 
 keybinds.show_wounds=Show wounds
+
+subtitles.debuff.heartbeat=Heart beats

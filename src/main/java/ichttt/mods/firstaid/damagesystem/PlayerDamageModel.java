@@ -5,7 +5,6 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.damagesystem.debuff.AbstractDebuff;
 import ichttt.mods.firstaid.damagesystem.debuff.Debuffs;
-import ichttt.mods.firstaid.damagesystem.debuff.IDebuff;
 import ichttt.mods.firstaid.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
@@ -116,16 +115,10 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
     public void tick(World world, EntityPlayer player) {
         if (player.isDead || player.getHealth() <= 0F)
             return;
-        if (FirstAid.activeHealingConfig.allowNaturalRegeneration) {
-            boolean isFullLife = true;
-            for (DamageablePart part : this) {
-                if (part.currentHealth != part.maxHealth) {
-                    isFullLife = false;
-                    break;
-                }
-            }
-            player.setHealth(isFullLife ? player.getMaxHealth() : 2F);
-        }
+        float currentHealth = getCurrentHealth();
+        if (currentHealth == 0)
+            currentHealth = Float.MIN_VALUE;
+        player.setHealth(player.getMaxHealth() * (currentHealth / FirstAid.playerMaxHealth));
 
         forEach(part -> part.tick(world, player, morphineTicksLeft == 0));
         if (morphineTicksLeft <= 0)
@@ -159,6 +152,13 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
                 return part;
             }
         };
+    }
+
+    public float getCurrentHealth() {
+        float currentHealth = 0;
+        for (DamageablePart part : this)
+            currentHealth += part.currentHealth;
+        return currentHealth;
     }
 
     public boolean isDead() {

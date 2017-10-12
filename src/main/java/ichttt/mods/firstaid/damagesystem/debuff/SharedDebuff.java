@@ -6,6 +6,7 @@ import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 
 public class SharedDebuff implements IDebuff {
     private final AbstractDebuff debuff;
@@ -21,7 +22,7 @@ public class SharedDebuff implements IDebuff {
     }
 
     @Override
-    public void handleDamageTaken(float damage, float healthPerMax, EntityPlayer player) {
+    public void handleDamageTaken(float damage, float healthPerMax, EntityPlayerMP player) {
         if (!FirstAidConfig.enableDebuffs)
             return;
         this.damage += damage;
@@ -29,7 +30,7 @@ public class SharedDebuff implements IDebuff {
     }
 
     @Override
-    public void handleHealing(float healingDone, float healthPerMax, EntityPlayer player) {
+    public void handleHealing(float healingDone, float healthPerMax, EntityPlayerMP player) {
         if (!FirstAidConfig.enableDebuffs)
             return;
         this.healingDone += healingDone;
@@ -39,7 +40,7 @@ public class SharedDebuff implements IDebuff {
     public void tick(EntityPlayer player) {
         if (!FirstAidConfig.enableDebuffs)
             return;
-        if (player.world.isRemote)
+        if (player.world.isRemote || !(player instanceof EntityPlayerMP))
             return;
         int count = healingCount + damageCount;
         if (count > 0) {
@@ -52,11 +53,11 @@ public class SharedDebuff implements IDebuff {
             healthPerMax /= parts.length;
             if (healingCount > 0) {
                 this.healingDone /= healingCount;
-                debuff.handleHealing(this.healingDone, healthPerMax, player);
+                debuff.handleHealing(this.healingDone, healthPerMax, (EntityPlayerMP) player);
             }
             if (damageCount > 0) {
                 this.damage /= damageCount;
-                debuff.handleDamageTaken(this.damage, healthPerMax, player);
+                debuff.handleDamageTaken(this.damage, healthPerMax, (EntityPlayerMP) player);
             }
             this.healingDone = 0;
             this.damage = 0;

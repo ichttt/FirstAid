@@ -2,7 +2,6 @@ package ichttt.mods.firstaid.network;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import io.netty.buffer.ByteBuf;
@@ -14,8 +13,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.lang.reflect.Field;
 
 public class MessageReceiveConfiguration implements IMessage {
 
@@ -40,8 +37,6 @@ public class MessageReceiveConfiguration implements IMessage {
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        playerDamageModel = ByteBufUtils.readTag(buf);
-
         healingCfg = new FirstAidConfig.ExternalHealing();
         healingCfg.allowNaturalRegeneration = buf.readBoolean();
         healingCfg.allowOtherHealingItems = buf.readBoolean();
@@ -57,12 +52,12 @@ public class MessageReceiveConfiguration implements IMessage {
         damageCfg.maxHealthRightArm = buf.readByte();
         damageCfg.maxHealthRightLeg = buf.readByte();
         damageCfg.maxHealthRightFoot = buf.readByte();
+
+        playerDamageModel = ByteBufUtils.readTag(buf);
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-        ByteBufUtils.writeTag(buf, playerDamageModel);
-
         buf.writeBoolean(healingCfg.allowNaturalRegeneration);
         buf.writeBoolean(healingCfg.allowOtherHealingItems);
         buf.writeDouble(healingCfg.otherRegenMultiplier);
@@ -76,6 +71,8 @@ public class MessageReceiveConfiguration implements IMessage {
         buf.writeByte(damageCfg.maxHealthRightArm);
         buf.writeByte(damageCfg.maxHealthRightLeg);
         buf.writeByte(damageCfg.maxHealthRightFoot);
+
+        ByteBufUtils.writeTag(buf, playerDamageModel);
     }
 
     public static class Handler implements IMessageHandler<MessageReceiveConfiguration, IMessage> {

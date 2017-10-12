@@ -67,7 +67,6 @@ public abstract class DamageDistribution {
         PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
         for (Pair<EntityEquipmentSlot, EnumPlayerPart[]> pair : getPartList()) {
             EntityEquipmentSlot slot = pair.getLeft();
-            float origDamage = damage;
             damage = ArmorUtils.applyArmor(player, player.getItemStackFromSlot(slot), source, damage, slot);
             if (damage <= 0F)
                 return 0F;

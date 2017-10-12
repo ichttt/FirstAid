@@ -1,14 +1,12 @@
 package ichttt.mods.firstaid.client;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.IProxy;
 import ichttt.mods.firstaid.client.gui.GuiApplyHealthItem;
-import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
-import ichttt.mods.firstaid.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.damagesystem.enums.EnumHealingType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.client.GuiIngameForge;
@@ -18,8 +16,6 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
-
-import java.util.Objects;
 
 @SuppressWarnings("unused")
 @SideOnly(Side.CLIENT)
@@ -31,7 +27,7 @@ public class ClientProxy implements IProxy {
         FirstAid.logger.debug("Loading ClientProxy");
         MinecraftForge.EVENT_BUS.register(ClientEventHandler.class);
         ClientRegistry.registerKeyBinding(showWounds);
-        GuiIngameForge.renderHealth = false;
+        GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
     }
 
     @Override

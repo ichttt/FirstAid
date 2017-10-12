@@ -65,12 +65,19 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
+    public static void preRender(RenderGameOverlayEvent.Post event) {
+        RenderGameOverlayEvent.ElementType type = event.getType();
+        if (type == RenderGameOverlayEvent.ElementType.HEALTH && !FirstAidConfig.overlay.showVanillaHealthBar) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
     public static void renderOverlay(RenderGameOverlayEvent.Post event) {
         RenderGameOverlayEvent.ElementType type = event.getType();
-        if (type == RenderGameOverlayEvent.ElementType.HEALTH) {
-            GuiIngameForge.renderHealth = false;
-            event.setCanceled(true);
-        } else if (type == RenderGameOverlayEvent.ElementType.ALL)
+        if (type == RenderGameOverlayEvent.ElementType.ALL) {
+            GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
             HUDHandler.renderOverlay(event.getResolution());
+        }
     }
 }

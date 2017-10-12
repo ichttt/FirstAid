@@ -1,15 +1,16 @@
 package ichttt.mods.firstaid.damagesystem.debuff;
 
 import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.sound.EnumHurtSound;
 
 public class Debuffs {
 
     public static AbstractDebuff[] getHeadDebuffs() {
         AbstractDebuff[] debuffs = new AbstractDebuff[2];
-        debuffs[0] = new OnHitDebuff("blindness")
+        debuffs[0] = new OnHitDebuff("blindness", EnumHurtSound.HEARTBEAT)
                 .addCondition(2F, 8 * 20)
                 .addCondition(1F, 4 * 20);
-        debuffs[1] = new OnHitDebuff("nausea")
+        debuffs[1] = new OnHitDebuff("nausea", EnumHurtSound.NONE)
                 .addCondition(3F, 16 * 20)
                 .addCondition(2F, 12 * 20);
         return debuffs;
@@ -17,7 +18,7 @@ public class Debuffs {
 
     public static AbstractDebuff[] getBodyDebuffs() {
         AbstractDebuff[] debuffs = new AbstractDebuff[2];
-        debuffs[0] = new OnHitDebuff("nausea")
+        debuffs[0] = new OnHitDebuff("nausea", EnumHurtSound.NONE)
                 .addCondition(4F, 16 * 20)
                 .addCondition(2F, 8 * 20);
         debuffs[1] = new ConstantDebuff("weakness")

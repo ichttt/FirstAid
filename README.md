@@ -7,3 +7,8 @@ It also introduces debuffs to make your life harder. These can be constant (as l
 # Download
 The mod can be downloaded at CurseForge:
 https://minecraft.curseforge.com/projects/first-aid
+
+# Third Party
+
+This project currently uses the heartbeat sound from <href>http://soundbible.com/2162-Human-Heartbeat.html</href>.
+It is licensed under the Attribution 3.0 license. Special thanks!

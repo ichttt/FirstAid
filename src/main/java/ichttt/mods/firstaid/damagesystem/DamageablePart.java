@@ -5,6 +5,7 @@ import ichttt.mods.firstaid.damagesystem.debuff.IDebuff;
 import ichttt.mods.firstaid.damagesystem.enums.EnumHealingType;
 import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -45,7 +46,7 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
         }
         final float finalNotFitting = notFitting;
         if (applyDebuff)
-            Arrays.stream(debuffs).forEach(debuff -> debuff.handleHealing(amount - finalNotFitting, currentHealth / maxHealth, player));
+            Arrays.stream(debuffs).forEach(debuff -> debuff.handleHealing(amount - finalNotFitting, currentHealth / maxHealth, (EntityPlayerMP) player));
         return notFitting;
     }
 
@@ -58,7 +59,7 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
         float notFitting = Math.abs(Math.min(0, currentHealth - amount));
         currentHealth = Math.max(0, currentHealth - amount);
         if (applyDebuff)
-            Arrays.stream(debuffs).forEach(debuff -> debuff.handleDamageTaken(origAmount - notFitting, currentHealth / maxHealth, player));
+            Arrays.stream(debuffs).forEach(debuff -> debuff.handleDamageTaken(origAmount - notFitting, currentHealth / maxHealth, (EntityPlayerMP) player));
         return notFitting;
     }
 

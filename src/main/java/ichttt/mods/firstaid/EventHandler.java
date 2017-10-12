@@ -11,7 +11,6 @@ import ichttt.mods.firstaid.network.MessageAddHealth;
 import ichttt.mods.firstaid.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.util.ArmorUtils;
 import ichttt.mods.firstaid.util.DataManagerWrapper;
-import ichttt.mods.firstaid.util.DimensionHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -20,8 +19,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.loot.LootEntryItem;
 import net.minecraft.world.storage.loot.LootPool;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -33,6 +32,7 @@ import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -51,6 +51,7 @@ import static ichttt.mods.firstaid.damagesystem.distribution.DamageDistributions
 
 public class EventHandler {
     public static final Random rand = new Random();
+    public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
 
     @SubscribeEvent(priority = EventPriority.LOW) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
@@ -86,7 +87,6 @@ public class EventHandler {
             default:
                 damageDistribution = SEMI_RANDOM_DIST;
         }
-        float origAmount =amountToDamage;
         amountToDamage = ArmorUtils.applyGlobalPotionModifieres(player, source, amountToDamage);
 
         //VANILLA COPY - combat tracker and exhaustion
@@ -125,6 +125,11 @@ public class EventHandler {
             //replace the data manager with our wrapper to grab absorption
             player.dataManager = new DataManagerWrapper(player, player.dataManager);
         }
+    }
+
+    @SubscribeEvent
+    public static void registerSound(RegistryEvent.Register<SoundEvent> event) {
+        event.getRegistry().register(HEARTBEAT);
     }
 
     @SubscribeEvent
@@ -213,6 +218,6 @@ public class EventHandler {
     public static void onWorldLoad(WorldEvent.Load event) {
         World world = event.getWorld();
         if (!world.isRemote)
-            DimensionHandler.checkHandled((WorldServer) world);
+            world.getGameRules().setOrCreateGameRule("naturalRegeneration", Boolean.toString(FirstAidConfig.externalHealing.allowNaturalRegeneration));
     }
 }

@@ -1,5 +1,6 @@
 package ichttt.mods.firstaid.client.gui;
 
+import com.google.common.collect.ImmutableMap;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.damagesystem.DamageablePart;
 import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
@@ -10,22 +11,21 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
 public class GuiUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
     private static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
-    private static final Map<EnumPlayerPart, FlashStateManager> flashStates = new HashMap<>();
+    private static final ImmutableMap<EnumPlayerPart, FlashStateManager> flashStates;
 
     static {
+        ImmutableMap.Builder<EnumPlayerPart, FlashStateManager> builder = ImmutableMap.builder();
         for (EnumPlayerPart part : EnumPlayerPart.values()) {
-            flashStates.put(part, new FlashStateManager());
+            builder.put(part, new FlashStateManager());
         }
+        flashStates = builder.build();
     }
 
     public static void drawHealth(DamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean secondLine) {

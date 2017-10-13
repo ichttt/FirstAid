@@ -1,7 +1,7 @@
 package ichttt.mods.firstaid;
 
 import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
-import ichttt.mods.firstaid.damagesystem.capability.CapWrapper;
+import ichttt.mods.firstaid.damagesystem.capability.CapProvider;
 import ichttt.mods.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.distribution.DamageDistribution;
@@ -121,7 +121,7 @@ public class EventHandler {
                 FirstAid.activeHealingConfig = FirstAidConfig.externalHealing;
                 damageModel = PlayerDamageModel.create();
             }
-            event.addCapability(CapWrapper.IDENTIFIER, new CapWrapper(player, damageModel));
+            event.addCapability(CapProvider.IDENTIFIER, new CapProvider(player, damageModel));
             //replace the data manager with our wrapper to grab absorption
             player.dataManager = new DataManagerWrapper(player, player.dataManager);
         }

@@ -14,6 +14,7 @@ import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.StringUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -102,10 +103,10 @@ public class GuiApplyHealthItem extends GuiScreen {
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
         GuiInventory.drawEntityOnScreen(this.width / 2, this.height / 2 + 30, 45, 0, 0, mc.player);
         super.drawScreen(mouseX, mouseY, partialTicks);
-        int morphineSecs = Math.round(damageModel.getMorphineTicks() / 20F);
-        if (morphineSecs > 0)
-            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", morphineSecs), this.guiLeft + (xSize / 2), this.guiTop + ySize - 29, 0xFFFFFF);
-        drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineSecs == 0 ? 21 : 11), 0xFFFFFF);
+        int morphineTicks = damageModel.getMorphineTicks();
+        if (morphineTicks > 0)
+            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", StringUtils.ticksToElapsedTime(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - 29, 0xFFFFFF);
+        drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
 
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
         drawHealth(damageModel.HEAD, false, 14);
@@ -140,7 +141,7 @@ public class GuiApplyHealthItem extends GuiScreen {
     }
 
     public void drawHealth(DamageablePart damageablePart, boolean right, int yOffset) {
-        GuiUtils.drawHealth(damageablePart, guiLeft + (right ? 194 - (Math.min(4F, Math.round(damageablePart.maxHealth) / 2F) * 9F) : 53), guiTop + yOffset, this, true);
+        GuiUtils.drawHealth(damageablePart, guiLeft + (right ? 193 - Math.min(38, GuiUtils.getMaxHearts(damageablePart.maxHealth) * 9 + GuiUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 53), guiTop + yOffset, this, true);
     }
 
     @Override

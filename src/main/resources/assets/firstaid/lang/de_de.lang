@@ -12,7 +12,7 @@ gui.right_arm=Rechter Arm
 gui.right_leg=Rechtes Bein
 gui.right_foot=Rechter Fuß
 gui.apply_hint=Wähle die Stelle, wo das Item angebracht werden soll
-gui.morphine_left=Morphium aktiv(%s Sekunden verbleibend)
+gui.morphine_left=Morphium aktiv(%s verbleibend)
 
 tutorial.welcome=Willkommen zum FirstAid Mod! Dieses Tutorial wird dich durch den Mod und seine Mechaniken führen.
 tutorial.line1=Wie du vielleicht schon gemerkt hast, ist die normale Lebensleiste weg. Sie wurde duch dieses System ersetzt.

@@ -29,7 +29,7 @@ public class ItemMorphine extends Item {
     @Override
     @Nonnull
     public ItemStack onItemUseFinish(@Nonnull ItemStack stack, World world, EntityLivingBase entityLiving) {
-        if (!world.isRemote && entityLiving instanceof EntityPlayer) {
+        if (entityLiving instanceof EntityPlayer) {
             PlayerDamageModel damageModel = PlayerDataManager.getDamageModel((EntityPlayer) entityLiving);
             Objects.requireNonNull(damageModel).applyMorphine();
         }

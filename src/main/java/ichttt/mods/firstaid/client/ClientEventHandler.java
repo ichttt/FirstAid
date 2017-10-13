@@ -8,6 +8,7 @@ import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -75,7 +76,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void renderOverlay(RenderGameOverlayEvent.Post event) {
         RenderGameOverlayEvent.ElementType type = event.getType();
-        if (type == RenderGameOverlayEvent.ElementType.ALL) {
+        if (type == RenderGameOverlayEvent.ElementType.ALL || type == RenderGameOverlayEvent.ElementType.TEXT) {
             GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
             HUDHandler.renderOverlay(event.getResolution());
         }

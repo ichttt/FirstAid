@@ -12,7 +12,7 @@ gui.right_arm=Right Arm
 gui.right_leg=Right Leg
 gui.right_foot=Right Foot
 gui.apply_hint=Pick where to apply the item
-gui.morphine_left=Morphine active(%s seconds left)
+gui.morphine_left=Morphine active(%s left)
 
 tutorial.welcome=Welcome to the FirstAid mod! This tutorial will guide you through this mod and explain the different mechanics.
 tutorial.line1=As you may already have noticed, the vanilla health bar is gone. It has been replaced by this system.

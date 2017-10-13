@@ -129,6 +129,6 @@ public class DebuffTimedSound implements ITickableSound {
     @Override
     public void update() {
         ticks++;
-        volume = Math.max(0.1F, volume - minusPerTick);
+        volume = Math.max(0.15F, volume - minusPerTick);
     }
 }

@@ -33,14 +33,14 @@ public class MessageApplyHealth implements IMessage {
     @Override
     public void fromBytes(ByteBuf buf) {
         part = EnumPlayerPart.fromID(buf.readByte());
-        healingType = EnumHealingType.fromID(buf.readByte());
+        healingType = EnumHealingType.VALUES[buf.readByte()];
         hand = buf.readBoolean() ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeByte(part.id);
-        buf.writeByte(healingType.id);
+        buf.writeByte(healingType.ordinal());
         buf.writeBoolean(hand == EnumHand.MAIN_HAND);
     }
 

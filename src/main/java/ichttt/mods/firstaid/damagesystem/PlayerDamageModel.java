@@ -180,4 +180,11 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
         float newAbsorption = Math.min(4F, absorption / 8F);
         forEach(damageablePart -> damageablePart.setAbsorption(newAbsorption));
     }
+
+    public int getMaxRenderSize() {
+        int max = 0;
+        for (DamageablePart part : this)
+            max = Math.max(max, (int) (part.maxHealth + part.getAbsorption() + 0.9999F));
+        return (int) (((max + 1) / 2F) * 9);
+    }
 }

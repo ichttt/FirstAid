@@ -19,12 +19,13 @@ import javax.annotation.Nullable;
 
 @SideOnly(Side.CLIENT)
 public class DebuffTimedSound implements ITickableSound {
+    private static final float volumeMultiplier = 1.25F;
     private final float minusPerTick;
     private final int debuffDuration;
     private final ResourceLocation soundLocation;
     private final EntityPlayerSP player;
     private Sound sound;
-    private float volume = 1.5F;
+    private float volume = volumeMultiplier;
     private int ticks;
     private static DebuffTimedSound HURT_SOUND;
 
@@ -39,8 +40,8 @@ public class DebuffTimedSound implements ITickableSound {
     public DebuffTimedSound(SoundEvent event, int debuffDuration) {
         this.soundLocation = event.getSoundName();
         this.player = Minecraft.getMinecraft().player;
-        this.debuffDuration = Integer.min(15, debuffDuration) * 20;
-        this.minusPerTick = (1F / this.debuffDuration) * 1.5F;
+        this.debuffDuration = Integer.min(15 * 20, debuffDuration);
+        this.minusPerTick = (1F / this.debuffDuration) * volumeMultiplier;
     }
 
     @Override
@@ -128,7 +129,6 @@ public class DebuffTimedSound implements ITickableSound {
     @Override
     public void update() {
         ticks++;
-        System.out.println(volume);
         volume = Math.max(0.1F, volume - minusPerTick);
     }
 }

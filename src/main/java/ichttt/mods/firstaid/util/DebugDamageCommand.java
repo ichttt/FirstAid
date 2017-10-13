@@ -12,6 +12,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,7 +32,7 @@ public class DebugDamageCommand extends CommandBase {
             List<String> values = new ArrayList<>(parts.length);
             for (EnumPlayerPart part : parts)
                 values.add(part.toString());
-            return values;
+            return getListOfStringsMatchingLastWord(args, values);
         } else if (args.length == 3) {
             List<String> values = new ArrayList<>(2);
             values.add("true");
@@ -51,7 +52,7 @@ public class DebugDamageCommand extends CommandBase {
     @Override
     public String getUsage(@Nonnull ICommandSender sender) {
         if (sender instanceof EntityPlayer)
-            return "/damage [part] [damage] (apply debuff)";
+            return "/damage [part] [damage] (invoke debuffs)";
         else
             return "Only usable by players";
     }
@@ -72,6 +73,10 @@ public class DebugDamageCommand extends CommandBase {
             PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
             damageModel.getFromEnum(part).damage(damage, player, debuff);
             FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, damage), (EntityPlayerMP) player);
+            if (damageModel.isDead()) {
+                player.sendMessage(new TextComponentTranslation("death.attack.generic", player.getDisplayName()));
+                player.setHealth(0F);
+            }
         } catch (RuntimeException e) {
             throw new CommandException(e.toString());
         }

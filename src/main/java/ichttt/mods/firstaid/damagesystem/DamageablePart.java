@@ -89,7 +89,7 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
         if (absorption > 0F)
             compound.setFloat("absorption", absorption);
         if (activeHealer != null) {
-            compound.setByte("healingItem", (byte) activeHealer.healingType.id);
+            compound.setByte("healingItem", (byte) (activeHealer.healingType.ordinal() + 1)); //+1 because of backward compat
             compound.setInteger("itemTicks", activeHealer.ticksPassed);
             compound.setInteger("itemHeals", activeHealer.heals);
         }
@@ -102,7 +102,7 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
             return;
         currentHealth = Math.min(maxHealth, nbt.getFloat("health"));
         if (nbt.hasKey("healingItem"))
-            activeHealer = EnumHealingType.fromID(nbt.getByte("healingItem")).createNewHealer().loadNBT(nbt.getInteger("itemTicks"), nbt.getInteger("itemHeals"));
+            activeHealer = EnumHealingType.VALUES[nbt.getByte("healingItem") - 1].createNewHealer().loadNBT(nbt.getInteger("itemTicks"), nbt.getInteger("itemHeals"));
         if (nbt.hasKey("absorption"))
             absorption = nbt.getFloat("absorption");
         //kick constant debuffs active

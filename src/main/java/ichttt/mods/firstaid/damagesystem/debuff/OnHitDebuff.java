@@ -32,11 +32,11 @@ public class OnHitDebuff extends AbstractDebuff {
         int value = -1;
         for (Float2IntMap.Entry entry : map.float2IntEntrySet()) {
             if (damage >= entry.getFloatKey()) {
-                value = entry.getIntValue();
+                value = Math.max(value, entry.getIntValue());
                 player.addPotionEffect(new PotionEffect(effect, entry.getIntValue(), 0, false, false));
             }
         }
-        if (value != -1)
+        if (value != -1 && sound != EnumHurtSound.NONE)
             FirstAid.NETWORKING.sendTo(new MessagePlayHurtSound(sound, value), player);
     }
 

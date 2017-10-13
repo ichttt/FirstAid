@@ -6,6 +6,7 @@ import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -26,25 +27,28 @@ public class HUDHandler {
         Objects.requireNonNull(damageModel);
         mc.getTextureManager().bindTexture(Gui.ICONS);
         Gui gui = mc.ingameGUI;
-        GlStateManager.pushMatrix();
         int xOffset = FirstAidConfig.overlay.xOffset;
         int yOffset = FirstAidConfig.overlay.yOffset;
         switch (FirstAidConfig.overlay.position) {
             case 0:
                 break;
             case 1:
-                xOffset += scaledResolution.getScaledWidth();
+                xOffset = scaledResolution.getScaledWidth() - xOffset - damageModel.getMaxRenderSize() - 60;
                 break;
             case 2:
-                yOffset += scaledResolution.getScaledHeight();
+                yOffset = scaledResolution.getScaledHeight() - yOffset - 80;
                 break;
             case 3:
-                xOffset += scaledResolution.getScaledWidth();
-                yOffset += scaledResolution.getScaledHeight();
+                xOffset = scaledResolution.getScaledWidth() - xOffset - damageModel.getMaxRenderSize() - 60;
+                yOffset = scaledResolution.getScaledHeight() - yOffset - 80;
                 break;
             default:
                 throw new RuntimeException("Invalid config option for position: " + FirstAidConfig.overlay.position);
         }
+        if (mc.currentScreen instanceof GuiChat && FirstAidConfig.overlay.position == 2) {
+            return;
+        }
+        GlStateManager.pushMatrix();
         GlStateManager.translate(xOffset, yOffset, 0F);
         for (DamageablePart part : damageModel) {
             mc.fontRenderer.drawString(I18n.format("gui." + part.part.toString().toLowerCase(Locale.ENGLISH)), 0, 0, 0xFFFFFF);

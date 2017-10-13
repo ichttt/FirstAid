@@ -2,24 +2,49 @@ package ichttt.mods.firstaid.client.gui;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.damagesystem.DamageablePart;
+import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
 public class GuiUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
+    private static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
+    private static final Map<EnumPlayerPart, FlashStateManager> flashStates = new HashMap<>();
+
+    static {
+        for (EnumPlayerPart part : EnumPlayerPart.values()) {
+            flashStates.put(part, new FlashStateManager());
+        }
+    }
 
     public static void drawHealth(DamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean secondLine) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(xTranslation, yTranslation, 0);
         int yTexture = damageablePart.canCauseDeath ? 45 : 0;
         int maxHealth = getMaxHearts(damageablePart.maxHealth);
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
         int current = (int) Math.ceil(damageablePart.currentHealth);
         int absorption = (int) Math.ceil(damageablePart.getAbsorption());
+        FlashStateManager activeFlashState = Objects.requireNonNull(flashStates.get(damageablePart.part));
+        if (prevHealth.containsKey(damageablePart.part)) {
+            int prev = prevHealth.getInt(damageablePart.part);
+            if (prev != current)
+                activeFlashState.setActive(Minecraft.getSystemTime());
+        }
+        prevHealth.put(damageablePart.part, current);
+        boolean highlight = activeFlashState.update(Minecraft.getSystemTime());
+
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(xTranslation, yTranslation, 0);
         if (secondLine)
             secondLine = (maxHealth + maxExtraHealth) > 4;
         if (secondLine) {
@@ -43,29 +68,27 @@ public class GuiUtils {
 
             GlStateManager.translate(0F, 5F, 0F);
             GlStateManager.pushMatrix();
-            renderLine(yTexture, maxHealth2, maxExtraHealth2, current2, absorption2, gui);
+            renderLine(yTexture, maxHealth2, maxExtraHealth2, current2, absorption2, gui, highlight);
             GlStateManager.popMatrix();
             GlStateManager.translate(0F, -10F, 0F);
         }
-        renderLine(yTexture, maxHealth, maxExtraHealth, current, absorption, gui);
+        renderLine(yTexture, maxHealth, maxExtraHealth, current, absorption, gui, highlight);
 
         GlStateManager.popMatrix();
     }
 
-    private static void renderLine(int yTexture, int maxHealth, int maxExtraHearts, int current, int absorption, Gui gui) {
+    private static void renderLine(int yTexture, int maxHealth, int maxExtraHearts, int current, int absorption, Gui gui, boolean highlight) {
         GlStateManager.pushMatrix();
-        renderMax(maxHealth, yTexture, gui);
+        renderMax(maxHealth, yTexture, gui, highlight);
         if (maxExtraHearts > 0) {
             if (maxHealth != 0)
                 GlStateManager.translate(2, 0, 0);
-            renderMax(maxExtraHearts, yTexture, gui);
+            renderMax(maxExtraHearts, yTexture, gui, highlight);
         }
         GlStateManager.popMatrix();
         GlStateManager.translate(0, 0, 1);
 
-        GlStateManager.pushMatrix();
         renderCurrentHealth(current, yTexture, gui);
-        GlStateManager.popMatrix();
 
         if (absorption > 0) {
             int offset = maxHealth * 9 + (maxHealth == 0 ? 0 : 2);
@@ -81,10 +104,11 @@ public class GuiUtils {
         return maxCurrentHearths >> 1;
     }
 
-    private static void renderMax(int max, int yTexture, Gui gui) {
+    private static void renderMax(int max, int yTexture, Gui gui, boolean highlight) {
         if (max > 8)
             throw new IllegalArgumentException("Can only draw up to 8 hearts!");
-        renderTexturedModalRects(max, false, 16, 16, yTexture, gui);
+        final int BACKGROUND = (highlight ? 25 : 16);
+        renderTexturedModalRects(max, false, BACKGROUND, BACKGROUND, yTexture, gui);
     }
 
     private static void renderCurrentHealth(int current, int yTexture, Gui gui) {
@@ -119,8 +143,7 @@ public class GuiUtils {
             throw new IllegalArgumentException("Cannot draw negative amount of hearts");
         for (int i = 0; i < toDraw; i++) {
             boolean renderHalf = lastOneHalf && i + 1 == toDraw;
-            gui.drawTexturedModalRect(0, 0, renderHalf ? halfTextureX : textureX, textureY, 9, 9);
-            GlStateManager.translate(9F, 0F, 0F);
+            gui.drawTexturedModalRect(9F * i, 0, renderHalf ? halfTextureX : textureX, textureY, 9, 9);
         }
     }
 }

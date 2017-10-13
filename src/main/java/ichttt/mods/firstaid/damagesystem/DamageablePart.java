@@ -41,7 +41,7 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
         currentHealth = Math.min(maxHealth, currentHealth + amount);
         if (notFitting > 0) {
             float oldHealth = currentHealth;
-            currentHealth = Math.min(currentHealth + notFitting, currentHealth + absorption);
+            currentHealth = Math.min(currentHealth + notFitting, currentHealth);
             notFitting = notFitting - (currentHealth - oldHealth);
         }
         final float finalNotFitting = notFitting;

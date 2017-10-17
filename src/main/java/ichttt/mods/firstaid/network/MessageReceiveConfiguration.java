@@ -85,6 +85,12 @@ public class MessageReceiveConfiguration implements IMessage {
             PlayerDamageModel damageModel = PlayerDamageModel.create();
             damageModel.deserializeNBT(message.playerDamageModel);
             Minecraft mc = Minecraft.getMinecraft();
+
+            FirstAid.playerMaxHealth = FirstAid.activeDamageConfig.maxHealthHead + FirstAid.activeDamageConfig.maxHealthLeftArm
+                    + FirstAid.activeDamageConfig.maxHealthLeftLeg + FirstAid.activeDamageConfig.maxHealthLeftFoot
+                    + FirstAid.activeDamageConfig.maxHealthBody + FirstAid.activeDamageConfig.maxHealthRightArm
+                    + FirstAid.activeDamageConfig.maxHealthRightLeg + FirstAid.activeDamageConfig.maxHealthRightFoot;
+
             FirstAid.logger.info("Received configuration");
             mc.addScheduledTask(() -> PlayerDataManager.capList.put(mc.player, damageModel));
             return null;

@@ -20,7 +20,6 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -86,14 +85,6 @@ public class FirstAid {
         if (manager instanceof CommandHandler) {
             ((CommandHandler) manager).registerCommand(new DebugDamageCommand());
         }
-    }
-
-    @Mod.EventHandler
-    public void onServerStart(FMLServerStartedEvent event) {
-        playerMaxHealth = FirstAidConfig.damageSystem.maxHealthHead + FirstAidConfig.damageSystem.maxHealthLeftArm
-                + FirstAidConfig.damageSystem.maxHealthLeftLeg + FirstAidConfig.damageSystem.maxHealthLeftFoot
-                + FirstAidConfig.damageSystem.maxHealthBody + FirstAidConfig.damageSystem.maxHealthRightArm
-                + FirstAidConfig.damageSystem.maxHealthRightLeg + FirstAidConfig.damageSystem.maxHealthRightFoot;
     }
 
     @Mod.EventHandler

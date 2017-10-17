@@ -17,7 +17,7 @@ import java.util.Objects;
 @SideOnly(Side.CLIENT)
 public class GuiUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
-    private static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
+    public static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
     private static final ImmutableMap<EnumPlayerPart, FlashStateManager> flashStates;
 
     static {

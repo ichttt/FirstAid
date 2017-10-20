@@ -2,6 +2,7 @@ package ichttt.mods.firstaid.sound;
 
 import ichttt.mods.firstaid.EventHandler;
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ITickableSound;
 import net.minecraft.client.audio.Sound;
@@ -30,6 +31,8 @@ public class DebuffTimedSound implements ITickableSound {
     private static DebuffTimedSound HURT_SOUND;
 
     public static void playHurtSound(int duration) {
+        if (!FirstAidConfig.enableSoundSystem)
+            return;
         SoundHandler soundHandler = Minecraft.getMinecraft().getSoundHandler();
         if (HURT_SOUND != null)
             soundHandler.stopSound(HURT_SOUND);

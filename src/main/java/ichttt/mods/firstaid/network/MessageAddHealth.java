@@ -1,5 +1,6 @@
 package ichttt.mods.firstaid.network;
 
+import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.distribution.HealthDistribution;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -35,7 +36,11 @@ public class MessageAddHealth implements IMessage {
         @Override
         public IMessage onMessage(MessageAddHealth message, MessageContext ctx) {
             EntityPlayerSP playerSP = Minecraft.getMinecraft().player;
-            HealthDistribution.distributeHealth(message.amount, playerSP);
+            float amount = message.amount;
+            if (amount == Float.MAX_VALUE) //short cut
+                PlayerDataManager.getDamageModel(playerSP).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.maxHealth);
+            else
+                HealthDistribution.distributeHealth(message.amount, playerSP);
             return null;
         }
     }

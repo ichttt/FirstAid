@@ -3,6 +3,7 @@ package ichttt.mods.firstaid.util;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.network.MessageApplyAbsorption;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
@@ -39,6 +40,10 @@ public class DataManagerWrapper extends EntityDataManager {
         return parent.get(key);
     }
 
+    public <T> void set_impl(@Nonnull DataParameter<T> key, @Nonnull T value) {
+        parent.set(key, value);
+    }
+
     @Override
     public <T> void set(@Nonnull DataParameter<T> key, @Nonnull T value) {
         if (key == EntityPlayer.ABSORPTION) {
@@ -49,11 +54,12 @@ public class DataManagerWrapper extends EntityDataManager {
                     FirstAid.NETWORKING.sendTo(new MessageApplyAbsorption(floatValue), playerMP);
             }
             PlayerDataManager.getDamageModel(player).setAbsorption(floatValue);
-        }
-        parent.set(key, value);
+        } else if (key == EntityLivingBase.HEALTH && !player.world.isRemote && (Float) value >= player.getMaxHealth())
+                PlayerDataManager.getDamageModel(player).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.maxHealth);
+        set_impl(key, value);
     }
-    //WRAPPER BELOW
 
+    // ----------WRAPPER BELOW----------
 
     @Override
     public <T> void register(DataParameter<T> key, @Nonnull T value) {

@@ -22,6 +22,9 @@ public class FirstAidConfig {
     @Config.Comment("Set to false to disable dynamic debuffs based on the health. Makes morphine useless")
     public static boolean enableDebuffs = true;
 
+    @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
+    public static boolean enableSoundSystem = true;
+
     public static class ExternalHealing {
 
         @Config.RequiresWorldRestart

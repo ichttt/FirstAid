@@ -17,7 +17,7 @@ import java.util.Objects;
 @SideOnly(Side.CLIENT)
 public class GuiUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
-    public static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
+    private static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
     private static final ImmutableMap<EnumPlayerPart, FlashStateManager> flashStates;
 
     static {
@@ -28,7 +28,7 @@ public class GuiUtils {
         flashStates = builder.build();
     }
 
-    public static void drawHealth(DamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean secondLine) {
+    public static void drawHealth(DamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean secondLine, boolean playerDead) {
         int yTexture = damageablePart.canCauseDeath ? 45 : 0;
         int maxHealth = getMaxHearts(damageablePart.maxHealth);
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
@@ -40,7 +40,10 @@ public class GuiUtils {
             if (prev != current)
                 activeFlashState.setActive(Minecraft.getSystemTime());
         }
-        prevHealth.put(damageablePart.part, current);
+        if (!playerDead)
+            prevHealth.put(damageablePart.part, current);
+        else
+            prevHealth.clear();
         boolean highlight = activeFlashState.update(Minecraft.getSystemTime());
 
         GlStateManager.pushMatrix();
@@ -140,7 +143,7 @@ public class GuiUtils {
         if (toDraw == 0)
             return;
         if (toDraw < 0)
-            throw new IllegalArgumentException("Cannot draw negative amount of hearts");
+            throw new IllegalArgumentException("Cannot draw negative amount of hearts " + toDraw);
         for (int i = 0; i < toDraw; i++) {
             boolean renderHalf = lastOneHalf && i + 1 == toDraw;
             gui.drawTexturedModalRect(9F * i, 0, renderHalf ? halfTextureX : textureX, textureY, 9, 9);

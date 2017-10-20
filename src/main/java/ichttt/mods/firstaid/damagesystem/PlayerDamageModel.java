@@ -7,6 +7,7 @@ import ichttt.mods.firstaid.damagesystem.debuff.AbstractDebuff;
 import ichttt.mods.firstaid.damagesystem.debuff.Debuffs;
 import ichttt.mods.firstaid.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.util.DataManagerWrapper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -118,7 +119,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
         float currentHealth = getCurrentHealth();
         if (currentHealth == 0)
             currentHealth = Float.MIN_VALUE;
-        player.setHealth(player.getMaxHealth() * (currentHealth / FirstAid.playerMaxHealth));
+        ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, player.getMaxHealth() * (currentHealth / FirstAid.playerMaxHealth));
 
         forEach(part -> part.tick(world, player, morphineTicksLeft == 0));
         if (morphineTicksLeft <= 0)

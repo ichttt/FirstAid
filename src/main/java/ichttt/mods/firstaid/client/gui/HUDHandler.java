@@ -50,10 +50,11 @@ public class HUDHandler {
         }
         GlStateManager.pushMatrix();
         GlStateManager.translate(xOffset, yOffset, 0F);
+        boolean playerDead = damageModel.isDead();
         for (DamageablePart part : damageModel) {
             mc.fontRenderer.drawString(I18n.format("gui." + part.part.toString().toLowerCase(Locale.ENGLISH)), 0, 0, 0xFFFFFF);
             mc.getTextureManager().bindTexture(Gui.ICONS);
-            GuiUtils.drawHealth(part, 60, 0, gui, false);
+            GuiUtils.drawHealth(part, 60, 0, gui, false, playerDead);
             GlStateManager.translate(0, 10F, 0F);
         }
         GlStateManager.popMatrix();

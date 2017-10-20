@@ -109,14 +109,15 @@ public class GuiApplyHealthItem extends GuiScreen {
         drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
 
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
-        drawHealth(damageModel.HEAD, false, 14);
-        drawHealth(damageModel.LEFT_ARM, false, 39);
-        drawHealth(damageModel.LEFT_LEG, false, 64);
-        drawHealth(damageModel.LEFT_FOOT, false, 89);
-        drawHealth(damageModel.BODY, true, 14);
-        drawHealth(damageModel.RIGHT_ARM, true, 39);
-        drawHealth(damageModel.RIGHT_LEG, true, 64);
-        drawHealth(damageModel.RIGHT_FOOT, true, 89);
+        boolean playerDead = damageModel.isDead();
+        drawHealth(damageModel.HEAD, false, 14, playerDead);
+        drawHealth(damageModel.LEFT_ARM, false, 39, playerDead);
+        drawHealth(damageModel.LEFT_LEG, false, 64, playerDead);
+        drawHealth(damageModel.LEFT_FOOT, false, 89, playerDead);
+        drawHealth(damageModel.BODY, true, 14, playerDead);
+        drawHealth(damageModel.RIGHT_ARM, true, 39, playerDead);
+        drawHealth(damageModel.RIGHT_LEG, true, 64, playerDead);
+        drawHealth(damageModel.RIGHT_FOOT, true, 89, playerDead);
 
         GlStateManager.pushMatrix();
         tooltipButton(HEAD, damageModel.HEAD, mouseX, mouseY);
@@ -140,8 +141,8 @@ public class GuiApplyHealthItem extends GuiScreen {
             button.enabled = enabled;
     }
 
-    public void drawHealth(DamageablePart damageablePart, boolean right, int yOffset) {
-        GuiUtils.drawHealth(damageablePart, guiLeft + (right ? 193 - Math.min(38, GuiUtils.getMaxHearts(damageablePart.maxHealth) * 9 + GuiUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 53), guiTop + yOffset, this, true);
+    public void drawHealth(DamageablePart damageablePart, boolean right, int yOffset, boolean playerDead) {
+        GuiUtils.drawHealth(damageablePart, guiLeft + (right ? 193 - Math.min(38, GuiUtils.getMaxHearts(damageablePart.maxHealth) * 9 + GuiUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 53), guiTop + yOffset, this, true, playerDead);
     }
 
     @Override

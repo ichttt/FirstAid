@@ -1,6 +1,5 @@
 package ichttt.mods.firstaid.network;
 
-import ichttt.mods.firstaid.client.gui.GuiUtils;
 import ichttt.mods.firstaid.damagesystem.DamageablePart;
 import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
@@ -50,8 +49,6 @@ public class MessageReceiveDamage implements IMessage {
                 Objects.requireNonNull(damageModel);
                 DamageablePart part = damageModel.getFromEnum(message.part);
                 part.damage(message.damageAmount, null, false);
-                if (damageModel.isDead())
-                    GuiUtils.prevHealth.clear();
             });
             return null;
         }

@@ -6,7 +6,7 @@ import net.minecraftforge.common.config.Config;
 @Config(modid = FirstAid.MODID, name = FirstAid.NAME)
 public class FirstAidConfig {
 
-    @Config.Comment("Settings regarding the max health of the body's parts")
+    @Config.Comment("Settings regarding the max health of the body's parts. 2 = 1 heart")
     @Config.RequiresWorldRestart
     public static final DamageSystem damageSystem = new DamageSystem();
 

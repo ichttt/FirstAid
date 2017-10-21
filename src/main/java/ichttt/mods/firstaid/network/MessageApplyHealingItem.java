@@ -17,14 +17,14 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class MessageApplyHealth implements IMessage {
+public class MessageApplyHealingItem implements IMessage {
     private EnumPlayerPart part;
     private EnumHealingType healingType;
     private EnumHand hand;
 
-    public MessageApplyHealth() {}
+    public MessageApplyHealingItem() {}
 
-    public MessageApplyHealth(EnumPlayerPart part, EnumHealingType healingType, EnumHand hand) {
+    public MessageApplyHealingItem(EnumPlayerPart part, EnumHealingType healingType, EnumHand hand) {
         this.part = part;
         this.healingType = healingType;
         this.hand = hand;
@@ -44,10 +44,10 @@ public class MessageApplyHealth implements IMessage {
         buf.writeBoolean(hand == EnumHand.MAIN_HAND);
     }
 
-    public static class Handler implements IMessageHandler<MessageApplyHealth, IMessage> {
+    public static class Handler implements IMessageHandler<MessageApplyHealingItem, IMessage> {
 
         @Override
-        public IMessage onMessage(final MessageApplyHealth message, final MessageContext ctx) {
+        public IMessage onMessage(final MessageApplyHealingItem message, final MessageContext ctx) {
             //noinspection ConstantConditions
             ctx.getServerHandler().player.getServer().addScheduledTask(() -> {
                 EntityPlayer player = ctx.getServerHandler().player;

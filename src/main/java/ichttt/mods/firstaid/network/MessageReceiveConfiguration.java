@@ -2,11 +2,13 @@ package ichttt.mods.firstaid.network;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
+import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -26,13 +28,15 @@ public class MessageReceiveConfiguration implements IMessage {
     private NBTTagCompound playerDamageModel;
     private FirstAidConfig.ExternalHealing healingCfg;
     private FirstAidConfig.DamageSystem damageCfg;
+    private boolean scaleMaxHealth;
 
     public MessageReceiveConfiguration() {}
 
-    public MessageReceiveConfiguration(PlayerDamageModel model, FirstAidConfig.ExternalHealing healingCfg, FirstAidConfig.DamageSystem damageCfg) {
+    public MessageReceiveConfiguration(PlayerDamageModel model, FirstAidConfig.ExternalHealing healingCfg, FirstAidConfig.DamageSystem damageCfg, boolean scaleMaxHealth) {
         this.playerDamageModel = model.serializeNBT();
         this.healingCfg = healingCfg;
         this.damageCfg = damageCfg;
+        this.scaleMaxHealth = scaleMaxHealth;
     }
 
     @Override
@@ -53,6 +57,8 @@ public class MessageReceiveConfiguration implements IMessage {
         damageCfg.maxHealthRightLeg = buf.readByte();
         damageCfg.maxHealthRightFoot = buf.readByte();
 
+        scaleMaxHealth = buf.readBoolean();
+
         playerDamageModel = ByteBufUtils.readTag(buf);
     }
 
@@ -72,6 +78,8 @@ public class MessageReceiveConfiguration implements IMessage {
         buf.writeByte(damageCfg.maxHealthRightLeg);
         buf.writeByte(damageCfg.maxHealthRightFoot);
 
+        buf.writeBoolean(scaleMaxHealth);
+
         ByteBufUtils.writeTag(buf, playerDamageModel);
     }
 
@@ -82,6 +90,7 @@ public class MessageReceiveConfiguration implements IMessage {
         public IMessage onMessage(MessageReceiveConfiguration message, MessageContext ctx) {
             FirstAid.activeHealingConfig = message.healingCfg;
             FirstAid.activeDamageConfig = message.damageCfg;
+            FirstAid.scaleMaxHealth = message.scaleMaxHealth;
             PlayerDamageModel damageModel = PlayerDamageModel.create();
             damageModel.deserializeNBT(message.playerDamageModel);
             Minecraft mc = Minecraft.getMinecraft();
@@ -92,7 +101,11 @@ public class MessageReceiveConfiguration implements IMessage {
                     + FirstAid.activeDamageConfig.maxHealthRightLeg + FirstAid.activeDamageConfig.maxHealthRightFoot;
 
             FirstAid.logger.info("Received configuration");
-            mc.addScheduledTask(() -> PlayerDataManager.capList.put(mc.player, damageModel));
+            mc.addScheduledTask(() -> {
+                PlayerDataManager.capList.put(mc.player, damageModel);
+                if (!damageModel.hasTutorial)
+                    mc.player.sendMessage(new TextComponentString("[First Aid] Press " + ClientProxy.showWounds.getDisplayName() + " for the tutorial"));
+            });
             return null;
         }
     }

@@ -16,7 +16,8 @@ import java.util.Arrays;
 
 public class DamageablePart implements INBTSerializable<NBTTagCompound> {
 
-    public final float maxHealth;
+    public final float initialMaxHealth;
+    private float maxHealth;
     public final boolean canCauseDeath;
     @Nullable
     public PartHealer activeHealer;
@@ -29,6 +30,7 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
     private float absorption;
 
     public DamageablePart(float maxHealth, boolean canCauseDeath, @Nonnull EnumPlayerPart playerPart, @Nonnull IDebuff... debuffs) {
+        this.initialMaxHealth = maxHealth;
         this.maxHealth = maxHealth;
         this.canCauseDeath = canCauseDeath;
         this.currentHealth = maxHealth;
@@ -116,5 +118,14 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
 
     public float getAbsorption() {
         return absorption;
+    }
+
+    public void setMaxHealth(float maxHealth) {
+        this.maxHealth = Math.max(2, maxHealth); //set 2 as a minimum
+        this.currentHealth = Math.min(currentHealth, this.maxHealth);
+    }
+
+    public float getMaxHealth() {
+        return maxHealth;
     }
 }

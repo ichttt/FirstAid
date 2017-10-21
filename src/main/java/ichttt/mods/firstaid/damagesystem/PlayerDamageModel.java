@@ -12,6 +12,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -22,7 +24,9 @@ import java.util.Objects;
 public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iterable<DamageablePart> {
     public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, LEFT_FOOT, BODY, RIGHT_ARM, RIGHT_LEG, RIGHT_FOOT;
     private int morphineTicksLeft = 0;
+    private float prevHealthCurrent = -1F;
     private final List<SharedDebuff> sharedDebuffs = new ArrayList<>(2);
+    public boolean hasTutorial;
 
     public static PlayerDamageModel create() {
         return new PlayerDamageModel(Objects.requireNonNull(FirstAid.activeDamageConfig));
@@ -39,13 +43,13 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
         SharedDebuff legFootDebuff = Debuffs.getLegFootDebuffs();
         sharedDebuffs.add(armDebuff);
         sharedDebuffs.add(legFootDebuff);
-        this.HEAD       = new DamageablePart(config.maxHealthHead, true, EnumPlayerPart.HEAD, headDebuffs);
-        this.LEFT_ARM   = new DamageablePart(config.maxHealthLeftArm, false, EnumPlayerPart.LEFT_ARM, armDebuff);
-        this.LEFT_LEG   = new DamageablePart(config.maxHealthLeftLeg, false, EnumPlayerPart.LEFT_LEG, legFootDebuff);
-        this.LEFT_FOOT  = new DamageablePart(config.maxHealthLeftFoot, false, EnumPlayerPart.LEFT_FOOT, legFootDebuff);
-        this.BODY       = new DamageablePart(config.maxHealthBody, true, EnumPlayerPart.BODY, bodyDebuffs);
-        this.RIGHT_ARM  = new DamageablePart(config.maxHealthRightArm, false, EnumPlayerPart.RIGHT_ARM, armDebuff);
-        this.RIGHT_LEG  = new DamageablePart(config.maxHealthRightLeg, false, EnumPlayerPart.RIGHT_LEG, legFootDebuff);
+        this.HEAD       = new DamageablePart(config.maxHealthHead,      true,  EnumPlayerPart.HEAD,       headDebuffs  );
+        this.LEFT_ARM   = new DamageablePart(config.maxHealthLeftArm,   false, EnumPlayerPart.LEFT_ARM,   armDebuff    );
+        this.LEFT_LEG   = new DamageablePart(config.maxHealthLeftLeg,   false, EnumPlayerPart.LEFT_LEG,   legFootDebuff);
+        this.LEFT_FOOT  = new DamageablePart(config.maxHealthLeftFoot,  false, EnumPlayerPart.LEFT_FOOT,  legFootDebuff);
+        this.BODY       = new DamageablePart(config.maxHealthBody,      true,  EnumPlayerPart.BODY,       bodyDebuffs  );
+        this.RIGHT_ARM  = new DamageablePart(config.maxHealthRightArm,  false, EnumPlayerPart.RIGHT_ARM,  armDebuff    );
+        this.RIGHT_LEG  = new DamageablePart(config.maxHealthRightLeg,  false, EnumPlayerPart.RIGHT_LEG,  legFootDebuff);
         this.RIGHT_FOOT = new DamageablePart(config.maxHealthRightFoot, false, EnumPlayerPart.RIGHT_FOOT, legFootDebuff);
     }
 
@@ -84,6 +88,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
         tagCompound.setTag("rightLeg", RIGHT_LEG.serializeNBT());
         tagCompound.setTag("rightFoot", RIGHT_FOOT.serializeNBT());
         tagCompound.setInteger("morphineTicks", morphineTicksLeft);
+        tagCompound.setBoolean("hasTutorial", hasTutorial);
         return tagCompound;
     }
 
@@ -107,10 +112,12 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
             RIGHT_FOOT.deserializeNBT((NBTTagCompound) nbt.getTag("rightFoot"));
         }
         morphineTicksLeft = nbt.getInteger("morphineTicks");
+        if (nbt.hasKey("hasTutorial"))
+            hasTutorial = nbt.getBoolean("hasTutorial");
     }
 
     private static void deserializeNBT_legacy(NBTTagCompound nbt, String key, DamageablePart part) {
-        part.currentHealth = Math.min(nbt.getFloat(key + "Health"), part.maxHealth);
+        part.currentHealth = Math.min(nbt.getFloat(key + "Health"), part.getMaxHealth());
     }
 
     public void tick(World world, EntityPlayer player) {
@@ -119,7 +126,28 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
         float currentHealth = getCurrentHealth();
         if (currentHealth == 0)
             currentHealth = Float.MIN_VALUE;
-        ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, player.getMaxHealth() * (currentHealth / FirstAid.playerMaxHealth));
+        float newCurrentHealth = player.getMaxHealth() * (currentHealth / (FirstAid.scaleMaxHealth ? player.getMaxHealth() : FirstAid.playerMaxHealth));
+        if (newCurrentHealth != prevHealthCurrent && !world.isRemote)
+            ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
+        prevHealthCurrent = newCurrentHealth;
+
+        if (FirstAid.scaleMaxHealth) {
+            float globalFactor = player.getMaxHealth() / 20F;
+            boolean reduce = false;
+            for (DamageablePart part : this) {
+                int result = Math.round(part.initialMaxHealth * globalFactor);
+                if (result %2 == 1) {
+                    if (reduce) {
+                        result--;
+                        reduce = false;
+                    } else {
+                        result++;
+                        reduce = true;
+                    }
+                }
+                part.setMaxHealth(result);
+            }
+        }
 
         forEach(part -> part.tick(world, player, morphineTicksLeft == 0));
         if (morphineTicksLeft <= 0)
@@ -182,10 +210,11 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
         forEach(damageablePart -> damageablePart.setAbsorption(newAbsorption));
     }
 
+    @SideOnly(Side.CLIENT)
     public int getMaxRenderSize() {
         int max = 0;
         for (DamageablePart part : this)
-            max = Math.max(max, (int) (part.maxHealth + part.getAbsorption() + 0.9999F));
+            max = Math.max(max, (int) (part.getMaxHealth() + part.getAbsorption() + 0.9999F));
         return (int) (((max + 1) / 2F) * 9);
     }
 }

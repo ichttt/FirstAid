@@ -16,14 +16,15 @@ public class FirstAidConfig {
     @Config.Comment("Settings regarding external healing system(like vanilla potions or natural regeneration")
     public static final ExternalHealing externalHealing = new ExternalHealing();
 
-    @Config.Comment("False if the tutorial message should be shown. Client side only")
-    public static boolean hasTutorial = false;
-
     @Config.Comment("Set to false to disable dynamic debuffs based on the health. Makes morphine useless")
     public static boolean enableDebuffs = true;
 
     @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
     public static boolean enableSoundSystem = true;
+
+    @Config.Comment("If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health")
+    @Config.RequiresWorldRestart
+    public static boolean scaleMaxHealth = false;
 
     public static class ExternalHealing {
 
@@ -64,28 +65,28 @@ public class FirstAidConfig {
 
     public static class DamageSystem {
 
-        @Config.RangeInt(min = 0, max = 12)
+        @Config.RangeInt(min = 2, max = 12)
         public int maxHealthHead = 4;
 
-        @Config.RangeInt(min = 0, max = 12)
+        @Config.RangeInt(min = 2, max = 12)
         public int maxHealthLeftArm = 4;
 
-        @Config.RangeInt(min = 0, max = 12)
+        @Config.RangeInt(min = 2, max = 12)
         public int maxHealthLeftLeg = 4;
 
-        @Config.RangeInt(min = 0, max = 12)
+        @Config.RangeInt(min = 2, max = 12)
         public int maxHealthLeftFoot = 4;
 
-        @Config.RangeInt(min = 0, max = 12)
+        @Config.RangeInt(min = 2, max = 12)
         public int maxHealthBody = 6;
 
-        @Config.RangeInt(min = 0, max = 12)
+        @Config.RangeInt(min = 2, max = 12)
         public int maxHealthRightArm = 4;
 
-        @Config.RangeInt(min = 0, max = 12)
+        @Config.RangeInt(min = 2, max = 12)
         public int maxHealthRightLeg = 4;
 
-        @Config.RangeInt(min = 0, max = 12)
+        @Config.RangeInt(min = 2, max = 12)
         public int maxHealthRightFoot = 4;
     }
 }

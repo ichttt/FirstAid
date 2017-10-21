@@ -27,7 +27,7 @@ public class HealthDistribution {
         for (EnumPlayerPart part : parts) {
             damageableParts.add(damageModel.getFromEnum(part));
         }
-        damageableParts.sort(Comparator.comparingDouble(value -> value.maxHealth - value.currentHealth));
+        damageableParts.sort(Comparator.comparingDouble(value -> value.getMaxHealth() - value.currentHealth));
 
         for (int i = 0; i < 8; i++) {
             DamageablePart part = damageableParts.get(i);

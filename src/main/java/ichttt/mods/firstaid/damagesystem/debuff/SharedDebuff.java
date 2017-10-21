@@ -48,7 +48,7 @@ public class SharedDebuff implements IDebuff {
             float healthPerMax = 0;
             for (EnumPlayerPart part : parts) {
                 DamageablePart damageablePart = damageModel.getFromEnum(part);
-                healthPerMax += damageablePart.currentHealth / damageablePart.maxHealth;
+                healthPerMax += damageablePart.currentHealth / damageablePart.getMaxHealth();
             }
             healthPerMax /= parts.length;
             if (healingCount > 0) {

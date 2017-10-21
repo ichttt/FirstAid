@@ -38,7 +38,7 @@ public class MessageAddHealth implements IMessage {
             EntityPlayerSP playerSP = Minecraft.getMinecraft().player;
             float amount = message.amount;
             if (amount == Float.MAX_VALUE) //short cut
-                PlayerDataManager.getDamageModel(playerSP).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.maxHealth);
+                PlayerDataManager.getDamageModel(playerSP).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
             else
                 HealthDistribution.distributeHealth(message.amount, playerSP);
             return null;

@@ -30,7 +30,7 @@ public class GuiUtils {
 
     public static void drawHealth(DamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean secondLine, boolean playerDead) {
         int yTexture = damageablePart.canCauseDeath ? 45 : 0;
-        int maxHealth = getMaxHearts(damageablePart.maxHealth);
+        int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
         int current = (int) Math.ceil(damageablePart.currentHealth);
         int absorption = (int) Math.ceil(damageablePart.getAbsorption());

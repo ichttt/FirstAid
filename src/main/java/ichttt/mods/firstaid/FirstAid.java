@@ -4,12 +4,7 @@ import ichttt.mods.firstaid.damagesystem.capability.CapabilityExtendedHealthSyst
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.debuff.Debuffs;
 import ichttt.mods.firstaid.items.FirstAidItems;
-import ichttt.mods.firstaid.network.MessageAddHealth;
-import ichttt.mods.firstaid.network.MessageApplyAbsorption;
-import ichttt.mods.firstaid.network.MessageApplyHealth;
-import ichttt.mods.firstaid.network.MessagePlayHurtSound;
-import ichttt.mods.firstaid.network.MessageReceiveConfiguration;
-import ichttt.mods.firstaid.network.MessageReceiveDamage;
+import ichttt.mods.firstaid.network.*;
 import ichttt.mods.firstaid.util.DebugDamageCommand;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommandManager;
@@ -30,9 +25,12 @@ import org.apache.logging.log4j.Logger;
 public class FirstAid {
     public static Logger logger;
     public static final String MODID = "firstaid";
-    public static final String NAME ="First Aid";
+    public static final String NAME = "First Aid";
+
+    //RECEIVED CONFIG FIELDS
     public static FirstAidConfig.DamageSystem activeDamageConfig;
     public static FirstAidConfig.ExternalHealing activeHealingConfig;
+    public static boolean scaleMaxHealth;
     public static int playerMaxHealth;
 
     @SuppressWarnings("unused")
@@ -59,11 +57,12 @@ public class FirstAid {
         logger.debug("Registering networking");
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
         NETWORKING.registerMessage(MessageReceiveDamage.Handler.class, MessageReceiveDamage.class, 1, Side.CLIENT);
-        NETWORKING.registerMessage(MessageApplyHealth.Handler.class, MessageApplyHealth.class, 2 , Side.SERVER);
+        NETWORKING.registerMessage(MessageApplyHealingItem.Handler.class, MessageApplyHealingItem.class, 2 , Side.SERVER);
         NETWORKING.registerMessage(MessageReceiveConfiguration.Handler.class, MessageReceiveConfiguration.class, 3, Side.CLIENT);
         NETWORKING.registerMessage(MessageApplyAbsorption.Handler.class, MessageApplyAbsorption.class, 4, Side.CLIENT);
         NETWORKING.registerMessage(MessageAddHealth.Handler.class, MessageAddHealth.class, 5, Side.CLIENT);
         NETWORKING.registerMessage(MessagePlayHurtSound.Handler.class, MessagePlayHurtSound.class, 6, Side.CLIENT);
+        NETWORKING.registerMessage(MessageHasTutorial.Handler.class, MessageHasTutorial.class, 7, Side.SERVER);
         MessageReceiveConfiguration.validate();
         logger.debug("Initializing debuffs");
         //noinspection ResultOfMethodCallIgnored

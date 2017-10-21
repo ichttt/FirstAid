@@ -1,9 +1,11 @@
 package ichttt.mods.firstaid.client.tutorial;
 
+import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.gui.GuiApplyHealthItem;
 import ichttt.mods.firstaid.client.gui.GuiUtils;
 import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.network.MessageHasTutorial;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -58,9 +60,10 @@ public class GuiTutorial extends GuiScreen {
 
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
-        if (button.id == 7 || button.id == 1)
+        if (button.id == 9 || button.id == 1) {
             Minecraft.getMinecraft().displayGuiScreen(null);
-        else if (button.id == 0) {
+            FirstAid.NETWORKING.sendToServer(new MessageHasTutorial());
+        } else if (button.id == 0) {
             this.action.next();
         }
     }

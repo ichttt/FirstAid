@@ -210,7 +210,7 @@ public class EventHandler {
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!event.player.world.isRemote) {
             FirstAid.logger.debug("Sending damage model to " + event.player.getDisplayNameString());
-            FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(PlayerDataManager.getDamageModel(event.player), FirstAidConfig.externalHealing, FirstAidConfig.damageSystem), (EntityPlayerMP) event.player);
+            FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(PlayerDataManager.getDamageModel(event.player), FirstAidConfig.externalHealing, FirstAidConfig.damageSystem, FirstAidConfig.scaleMaxHealth), (EntityPlayerMP) event.player);
         }
     }
 

@@ -55,7 +55,7 @@ public class DataManagerWrapper extends EntityDataManager {
             }
             PlayerDataManager.getDamageModel(player).setAbsorption(floatValue);
         } else if (key == EntityLivingBase.HEALTH && !player.world.isRemote && (Float) value >= player.getMaxHealth())
-                PlayerDataManager.getDamageModel(player).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.maxHealth);
+                PlayerDataManager.getDamageModel(player).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
         set_impl(key, value);
     }
 

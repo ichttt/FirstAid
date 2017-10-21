@@ -5,7 +5,7 @@ import ichttt.mods.firstaid.damagesystem.DamageablePart;
 import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.enums.EnumHealingType;
 import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.network.MessageApplyHealth;
+import ichttt.mods.firstaid.network.MessageApplyHealingItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
@@ -142,14 +142,14 @@ public class GuiApplyHealthItem extends GuiScreen {
     }
 
     public void drawHealth(DamageablePart damageablePart, boolean right, int yOffset, boolean playerDead) {
-        GuiUtils.drawHealth(damageablePart, guiLeft + (right ? 193 - Math.min(38, GuiUtils.getMaxHearts(damageablePart.maxHealth) * 9 + GuiUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 53), guiTop + yOffset, this, true, playerDead);
+        GuiUtils.drawHealth(damageablePart, guiLeft + (right ? 193 - Math.min(38, GuiUtils.getMaxHearts(damageablePart.getMaxHealth()) * 9 + GuiUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 53), guiTop + yOffset, this, true, playerDead);
     }
 
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
         if (button.id < 9) {
             EnumPlayerPart playerPart = EnumPlayerPart.fromID((button.id));
-            FirstAid.NETWORKING.sendToServer(new MessageApplyHealth(playerPart, healingType, activeHand));
+            FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, healingType, activeHand));
             //TODO notify the user somehow (sound?)
             DamageablePart part = damageModel.getFromEnum(playerPart);
             part.applyItem(healingType.createNewHealer());

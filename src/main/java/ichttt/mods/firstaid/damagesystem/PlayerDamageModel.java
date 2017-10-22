@@ -25,6 +25,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
     public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, LEFT_FOOT, BODY, RIGHT_ARM, RIGHT_LEG, RIGHT_FOOT;
     private int morphineTicksLeft = 0;
     private float prevHealthCurrent = -1F;
+    private float prevScaleFactor;
     private final List<SharedDebuff> sharedDebuffs = new ArrayList<>(2);
     public boolean hasTutorial;
 
@@ -133,20 +134,23 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
 
         if (FirstAid.scaleMaxHealth) {
             float globalFactor = player.getMaxHealth() / 20F;
-            boolean reduce = false;
-            for (DamageablePart part : this) {
-                int result = Math.round(part.initialMaxHealth * globalFactor);
-                if (result %2 == 1) {
-                    if (reduce) {
-                        result--;
-                        reduce = false;
-                    } else {
-                        result++;
-                        reduce = true;
+            if (prevScaleFactor != globalFactor) {
+                boolean reduce = false;
+                for (DamageablePart part : this) {
+                    int result = Math.round(part.initialMaxHealth * globalFactor);
+                    if (result % 2 == 1) {
+                        if (reduce) {
+                            result--;
+                            reduce = false;
+                        } else {
+                            result++;
+                            reduce = true;
+                        }
                     }
+                    part.setMaxHealth(result);
                 }
-                part.setMaxHealth(result);
             }
+            prevScaleFactor = globalFactor;
         }
 
         forEach(part -> part.tick(world, player, morphineTicksLeft == 0));

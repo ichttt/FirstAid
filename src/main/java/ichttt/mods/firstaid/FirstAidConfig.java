@@ -22,7 +22,8 @@ public class FirstAidConfig {
     @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
     public static boolean enableSoundSystem = true;
 
-    @Config.Comment("If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health")
+    @Config.Comment("If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health" +
+            "\n!!WARNING!! THIS CONFIG OPTION STILL REQUIRES SOME TESTING AND IS NOT STABLE RIGHT NOW")
     @Config.RequiresWorldRestart
     public static boolean scaleMaxHealth = false;
 

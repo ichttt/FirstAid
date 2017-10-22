@@ -90,5 +90,6 @@ public class FirstAid {
     public void onServerStop(FMLServerStoppedEvent event) {
         logger.debug("Cleaning up");
         PlayerDataManager.capList.clear();
+        PlayerDataManager.tutorialDone.clear();
     }
 }

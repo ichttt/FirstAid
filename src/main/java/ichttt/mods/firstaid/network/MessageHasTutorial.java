@@ -20,6 +20,7 @@ public class MessageHasTutorial implements IMessage {
         @Override
         public IMessage onMessage(MessageHasTutorial message, MessageContext ctx) {
             EntityPlayerMP player = ctx.getServerHandler().player;
+            PlayerDataManager.tutorialDone.add(player.getName());
             //noinspection ConstantConditions
             player.getServer().addScheduledTask(() -> PlayerDataManager.getDamageModel(player).hasTutorial = true);
             return null;

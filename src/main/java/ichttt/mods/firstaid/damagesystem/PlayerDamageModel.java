@@ -3,6 +3,7 @@ package ichttt.mods.firstaid.damagesystem;
 import ichttt.mods.firstaid.EventHandler;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
+import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.debuff.AbstractDebuff;
 import ichttt.mods.firstaid.damagesystem.debuff.Debuffs;
 import ichttt.mods.firstaid.damagesystem.debuff.SharedDebuff;
@@ -124,6 +125,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
     public void tick(World world, EntityPlayer player) {
         if (player.isDead || player.getHealth() <= 0F)
             return;
+
         float currentHealth = getCurrentHealth();
         if (currentHealth == 0)
             currentHealth = Float.MIN_VALUE;
@@ -131,6 +133,9 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
         if (newCurrentHealth != prevHealthCurrent && !world.isRemote)
             ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
         prevHealthCurrent = newCurrentHealth;
+
+        if (!this.hasTutorial)
+            this.hasTutorial = PlayerDataManager.tutorialDone.contains(player.getName());
 
         if (FirstAid.scaleMaxHealth) {
             float globalFactor = player.getMaxHealth() / 20F;

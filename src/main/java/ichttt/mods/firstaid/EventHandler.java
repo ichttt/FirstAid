@@ -6,9 +6,11 @@ import ichttt.mods.firstaid.damagesystem.capability.CapabilityExtendedHealthSyst
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.damagesystem.distribution.HealthDistribution;
+import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.items.FirstAidItems;
 import ichttt.mods.firstaid.network.MessageAddHealth;
 import ichttt.mods.firstaid.network.MessageReceiveConfiguration;
+import ichttt.mods.firstaid.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.util.ArmorUtils;
 import ichttt.mods.firstaid.util.DataManagerWrapper;
 import net.minecraft.entity.Entity;
@@ -59,11 +61,12 @@ public class EventHandler {
         float amountToDamage = event.getAmount();
         if (entity.getEntityWorld().isRemote || !entity.hasCapability(CapabilityExtendedHealthSystem.INSTANCE, null))
             return;
+        EntityPlayer player = (EntityPlayer) entity;
         if (amountToDamage == Float.MAX_VALUE) {
-            event.setCanceled(true);
+            if (player instanceof EntityPlayerMP)
+                Arrays.stream(EnumPlayerPart.values()).forEach(part -> FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, Float.MAX_VALUE), (EntityPlayerMP) player));
             return;
         }
-        EntityPlayer player = (EntityPlayer) entity;
         PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
         DamageSource source = event.getSource();
         String sourceType = source.damageType;
@@ -115,7 +118,7 @@ public class EventHandler {
             EntityPlayer player = (EntityPlayer) obj;
             PlayerDamageModel damageModel;
             if (player.world.isRemote)
-                damageModel = PlayerDamageModel.createTemp();
+                damageModel = FirstAid.activeDamageConfig == null ? PlayerDamageModel.createTemp() : PlayerDamageModel.create();
             else {
                 FirstAid.activeDamageConfig = FirstAidConfig.damageSystem;
                 FirstAid.activeHealingConfig = FirstAidConfig.externalHealing;
@@ -209,8 +212,11 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!event.player.world.isRemote) {
-            FirstAid.logger.debug("Sending damage model to " + event.player.getDisplayNameString());
-            FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(PlayerDataManager.getDamageModel(event.player), FirstAidConfig.externalHealing, FirstAidConfig.damageSystem, FirstAidConfig.scaleMaxHealth), (EntityPlayerMP) event.player);
+            FirstAid.logger.debug("Sending damage model to " + event.player.getName());
+            PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(event.player);
+            if (damageModel.hasTutorial)
+                PlayerDataManager.tutorialDone.add(event.player.getName());
+            FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(damageModel, FirstAidConfig.externalHealing, FirstAidConfig.damageSystem, FirstAidConfig.scaleMaxHealth), (EntityPlayerMP) event.player);
         }
     }
 

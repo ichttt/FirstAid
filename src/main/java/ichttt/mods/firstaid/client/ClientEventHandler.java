@@ -35,6 +35,7 @@ public class ClientEventHandler {
         if (ClientProxy.showWounds.isPressed()) {
             if (!damageModel.hasTutorial) {
                 damageModel.hasTutorial = true;
+                PlayerDataManager.tutorialDone.add(mc.player.getName());
                 Minecraft.getMinecraft().displayGuiScreen(new GuiTutorial());
             }
             else {

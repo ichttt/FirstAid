@@ -103,7 +103,9 @@ public class MessageReceiveConfiguration implements IMessage {
             FirstAid.logger.info("Received configuration");
             mc.addScheduledTask(() -> {
                 PlayerDataManager.capList.put(mc.player, damageModel);
-                if (!damageModel.hasTutorial)
+                if (damageModel.hasTutorial)
+                    PlayerDataManager.tutorialDone.add(mc.player.getName());
+                else
                     mc.player.sendMessage(new TextComponentString("[First Aid] Press " + ClientProxy.showWounds.getDisplayName() + " for the tutorial"));
             });
             return null;

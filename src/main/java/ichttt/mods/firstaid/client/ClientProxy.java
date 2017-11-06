@@ -5,7 +5,7 @@ import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.IProxy;
 import ichttt.mods.firstaid.client.gui.GuiApplyHealthItem;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
-import ichttt.mods.firstaid.damagesystem.enums.EnumHealingType;
+import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.EnumHand;

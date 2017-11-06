@@ -1,11 +1,11 @@
 package ichttt.mods.firstaid.network;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.damagesystem.DamageablePart;
-import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.api.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
-import ichttt.mods.firstaid.damagesystem.enums.EnumHealingType;
-import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.enums.EnumHealingType;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.items.ItemHealing;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
@@ -51,7 +51,7 @@ public class MessageApplyHealingItem implements IMessage {
             //noinspection ConstantConditions
             ctx.getServerHandler().player.getServer().addScheduledTask(() -> {
                 EntityPlayer player = ctx.getServerHandler().player;
-                PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+                AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
                 ItemStack stack = player.getHeldItem(message.hand);
                 Item item = stack.getItem();
                 if (!(item instanceof ItemHealing)) {
@@ -67,7 +67,7 @@ public class MessageApplyHealingItem implements IMessage {
                     }
                 }
                 stack.shrink(1);
-                DamageablePart damageablePart = damageModel.getFromEnum(message.part);
+                AbstractDamageablePart damageablePart = damageModel.getFromEnum(message.part);
                 damageablePart.applyItem(message.healingType.createNewHealer());
             });
             return null;

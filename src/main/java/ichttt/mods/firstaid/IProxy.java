@@ -1,6 +1,6 @@
 package ichttt.mods.firstaid;
 
-import ichttt.mods.firstaid.damagesystem.enums.EnumHealingType;
+import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import net.minecraft.util.EnumHand;
 
 public interface IProxy {

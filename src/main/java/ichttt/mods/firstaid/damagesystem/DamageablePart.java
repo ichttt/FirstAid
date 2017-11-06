@@ -1,43 +1,34 @@
 package ichttt.mods.firstaid.damagesystem;
 
+import ichttt.mods.firstaid.api.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.PartHealer;
 import ichttt.mods.firstaid.damagesystem.debuff.ConstantDebuff;
 import ichttt.mods.firstaid.damagesystem.debuff.IDebuff;
-import ichttt.mods.firstaid.damagesystem.enums.EnumHealingType;
-import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.enums.EnumHealingType;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 
-public class DamageablePart implements INBTSerializable<NBTTagCompound> {
-
-    public final int initialMaxHealth;
+public class DamageablePart extends AbstractDamageablePart {
     private int maxHealth;
-    public final boolean canCauseDeath;
-    @Nullable
-    public PartHealer activeHealer;
-    @Nonnull
-    public final EnumPlayerPart part;
     @Nonnull
     private final IDebuff[] debuffs;
-
-    public float currentHealth;
     private float absorption;
 
     public DamageablePart(int maxHealth, boolean canCauseDeath, @Nonnull EnumPlayerPart playerPart, @Nonnull IDebuff... debuffs) {
-        this.initialMaxHealth = maxHealth;
+        super(maxHealth, canCauseDeath, playerPart);
         this.maxHealth = maxHealth;
-        this.canCauseDeath = canCauseDeath;
         this.currentHealth = maxHealth;
-        this.part = playerPart;
         this.debuffs = debuffs;
     }
 
+    @Override
     public float heal(float amount, EntityPlayer player, boolean applyDebuff) {
         float notFitting = Math.abs(Math.min(0F, maxHealth - (currentHealth + amount)));
         currentHealth = Math.min(maxHealth, currentHealth + amount);
@@ -52,6 +43,7 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
         return notFitting;
     }
 
+    @Override
     public float damage(float amount, EntityPlayer player, boolean applyDebuff) {
         float origAmount = amount;
         if (absorption > 0) {
@@ -65,7 +57,8 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
         return notFitting;
     }
 
-    void tick(World world, EntityPlayer player, boolean tickDebuffs) {
+    @Override
+    public void tick(World world, EntityPlayer player, boolean tickDebuffs) {
         if (activeHealer != null) {
             if (activeHealer.tick()) {
                 heal(1F, player, !world.isRemote);
@@ -80,6 +73,7 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
             Arrays.stream(debuffs).filter(debuff -> debuff instanceof ConstantDebuff).forEach(debuff -> ((ConstantDebuff) debuff).update(player));
     }
 
+    @Override
     public void applyItem(PartHealer healer) {
         activeHealer = healer;
     }
@@ -111,20 +105,24 @@ public class DamageablePart implements INBTSerializable<NBTTagCompound> {
         Arrays.stream(debuffs).forEach(debuff -> debuff.handleHealing(0F, currentHealth / maxHealth, null));
     }
 
+    @Override
     public void setAbsorption(float absorption) {
         this.absorption = absorption;
         currentHealth = Math.min(maxHealth + absorption, currentHealth);
     }
 
+    @Override
     public float getAbsorption() {
         return absorption;
     }
 
+    @Override
     public void setMaxHealth(int maxHealth) {
         this.maxHealth = Math.max(2, maxHealth); //set 2 as a minimum
         this.currentHealth = Math.min(currentHealth, this.maxHealth);
     }
 
+    @Override
     public int getMaxHealth() {
         return maxHealth;
     }

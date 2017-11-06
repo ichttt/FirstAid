@@ -1,7 +1,7 @@
 package ichttt.mods.firstaid.items;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,7 +30,7 @@ public class ItemMorphine extends Item {
     @Nonnull
     public ItemStack onItemUseFinish(@Nonnull ItemStack stack, World world, EntityLivingBase entityLiving) {
         if (entityLiving instanceof EntityPlayer) {
-            PlayerDamageModel damageModel = PlayerDataManager.getDamageModel((EntityPlayer) entityLiving);
+            AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel((EntityPlayer) entityLiving);
             Objects.requireNonNull(damageModel).applyMorphine();
         }
         stack.shrink(1);

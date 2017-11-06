@@ -2,8 +2,8 @@ package ichttt.mods.firstaid.client.gui;
 
 import com.google.common.collect.ImmutableMap;
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.damagesystem.DamageablePart;
-import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -28,7 +28,7 @@ public class GuiUtils {
         flashStates = builder.build();
     }
 
-    public static void drawHealth(DamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean secondLine, boolean playerDead) {
+    public static void drawHealth(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean secondLine, boolean playerDead) {
         int yTexture = damageablePart.canCauseDeath ? 45 : 0;
         int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());

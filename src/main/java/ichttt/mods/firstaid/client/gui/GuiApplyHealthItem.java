@@ -1,10 +1,10 @@
 package ichttt.mods.firstaid.client.gui;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.damagesystem.DamageablePart;
-import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
-import ichttt.mods.firstaid.damagesystem.enums.EnumHealingType;
-import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumHealingType;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.network.MessageApplyHealingItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -32,20 +32,20 @@ public class GuiApplyHealthItem extends GuiScreen {
 
     private GuiButton HEAD, LEFT_ARM, LEFT_LEG, LEFT_FOOT, BODY, RIGHT_ARM, RIGHT_LEG, RIGHT_FOOT;
 
-    private final PlayerDamageModel damageModel;
+    private final AbstractPlayerDamageModel damageModel;
     private EnumHealingType healingType;
     private EnumHand activeHand;
     private final boolean disableButtons;
 
     public static boolean isOpen = false;
 
-    public GuiApplyHealthItem(PlayerDamageModel damageModel) {
+    public GuiApplyHealthItem(AbstractPlayerDamageModel damageModel) {
         this.damageModel = damageModel;
 
         disableButtons = true;
     }
 
-    public GuiApplyHealthItem(PlayerDamageModel damageModel, EnumHealingType healingType, EnumHand activeHand) {
+    public GuiApplyHealthItem(AbstractPlayerDamageModel damageModel, EnumHealingType healingType, EnumHand activeHand) {
         this.damageModel = damageModel;
         this.healingType = healingType;
         this.activeHand = activeHand;
@@ -133,7 +133,7 @@ public class GuiApplyHealthItem extends GuiScreen {
         //TODO color the critical parts of the player red?
     }
 
-    private void tooltipButton(GuiButton button, DamageablePart part, int mouseX, int mouseY) {
+    private void tooltipButton(GuiButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
         if (!enabled && button.hovered)
             drawHoveringText("Currently active: " + part.activeHealer.healingType, mouseX, mouseY);
@@ -141,7 +141,7 @@ public class GuiApplyHealthItem extends GuiScreen {
             button.enabled = enabled;
     }
 
-    public void drawHealth(DamageablePart damageablePart, boolean right, int yOffset, boolean playerDead) {
+    public void drawHealth(AbstractDamageablePart damageablePart, boolean right, int yOffset, boolean playerDead) {
         GuiUtils.drawHealth(damageablePart, guiLeft + (right ? 193 - Math.min(38, GuiUtils.getMaxHearts(damageablePart.getMaxHealth()) * 9 + GuiUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 53), guiTop + yOffset, this, true, playerDead);
     }
 
@@ -151,7 +151,7 @@ public class GuiApplyHealthItem extends GuiScreen {
             EnumPlayerPart playerPart = EnumPlayerPart.fromID((button.id));
             FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, healingType, activeHand));
             //TODO notify the user somehow (sound?)
-            DamageablePart part = damageModel.getFromEnum(playerPart);
+            AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
             part.applyItem(healingType.createNewHealer());
         }
         Minecraft.getMinecraft().displayGuiScreen(null);

@@ -1,6 +1,6 @@
 package ichttt.mods.firstaid.damagesystem.debuff;
 
-import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.sound.EnumHurtSound;
 
 public class Debuffs {

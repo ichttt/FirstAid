@@ -54,7 +54,7 @@ public class DataManagerWrapper extends EntityDataManager {
                     FirstAid.NETWORKING.sendTo(new MessageApplyAbsorption(floatValue), playerMP);
             }
             PlayerDataManager.getDamageModel(player).setAbsorption(floatValue);
-        } else if (key == EntityLivingBase.HEALTH && !player.world.isRemote && (Float) value >= player.getMaxHealth())
+        } else if (key == EntityLivingBase.HEALTH && !player.world.isRemote && (Float) value > player.getMaxHealth())
                 PlayerDataManager.getDamageModel(player).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
         set_impl(key, value);
     }

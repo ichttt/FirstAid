@@ -2,6 +2,7 @@ package ichttt.mods.firstaid.network;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
@@ -32,7 +33,7 @@ public class MessageReceiveConfiguration implements IMessage {
 
     public MessageReceiveConfiguration() {}
 
-    public MessageReceiveConfiguration(PlayerDamageModel model, FirstAidConfig.ExternalHealing healingCfg, FirstAidConfig.DamageSystem damageCfg, boolean scaleMaxHealth) {
+    public MessageReceiveConfiguration(AbstractPlayerDamageModel model, FirstAidConfig.ExternalHealing healingCfg, FirstAidConfig.DamageSystem damageCfg, boolean scaleMaxHealth) {
         this.playerDamageModel = model.serializeNBT();
         this.healingCfg = healingCfg;
         this.damageCfg = damageCfg;
@@ -91,7 +92,7 @@ public class MessageReceiveConfiguration implements IMessage {
             FirstAid.activeHealingConfig = message.healingCfg;
             FirstAid.activeDamageConfig = message.damageCfg;
             FirstAid.scaleMaxHealth = message.scaleMaxHealth;
-            PlayerDamageModel damageModel = PlayerDamageModel.create();
+            AbstractPlayerDamageModel damageModel = PlayerDamageModel.create();
             damageModel.deserializeNBT(message.playerDamageModel);
             Minecraft mc = Minecraft.getMinecraft();
 

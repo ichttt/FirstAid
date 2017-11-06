@@ -3,76 +3,57 @@ package ichttt.mods.firstaid.damagesystem;
 import ichttt.mods.firstaid.EventHandler;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
+import ichttt.mods.firstaid.api.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.debuff.AbstractDebuff;
 import ichttt.mods.firstaid.damagesystem.debuff.Debuffs;
 import ichttt.mods.firstaid.damagesystem.debuff.SharedDebuff;
-import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.util.DataManagerWrapper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 
-public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iterable<DamageablePart> {
-    public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, LEFT_FOOT, BODY, RIGHT_ARM, RIGHT_LEG, RIGHT_FOOT;
+public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private int morphineTicksLeft = 0;
     private float prevHealthCurrent = -1F;
     private float prevScaleFactor;
     private final List<SharedDebuff> sharedDebuffs = new ArrayList<>(2);
-    public boolean hasTutorial;
 
-    public static PlayerDamageModel create() {
-        return new PlayerDamageModel(Objects.requireNonNull(FirstAid.activeDamageConfig));
+    public static AbstractPlayerDamageModel create() {
+        return create_impl(Objects.requireNonNull(FirstAid.activeDamageConfig));
     }
 
-    public static PlayerDamageModel createTemp() {
-        return new PlayerDamageModel(FirstAidConfig.damageSystem);
+    public static AbstractPlayerDamageModel createTemp() {
+        return create_impl(FirstAidConfig.damageSystem);
     }
 
-    protected PlayerDamageModel(FirstAidConfig.DamageSystem config) {
+    private static AbstractPlayerDamageModel create_impl(FirstAidConfig.DamageSystem config) {
         AbstractDebuff[] headDebuffs = Debuffs.getHeadDebuffs();
         AbstractDebuff[] bodyDebuffs = Debuffs.getBodyDebuffs();
         SharedDebuff armDebuff = Debuffs.getArmDebuffs();
         SharedDebuff legFootDebuff = Debuffs.getLegFootDebuffs();
-        sharedDebuffs.add(armDebuff);
-        sharedDebuffs.add(legFootDebuff);
-        this.HEAD       = new DamageablePart(config.maxHealthHead,      true,  EnumPlayerPart.HEAD,       headDebuffs  );
-        this.LEFT_ARM   = new DamageablePart(config.maxHealthLeftArm,   false, EnumPlayerPart.LEFT_ARM,   armDebuff    );
-        this.LEFT_LEG   = new DamageablePart(config.maxHealthLeftLeg,   false, EnumPlayerPart.LEFT_LEG,   legFootDebuff);
-        this.LEFT_FOOT  = new DamageablePart(config.maxHealthLeftFoot,  false, EnumPlayerPart.LEFT_FOOT,  legFootDebuff);
-        this.BODY       = new DamageablePart(config.maxHealthBody,      true,  EnumPlayerPart.BODY,       bodyDebuffs  );
-        this.RIGHT_ARM  = new DamageablePart(config.maxHealthRightArm,  false, EnumPlayerPart.RIGHT_ARM,  armDebuff    );
-        this.RIGHT_LEG  = new DamageablePart(config.maxHealthRightLeg,  false, EnumPlayerPart.RIGHT_LEG,  legFootDebuff);
-        this.RIGHT_FOOT = new DamageablePart(config.maxHealthRightFoot, false, EnumPlayerPart.RIGHT_FOOT, legFootDebuff);
+        return new PlayerDamageModel(config, headDebuffs, bodyDebuffs, armDebuff, legFootDebuff);
     }
 
-    public DamageablePart getFromEnum(EnumPlayerPart part) {
-        switch (part) {
-            case HEAD:
-                return HEAD;
-            case LEFT_ARM:
-                return LEFT_ARM;
-            case LEFT_LEG:
-                return LEFT_LEG;
-            case BODY:
-                return BODY;
-            case RIGHT_ARM:
-                return RIGHT_ARM;
-            case RIGHT_LEG:
-                return RIGHT_LEG;
-            case LEFT_FOOT:
-                return LEFT_FOOT;
-            case RIGHT_FOOT:
-                return RIGHT_FOOT;
-            default:
-                throw new RuntimeException("Unknown enum " + part);
-        }
+
+    protected PlayerDamageModel(FirstAidConfig.DamageSystem config, AbstractDebuff[] headDebuffs, AbstractDebuff[] bodyDebuffs, SharedDebuff armDebuff, SharedDebuff legFootDebuff) {
+        super(new DamageablePart(config.maxHealthHead,      true,  EnumPlayerPart.HEAD,       headDebuffs  ),
+              new DamageablePart(config.maxHealthLeftArm,   false, EnumPlayerPart.LEFT_ARM,   armDebuff    ),
+              new DamageablePart(config.maxHealthLeftLeg,   false, EnumPlayerPart.LEFT_LEG,   legFootDebuff),
+              new DamageablePart(config.maxHealthLeftFoot,  false, EnumPlayerPart.LEFT_FOOT,  legFootDebuff),
+              new DamageablePart(config.maxHealthBody,      true,  EnumPlayerPart.BODY,       bodyDebuffs  ),
+              new DamageablePart(config.maxHealthRightArm,  false, EnumPlayerPart.RIGHT_ARM,  armDebuff    ),
+              new DamageablePart(config.maxHealthRightLeg,  false, EnumPlayerPart.RIGHT_LEG,  legFootDebuff),
+              new DamageablePart(config.maxHealthRightFoot, false, EnumPlayerPart.RIGHT_FOOT, legFootDebuff));
+        sharedDebuffs.add(armDebuff);
+        sharedDebuffs.add(legFootDebuff);
     }
 
     @Override
@@ -115,10 +96,11 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
             hasTutorial = nbt.getBoolean("hasTutorial");
     }
 
-    private static void deserializeNBT_legacy(NBTTagCompound nbt, String key, DamageablePart part) {
+    private static void deserializeNBT_legacy(NBTTagCompound nbt, String key, AbstractDamageablePart part) {
         part.currentHealth = Math.min(nbt.getFloat(key + "Health"), part.getMaxHealth());
     }
 
+    @Override
     public void tick(World world, EntityPlayer player) {
         if (player.isDead || player.getHealth() <= 0F)
             return;
@@ -138,7 +120,7 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
             float globalFactor = player.getMaxHealth() / 20F;
             if (prevScaleFactor != globalFactor) {
                 boolean reduce = false;
-                for (DamageablePart part : this) {
+                for (AbstractDamageablePart part : this) {
                     int result = Math.round(part.initialMaxHealth * globalFactor);
                     if (result % 2 == 1) {
                         if (reduce) {
@@ -162,18 +144,20 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
             morphineTicksLeft--;
     }
 
+    @Override
     public void applyMorphine() {
         morphineTicksLeft = (EventHandler.rand.nextInt(2) * 20 * 45) + 20 * 210;
     }
 
+    @Override
     public int getMorphineTicks() {
         return morphineTicksLeft;
     }
 
     @Override
     @Nonnull
-    public Iterator<DamageablePart> iterator() {
-        return new Iterator<DamageablePart>() {
+    public Iterator<AbstractDamageablePart> iterator() {
+        return new Iterator<AbstractDamageablePart>() {
             byte count = 1;
             @Override
             public boolean hasNext() {
@@ -181,47 +165,52 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
             }
 
             @Override
-            public DamageablePart next() {
+            public AbstractDamageablePart next() {
                 if (count > 8)
                     throw new NoSuchElementException();
-                DamageablePart part = getFromEnum(EnumPlayerPart.fromID(count));
+                AbstractDamageablePart part = getFromEnum(EnumPlayerPart.fromID(count));
                 count++;
                 return part;
             }
         };
     }
 
+    @Override
     public float getCurrentHealth() {
         float currentHealth = 0;
-        for (DamageablePart part : this)
+        for (AbstractDamageablePart part : this)
             currentHealth += part.currentHealth;
         return currentHealth;
     }
 
+    @Override
     public boolean isDead() {
-        for (DamageablePart part : this) {
+        for (AbstractDamageablePart part : this) {
             if (part.canCauseDeath && part.currentHealth <= 0)
                 return true;
         }
         return false;
     }
 
+    @Override
     public Float getAbsorption() {
         float value = 0;
-        for (DamageablePart part : this)
+        for (AbstractDamageablePart part : this)
                 value += part.getAbsorption();
         return value;
     }
 
+    @Override
     public void setAbsorption(float absorption) {
         float newAbsorption = Math.min(4F, absorption / 8F);
         forEach(damageablePart -> damageablePart.setAbsorption(newAbsorption));
     }
 
+    @Override
     @SideOnly(Side.CLIENT)
     public int getMaxRenderSize() {
         int max = 0;
-        for (DamageablePart part : this)
+        for (AbstractDamageablePart part : this)
             max = Math.max(max, (int) (part.getMaxHealth() + part.getAbsorption() + 0.9999F));
         return (int) (((max + 1) / 2F) * 9);
     }

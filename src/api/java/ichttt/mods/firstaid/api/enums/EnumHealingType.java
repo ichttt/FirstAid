@@ -1,6 +1,6 @@
-package ichttt.mods.firstaid.damagesystem.enums;
+package ichttt.mods.firstaid.api.enums;
 
-import ichttt.mods.firstaid.damagesystem.PartHealer;
+import ichttt.mods.firstaid.api.PartHealer;
 
 public enum EnumHealingType {
     BANDAGE() {

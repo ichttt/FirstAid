@@ -1,13 +1,13 @@
-package ichttt.mods.firstaid.damagesystem;
+package ichttt.mods.firstaid.api;
 
-import ichttt.mods.firstaid.damagesystem.enums.EnumHealingType;
+import ichttt.mods.firstaid.api.enums.EnumHealingType;
 
 public class PartHealer {
     public final EnumHealingType healingType;
 
     public final int maxHeal, ticksPerHeal;
-    int ticksPassed = 0;
-    int heals = 0;
+    public int ticksPassed = 0;
+    public  int heals = 0;
 
     public PartHealer(int ticksPerHeal, int maxHeal, EnumHealingType type) {
         this.maxHeal = maxHeal;

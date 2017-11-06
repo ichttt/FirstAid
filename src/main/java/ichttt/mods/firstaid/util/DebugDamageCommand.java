@@ -1,9 +1,9 @@
 package ichttt.mods.firstaid.util;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
-import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.network.MessageReceiveDamage;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -71,7 +71,7 @@ public class DebugDamageCommand extends CommandBase {
             if (args.length == 3)
                 debuff = Boolean.parseBoolean(args[2]);
             EntityPlayer player = (EntityPlayer) sender;
-            PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+            AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
             damageModel.getFromEnum(part).damage(damage, player, debuff);
             FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, damage), (EntityPlayerMP) player);
             if (damageModel.isDead()) {

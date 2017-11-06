@@ -1,9 +1,9 @@
 package ichttt.mods.firstaid.damagesystem.distribution;
 
-import ichttt.mods.firstaid.damagesystem.DamageablePart;
-import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.api.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
-import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.ArrayList;
@@ -20,17 +20,17 @@ public class HealthDistribution {
         parts.addAll(Arrays.asList(partArray));
     }
 
-    public static void distribute(float health, PlayerDamageModel damageModel, EntityPlayer player) {
+    public static void distribute(float health, AbstractPlayerDamageModel damageModel, EntityPlayer player) {
         float toHeal = health / 8F;
         Collections.shuffle(parts);
-        List<DamageablePart> damageableParts = new ArrayList<>(parts.size());
+        List<AbstractDamageablePart> damageableParts = new ArrayList<>(parts.size());
         for (EnumPlayerPart part : parts) {
             damageableParts.add(damageModel.getFromEnum(part));
         }
         damageableParts.sort(Comparator.comparingDouble(value -> value.getMaxHealth() - value.currentHealth));
 
         for (int i = 0; i < 8; i++) {
-            DamageablePart part = damageableParts.get(i);
+            AbstractDamageablePart part = damageableParts.get(i);
             float diff = toHeal - part.heal(toHeal, player, !player.getEntityWorld().isRemote);
             //prevent inaccuracy
             diff = Math.round(diff * 10000.0F) / 10000.0F;
@@ -42,7 +42,7 @@ public class HealthDistribution {
     }
 
     public static void distributeHealth(float health, EntityPlayer player) {
-        PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
         distribute(health, damageModel, player);
     }
 }

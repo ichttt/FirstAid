@@ -1,6 +1,6 @@
 package ichttt.mods.firstaid.items;
 
-import ichttt.mods.firstaid.damagesystem.enums.EnumHealingType;
+import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;

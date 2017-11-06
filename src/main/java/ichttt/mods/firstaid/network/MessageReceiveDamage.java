@@ -1,9 +1,9 @@
 package ichttt.mods.firstaid.network;
 
-import ichttt.mods.firstaid.damagesystem.DamageablePart;
-import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.api.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
-import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -45,9 +45,9 @@ public class MessageReceiveDamage implements IMessage {
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(MessageReceiveDamage message, MessageContext ctx) {
             Minecraft.getMinecraft().addScheduledTask(() -> {
-               PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(Minecraft.getMinecraft().player);
+               AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(Minecraft.getMinecraft().player);
                 Objects.requireNonNull(damageModel);
-                DamageablePart part = damageModel.getFromEnum(message.part);
+                AbstractDamageablePart part = damageModel.getFromEnum(message.part);
                 part.damage(message.damageAmount, null, false);
             });
             return null;

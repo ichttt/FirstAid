@@ -1,8 +1,8 @@
 package ichttt.mods.firstaid.client.gui;
 
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.damagesystem.DamageablePart;
-import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.api.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -23,7 +23,7 @@ public class HUDHandler {
         Minecraft mc = Minecraft.getMinecraft();
         if (!FirstAidConfig.overlay.showOverlay || mc.player == null || GuiApplyHealthItem.isOpen || mc.player.isCreative())
             return;
-        PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(mc.player);
+        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(mc.player);
         Objects.requireNonNull(damageModel);
         mc.getTextureManager().bindTexture(Gui.ICONS);
         Gui gui = mc.ingameGUI;
@@ -51,7 +51,7 @@ public class HUDHandler {
         GlStateManager.pushMatrix();
         GlStateManager.translate(xOffset, yOffset, 0F);
         boolean playerDead = damageModel.isDead();
-        for (DamageablePart part : damageModel) {
+        for (AbstractDamageablePart part : damageModel) {
             mc.fontRenderer.drawString(I18n.format("gui." + part.part.toString().toLowerCase(Locale.ENGLISH)), 0, 0, 0xFFFFFF);
             mc.getTextureManager().bindTexture(Gui.ICONS);
             GuiUtils.drawHealth(part, 60, 0, gui, false, playerDead);

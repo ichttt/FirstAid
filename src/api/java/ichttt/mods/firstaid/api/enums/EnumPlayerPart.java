@@ -1,4 +1,4 @@
-package ichttt.mods.firstaid.damagesystem.enums;
+package ichttt.mods.firstaid.api.enums;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.inventory.EntityEquipmentSlot;

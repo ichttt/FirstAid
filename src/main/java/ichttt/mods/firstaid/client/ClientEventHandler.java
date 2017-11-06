@@ -1,10 +1,10 @@
 package ichttt.mods.firstaid.client;
 
 import ichttt.mods.firstaid.FirstAidConfig;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.gui.GuiApplyHealthItem;
 import ichttt.mods.firstaid.client.gui.HUDHandler;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
-import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
@@ -31,7 +31,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void onKeyPress(InputEvent.KeyInputEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
-        PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(mc.player);
+        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(mc.player);
         if (ClientProxy.showWounds.isPressed()) {
             if (!damageModel.hasTutorial) {
                 damageModel.hasTutorial = true;

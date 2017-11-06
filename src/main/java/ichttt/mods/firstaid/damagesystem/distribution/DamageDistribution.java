@@ -1,11 +1,11 @@
 package ichttt.mods.firstaid.damagesystem.distribution;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.util.ArmorUtils;
-import ichttt.mods.firstaid.damagesystem.DamageablePart;
-import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
-import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.network.MessageReceiveDamage;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -38,13 +38,13 @@ public abstract class DamageDistribution {
         slotToParts.put(EntityEquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT));
     }
 
-    protected static float distributeDamageOnParts(float damage, PlayerDamageModel damageModel, EnumPlayerPart[] enumParts, EntityPlayer player, boolean addStat) {
-        ArrayList<DamageablePart> damageableParts = new ArrayList<>(enumParts.length);
+    protected static float distributeDamageOnParts(float damage, AbstractPlayerDamageModel damageModel, EnumPlayerPart[] enumParts, EntityPlayer player, boolean addStat) {
+        ArrayList<AbstractDamageablePart> damageableParts = new ArrayList<>(enumParts.length);
         for (EnumPlayerPart part : enumParts) {
             damageableParts.add(damageModel.getFromEnum(part));
         }
         Collections.shuffle(damageableParts);
-        for (DamageablePart part : damageableParts) {
+        for (AbstractDamageablePart part : damageableParts) {
             FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part.part, damage), (EntityPlayerMP) player);
             float dmgDone = damage - part.damage(damage, player, damageModel.getMorphineTicks() == 0);
             if (addStat)
@@ -64,7 +64,7 @@ public abstract class DamageDistribution {
     protected abstract List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> getPartList();
 
     public float distributeDamage(float damage, EntityPlayer player, DamageSource source, boolean addStat) {
-        PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
         for (Pair<EntityEquipmentSlot, EnumPlayerPart[]> pair : getPartList()) {
             EntityEquipmentSlot slot = pair.getLeft();
             damage = ArmorUtils.applyArmor(player, player.getItemStackFromSlot(slot), source, damage, slot);

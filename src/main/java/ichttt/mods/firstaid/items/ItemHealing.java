@@ -1,7 +1,7 @@
 package ichttt.mods.firstaid.items;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.damagesystem.enums.EnumHealingType;
+import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

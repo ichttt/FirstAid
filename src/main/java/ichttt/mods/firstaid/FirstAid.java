@@ -1,6 +1,6 @@
 package ichttt.mods.firstaid;
 
-import ichttt.mods.firstaid.damagesystem.capability.CapabilityExtendedHealthSystem;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.debuff.Debuffs;
 import ichttt.mods.firstaid.items.FirstAidItems;
@@ -53,6 +53,7 @@ public class FirstAid {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
+        logger.debug("Registering capability");
         CapabilityExtendedHealthSystem.register();
         logger.debug("Registering networking");
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);

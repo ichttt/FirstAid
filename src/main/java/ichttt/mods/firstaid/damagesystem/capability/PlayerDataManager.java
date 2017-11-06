@@ -2,6 +2,7 @@ package ichttt.mods.firstaid.damagesystem.capability;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -12,7 +13,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class PlayerDataManager {
-    public static final ConcurrentMap<EntityPlayer, PlayerDamageModel> capList = new MapMaker().concurrencyLevel(2).weakKeys().makeMap();
+    public static final ConcurrentMap<EntityPlayer, AbstractPlayerDamageModel> capList = new MapMaker().concurrencyLevel(2).weakKeys().makeMap();
     public static final Set<String> tutorialDone = Collections.newSetFromMap(new WeakHashMap<>());
 
     public static void tickPlayer(@Nonnull EntityPlayer player) {
@@ -26,7 +27,7 @@ public class PlayerDataManager {
         capList.put(player, PlayerDamageModel.create());
     }
 
-    public static PlayerDamageModel getDamageModel(@Nonnull EntityPlayer player) {
+    public static AbstractPlayerDamageModel getDamageModel(@Nonnull EntityPlayer player) {
         Preconditions.checkNotNull(player, "Player may not be null");
         return capList.get(player);
     }

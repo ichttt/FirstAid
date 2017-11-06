@@ -1,10 +1,10 @@
 package ichttt.mods.firstaid.damagesystem.debuff;
 
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.damagesystem.DamageablePart;
-import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.api.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
-import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -44,10 +44,10 @@ public class SharedDebuff implements IDebuff {
             return;
         int count = healingCount + damageCount;
         if (count > 0) {
-            PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+            AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
             float healthPerMax = 0;
             for (EnumPlayerPart part : parts) {
-                DamageablePart damageablePart = damageModel.getFromEnum(part);
+                AbstractDamageablePart damageablePart = damageModel.getFromEnum(part);
                 healthPerMax += damageablePart.currentHealth / damageablePart.getMaxHealth();
             }
             healthPerMax /= parts.length;

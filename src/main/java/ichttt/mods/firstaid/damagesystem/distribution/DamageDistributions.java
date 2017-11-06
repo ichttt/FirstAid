@@ -1,6 +1,6 @@
 package ichttt.mods.firstaid.damagesystem.distribution;
 
-import ichttt.mods.firstaid.damagesystem.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.inventory.EntityEquipmentSlot;
 
 public class DamageDistributions {

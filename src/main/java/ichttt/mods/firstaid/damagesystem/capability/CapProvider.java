@@ -1,7 +1,8 @@
 package ichttt.mods.firstaid.damagesystem.capability;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -18,7 +19,7 @@ public class CapProvider implements ICapabilityProvider, INBTSerializable<NBTTag
 
     private final EntityPlayer player;
 
-    public CapProvider(EntityPlayer player, PlayerDamageModel damageModel) {
+    public CapProvider(EntityPlayer player, AbstractPlayerDamageModel damageModel) {
         this.player = player;
         PlayerDataManager.capList.put(player, damageModel);
     }
@@ -39,13 +40,13 @@ public class CapProvider implements ICapabilityProvider, INBTSerializable<NBTTag
 
     @Override
     public NBTTagCompound serializeNBT() {
-        PlayerDamageModel damageModel = PlayerDataManager.capList.get(player);
+        AbstractPlayerDamageModel damageModel = PlayerDataManager.capList.get(player);
         return damageModel.serializeNBT();
     }
 
     @Override
     public void deserializeNBT(NBTTagCompound nbt) {
-        PlayerDamageModel damageModel = PlayerDataManager.capList.get(player);
+        AbstractPlayerDamageModel damageModel = PlayerDataManager.capList.get(player);
         damageModel.deserializeNBT(nbt);
     }
 }

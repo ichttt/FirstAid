@@ -64,7 +64,7 @@ public class EventHandler {
         EntityPlayer player = (EntityPlayer) entity;
         if (amountToDamage == Float.MAX_VALUE) {
             if (player instanceof EntityPlayerMP)
-                Arrays.stream(EnumPlayerPart.values()).forEach(part -> FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, Float.MAX_VALUE), (EntityPlayerMP) player));
+                Arrays.stream(EnumPlayerPart.VALUES).forEach(part -> FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, Float.MAX_VALUE), (EntityPlayerMP) player));
             return;
         }
         PlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);

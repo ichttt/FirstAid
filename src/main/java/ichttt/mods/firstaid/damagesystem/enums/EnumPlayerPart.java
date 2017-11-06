@@ -7,6 +7,8 @@ public enum EnumPlayerPart {
     HEAD(1, EntityEquipmentSlot.HEAD), LEFT_ARM(2, EntityEquipmentSlot.CHEST), LEFT_LEG(3, EntityEquipmentSlot.LEGS), LEFT_FOOT(4, EntityEquipmentSlot.FEET),
     BODY(5, EntityEquipmentSlot.CHEST), RIGHT_ARM(6, EntityEquipmentSlot.CHEST), RIGHT_LEG(7, EntityEquipmentSlot.LEGS), RIGHT_FOOT(8, EntityEquipmentSlot.FEET);
 
+    public static final EnumPlayerPart[] VALUES = values();
+
     public final byte id;
     private ImmutableList<EnumPlayerPart> neighbours;
     public final EntityEquipmentSlot slot;

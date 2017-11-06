@@ -19,6 +19,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class DebugDamageCommand extends CommandBase {
 
@@ -64,7 +65,7 @@ public class DebugDamageCommand extends CommandBase {
         if (args.length != 2 && args.length != 3)
             throw new CommandException("Missing arguments. Usage: " + getUsage(sender));
         try {
-            EnumPlayerPart part = EnumPlayerPart.valueOf(args[0].toUpperCase());
+            EnumPlayerPart part = EnumPlayerPart.valueOf(args[0].toUpperCase(Locale.ENGLISH));
             float damage = Float.parseFloat(args[1]);
             boolean debuff = true;
             if (args.length == 3)

@@ -17,10 +17,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iterable<DamageablePart> {
     public final DamageablePart HEAD, LEFT_ARM, LEFT_LEG, LEFT_FOOT, BODY, RIGHT_ARM, RIGHT_LEG, RIGHT_FOOT;
@@ -185,6 +182,8 @@ public class PlayerDamageModel implements INBTSerializable<NBTTagCompound>, Iter
 
             @Override
             public DamageablePart next() {
+                if (count > 8)
+                    throw new NoSuchElementException();
                 DamageablePart part = getFromEnum(EnumPlayerPart.fromID(count));
                 count++;
                 return part;

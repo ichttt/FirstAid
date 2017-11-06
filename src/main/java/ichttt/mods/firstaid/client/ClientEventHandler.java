@@ -55,7 +55,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void renderOverlay(RenderGameOverlayEvent.Post event) {
         RenderGameOverlayEvent.ElementType type = event.getType();
-        if (type == RenderGameOverlayEvent.ElementType.ALL || type == RenderGameOverlayEvent.ElementType.TEXT) {
+        if (type == RenderGameOverlayEvent.ElementType.ALL || (type == RenderGameOverlayEvent.ElementType.TEXT && FirstAidConfig.overlay.position == 2)) {
             GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
             HUDHandler.renderOverlay(event.getResolution());
         }

@@ -15,7 +15,7 @@ import java.util.List;
 public class HealthDistribution {
     private static final List<EnumPlayerPart> parts;
     static {
-        EnumPlayerPart[] partArray = EnumPlayerPart.values();
+        EnumPlayerPart[] partArray = EnumPlayerPart.VALUES;
         parts = new ArrayList<>(partArray.length);
         parts.addAll(Arrays.asList(partArray));
     }

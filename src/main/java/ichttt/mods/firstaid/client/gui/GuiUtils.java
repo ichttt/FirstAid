@@ -22,7 +22,7 @@ public class GuiUtils {
 
     static {
         ImmutableMap.Builder<EnumPlayerPart, FlashStateManager> builder = ImmutableMap.builder();
-        for (EnumPlayerPart part : EnumPlayerPart.values()) {
+        for (EnumPlayerPart part : EnumPlayerPart.VALUES) {
             builder.put(part, new FlashStateManager());
         }
         flashStates = builder.build();

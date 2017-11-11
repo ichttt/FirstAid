@@ -1,8 +1,8 @@
 package ichttt.mods.firstaid.damagesystem.debuff;
 
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;

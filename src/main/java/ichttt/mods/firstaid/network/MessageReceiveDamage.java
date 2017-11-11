@@ -1,7 +1,7 @@
 package ichttt.mods.firstaid.network;
 
-import ichttt.mods.firstaid.api.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import io.netty.buffer.ByteBuf;

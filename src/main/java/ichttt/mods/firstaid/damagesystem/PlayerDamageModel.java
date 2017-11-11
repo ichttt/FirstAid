@@ -1,10 +1,12 @@
 package ichttt.mods.firstaid.damagesystem;
 
+import com.creativemd.playerrevive.api.IRevival;
+import com.creativemd.playerrevive.api.capability.CapaRevive;
 import ichttt.mods.firstaid.EventHandler;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.debuff.AbstractDebuff;
 import ichttt.mods.firstaid.damagesystem.debuff.Debuffs;
@@ -18,6 +20,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class PlayerDamageModel extends AbstractPlayerDamageModel {
@@ -102,16 +105,24 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public void tick(World world, EntityPlayer player) {
-        if (player.isDead || player.getHealth() <= 0F)
+        if (player.isDead || player.getHealth() <= 0F || isDead(player))
             return;
 
         float currentHealth = getCurrentHealth();
         if (currentHealth == 0)
-            currentHealth = Float.MIN_VALUE;
-        float newCurrentHealth = player.getMaxHealth() * (currentHealth / (FirstAid.scaleMaxHealth ? player.getMaxHealth() : FirstAid.playerMaxHealth));
-        if (newCurrentHealth != prevHealthCurrent && !world.isRemote)
-            ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
-        prevHealthCurrent = newCurrentHealth;
+            return;
+
+        if (FirstAid.playerMaxHealth != -1) {
+            float newCurrentHealth = player.getMaxHealth() * (currentHealth / (FirstAid.scaleMaxHealth ? player.getMaxHealth() : FirstAid.playerMaxHealth));
+            
+            if (Float.isInfinite(newCurrentHealth)) {
+                FirstAid.logger.error("Error calculating current health: Value was infinite");
+            } else {
+                if (newCurrentHealth != prevHealthCurrent && !world.isRemote)
+                    ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
+                prevHealthCurrent = newCurrentHealth;
+            }
+        }
 
         if (!this.hasTutorial)
             this.hasTutorial = PlayerDataManager.tutorialDone.contains(player.getName());
@@ -184,7 +195,12 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     @Override
-    public boolean isDead() {
+    public boolean isDead(@Nullable EntityPlayer player) {
+        if (CapaRevive.reviveCapa != null && player != null && player.hasCapability(CapaRevive.reviveCapa, null)) {
+            IRevival revival = Objects.requireNonNull(player.getCapability(CapaRevive.reviveCapa, null));
+            if (!revival.isHealty() && !revival.isDead())
+                return false;
+        }
         for (AbstractDamageablePart part : this) {
             if (part.canCauseDeath && part.currentHealth <= 0)
                 return true;

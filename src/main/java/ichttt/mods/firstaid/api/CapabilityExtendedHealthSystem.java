@@ -1,5 +1,7 @@
 package ichttt.mods.firstaid.api;
 
+import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -9,7 +11,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -59,7 +60,7 @@ public class CapabilityExtendedHealthSystem {
         }
 
         @Override
-        public boolean isDead() {
+        public boolean isDead(EntityPlayer player) {
             return false;
         }
 

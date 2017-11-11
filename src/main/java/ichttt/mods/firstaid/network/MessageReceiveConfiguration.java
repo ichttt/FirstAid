@@ -2,7 +2,7 @@ package ichttt.mods.firstaid.network;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;

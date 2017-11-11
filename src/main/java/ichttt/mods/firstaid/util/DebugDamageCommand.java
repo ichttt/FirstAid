@@ -1,7 +1,7 @@
 package ichttt.mods.firstaid.util;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.network.MessageReceiveDamage;
@@ -74,7 +74,7 @@ public class DebugDamageCommand extends CommandBase {
             AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
             damageModel.getFromEnum(part).damage(damage, player, debuff);
             FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, damage), (EntityPlayerMP) player);
-            if (damageModel.isDead()) {
+            if (damageModel.isDead(player)) {
                 player.sendMessage(new TextComponentTranslation("death.attack.generic", player.getDisplayName()));
                 player.setHealth(0F);
             }

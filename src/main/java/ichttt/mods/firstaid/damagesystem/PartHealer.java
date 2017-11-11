@@ -1,30 +1,29 @@
-package ichttt.mods.firstaid.api;
+package ichttt.mods.firstaid.damagesystem;
 
+import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
 
-public class PartHealer {
-    public final EnumHealingType healingType;
-
-    public final int maxHeal, ticksPerHeal;
-    public int ticksPassed = 0;
-    public  int heals = 0;
+public class PartHealer extends AbstractPartHealer {
+    private int ticksPassed = 0;
+    private int heals = 0;
 
     public PartHealer(int ticksPerHeal, int maxHeal, EnumHealingType type) {
-        this.maxHeal = maxHeal;
-        this.ticksPerHeal = ticksPerHeal;
-        this.healingType = type;
+        super(maxHeal, type, ticksPerHeal);
     }
 
-    public PartHealer loadNBT(int ticksPassed, int heals) {
+    @Override
+    public AbstractPartHealer loadNBT(int ticksPassed, int heals) {
         this.ticksPassed = ticksPassed;
         this.heals = heals;
         return this;
     }
 
+    @Override
     public boolean hasFinished() {
         return heals >= maxHeal;
     }
 
+    @Override
     public boolean tick() {
         if (hasFinished())
             return false;
@@ -35,5 +34,15 @@ public class PartHealer {
             heals++;
         }
         return nextHeal;
+    }
+
+    @Override
+    public int getTicksPassed() {
+        return ticksPassed;
+    }
+
+    @Override
+    public int getHealsDone() {
+        return heals;
     }
 }

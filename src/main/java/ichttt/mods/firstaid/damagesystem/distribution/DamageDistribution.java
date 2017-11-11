@@ -1,8 +1,9 @@
 package ichttt.mods.firstaid.damagesystem.distribution;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.IDamageDistribution;
+import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.util.ArmorUtils;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
@@ -22,8 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class DamageDistribution {
+public abstract class DamageDistribution implements IDamageDistribution {
+    @Nonnull
     protected static final EntityEquipmentSlot[] ARMOR_SLOTS;
+    @Nonnull
     protected static final Map<EntityEquipmentSlot, List<EnumPlayerPart>> slotToParts = new HashMap<>();
 
     static {
@@ -38,7 +41,7 @@ public abstract class DamageDistribution {
         slotToParts.put(EntityEquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT));
     }
 
-    protected static float distributeDamageOnParts(float damage, AbstractPlayerDamageModel damageModel, EnumPlayerPart[] enumParts, EntityPlayer player, boolean addStat) {
+    protected static float distributeDamageOnParts(float damage, @Nonnull AbstractPlayerDamageModel damageModel, @Nonnull EnumPlayerPart[] enumParts, @Nonnull EntityPlayer player, boolean addStat) {
         ArrayList<AbstractDamageablePart> damageableParts = new ArrayList<>(enumParts.length);
         for (EnumPlayerPart part : enumParts) {
             damageableParts.add(damageModel.getFromEnum(part));
@@ -63,7 +66,8 @@ public abstract class DamageDistribution {
     @Nonnull
     protected abstract List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> getPartList();
 
-    public float distributeDamage(float damage, EntityPlayer player, DamageSource source, boolean addStat) {
+    @Override
+    public float distributeDamage(float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat) {
         AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
         for (Pair<EntityEquipmentSlot, EnumPlayerPart[]> pair : getPartList()) {
             EntityEquipmentSlot slot = pair.getLeft();

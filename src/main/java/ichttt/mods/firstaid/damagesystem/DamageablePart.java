@@ -1,7 +1,7 @@
 package ichttt.mods.firstaid.damagesystem;
 
-import ichttt.mods.firstaid.api.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.PartHealer;
+import ichttt.mods.firstaid.FirstAidRegistryImpl;
+import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.damagesystem.debuff.ConstantDebuff;
 import ichttt.mods.firstaid.damagesystem.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
@@ -62,20 +62,12 @@ public class DamageablePart extends AbstractDamageablePart {
         if (activeHealer != null) {
             if (activeHealer.tick()) {
                 heal(1F, player, !world.isRemote);
-                if (!world.isRemote) {
-                    world.playEvent(2005, player.getPosition(), 0);
-                }
             }
             if (activeHealer.hasFinished())
                 activeHealer = null;
         }
         if (!world.isRemote && tickDebuffs)
             Arrays.stream(debuffs).filter(debuff -> debuff instanceof ConstantDebuff).forEach(debuff -> ((ConstantDebuff) debuff).update(player));
-    }
-
-    @Override
-    public void applyItem(PartHealer healer) {
-        activeHealer = healer;
     }
 
     @Override
@@ -86,8 +78,8 @@ public class DamageablePart extends AbstractDamageablePart {
             compound.setFloat("absorption", absorption);
         if (activeHealer != null) {
             compound.setByte("healingItem", (byte) (activeHealer.healingType.ordinal() + 1)); //+1 because of backward compat
-            compound.setInteger("itemTicks", activeHealer.ticksPassed);
-            compound.setInteger("itemHeals", activeHealer.heals);
+            compound.setInteger("itemTicks", activeHealer.getTicksPassed());
+            compound.setInteger("itemHeals", activeHealer.getHealsDone());
         }
         return compound;
     }
@@ -98,7 +90,7 @@ public class DamageablePart extends AbstractDamageablePart {
             return;
         currentHealth = Math.min(maxHealth, nbt.getFloat("health"));
         if (nbt.hasKey("healingItem"))
-            activeHealer = EnumHealingType.VALUES[nbt.getByte("healingItem") - 1].createNewHealer().loadNBT(nbt.getInteger("itemTicks"), nbt.getInteger("itemHeals"));
+            activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(EnumHealingType.VALUES[nbt.getByte("healingItem") - 1]).loadNBT(nbt.getInteger("itemTicks"), nbt.getInteger("itemHeals"));
         if (nbt.hasKey("absorption"))
             absorption = nbt.getFloat("absorption");
         //kick constant debuffs active

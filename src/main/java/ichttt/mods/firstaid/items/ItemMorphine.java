@@ -1,7 +1,7 @@
 package ichttt.mods.firstaid.items;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;

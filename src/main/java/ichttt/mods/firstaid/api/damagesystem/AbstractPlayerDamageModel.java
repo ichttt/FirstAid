@@ -1,4 +1,4 @@
-package ichttt.mods.firstaid.api;
+package ichttt.mods.firstaid.api.damagesystem;
 
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
@@ -7,6 +7,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nullable;
 
 public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDamageablePart>, INBTSerializable<NBTTagCompound> {
     public final AbstractDamageablePart HEAD, LEFT_ARM, LEFT_LEG, LEFT_FOOT, BODY, RIGHT_ARM, RIGHT_LEG, RIGHT_FOOT;
@@ -54,7 +56,7 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
 
     public abstract float getCurrentHealth();
 
-    public abstract boolean isDead();
+    public abstract boolean isDead(@Nullable EntityPlayer player);
 
     public abstract Float getAbsorption();
 

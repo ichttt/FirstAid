@@ -1,4 +1,4 @@
-package ichttt.mods.firstaid.api;
+package ichttt.mods.firstaid.api.damagesystem;
 
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
@@ -15,7 +15,7 @@ public abstract class AbstractDamageablePart implements INBTSerializable<NBTTagC
     @Nonnull
     public final EnumPlayerPart part;
     @Nullable
-    public PartHealer activeHealer;
+    public AbstractPartHealer activeHealer;
     public float currentHealth;
 
     public AbstractDamageablePart(int maxHealth, boolean canCauseDeath, @Nonnull EnumPlayerPart playerPart) {
@@ -29,8 +29,6 @@ public abstract class AbstractDamageablePart implements INBTSerializable<NBTTagC
     public abstract float damage(float amount, EntityPlayer player, boolean applyDebuff);
 
     public abstract void tick(World world, EntityPlayer player, boolean tickDebuffs);
-
-    public abstract void applyItem(PartHealer healer);
 
     public abstract void setAbsorption(float absorption);
 

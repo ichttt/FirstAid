@@ -1,13 +1,16 @@
 package ichttt.mods.firstaid;
 
-import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import com.creativemd.playerrevive.api.capability.CapaRevive;
+import ichttt.mods.firstaid.api.FirstAidRegistry;
+import ichttt.mods.firstaid.api.IDamageDistribution;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.CapProvider;
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.damagesystem.distribution.HealthDistribution;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.items.FirstAidItems;
 import ichttt.mods.firstaid.network.MessageAddHealth;
 import ichttt.mods.firstaid.network.MessageReceiveConfiguration;
@@ -56,41 +59,27 @@ public class EventHandler {
     public static final Random rand = new Random();
     public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
 
-    @SubscribeEvent(priority = EventPriority.LOW) //so all other can modify their damage first, and we apply after that
+    @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
         float amountToDamage = event.getAmount();
         if (entity.getEntityWorld().isRemote || !entity.hasCapability(CapabilityExtendedHealthSystem.INSTANCE, null))
             return;
         EntityPlayer player = (EntityPlayer) entity;
+        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
         if (amountToDamage == Float.MAX_VALUE) {
+            damageModel.forEach(damageablePart -> damageablePart.currentHealth = 0F);
             if (player instanceof EntityPlayerMP)
                 Arrays.stream(EnumPlayerPart.VALUES).forEach(part -> FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, Float.MAX_VALUE), (EntityPlayerMP) player));
+            if (CapaRevive.reviveCapa != null && player.hasCapability(CapaRevive.reviveCapa, null)) { //special path for PlayerRevival
+                event.setCanceled(true);
+                player.setHealth(0F);
+            }
             return;
         }
-        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+
         DamageSource source = event.getSource();
-        String sourceType = source.damageType;
-        DamageDistribution damageDistribution;
-        switch (sourceType) {
-            case "fall":
-            case "hotFloor":
-                damageDistribution = FALL_DMG;
-                break;
-            case "fallingBlock":
-            case "anvil":
-                damageDistribution = HEAD;
-                break;
-            case "starve":
-                damageDistribution = STARVE;
-                break;
-            case "magic":
-            case "drown":
-                damageDistribution = FULL_RANDOM_DIST;
-                break;
-            default:
-                damageDistribution = SEMI_RANDOM_DIST;
-        }
+        IDamageDistribution damageDistribution = FirstAidRegistryImpl.INSTANCE.getDamageDistribution(source);
         amountToDamage = ArmorUtils.applyGlobalPotionModifieres(player, source, amountToDamage);
 
         //VANILLA COPY - combat tracker and exhaustion
@@ -108,7 +97,7 @@ public class EventHandler {
         }
 
         event.setCanceled(true);
-        if (damageModel.isDead() && (!FirstAid.activeHealingConfig.allowOtherHealingItems || !player.checkTotemDeathProtection(source)))
+        if (damageModel.isDead(player) && (!FirstAid.activeHealingConfig.allowOtherHealingItems || !player.checkTotemDeathProtection(source)))
             player.setHealth(0F);
     }
 
@@ -176,7 +165,7 @@ public class EventHandler {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onLivingDeath(LivingDeathEvent event) {
         EntityLivingBase entityLiving = event.getEntityLiving();
         if (entityLiving instanceof EntityPlayer && !(entityLiving instanceof FakePlayer)) {

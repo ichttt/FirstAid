@@ -1,8 +1,10 @@
 package ichttt.mods.firstaid.client.gui;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.FirstAidRegistryImpl;
+import ichttt.mods.firstaid.api.FirstAidRegistry;
+import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.network.MessageApplyHealingItem;
@@ -109,7 +111,7 @@ public class GuiApplyHealthItem extends GuiScreen {
         drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
 
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
-        boolean playerDead = damageModel.isDead();
+        boolean playerDead = damageModel.isDead(mc.player);
         drawHealth(damageModel.HEAD, false, 14, playerDead);
         drawHealth(damageModel.LEFT_ARM, false, 39, playerDead);
         drawHealth(damageModel.LEFT_LEG, false, 64, playerDead);
@@ -152,7 +154,7 @@ public class GuiApplyHealthItem extends GuiScreen {
             FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, healingType, activeHand));
             //TODO notify the user somehow (sound?)
             AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
-            part.applyItem(healingType.createNewHealer());
+            part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(healingType);
         }
         Minecraft.getMinecraft().displayGuiScreen(null);
     }

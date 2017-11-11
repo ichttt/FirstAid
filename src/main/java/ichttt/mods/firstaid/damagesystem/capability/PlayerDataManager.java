@@ -2,7 +2,7 @@ package ichttt.mods.firstaid.damagesystem.capability;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
-import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import net.minecraft.entity.player.EntityPlayer;
 

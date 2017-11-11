@@ -7,18 +7,16 @@ import net.minecraft.util.DamageSource;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class StandardDamageDistribution extends DamageDistribution {
-    private final List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList = new ArrayList<>();
+    private final List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList;
 
-    public StandardDamageDistribution addParts(EntityEquipmentSlot slot, EnumPlayerPart... part) {
-        partList.add(Pair.of(slot, part));
-        return this;
+    public StandardDamageDistribution(List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList) {
+        this.partList = partList;
     }
 
     @Override
@@ -28,7 +26,7 @@ public class StandardDamageDistribution extends DamageDistribution {
     }
 
     @Override
-    public float distributeDamage(float damage, EntityPlayer player, DamageSource source, boolean addStat) {
+    public float distributeDamage(float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat) {
         float rest = super.distributeDamage(damage, player, source, addStat);
         if (rest > 0) {
             EnumPlayerPart[] parts = partList.get(partList.size() - 1).getRight();

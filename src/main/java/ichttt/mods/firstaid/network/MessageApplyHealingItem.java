@@ -1,8 +1,9 @@
 package ichttt.mods.firstaid.network;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.FirstAidRegistryImpl;
+import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
@@ -68,7 +69,7 @@ public class MessageApplyHealingItem implements IMessage {
                 }
                 stack.shrink(1);
                 AbstractDamageablePart damageablePart = damageModel.getFromEnum(message.part);
-                damageablePart.applyItem(message.healingType.createNewHealer());
+                damageablePart.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(message.healingType);
             });
             return null;
         }

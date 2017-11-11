@@ -1,8 +1,8 @@
 package ichttt.mods.firstaid.client.gui;
 
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -50,7 +50,7 @@ public class HUDHandler {
         }
         GlStateManager.pushMatrix();
         GlStateManager.translate(xOffset, yOffset, 0F);
-        boolean playerDead = damageModel.isDead();
+        boolean playerDead = damageModel.isDead(mc.player);
         for (AbstractDamageablePart part : damageModel) {
             mc.fontRenderer.drawString(I18n.format("gui." + part.part.toString().toLowerCase(Locale.ENGLISH)), 0, 0, 0xFFFFFF);
             mc.getTextureManager().bindTexture(Gui.ICONS);

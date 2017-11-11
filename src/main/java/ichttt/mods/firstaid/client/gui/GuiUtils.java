@@ -2,7 +2,7 @@ package ichttt.mods.firstaid.client.gui;
 
 import com.google.common.collect.ImmutableMap;
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.Minecraft;

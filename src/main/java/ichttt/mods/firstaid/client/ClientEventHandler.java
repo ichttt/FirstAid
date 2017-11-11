@@ -1,7 +1,7 @@
 package ichttt.mods.firstaid.client;
 
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.gui.GuiApplyHealthItem;
 import ichttt.mods.firstaid.client.gui.HUDHandler;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;

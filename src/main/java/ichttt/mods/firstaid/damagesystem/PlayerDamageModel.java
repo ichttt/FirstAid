@@ -7,11 +7,11 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.debuff.AbstractDebuff;
 import ichttt.mods.firstaid.damagesystem.debuff.Debuffs;
 import ichttt.mods.firstaid.damagesystem.debuff.SharedDebuff;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.util.DataManagerWrapper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -28,6 +28,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private float prevHealthCurrent = -1F;
     private float prevScaleFactor;
     private final List<SharedDebuff> sharedDebuffs = new ArrayList<>(2);
+    private boolean waitingForHelp = false;
 
     public static AbstractPlayerDamageModel create() {
         return create_impl(Objects.requireNonNull(FirstAid.activeDamageConfig));
@@ -105,7 +106,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public void tick(World world, EntityPlayer player) {
-        if (player.isDead || player.getHealth() <= 0F || isDead(player))
+        if (isDead(player))
             return;
 
         float currentHealth = getCurrentHealth();
@@ -114,7 +115,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
         if (FirstAid.playerMaxHealth != -1) {
             float newCurrentHealth = player.getMaxHealth() * (currentHealth / (FirstAid.scaleMaxHealth ? player.getMaxHealth() : FirstAid.playerMaxHealth));
-            
+
             if (Float.isInfinite(newCurrentHealth)) {
                 FirstAid.logger.error("Error calculating current health: Value was infinite");
             } else {
@@ -198,9 +199,24 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     public boolean isDead(@Nullable EntityPlayer player) {
         if (CapaRevive.reviveCapa != null && player != null && player.hasCapability(CapaRevive.reviveCapa, null)) {
             IRevival revival = Objects.requireNonNull(player.getCapability(CapaRevive.reviveCapa, null));
-            if (!revival.isHealty() && !revival.isDead())
+            if (!revival.isHealty() && !revival.isDead()) {
+                this.waitingForHelp = true;
+                return true;
+            }
+            else if (this.waitingForHelp && revival.isRevived()) {
+                this.waitingForHelp = false;
+                player.isDead = false;
+                for (AbstractDamageablePart part : this) {
+                    if (part.canCauseDeath && part.currentHealth <= 0F)
+                        part.currentHealth = 1F;
+                }
                 return false;
+            }
         }
+
+        if (player != null && (player.isDead || player.getHealth() <= 0F))
+            return true;
+
         for (AbstractDamageablePart part : this) {
             if (part.canCauseDeath && part.currentHealth <= 0)
                 return true;

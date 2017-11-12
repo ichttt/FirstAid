@@ -45,7 +45,7 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
-    public static void preRender(RenderGameOverlayEvent.Post event) {
+    public static void preRender(RenderGameOverlayEvent.Pre event) {
         RenderGameOverlayEvent.ElementType type = event.getType();
         if (type == RenderGameOverlayEvent.ElementType.HEALTH && !FirstAidConfig.overlay.showVanillaHealthBar) {
             event.setCanceled(true);

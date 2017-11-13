@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.3.3-DBG", acceptedMinecraftVersions = "[1.12,1.13)")
+@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.3.3", acceptedMinecraftVersions = "[1.12,1.13)")
 public class FirstAid {
     public static Logger logger;
     public static final String MODID = "firstaid";

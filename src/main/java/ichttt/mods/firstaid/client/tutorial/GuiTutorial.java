@@ -28,24 +28,24 @@ public class GuiTutorial extends GuiScreen {
         this.parent = new GuiApplyHealthItem(demoModel);
         this.action = new TutorialAction(this);
 
-        this.action.addTextWrapper("tutorial.welcome");
-        this.action.addTextWrapper("tutorial.line1");
-        this.action.addTextWrapper("tutorial.line2");
+        this.action.addTextWrapper("firstaid.tutorial.welcome");
+        this.action.addTextWrapper("firstaid.tutorial.line1");
+        this.action.addTextWrapper("firstaid.tutorial.line2");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_FOOT.damage(4F, null, false));
-        this.action.addTextWrapper("tutorial.line3");
+        this.action.addTextWrapper("firstaid.tutorial.line3");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.applyMorphine());
-        this.action.addTextWrapper("tutorial.line4");
-        this.action.addTextWrapper("tutorial.line5");
+        this.action.addTextWrapper("firstaid.tutorial.line4");
+        this.action.addTextWrapper("firstaid.tutorial.line5");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_FOOT.heal(3F, null, false));
-        this.action.addTextWrapper("tutorial.line6");
+        this.action.addTextWrapper("firstaid.tutorial.line6");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.HEAD.damage(16F, null, false));
-        this.action.addTextWrapper("tutorial.line7");
-        this.action.addTextWrapper("tutorial.line8", ClientProxy.showWounds.getDisplayName());
+        this.action.addTextWrapper("firstaid.tutorial.line7");
+        this.action.addTextWrapper("firstaid.tutorial.line8", ClientProxy.showWounds.getDisplayName());
         this.action.addActionCallable(guiTutorial -> {
             guiTutorial.buttonList.remove(0);
             this.buttonList.add(new GuiButton(1, parent.guiLeft + GuiApplyHealthItem.xSize - 34, guiTop + 4, 32, 20, "end"));
         });
-        this.action.addTextWrapper("tutorial.end");
+        this.action.addTextWrapper("firstaid.tutorial.end");
 
         this.action.next();
     }

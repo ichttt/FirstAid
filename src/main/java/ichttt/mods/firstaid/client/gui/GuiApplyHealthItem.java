@@ -22,6 +22,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 @SideOnly(Side.CLIENT)
 public class GuiApplyHealthItem extends GuiScreen {
@@ -138,7 +139,7 @@ public class GuiApplyHealthItem extends GuiScreen {
     private void tooltipButton(GuiButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
         if (!enabled && button.hovered)
-            drawHoveringText("Currently active: " + part.activeHealer.healingType, mouseX, mouseY);
+            drawHoveringText(I18n.format("gui.active_item") + " :" + I18n.format("item." + part.activeHealer.healingType.toString().toLowerCase(Locale.ENGLISH) + ".name"), mouseX, mouseY);
         if (!disableButtons)
             button.enabled = enabled;
     }

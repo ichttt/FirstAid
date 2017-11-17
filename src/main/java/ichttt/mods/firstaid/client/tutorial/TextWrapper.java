@@ -29,6 +29,7 @@ public class TextWrapper {
                 builder.append('-');
                 lines.add(builder.toString());
                 builder = new StringBuilder();
+                builder.append(c);
                 count = 0;
             } else {
                 builder.append(c);

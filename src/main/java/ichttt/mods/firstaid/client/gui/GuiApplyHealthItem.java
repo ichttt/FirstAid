@@ -21,6 +21,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
@@ -107,8 +108,8 @@ public class GuiApplyHealthItem extends GuiScreen {
         super.drawScreen(mouseX, mouseY, partialTicks);
         int morphineTicks = damageModel.getMorphineTicks();
         if (morphineTicks > 0)
-            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", StringUtils.ticksToElapsedTime(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - 29, 0xFFFFFF);
-        drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
+            drawCenteredString(this.mc.fontRendererObj, I18n.format("gui.morphine_left", StringUtils.ticksToElapsedTime(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - 29, 0xFFFFFF);
+        drawCenteredString(this.mc.fontRendererObj, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
 
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
         boolean playerDead = damageModel.isDead(mc.player);
@@ -138,7 +139,7 @@ public class GuiApplyHealthItem extends GuiScreen {
     private void tooltipButton(GuiButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
         if (!enabled && button.hovered)
-            drawHoveringText("Currently active: " + part.activeHealer.healingType, mouseX, mouseY);
+            drawHoveringText(Collections.singletonList("Currently active: " + part.activeHealer.healingType), mouseX, mouseY);
         if (!disableButtons)
             button.enabled = enabled;
     }

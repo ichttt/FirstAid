@@ -52,7 +52,7 @@ public class HUDHandler {
         GlStateManager.translate(xOffset, yOffset, 0F);
         boolean playerDead = damageModel.isDead(mc.player);
         for (AbstractDamageablePart part : damageModel) {
-            mc.fontRenderer.drawString(I18n.format("gui." + part.part.toString().toLowerCase(Locale.ENGLISH)), 0, 0, 0xFFFFFF);
+            mc.fontRendererObj.drawString(I18n.format("gui." + part.part.toString().toLowerCase(Locale.ENGLISH)), 0, 0, 0xFFFFFF);
             mc.getTextureManager().bindTexture(Gui.ICONS);
             GuiUtils.drawHealth(part, 60, 0, gui, false, playerDead);
             GlStateManager.translate(0, 10F, 0F);

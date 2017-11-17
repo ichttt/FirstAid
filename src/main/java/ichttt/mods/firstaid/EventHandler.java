@@ -57,7 +57,7 @@ import static ichttt.mods.firstaid.damagesystem.distribution.DamageDistributions
 
 public class EventHandler {
     public static final Random rand = new Random();
-    public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
+    public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")).setRegistryName(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
 
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
@@ -118,11 +118,6 @@ public class EventHandler {
             //replace the data manager with our wrapper to grab absorption
             player.dataManager = new DataManagerWrapper(player, player.dataManager);
         }
-    }
-
-    @SubscribeEvent
-    public static void registerSound(RegistryEvent.Register<SoundEvent> event) {
-        event.getRegistry().register(HEARTBEAT);
     }
 
     @SubscribeEvent

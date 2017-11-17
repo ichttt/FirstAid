@@ -6,10 +6,13 @@ import ichttt.mods.firstaid.IProxy;
 import ichttt.mods.firstaid.client.gui.GuiApplyHealthItem;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
+import ichttt.mods.firstaid.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.client.GuiIngameForge;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -28,6 +31,9 @@ public class ClientProxy implements IProxy {
         MinecraftForge.EVENT_BUS.register(ClientEventHandler.class);
         ClientRegistry.registerKeyBinding(showWounds);
         GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
+        ModelLoader.setCustomModelResourceLocation(FirstAidItems.BANDAGE, 0, new ModelResourceLocation("firstaid:bandage"));
+        ModelLoader.setCustomModelResourceLocation(FirstAidItems.PLASTER, 0, new ModelResourceLocation("firstaid:plaster"));
+        ModelLoader.setCustomModelResourceLocation(FirstAidItems.MORPHINE, 0, new ModelResourceLocation("firstaid:morphine"));
     }
 
     @Override

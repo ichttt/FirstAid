@@ -15,6 +15,7 @@ gui.apply_hint=Wähle die Stelle, wo das Item angebracht werden soll
 gui.morphine_left=Morphium aktiv(%s verbleibend)
 gui.active_item=Gerade aktiv
 
+firstaid.tutorial.hint=Drücke %s für das Tutorial
 firstaid.tutorial.welcome=Willkommen zum FirstAid Mod! Dieses Tutorial wird dich durch den Mod und seine Mechaniken führen.
 firstaid.tutorial.line1=Wie du vielleicht schon gemerkt hast, ist die normale Lebensleiste weg. Sie wurde duch dieses System ersetzt.
 firstaid.tutorial.line2=Jeder Teil deines Körpers hat seine eigene Lebensleiste. Wenn du zum Beispiel von einem hohen Platz fällst...

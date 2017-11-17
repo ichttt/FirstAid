@@ -41,10 +41,6 @@ public class GuiTutorial extends GuiScreen {
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.HEAD.damage(16F, null, false));
         this.action.addTextWrapper("firstaid.tutorial.line7");
         this.action.addTextWrapper("firstaid.tutorial.line8", ClientProxy.showWounds.getDisplayName());
-        this.action.addActionCallable(guiTutorial -> {
-            guiTutorial.buttonList.remove(0);
-            this.buttonList.add(new GuiButton(1, parent.guiLeft + GuiApplyHealthItem.xSize - 34, guiTop + 4, 32, 20, "end"));
-        });
         this.action.addTextWrapper("firstaid.tutorial.end");
 
         this.action.next();
@@ -61,11 +57,16 @@ public class GuiTutorial extends GuiScreen {
 
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
-        if (button.id == 9 || button.id == 1) {
+        if (button.id == 9) {
             FirstAid.NETWORKING.sendToServer(new MessageHasTutorial());
-            mc.displayGuiScreen(button.id == 1 ? new GuiApplyHealthItem(PlayerDataManager.getDamageModel(mc.player)) : null);
+            mc.displayGuiScreen(null);
         } else if (button.id == 0) {
-            this.action.next();
+            if (action.hasNext())
+                this.action.next();
+            else {
+                FirstAid.NETWORKING.sendToServer(new MessageHasTutorial());
+                mc.displayGuiScreen(new GuiApplyHealthItem(PlayerDataManager.getDamageModel(mc.player)));
+            }
         }
     }
 

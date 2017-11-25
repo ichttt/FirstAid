@@ -7,6 +7,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.network.MessageApplyHealingItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -146,6 +147,13 @@ public class GuiApplyHealthItem extends GuiScreen {
 
     public void drawHealth(AbstractDamageablePart damageablePart, boolean right, int yOffset, boolean playerDead) {
         GuiUtils.drawHealth(damageablePart, guiLeft + (right ? 193 - Math.min(38, GuiUtils.getMaxHearts(damageablePart.getMaxHealth()) * 9 + GuiUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 53), guiTop + yOffset, this, true, playerDead);
+    }
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (keyCode == ClientProxy.showWounds.getKeyCode())
+            Minecraft.getMinecraft().displayGuiScreen(null);
+        super.keyTyped(typedChar, keyCode);
     }
 
     @Override

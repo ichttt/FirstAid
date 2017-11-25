@@ -67,14 +67,15 @@ public class FirstAid {
         CapabilityExtendedHealthSystem.register();
 
         logger.debug("Registering networking");
+        int i = 0;
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
-        NETWORKING.registerMessage(MessageReceiveDamage.Handler.class, MessageReceiveDamage.class, 1, Side.CLIENT);
-        NETWORKING.registerMessage(MessageApplyHealingItem.Handler.class, MessageApplyHealingItem.class, 2 , Side.SERVER);
-        NETWORKING.registerMessage(MessageReceiveConfiguration.Handler.class, MessageReceiveConfiguration.class, 3, Side.CLIENT);
-        NETWORKING.registerMessage(MessageApplyAbsorption.Handler.class, MessageApplyAbsorption.class, 4, Side.CLIENT);
-        NETWORKING.registerMessage(MessageAddHealth.Handler.class, MessageAddHealth.class, 5, Side.CLIENT);
-        NETWORKING.registerMessage(MessagePlayHurtSound.Handler.class, MessagePlayHurtSound.class, 6, Side.CLIENT);
-        NETWORKING.registerMessage(MessageHasTutorial.Handler.class, MessageHasTutorial.class, 7, Side.SERVER);
+        NETWORKING.registerMessage(MessageReceiveDamage.Handler.class, MessageReceiveDamage.class, ++i, Side.CLIENT);
+        NETWORKING.registerMessage(MessageApplyHealingItem.Handler.class, MessageApplyHealingItem.class, ++i , Side.SERVER);
+        NETWORKING.registerMessage(MessageReceiveConfiguration.Handler.class, MessageReceiveConfiguration.class, ++i, Side.CLIENT);
+        NETWORKING.registerMessage(MessageApplyAbsorption.Handler.class, MessageApplyAbsorption.class, ++i, Side.CLIENT);
+        NETWORKING.registerMessage(MessageAddHealth.Handler.class, MessageAddHealth.class, ++i, Side.CLIENT);
+        NETWORKING.registerMessage(MessagePlayHurtSound.Handler.class, MessagePlayHurtSound.class, ++i, Side.CLIENT);
+        NETWORKING.registerMessage(MessageHasTutorial.Handler.class, MessageHasTutorial.class, ++i, Side.SERVER);
         MessageReceiveConfiguration.validate();
 
         logger.debug("Registering defaults registry values");

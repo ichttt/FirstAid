@@ -12,7 +12,9 @@ import ichttt.mods.firstaid.network.*;
 import ichttt.mods.firstaid.util.DebugDamageCommand;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommandManager;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
@@ -24,6 +26,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -44,14 +47,21 @@ public class FirstAid {
     @SidedProxy(clientSide = "ichttt.mods.firstaid.client.ClientProxy", serverSide = "ichttt.mods.firstaid.server.ServerProxy")
     public static IProxy proxy;
 
-    public static CreativeTabFirstAid creativeTab;
+    public static CreativeTabs creativeTab;
     public static SimpleNetworkWrapper NETWORKING;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent pre) {
         logger = pre.getModLog();
         logger.debug("FirstAid starting");
-        creativeTab = new CreativeTabFirstAid();
+        creativeTab = new CreativeTabs(FirstAid.MODID) {
+            @Nonnull
+            @Override
+            public ItemStack getTabIconItem() {
+                return new ItemStack(FirstAidItems.BANDAGE, 1);
+            }
+        };
+
         FirstAidItems.init();
         proxy.init();
         //Setup API
@@ -99,8 +109,8 @@ public class FirstAid {
         bodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.BODY}));
         registry.bindDamageSourceStandard("starve", bodyList);
 
-        registry.bindDamageSourceRandom("magic", true);
-        registry.bindDamageSourceRandom("drown", true);
+        registry.bindDamageSourceRandom("magic", false, false);
+        registry.bindDamageSourceRandom("drown", false, true);
 
         logger.debug("Initializing debuffs");
         //noinspection ResultOfMethodCallIgnored

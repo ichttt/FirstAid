@@ -1,15 +1,16 @@
 package ichttt.mods.firstaid;
 
 import com.creativemd.playerrevive.api.capability.CapaRevive;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.CapProvider;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.damagesystem.distribution.PreferredDamageDistribution;
+import ichttt.mods.firstaid.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.items.FirstAidItems;
 import ichttt.mods.firstaid.network.MessageAddHealth;
 import ichttt.mods.firstaid.network.MessageReceiveConfiguration;
@@ -58,8 +59,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
-import static ichttt.mods.firstaid.damagesystem.distribution.DamageDistributions.*;
-
 public class EventHandler {
     public static final Random rand = new Random();
     public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
@@ -76,7 +75,7 @@ public class EventHandler {
         if (amountToDamage == Float.MAX_VALUE) {
             damageModel.forEach(damageablePart -> damageablePart.currentHealth = 0F);
             if (player instanceof EntityPlayerMP)
-                Arrays.stream(EnumPlayerPart.VALUES).forEach(part -> FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, Float.MAX_VALUE), (EntityPlayerMP) player));
+                Arrays.stream(EnumPlayerPart.VALUES).forEach(part -> FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, Float.MAX_VALUE, 0F), (EntityPlayerMP) player));
             if (CapaRevive.reviveCapa != null && player.hasCapability(CapaRevive.reviveCapa, null)) { //special path for PlayerRevival
                 event.setCanceled(true);
                 ((DataManagerWrapper)player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
@@ -109,12 +108,12 @@ public class EventHandler {
 
         float left = damageDistribution.distributeDamage(amountToDamage, player, source, addStat);
         if (left > 0) {
-            damageDistribution = SEMI_RANDOM_DIST;
+            damageDistribution = RandomDamageDistribution.NEAREST_KILL;
             damageDistribution.distributeDamage(left, player, source, addStat);
         }
 
         event.setCanceled(true);
-        if (damageModel.isDead(player) && (!FirstAid.activeHealingConfig.allowOtherHealingItems || !player.checkTotemDeathProtection(source)))
+        if (damageModel.isDead(null) && (!FirstAid.activeHealingConfig.allowOtherHealingItems || !player.checkTotemDeathProtection(source)))
             ((DataManagerWrapper)player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
 
         hitList.remove(player);

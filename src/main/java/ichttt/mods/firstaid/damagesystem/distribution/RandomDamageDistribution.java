@@ -1,6 +1,8 @@
 package ichttt.mods.firstaid.damagesystem.distribution;
 
+import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -12,11 +14,25 @@ import java.util.List;
 import java.util.Random;
 
 public class RandomDamageDistribution extends DamageDistribution {
+    public static final RandomDamageDistribution NEAREST_NOKILL = new RandomDamageDistribution(true, true);
+    public static final RandomDamageDistribution NEAREST_KILL = new RandomDamageDistribution(true, false);
+    public static final RandomDamageDistribution ANY_NOKILL = new RandomDamageDistribution(false, true);
+    public static final RandomDamageDistribution ANY_KILL = new RandomDamageDistribution(false, false);
+
     private static final Random RANDOM = new Random();
     private final boolean nearestFirst;
+    private boolean tryNoKill;
 
-    public RandomDamageDistribution(boolean nearestFirst) {
+    public RandomDamageDistribution(boolean nearestFirst, boolean tryNoKill) {
         this.nearestFirst = nearestFirst;
+        this.tryNoKill = tryNoKill;
+    }
+
+    @Override
+    protected float minHealth(@Nonnull EntityPlayer player, @Nonnull AbstractDamageablePart playerPart) {
+        if (tryNoKill && playerPart.canCauseDeath)
+            return 1F;
+        return 0F;
     }
 
     @Override

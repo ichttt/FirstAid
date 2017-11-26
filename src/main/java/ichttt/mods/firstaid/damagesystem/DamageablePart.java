@@ -2,10 +2,10 @@ package ichttt.mods.firstaid.damagesystem;
 
 import ichttt.mods.firstaid.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
-import ichttt.mods.firstaid.damagesystem.debuff.ConstantDebuff;
-import ichttt.mods.firstaid.damagesystem.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.damagesystem.debuff.ConstantDebuff;
+import ichttt.mods.firstaid.damagesystem.debuff.IDebuff;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -45,13 +45,20 @@ public class DamageablePart extends AbstractDamageablePart {
 
     @Override
     public float damage(float amount, EntityPlayer player, boolean applyDebuff) {
+        return damage(amount, player, applyDebuff, 0F);
+    }
+
+    @Override
+    public float damage(float amount, EntityPlayer player, boolean applyDebuff, float minHealth) {
+        if (minHealth > maxHealth)
+            throw new IllegalArgumentException("Cannot damage part with minHealth " + minHealth + " while he has more max health (" + maxHealth + ")");
         float origAmount = amount;
         if (absorption > 0) {
             amount = Math.abs(Math.min(0, absorption - origAmount));
             absorption = Math.max(0, absorption - origAmount);
         }
-        float notFitting = Math.abs(Math.min(0, currentHealth - amount));
-        currentHealth = Math.max(0, currentHealth - amount);
+        float notFitting = Math.abs(Math.min(minHealth, currentHealth - amount) - minHealth);
+        currentHealth = Math.max(minHealth, currentHealth - amount);
         if (applyDebuff)
             Arrays.stream(debuffs).forEach(debuff -> debuff.handleDamageTaken(origAmount - notFitting, currentHealth / maxHealth, (EntityPlayerMP) player));
         return notFitting;

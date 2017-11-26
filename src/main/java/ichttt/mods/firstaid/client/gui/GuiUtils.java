@@ -1,10 +1,10 @@
 package ichttt.mods.firstaid.client.gui;
 
 import com.google.common.collect.ImmutableMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -17,7 +17,7 @@ import java.util.Objects;
 @SideOnly(Side.CLIENT)
 public class GuiUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
-    private static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
+    private static final TObjectIntHashMap<EnumPlayerPart> prevHealth = new TObjectIntHashMap<>();
     private static final ImmutableMap<EnumPlayerPart, FlashStateManager> flashStates;
 
     static {
@@ -36,7 +36,7 @@ public class GuiUtils {
         int absorption = (int) Math.ceil(damageablePart.getAbsorption());
         FlashStateManager activeFlashState = Objects.requireNonNull(flashStates.get(damageablePart.part));
         if (prevHealth.containsKey(damageablePart.part)) {
-            int prev = prevHealth.getInt(damageablePart.part);
+            int prev = prevHealth.get(damageablePart.part);
             if (prev != current)
                 activeFlashState.setActive(Minecraft.getSystemTime());
         }

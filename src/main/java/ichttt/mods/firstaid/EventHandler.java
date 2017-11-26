@@ -41,8 +41,6 @@ import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -61,7 +59,6 @@ import java.util.Random;
 
 public class EventHandler {
     public static final Random rand = new Random();
-    private static final HashMap<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new HashMap<>();
     public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")).setRegistryName(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
 
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
@@ -96,16 +93,6 @@ public class EventHandler {
         boolean addStat = amountToDamage < 3.4028235E37F;
         IDamageDistribution damageDistribution = FirstAidRegistryImpl.INSTANCE.getDamageDistribution(source);
 
-        if (source.isProjectile()) {
-            Pair<Entity, RayTraceResult> rayTraceResult = hitList.remove(player);
-            if (rayTraceResult != null) {
-                Entity entityProjectile = rayTraceResult.getLeft();
-                EntityEquipmentSlot slot = ProjectileHelper.getPartByPosition(entityProjectile, player);
-                if (slot != null)
-                    damageDistribution = new PreferredDamageDistribution(slot);
-            }
-        }
-
         float left = damageDistribution.distributeDamage(amountToDamage, player, source, addStat);
         if (left > 0) {
             damageDistribution = RandomDamageDistribution.NEAREST_KILL;
@@ -115,20 +102,6 @@ public class EventHandler {
         event.setCanceled(true);
         if (damageModel.isDead(null) && (!FirstAid.activeHealingConfig.allowOtherHealingItems || !player.checkTotemDeathProtection(source)))
             ((DataManagerWrapper)player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
-
-        hitList.remove(player);
-    }
-
-    @SubscribeEvent(priority =  EventPriority.LOWEST)
-    public static void onProjectileImpact(ProjectileImpactEvent event) {
-        RayTraceResult result = event.getRayTraceResult();
-        if (result.typeOfHit != RayTraceResult.Type.ENTITY)
-            return;
-
-        Entity entity = result.entityHit;
-        if (!entity.world.isRemote && entity instanceof EntityPlayer) {
-            hitList.put((EntityPlayer) entity, Pair.of(event.getEntity(), event.getRayTraceResult()));
-        }
     }
 
     @SubscribeEvent
@@ -233,11 +206,6 @@ public class EventHandler {
                 PlayerDataManager.tutorialDone.add(event.player.getName());
             FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(damageModel, FirstAidConfig.externalHealing, FirstAidConfig.damageSystem, FirstAidConfig.scaleMaxHealth), (EntityPlayerMP) event.player);
         }
-    }
-
-    @SubscribeEvent(priority =  EventPriority.LOW)
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        hitList.remove(event.player);
     }
 
     @SubscribeEvent

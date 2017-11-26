@@ -119,7 +119,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             if (Float.isInfinite(newCurrentHealth)) {
                 FirstAid.logger.error("Error calculating current health: Value was infinite");
             } else {
-                if (newCurrentHealth != prevHealthCurrent && !world.isRemote)
+                if (newCurrentHealth != prevHealthCurrent)
                     ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
                 prevHealthCurrent = newCurrentHealth;
             }

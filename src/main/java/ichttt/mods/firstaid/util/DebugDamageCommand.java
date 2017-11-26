@@ -76,7 +76,7 @@ public class DebugDamageCommand extends CommandBase {
             FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, damage), (EntityPlayerMP) player);
             if (damageModel.isDead(player)) {
                 player.sendMessage(new TextComponentTranslation("death.attack.generic", player.getDisplayName()));
-                player.setHealth(0F);
+                ((DataManagerWrapper)player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
             }
         } catch (RuntimeException e) {
             throw new CommandException(e.toString());

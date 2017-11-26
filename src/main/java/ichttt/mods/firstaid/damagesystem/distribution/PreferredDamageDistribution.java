@@ -17,6 +17,10 @@ public class PreferredDamageDistribution extends DamageDistribution {
             throw new IllegalArgumentException("ArmorSlot " + slot + " is not for PlayerPart " + preferred);
     }
 
+    public PreferredDamageDistribution(EntityEquipmentSlot slot) {
+        this.slot = slot;
+    }
+
     @Nonnull
     @Override
     protected List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> getPartList() {

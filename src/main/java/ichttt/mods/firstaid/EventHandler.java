@@ -1,7 +1,6 @@
 package ichttt.mods.firstaid;
 
 import com.creativemd.playerrevive.api.capability.CapaRevive;
-import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
@@ -9,23 +8,26 @@ import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.damagesystem.capability.CapProvider;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
-import ichttt.mods.firstaid.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.damagesystem.distribution.HealthDistribution;
+import ichttt.mods.firstaid.damagesystem.distribution.PreferredDamageDistribution;
 import ichttt.mods.firstaid.items.FirstAidItems;
 import ichttt.mods.firstaid.network.MessageAddHealth;
 import ichttt.mods.firstaid.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.util.ArmorUtils;
 import ichttt.mods.firstaid.util.DataManagerWrapper;
+import ichttt.mods.firstaid.util.ProjectileHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootEntryItem;
 import net.minecraft.world.storage.loot.LootPool;
@@ -39,6 +41,7 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -49,8 +52,10 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Random;
 
 import static ichttt.mods.firstaid.damagesystem.distribution.DamageDistributions.*;
@@ -58,12 +63,13 @@ import static ichttt.mods.firstaid.damagesystem.distribution.DamageDistributions
 public class EventHandler {
     public static final Random rand = new Random();
     public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
+    private static final HashMap<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new HashMap<>();
 
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
         float amountToDamage = event.getAmount();
-        if (entity.getEntityWorld().isRemote || !entity.hasCapability(CapabilityExtendedHealthSystem.INSTANCE, null))
+        if (entity.getEntityWorld().isRemote || !(entity instanceof EntityPlayer))
             return;
         EntityPlayer player = (EntityPlayer) entity;
         AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
@@ -73,13 +79,12 @@ public class EventHandler {
                 Arrays.stream(EnumPlayerPart.VALUES).forEach(part -> FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, Float.MAX_VALUE), (EntityPlayerMP) player));
             if (CapaRevive.reviveCapa != null && player.hasCapability(CapaRevive.reviveCapa, null)) { //special path for PlayerRevival
                 event.setCanceled(true);
-                player.setHealth(0F);
+                ((DataManagerWrapper)player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
             }
             return;
         }
 
         DamageSource source = event.getSource();
-        IDamageDistribution damageDistribution = FirstAidRegistryImpl.INSTANCE.getDamageDistribution(source);
         amountToDamage = ArmorUtils.applyGlobalPotionModifieres(player, source, amountToDamage);
 
         //VANILLA COPY - combat tracker and exhaustion
@@ -90,6 +95,18 @@ public class EventHandler {
         }
 
         boolean addStat = amountToDamage < 3.4028235E37F;
+        IDamageDistribution damageDistribution = FirstAidRegistryImpl.INSTANCE.getDamageDistribution(source);
+
+        if (source.isProjectile()) {
+            Pair<Entity, RayTraceResult> rayTraceResult = hitList.remove(player);
+            if (rayTraceResult != null) {
+                Entity entityProjectile = rayTraceResult.getLeft();
+                EntityEquipmentSlot slot = ProjectileHelper.getPartByPosition(entityProjectile, player);
+                if (slot != null)
+                    damageDistribution = new PreferredDamageDistribution(slot);
+            }
+        }
+
         float left = damageDistribution.distributeDamage(amountToDamage, player, source, addStat);
         if (left > 0) {
             damageDistribution = SEMI_RANDOM_DIST;
@@ -98,7 +115,21 @@ public class EventHandler {
 
         event.setCanceled(true);
         if (damageModel.isDead(player) && (!FirstAid.activeHealingConfig.allowOtherHealingItems || !player.checkTotemDeathProtection(source)))
-            player.setHealth(0F);
+            ((DataManagerWrapper)player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
+
+        hitList.remove(player);
+    }
+
+    @SubscribeEvent(priority =  EventPriority.LOWEST)
+    public static void onProjectileImpact(ProjectileImpactEvent event) {
+        RayTraceResult result = event.getRayTraceResult();
+        if (result.typeOfHit != RayTraceResult.Type.ENTITY)
+            return;
+
+        Entity entity = result.entityHit;
+        if (!entity.world.isRemote && entity instanceof EntityPlayer) {
+            hitList.put((EntityPlayer) entity, Pair.of(event.getEntity(), event.getRayTraceResult()));
+        }
     }
 
     @SubscribeEvent
@@ -208,6 +239,11 @@ public class EventHandler {
                 PlayerDataManager.tutorialDone.add(event.player.getName());
             FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(damageModel, FirstAidConfig.externalHealing, FirstAidConfig.damageSystem, FirstAidConfig.scaleMaxHealth), (EntityPlayerMP) event.player);
         }
+    }
+
+    @SubscribeEvent(priority =  EventPriority.LOW)
+    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        hitList.remove(event.player);
     }
 
     @SubscribeEvent

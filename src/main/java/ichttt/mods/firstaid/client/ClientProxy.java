@@ -3,8 +3,11 @@ package ichttt.mods.firstaid.client;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.IProxy;
+import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.client.gui.GuiApplyHealthItem;
+import ichttt.mods.firstaid.client.gui.HUDHandler;
 import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
+import net.minecraft.client.resources.IReloadableResourceManager;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
@@ -31,6 +34,7 @@ public class ClientProxy implements IProxy {
         MinecraftForge.EVENT_BUS.register(ClientEventHandler.class);
         ClientRegistry.registerKeyBinding(showWounds);
         GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
+        ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(manager -> HUDHandler.rebuildTranslationTable());
         ModelLoader.setCustomModelResourceLocation(FirstAidItems.BANDAGE, 0, new ModelResourceLocation("firstaid:bandage"));
         ModelLoader.setCustomModelResourceLocation(FirstAidItems.PLASTER, 0, new ModelResourceLocation("firstaid:plaster"));
         ModelLoader.setCustomModelResourceLocation(FirstAidItems.MORPHINE, 0, new ModelResourceLocation("firstaid:morphine"));
@@ -38,7 +42,8 @@ public class ClientProxy implements IProxy {
 
     @Override
     public void showGuiApplyHealth(EnumHealingType healingType, EnumHand activeHand) {
-        GuiApplyHealthItem.INSTANCE = new GuiApplyHealthItem(PlayerDataManager.getDamageModel(Minecraft.getMinecraft().player), healingType, activeHand);
-        Minecraft.getMinecraft().displayGuiScreen(GuiApplyHealthItem.INSTANCE);
+        Minecraft mc = Minecraft.getMinecraft();
+        GuiApplyHealthItem.INSTANCE = new GuiApplyHealthItem(PlayerDataManager.getDamageModel(mc.player), healingType, activeHand);
+        mc.displayGuiScreen(GuiApplyHealthItem.INSTANCE);
     }
 }

@@ -28,6 +28,8 @@ public abstract class AbstractDamageablePart implements INBTSerializable<NBTTagC
 
     public abstract float damage(float amount, EntityPlayer player, boolean applyDebuff);
 
+    public abstract float damage(float amount, EntityPlayer player, boolean applyDebuff, float minHealth);
+
     public abstract void tick(World world, EntityPlayer player, boolean tickDebuffs);
 
     public abstract void setAbsorption(float absorption);

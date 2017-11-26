@@ -18,25 +18,28 @@ public class MessageReceiveDamage implements IMessage {
 
     private EnumPlayerPart part;
     private float damageAmount;
+    private float minHealth;
 
     public MessageReceiveDamage() {}
 
-    public MessageReceiveDamage(EnumPlayerPart part, float damageAmount) {
-
+    public MessageReceiveDamage(EnumPlayerPart part, float damageAmount, float minHealth) {
         this.part = part;
         this.damageAmount = damageAmount;
+        this.minHealth = minHealth;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         part = EnumPlayerPart.fromID(buf.readByte());
         damageAmount = buf.readFloat();
+        minHealth = buf.readFloat();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeByte(part.id);
         buf.writeFloat(damageAmount);
+        buf.writeFloat(minHealth);
     }
 
     public static class Handler implements IMessageHandler<MessageReceiveDamage, IMessage> {
@@ -48,7 +51,7 @@ public class MessageReceiveDamage implements IMessage {
                AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(Minecraft.getMinecraft().player);
                 Objects.requireNonNull(damageModel);
                 AbstractDamageablePart part = damageModel.getFromEnum(message.part);
-                part.damage(message.damageAmount, null, false);
+                part.damage(message.damageAmount, null, false, message.minHealth);
             });
             return null;
         }

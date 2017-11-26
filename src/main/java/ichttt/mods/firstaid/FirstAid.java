@@ -12,6 +12,7 @@ import ichttt.mods.firstaid.network.*;
 import ichttt.mods.firstaid.util.DebugDamageCommand;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommandManager;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
@@ -32,6 +33,7 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -52,14 +54,21 @@ public class FirstAid {
     @SidedProxy(clientSide = "ichttt.mods.firstaid.client.ClientProxy", serverSide = "ichttt.mods.firstaid.server.ServerProxy")
     public static IProxy proxy;
 
-    public static CreativeTabFirstAid creativeTab;
+    public static CreativeTabs creativeTab;
     public static SimpleNetworkWrapper NETWORKING;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent pre) {
         logger = pre.getModLog();
         logger.debug("FirstAid starting");
-        creativeTab = new CreativeTabFirstAid();
+        creativeTab = new CreativeTabs(FirstAid.MODID) {
+            @Nonnull
+            @Override
+            public ItemStack getTabIconItem() {
+                return new ItemStack(FirstAidItems.BANDAGE, 1);
+            }
+        };
+
         FirstAidItems.init();
         proxy.init();
         //Setup API
@@ -93,14 +102,15 @@ public class FirstAid {
         CapabilityExtendedHealthSystem.register();
 
         logger.debug("Registering networking");
+        int i = 0;
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
-        NETWORKING.registerMessage(MessageReceiveDamage.Handler.class, MessageReceiveDamage.class, 1, Side.CLIENT);
-        NETWORKING.registerMessage(MessageApplyHealingItem.Handler.class, MessageApplyHealingItem.class, 2 , Side.SERVER);
-        NETWORKING.registerMessage(MessageReceiveConfiguration.Handler.class, MessageReceiveConfiguration.class, 3, Side.CLIENT);
-        NETWORKING.registerMessage(MessageApplyAbsorption.Handler.class, MessageApplyAbsorption.class, 4, Side.CLIENT);
-        NETWORKING.registerMessage(MessageAddHealth.Handler.class, MessageAddHealth.class, 5, Side.CLIENT);
-        NETWORKING.registerMessage(MessagePlayHurtSound.Handler.class, MessagePlayHurtSound.class, 6, Side.CLIENT);
-        NETWORKING.registerMessage(MessageHasTutorial.Handler.class, MessageHasTutorial.class, 7, Side.SERVER);
+        NETWORKING.registerMessage(MessageReceiveDamage.Handler.class, MessageReceiveDamage.class, ++i, Side.CLIENT);
+        NETWORKING.registerMessage(MessageApplyHealingItem.Handler.class, MessageApplyHealingItem.class, ++i , Side.SERVER);
+        NETWORKING.registerMessage(MessageReceiveConfiguration.Handler.class, MessageReceiveConfiguration.class, ++i, Side.CLIENT);
+        NETWORKING.registerMessage(MessageApplyAbsorption.Handler.class, MessageApplyAbsorption.class, ++i, Side.CLIENT);
+        NETWORKING.registerMessage(MessageAddHealth.Handler.class, MessageAddHealth.class, ++i, Side.CLIENT);
+        NETWORKING.registerMessage(MessagePlayHurtSound.Handler.class, MessagePlayHurtSound.class, ++i, Side.CLIENT);
+        NETWORKING.registerMessage(MessageHasTutorial.Handler.class, MessageHasTutorial.class, ++i, Side.SERVER);
         MessageReceiveConfiguration.validate();
 
         logger.debug("Registering defaults registry values");
@@ -124,8 +134,8 @@ public class FirstAid {
         bodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.BODY}));
         registry.bindDamageSourceStandard("starve", bodyList);
 
-        registry.bindDamageSourceRandom("magic", true);
-        registry.bindDamageSourceRandom("drown", true);
+        registry.bindDamageSourceRandom("magic", false, false);
+        registry.bindDamageSourceRandom("drown", false, true);
 
         logger.debug("Initializing debuffs");
         //noinspection ResultOfMethodCallIgnored

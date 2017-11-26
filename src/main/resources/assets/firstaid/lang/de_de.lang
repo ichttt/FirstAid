@@ -13,17 +13,50 @@ gui.right_leg=Rechtes Bein
 gui.right_foot=Rechter Fuß
 gui.apply_hint=Wähle die Stelle, wo das Item angebracht werden soll
 gui.morphine_left=Morphium aktiv(%s verbleibend)
+gui.active_item=Gerade aktiv
 
-tutorial.welcome=Willkommen zum FirstAid Mod! Dieses Tutorial wird dich durch den Mod und seine Mechaniken führen.
-tutorial.line1=Wie du vielleicht schon gemerkt hast, ist die normale Lebensleiste weg. Sie wurde duch dieses System ersetzt.
-tutorial.line2=Jeder Teil deines Körpers hat seine eigene Lebensleiste. Wenn du zum Beispiel von einem hohen Platz fällst...
-tutorial.line3=Wird einer deiner Füße verletzt! Dies kann negative Effekte herbeiführen, wie Langsamkeit für wunde Füße, langames Abbauen für wunde Arme und so weiter.
-tutorial.line4=Diese Effekte können durch Morphium oder durch das Heilen der Wunde behoben werden
-tutorial.line5=Wunden können durch Bandagen oder Plaster geheilt werden (Rechtsklick auf den Gegenstand).
-tutorial.line6=Ein Spieler stirbt dann, wenn ein kritisches Organ (Kopf oder Torso) kein Leben mehr hat.
-tutorial.line7=In diesem Fall wäre der Spieler z.B. tot, egal wie viel Leben die anderen Organe haben.
-tutorial.line8=Wenn du dein derzeitiges Leben und aktive Heilungsgegenstände sehen willst, drücke %s, um dieses Fenster wieder zu öffnen.
-tutorial.end=Das ist das Ende des Tutorials.
+firstaid.tutorial.hint=Drücke %s für das Tutorial
+firstaid.tutorial.welcome=Willkommen zum FirstAid Mod! Dieses Tutorial wird dich durch den Mod und seine Mechaniken führen.
+firstaid.tutorial.line1=Wie du vielleicht schon gemerkt hast, ist die normale Lebensleiste weg. Sie wurde duch dieses System ersetzt.
+firstaid.tutorial.line2=Jeder Teil deines Körpers hat seine eigene Lebensleiste. Wenn du zum Beispiel von einem hohen Platz fällst...
+firstaid.tutorial.line3=Wird einer deiner Füße verletzt! Dies kann negative Effekte herbeiführen, wie Langsamkeit für wunde Füße, langames Abbauen für wunde Arme und so weiter.
+firstaid.tutorial.line4=Diese Effekte können durch Morphium oder durch das Heilen der Wunde behoben werden
+firstaid.tutorial.line5=Wunden können durch Bandagen oder Plaster geheilt werden (Rechtsklick auf den Gegenstand).
+firstaid.tutorial.line6=Ein Spieler stirbt dann, wenn ein kritisches Organ (Kopf oder Torso) kein Leben mehr hat.
+firstaid.tutorial.line7=In diesem Fall wäre der Spieler z.B. tot, egal wie viel Leben die anderen Organe haben.
+firstaid.tutorial.line8=Wenn du dein derzeitiges Leben und aktive Heilungsgegenstände sehen willst, drücke %s, um dieses Fenster wieder zu öffnen.
+firstaid.tutorial.end=Das ist das Ende des Tutorials.
+
+firstaid.config.damagesystem=Schadenssystem
+firstaid.config.damagesystem.tooltip=Einstellungen, die das maximale Leben der Körperteile beeinflussen. 2 = 1 Herz
+firstaid.config.overlay=Overlay
+firstaid.config.overlay.tooltip=Einstellungen, die das Overlay im Spiel regeln.
+firstaid.config.externalhealing=Externe Heilung
+firstaid.config.externalhealing.tooltip=Einstellungen, die externe Heilungssysteme regeln (z.B. Potions oder natürliche Regeneration)
+firstaid.config.enabledebuffs=Negative Effekte aktivieren
+firstaid.config.enabledebuffs.tooltip=Wenn deaktiviert werden keine negative Effekte an Spieler verteilt. Macht Morphium nutzlos
+firstaid.config.enablesoundsystem=Soundsystem aktivieren
+firstaid.config.enablesoundsystem.tooltip=Wenn aktivieren, werden zu bestimmten negativen Effekten Sounds gespielt
+firstaid.config.scalemaxhealth=Maximales Leben skalieren
+firstaid.config.scalemaxhealth.tooltip=Falls aktiv wird dein maximales Leben, welches du z.B. von anderen Mods bekommst, auf deine Körperteile aufgespilltet.
+firstaid.config.allownaturalregeneration=Natürliche Regeneration erlauben
+firstaid.config.allownaturalregeneration.tooltip=Falls aktiv, greift die normale natürliche Regeneration
+firstaid.config.allowotherhealingitems=Andere Heilungsgegenstände aktivieren
+firstaid.config.allowotherhealingitems.tooltip=Wenn deaktiviert haben z.B. Heilungstränke keinen Effekt
+firstaid.config.otherregenmultiplier=Multiplikator anderer Regeneration
+firstaid.config.otherregenmultiplier.tooltip=Der Wert, mit dem die externe Heilung verrechnet wird. Kein Effekt, falls andere Heilungsgegenstände deaktiviert sind.
+firstaid.config.naturalregenmultiplier=Multiplikator natürlicher Regeneration
+firstaid.config.naturalregenmultiplier.tooltip=Der Wert, mit dem die natürliche Heilung verrechnet wird. Kein Effekt, falls natürliche Regeneration deaktiviert ist.
+firstaid.config.showvanillahealthbar=Zeige die normale Lebensleiste
+firstaid.config.showvanillahealthbar.tooltip=Falls aktiviert wird die normale Lebensleiste dargestellt (zeigt dein durchschnittliches Leben)
+firstaid.config.showoverlay=Overlay anzeigen
+firstaid.config.showoverlay.tooltip=Zeigt das neue Overlay
+firstaid.config.position=Position
+firstaid.config.position.tooltip=Der relative Punkt des Overlays. 0=oben+links, 1=oben+rechts, 2=unten+links, 3=unten+rechts
+firstaid.config.xoffset=X-Achsenoffset
+firstaid.config.xoffset.tooltip=Der Offset auf der X-Achse
+firstaid.config.yoffset=Y-Achsenoffset
+firstaid.config.yoffset.tooltip=Der Offset auf der Y-Achse
 
 keybinds.show_wounds=Wunden anzeigen
 

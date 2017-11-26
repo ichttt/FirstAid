@@ -8,8 +8,8 @@ import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class TextWrapper {
-    private static final int maxChars = 34;
-    private static final int minimumChars = 28;
+    private static final int maxChars = 35;
+    private static final int minimumChars = 29;
 
     private int currentLine = 0;
     private final List<String> lines = new ArrayList<>();
@@ -29,6 +29,7 @@ public class TextWrapper {
                 builder.append('-');
                 lines.add(builder.toString());
                 builder = new StringBuilder();
+                builder.append(c);
                 count = 0;
             } else {
                 builder.append(c);

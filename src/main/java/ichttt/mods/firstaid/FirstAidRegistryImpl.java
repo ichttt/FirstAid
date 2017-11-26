@@ -5,7 +5,7 @@ import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.damagesystem.distribution.DamageDistributions;
+import ichttt.mods.firstaid.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.damagesystem.distribution.StandardDamageDistribution;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.DamageSource;
@@ -39,10 +39,19 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
     @Override
     public void bindDamageSourceRandom(@Nonnull String damageType, boolean nearestFirst) {
-        if (nearestFirst)
-            DISTRIBUTION_MAP.remove(damageType);
-        else
-            DISTRIBUTION_MAP.put(damageType, DamageDistributions.FULL_RANDOM_DIST);
+        bindDamageSourceRandom(damageType, nearestFirst, false);
+    }
+
+    @Override
+    public void bindDamageSourceRandom(@Nonnull String damageType, boolean nearestFirst, boolean tryNoKill) {
+        if (nearestFirst) {
+            if (!tryNoKill)
+                DISTRIBUTION_MAP.remove(damageType);
+            else
+                DISTRIBUTION_MAP.put(damageType, RandomDamageDistribution.NEAREST_NOKILL);
+        } else {
+            DISTRIBUTION_MAP.put(damageType, tryNoKill ? RandomDamageDistribution.ANY_NOKILL : RandomDamageDistribution.ANY_KILL);
+        }
     }
 
     @Override
@@ -66,7 +75,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     public IDamageDistribution getDamageDistribution(@Nonnull DamageSource source) {
         IDamageDistribution distribution = DISTRIBUTION_MAP.get(source.damageType);
         if (distribution == null)
-            distribution = DamageDistributions.SEMI_RANDOM_DIST;
+            distribution = RandomDamageDistribution.NEAREST_KILL;
         return distribution;
     }
 }

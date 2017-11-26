@@ -15,6 +15,7 @@ import ichttt.mods.firstaid.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.util.DataManagerWrapper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -119,7 +120,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             if (Float.isInfinite(newCurrentHealth)) {
                 FirstAid.logger.error("Error calculating current health: Value was infinite");
             } else {
-                if (newCurrentHealth != prevHealthCurrent && !world.isRemote)
+                if (newCurrentHealth != prevHealthCurrent)
                     ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
                 prevHealthCurrent = newCurrentHealth;
             }
@@ -197,20 +198,21 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public boolean isDead(@Nullable EntityPlayer player) {
-        if (CapaRevive.reviveCapa != null && player != null && player.hasCapability(CapaRevive.reviveCapa, null)) {
-            IRevival revival = Objects.requireNonNull(player.getCapability(CapaRevive.reviveCapa, null));
-            if (!revival.isHealty() && !revival.isDead()) {
-                this.waitingForHelp = true;
-                return true;
-            }
-            else if (this.waitingForHelp && revival.isRevived()) {
-                this.waitingForHelp = false;
-                player.isDead = false;
-                for (AbstractDamageablePart part : this) {
-                    if (part.canCauseDeath && part.currentHealth <= 0F)
-                        part.currentHealth = 1F;
+        if (player != null && CapaRevive.reviveCapa != null && player.hasCapability(CapaRevive.reviveCapa, null)) {
+            MinecraftServer server = player.getServer();
+            if (server != null && server.getPlayerList().getCurrentPlayerCount() > 1) {
+                IRevival revival = Objects.requireNonNull(player.getCapability(CapaRevive.reviveCapa, null));
+                if (!revival.isHealty() && !revival.isDead()) {
+                    this.waitingForHelp = true;
+                    return true;
+                } else if (this.waitingForHelp && revival.isRevived()) {
+                    this.waitingForHelp = false;
+                    player.isDead = false;
+                    for (AbstractDamageablePart part : this) {
+                        if (part.canCauseDeath && part.currentHealth <= 0F) part.currentHealth = 1F;
+                    }
+                    return false;
                 }
-                return false;
             }
         }
 

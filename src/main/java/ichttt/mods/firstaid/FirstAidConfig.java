@@ -7,40 +7,49 @@ import net.minecraftforge.common.config.Config;
 public class FirstAidConfig {
 
     @Config.Comment("Settings regarding the max health of the body's parts. 2 = 1 heart")
+    @Config.LangKey("firstaid.config.damagesystem")
     @Config.RequiresWorldRestart
     public static final DamageSystem damageSystem = new DamageSystem();
 
     @Config.Comment("Settings regarding the health overlay when ingame")
+    @Config.LangKey("firstaid.config.overlay")
     public static final Overlay overlay = new Overlay();
 
     @Config.Comment("Settings regarding external healing system(like vanilla potions or natural regeneration")
+    @Config.LangKey("firstaid.config.externalhealing")
     public static final ExternalHealing externalHealing = new ExternalHealing();
 
     @Config.Comment("Set to false to disable dynamic debuffs based on the health. Makes morphine useless")
+    @Config.LangKey("firstaid.config.enabledebuffs")
     public static boolean enableDebuffs = true;
 
     @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
+    @Config.LangKey("firstaid.config.enablesoundsystem")
     public static boolean enableSoundSystem = true;
 
-    @Config.Comment("If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health" +
-            "\n!!WARNING!! THIS CONFIG OPTION STILL REQUIRES SOME TESTING AND IS NOT STABLE RIGHT NOW")
+    @Config.Comment("If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health")
+    @Config.LangKey("firstaid.config.scalemaxhealth")
     @Config.RequiresWorldRestart
     public static boolean scaleMaxHealth = false;
 
     public static class ExternalHealing {
 
-        @Config.RequiresWorldRestart
         @Config.Comment("Allow vanilla's natural regeneration. Requires \"allowOtherHealingItems\" to be true")
+        @Config.LangKey("firstaid.config.allownaturalregeneration")
+        @Config.RequiresWorldRestart
         public boolean allowNaturalRegeneration = false;
 
         @Config.Comment("If false, healing potions and other healing items will have no effect")
+        @Config.LangKey("firstaid.config.allowotherhealingitems")
         public boolean allowOtherHealingItems = true;
 
-        @Config.Comment("The value external regen will be multiplied with. Has no effect if allowOtherHealingItems is disabled")
+        @Config.Comment("The value external regen will be multiplied with. Has no effect if \"allowOtherHealingItems\" is disabled")
+        @Config.LangKey("firstaid.config.otherregenmultiplier")
         @Config.RangeDouble(min = 0D)
         public double otherRegenMultiplier = 0.75D;
 
-        @Config.Comment("The value vanilla's natural regeneration will be multiplied with. Has no effect if allowNaturalRegeneration is disabled")
+        @Config.Comment("The value vanilla's natural regeneration will be multiplied with. Has no effect if \"allowNaturalRegeneration\" is disabled")
+        @Config.LangKey("firstaid.config.naturalregenmultiplier")
         @Config.RangeDouble(min = 0D)
         public double naturalRegenMultiplier = 0.5D;
     }
@@ -48,19 +57,24 @@ public class FirstAidConfig {
     public static class Overlay {
 
         @Config.Comment("True if the main health bar should be rendered (Will be average health)")
+        @Config.LangKey("firstaid.config.showvanillahealthbar")
         public boolean showVanillaHealthBar = false;
 
         @Config.Comment("True if the overlay should be shown, false otherwise")
+        @Config.LangKey("firstaid.config.showoverlay")
         public boolean showOverlay = true;
 
-        @Config.RangeInt(min = 0, max = 3)
         @Config.Comment("The relative point of the overlay. 0=top+left, 1=top+right, 2=bottom+left, 3=bottom+right")
+        @Config.LangKey("firstaid.config.position")
+        @Config.RangeInt(min = 0, max = 3)
         public int position = 0;
 
         @Config.Comment("The offset on the x axis")
+        @Config.LangKey("firstaid.config.xoffset")
         public int xOffset = 0;
 
         @Config.Comment("The offset on the y axis")
+        @Config.LangKey("firstaid.config.yoffset")
         public int yOffset = 1;
     }
 

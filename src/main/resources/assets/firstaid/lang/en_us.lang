@@ -13,17 +13,50 @@ gui.right_leg=Right Leg
 gui.right_foot=Right Foot
 gui.apply_hint=Pick where to apply the item
 gui.morphine_left=Morphine active(%s left)
+gui.active_item=Currently active
 
-tutorial.welcome=Welcome to the FirstAid mod! This tutorial will guide you through this mod and explain the different mechanics.
-tutorial.line1=As you may already have noticed, the vanilla health bar is gone. It has been replaced by this system.
-tutorial.line2=Every part of your body has it's own health. So if you fall from a high place...
-tutorial.line3=One of your feet will be damaged! This may cause some debuffs to apply, like slowness for damaged feet, mining fatigue for damaged arms and so one.
-tutorial.line4=This effects may be bypassed by taking morphine or healing the wound.
-tutorial.line5=Wounds can be healed by applying bandages or plaster (right click the item).
-tutorial.line6=A player can die, if a critical organ's health (head or body) drop to zero.
-tutorial.line7=In this case, the player would be dead, no matter how much health the other organs have.
-tutorial.line8=If you want to see your current health and active healers, just press %s to open this interface with your health.
-tutorial.end=That is the end of the tutorial.
+firstaid.tutorial.hint=Press %s for the tutorial
+firstaid.tutorial.welcome=Welcome to the FirstAid mod! This tutorial will guide you through this mod and explain the different mechanics.
+firstaid.tutorial.line1=As you may already have noticed, the vanilla health bar is gone. It has been replaced by this system.
+firstaid.tutorial.line2=Every part of your body has it's own health. So if you fall from a high place...
+firstaid.tutorial.line3=One of your feet will be damaged! This may cause some debuffs to apply, like slowness for damaged feet, mining fatigue for damaged arms and so on.
+firstaid.tutorial.line4=These effects may be bypassed by taking morphine or healing the wound.
+firstaid.tutorial.line5=Wounds can be healed by applying bandages or plaster (right click the item).
+firstaid.tutorial.line6=A player can die, if a critical organ's health (head or body) drop to zero.
+firstaid.tutorial.line7=In this case, the player would be dead, no matter how much health the other organs have.
+firstaid.tutorial.line8=If you want to see your current health and active healers, just press %s to open this interface with your health.
+firstaid.tutorial.end=That is the end of the tutorial.
+
+firstaid.config.damagesystem=Damage system
+firstaid.config.damagesystem.tooltip=Settings regarding the max health of the body's parts. 2 = 1 heart
+firstaid.config.overlay=Overlay
+firstaid.config.overlay.tooltip=Settings regarding the health overlay when ingame
+firstaid.config.externalhealing=External healing
+firstaid.config.externalhealing.tooltip=Settings regarding external healing system(like vanilla potions or natural regeneration)
+firstaid.config.enabledebuffs=Enable debuffs
+firstaid.config.enabledebuffs.tooltip=Set to false to disable dynamic debuffs based on the health. Makes morphine useless
+firstaid.config.enablesoundsystem=Enable soundsystem
+firstaid.config.enablesoundsystem.tooltip=Set to true to enable the debuff sounds. Requieres enableDebuffs to be true
+firstaid.config.scalemaxhealth=Scale max health
+firstaid.config.scalemaxhealth.tooltip=If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health
+firstaid.config.allownaturalregeneration=Allow natural regeneration
+firstaid.config.allownaturalregeneration.tooltip=Allow vanilla's natural regeneration. Requires "allowOtherHealingItems" to be true
+firstaid.config.allowotherhealingitems=Allow other healing items
+firstaid.config.allowotherhealingitems.tooltip=If false, healing potions and other healing items will have no effect
+firstaid.config.otherregenmultiplier=Other regeneration multiplier
+firstaid.config.otherregenmultiplier.tooltip=The value external regen will be multiplied with. Has no effect if "Allow other healing items" is disabled
+firstaid.config.naturalregenmultiplier=Natural regeneration multiplier
+firstaid.config.naturalregenmultiplier.tooltip=The value vanilla's natural regeneration will be multiplied with. Has no effect if "Allow natural items" is disabled
+firstaid.config.showvanillahealthbar=Show vanilla health bar
+firstaid.config.showvanillahealthbar.tooltip=True if the main health bar should be rendered (Will be average health)
+firstaid.config.showoverlay=Show overlay
+firstaid.config.showoverlay.tooltip=True if the overlay should be shown, false otherwise
+firstaid.config.position=Position
+firstaid.config.position.tooltip=The relative point of the overlay. 0=top+left, 1=top+right, 2=bottom+left, 3=bottom+right
+firstaid.config.xoffset=X-Axis Offset
+firstaid.config.xoffset.tooltip=The offset on the x axis
+firstaid.config.yoffset=Y-Axis Offset
+firstaid.config.yoffset.tooltip=The offset on the y axis
 
 keybinds.show_wounds=Show wounds
 

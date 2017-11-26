@@ -44,10 +44,15 @@ public class TutorialAction {
             Consumer<GuiTutorial> consumer = (Consumer<GuiTutorial>) obj;
             consumer.accept(guiContext);
             pos++;
-            next();
+            if (hasNext())
+                next();
         } else {
             throw new RuntimeException("Found invalid object " + obj.toString());
         }
+    }
+
+    public boolean hasNext() {
+        return pos < queue.size() || activeWrapper != null;
     }
 
     private void writeFromActiveWrapper() {

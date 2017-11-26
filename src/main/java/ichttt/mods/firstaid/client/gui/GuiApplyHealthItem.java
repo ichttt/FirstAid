@@ -28,7 +28,7 @@ import java.util.Locale;
 @SideOnly(Side.CLIENT)
 public class GuiApplyHealthItem extends GuiScreen {
     public static GuiApplyHealthItem INSTANCE;
-    public static final int xSize = 248;
+    public static final int xSize = 256;
     public static final int ySize = 137;
 
     public int guiLeft;
@@ -63,24 +63,24 @@ public class GuiApplyHealthItem extends GuiScreen {
         this.guiLeft = (this.width - xSize) / 2;
         this.guiTop = (this.height - ySize) / 2;
 
-        HEAD = new GuiButton(1, this.guiLeft + 4, this.guiTop + 8, 48, 20, I18n.format("gui.head"));
+        HEAD = new GuiButton(1, this.guiLeft + 4, this.guiTop + 8, 52, 20, I18n.format("gui.head"));
         this.buttonList.add(HEAD);
 
-        LEFT_ARM = new GuiButton(2, this.guiLeft + 4, this.guiTop + 33, 48, 20, I18n.format("gui.left_arm"));
+        LEFT_ARM = new GuiButton(2, this.guiLeft + 4, this.guiTop + 33, 52, 20, I18n.format("gui.left_arm"));
         this.buttonList.add(LEFT_ARM);
-        LEFT_LEG = new GuiButton(3, this.guiLeft + 4, this.guiTop + 58, 48, 20, I18n.format("gui.left_leg"));
+        LEFT_LEG = new GuiButton(3, this.guiLeft + 4, this.guiTop + 58, 52, 20, I18n.format("gui.left_leg"));
         this.buttonList.add(LEFT_LEG);
-        LEFT_FOOT = new GuiButton(4, this.guiLeft + 4, this.guiTop + 83, 48, 20, I18n.format("gui.left_foot"));
+        LEFT_FOOT = new GuiButton(4, this.guiLeft + 4, this.guiTop + 83, 52, 20, I18n.format("gui.left_foot"));
         this.buttonList.add(LEFT_FOOT);
 
-        BODY = new GuiButton(5, this.guiLeft + 195, this.guiTop + 8, 48, 20, I18n.format("gui.body"));
+        BODY = new GuiButton(5, this.guiLeft + 199, this.guiTop + 8, 52, 20, I18n.format("gui.body"));
         this.buttonList.add(BODY);
 
-        RIGHT_ARM = new GuiButton(6, this.guiLeft + 195, this.guiTop + 33, 48, 20, I18n.format("gui.right_arm"));
+        RIGHT_ARM = new GuiButton(6, this.guiLeft + 199, this.guiTop + 33, 52, 20, I18n.format("gui.right_arm"));
         this.buttonList.add(RIGHT_ARM);
-        RIGHT_LEG = new GuiButton(7, this.guiLeft + 195, this.guiTop + 58, 48, 20, I18n.format("gui.right_leg"));
+        RIGHT_LEG = new GuiButton(7, this.guiLeft + 199, this.guiTop + 58, 52, 20, I18n.format("gui.right_leg"));
         this.buttonList.add(RIGHT_LEG);
-        RIGHT_FOOT = new GuiButton(8, this.guiLeft + 195, this.guiTop + 83, 48, 20, I18n.format("gui.right_foot"));
+        RIGHT_FOOT = new GuiButton(8, this.guiLeft + 199, this.guiTop + 83, 52, 20, I18n.format("gui.right_foot"));
         this.buttonList.add(RIGHT_FOOT);
 
         if (disableButtons) {
@@ -146,13 +146,13 @@ public class GuiApplyHealthItem extends GuiScreen {
     }
 
     public void drawHealth(AbstractDamageablePart damageablePart, boolean right, int yOffset, boolean playerDead) {
-        GuiUtils.drawHealth(damageablePart, guiLeft + (right ? 193 - Math.min(38, GuiUtils.getMaxHearts(damageablePart.getMaxHealth()) * 9 + GuiUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 53), guiTop + yOffset, this, true, playerDead);
+        GuiUtils.drawHealth(damageablePart, guiLeft + (right ? 200 - Math.min(38, GuiUtils.getMaxHearts(damageablePart.getMaxHealth()) * 9 + GuiUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 57), guiTop + yOffset, this, true, playerDead);
     }
 
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
         if (keyCode == ClientProxy.showWounds.getKeyCode())
-            Minecraft.getMinecraft().displayGuiScreen(null);
+            mc.displayGuiScreen(null);
         super.keyTyped(typedChar, keyCode);
     }
 
@@ -165,7 +165,7 @@ public class GuiApplyHealthItem extends GuiScreen {
             AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
             part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(healingType);
         }
-        Minecraft.getMinecraft().displayGuiScreen(null);
+        mc.displayGuiScreen(null);
     }
 
     @Override

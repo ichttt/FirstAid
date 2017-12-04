@@ -2,14 +2,12 @@ package ichttt.mods.firstaid.client.gui;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidRegistryImpl;
-import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.network.MessageApplyHealingItem;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -157,7 +155,7 @@ public class GuiApplyHealthItem extends GuiScreen {
     }
 
     @Override
-    protected void actionPerformed(GuiButton button) throws IOException {
+    protected void actionPerformed(GuiButton button) {
         if (button.id < 9) {
             EnumPlayerPart playerPart = EnumPlayerPart.fromID((button.id));
             FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, healingType, activeHand));

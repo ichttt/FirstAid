@@ -1,6 +1,7 @@
 package ichttt.mods.firstaid;
 
 import com.creativemd.playerrevive.api.capability.CapaRevive;
+import com.google.common.collect.MapMaker;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
@@ -56,13 +57,13 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.ConcurrentMap;
 
 public class EventHandler {
     public static final Random rand = new Random();
     public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
-    private static final HashMap<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new HashMap<>();
+    static final ConcurrentMap<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new MapMaker().weakKeys().concurrencyLevel(1).makeMap();
 
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
@@ -157,8 +158,10 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && !event.player.isCreative())
+        if (event.phase == TickEvent.Phase.END && !event.player.isCreative()) {
             PlayerDataManager.tickPlayer(event.player);
+            hitList.remove(event.player); //Damage should be done in the same tick as the hit was noted, otherwise we got a false-positive
+        }
     }
 
     @SubscribeEvent

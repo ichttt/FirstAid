@@ -21,7 +21,7 @@ public class RandomDamageDistribution extends DamageDistribution {
 
     private static final Random RANDOM = new Random();
     private final boolean nearestFirst;
-    private boolean tryNoKill;
+    private final boolean tryNoKill;
 
     public RandomDamageDistribution(boolean nearestFirst, boolean tryNoKill) {
         this.nearestFirst = nearestFirst;

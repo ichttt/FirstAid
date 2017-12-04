@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.4.0", acceptedMinecraftVersions = "[1.12,1.13)")
+@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.4.0", acceptedMinecraftVersions = "[1.12.2,1.13)", dependencies = "required-after:forge@[14.23.0.2526,);")
 public class FirstAid {
     public static Logger logger;
     public static final String MODID = "firstaid";
@@ -144,5 +144,6 @@ public class FirstAid {
         logger.debug("Cleaning up");
         PlayerDataManager.capList.clear();
         PlayerDataManager.tutorialDone.clear();
+        EventHandler.hitList.clear();
     }
 }

@@ -10,13 +10,14 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.potion.PotionEffect;
 
 import javax.annotation.Nonnull;
+import java.util.function.BooleanSupplier;
 
 public class OnHitDebuff extends AbstractDebuff {
     private final Float2IntLinkedOpenHashMap map = new Float2IntLinkedOpenHashMap();
     private final EnumHurtSound sound;
 
-    public OnHitDebuff(String potionName, @Nonnull EnumHurtSound sound) {
-        super(potionName);
+    public OnHitDebuff(String potionName, BooleanSupplier disableEnableSupplier, @Nonnull EnumHurtSound sound) {
+        super(potionName, disableEnableSupplier);
         this.sound = sound;
     }
 
@@ -27,7 +28,7 @@ public class OnHitDebuff extends AbstractDebuff {
 
     @Override
     public void handleDamageTaken(float damage, float healthPerMax, EntityPlayerMP player) {
-        if (!FirstAidConfig.enableDebuffs)
+        if (!this.isEnabled.getAsBoolean())
             return;
         int value = -1;
         for (Float2IntMap.Entry entry : map.float2IntEntrySet()) {

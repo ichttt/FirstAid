@@ -1,10 +1,9 @@
 package ichttt.mods.firstaid.damagesystem.debuff;
 
-import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -23,7 +22,7 @@ public class SharedDebuff implements IDebuff {
 
     @Override
     public void handleDamageTaken(float damage, float healthPerMax, EntityPlayerMP player) {
-        if (!FirstAidConfig.enableDebuffs)
+        if (!debuff.isEnabled.getAsBoolean())
             return;
         this.damage += damage;
         this.damageCount++;
@@ -31,14 +30,14 @@ public class SharedDebuff implements IDebuff {
 
     @Override
     public void handleHealing(float healingDone, float healthPerMax, EntityPlayerMP player) {
-        if (!FirstAidConfig.enableDebuffs)
+        if (!debuff.isEnabled.getAsBoolean())
             return;
         this.healingDone += healingDone;
         this.healingCount++;
     }
 
     public void tick(EntityPlayer player) {
-        if (!FirstAidConfig.enableDebuffs)
+        if (!debuff.isEnabled.getAsBoolean())
             return;
         if (player.world.isRemote || !(player instanceof EntityPlayerMP))
             return;

@@ -13,8 +13,12 @@ import ichttt.mods.firstaid.util.DebugDamageCommand;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
@@ -22,7 +26,10 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.oredict.ShapedOreRecipe;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 
@@ -31,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.4.2", acceptedMinecraftVersions = "[1.12.2,1.13)", dependencies = "required-after:forge@[14.23.0.2526,);")
+@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.11.2-1.4.2", acceptedMinecraftVersions = "[1.11,1.12)")
 public class FirstAid {
     public static Logger logger;
     public static final String MODID = "firstaid";
@@ -67,6 +74,24 @@ public class FirstAid {
         //Setup API
         FirstAidRegistry.setImpl(FirstAidRegistryImpl.INSTANCE);
         checkEarlyExit();
+
+        GameRegistry.register(EventHandler.HEARTBEAT);
+        List<ItemStack> stacks = NonNullList.create();
+        stacks.add(new ItemStack(Items.GLASS_BOTTLE));
+        stacks.add(new ItemStack(Items.FERMENTED_SPIDER_EYE));
+        stacks.add(new ItemStack(Items.FERMENTED_SPIDER_EYE));
+
+        GameRegistry.addRecipe(new ShapelessRecipes(new ItemStack(FirstAidItems.MORPHINE), stacks));
+
+        GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(FirstAidItems.BANDAGE),
+                "S S", "WWW", "S S",
+                'W', new ItemStack(Objects.requireNonNull(Item.getByNameOrId("wool")), 1, OreDictionary.WILDCARD_VALUE),
+                'S', "string"));
+
+        GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(FirstAidItems.PLASTER),
+                "SS", "WW",
+                'W', new ItemStack(Objects.requireNonNull(Item.getByNameOrId("wool")), 1, OreDictionary.WILDCARD_VALUE),
+                'S', "string"));
     }
 
     @Mod.EventHandler

@@ -22,13 +22,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ClientEventHandler {
 
     @SubscribeEvent
-    public static void registerModels(ModelRegistryEvent event) {
-        ModelLoader.setCustomModelResourceLocation(FirstAidItems.BANDAGE, 0, new ModelResourceLocation("firstaid:bandage"));
-        ModelLoader.setCustomModelResourceLocation(FirstAidItems.PLASTER, 0, new ModelResourceLocation("firstaid:plaster"));
-        ModelLoader.setCustomModelResourceLocation(FirstAidItems.MORPHINE, 0, new ModelResourceLocation("firstaid:morphine"));
-    }
-
-    @SubscribeEvent
     public static void onKeyPress(InputEvent.KeyInputEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
         AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(mc.player);

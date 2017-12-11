@@ -71,7 +71,7 @@ public class GuiTutorial extends GuiScreen {
     }
 
     public void drawOffsetString(String s, int yOffset) {
-        drawString(mc.fontRenderer, s, parent.guiLeft + 30, guiTop + yOffset, 0xFFFFFF);
+        drawString(mc.fontRendererObj, s, parent.guiLeft + 30, guiTop + yOffset, 0xFFFFFF);
     }
 
     @Override

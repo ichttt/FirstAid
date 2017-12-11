@@ -1,17 +1,17 @@
 package ichttt.mods.firstaid.damagesystem.debuff;
 
 import ichttt.mods.firstaid.FirstAidConfig;
-import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.floats.Float2IntMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.potion.PotionEffect;
 
 import java.util.function.BooleanSupplier;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ConstantDebuff extends AbstractDebuff {
     private int ticks = 0;
-    private final Float2IntLinkedOpenHashMap map = new Float2IntLinkedOpenHashMap();
+    private final LinkedHashMap<Float, Integer> map = new LinkedHashMap<>();
     private int activeMultiplier = 0;
 
     public ConstantDebuff(String potionName, BooleanSupplier disableEnableSupplier) {
@@ -27,10 +27,12 @@ public class ConstantDebuff extends AbstractDebuff {
         if (!this.isEnabled.getAsBoolean())
             return;
         boolean found = false;
-        for (Float2IntMap.Entry entry : map.float2IntEntrySet()) {
-            if (healthPerMax < entry.getFloatKey()) {
+        for (Map.Entry entry : map.entrySet()) {
+            float key = (float) entry.getKey();
+            if (healthPerMax < key) {
+                int newValue = (int) entry.getValue();
                 ticks = 0;
-                activeMultiplier = entry.getIntValue();
+                activeMultiplier = newValue;
                 found = true;
                 break;
             }

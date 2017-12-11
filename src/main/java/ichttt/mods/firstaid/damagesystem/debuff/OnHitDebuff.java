@@ -4,16 +4,16 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.network.MessagePlayHurtSound;
 import ichttt.mods.firstaid.sound.EnumHurtSound;
-import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.floats.Float2IntMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.potion.PotionEffect;
 
 import javax.annotation.Nonnull;
 import java.util.function.BooleanSupplier;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class OnHitDebuff extends AbstractDebuff {
-    private final Float2IntLinkedOpenHashMap map = new Float2IntLinkedOpenHashMap();
+    private final LinkedHashMap<Float, Integer> map = new LinkedHashMap<>();
     private final EnumHurtSound sound;
 
     public OnHitDebuff(String potionName, BooleanSupplier disableEnableSupplier, @Nonnull EnumHurtSound sound) {
@@ -31,10 +31,12 @@ public class OnHitDebuff extends AbstractDebuff {
         if (!this.isEnabled.getAsBoolean())
             return;
         int value = -1;
-        for (Float2IntMap.Entry entry : map.float2IntEntrySet()) {
-            if (damage >= entry.getFloatKey()) {
-                value = Math.max(value, entry.getIntValue());
-                player.addPotionEffect(new PotionEffect(effect, entry.getIntValue(), 0, false, false));
+        for (Map.Entry entry : map.entrySet()) {
+            float key = (float) entry.getKey();
+            if (damage >= key) {
+                int newValue = (int) entry.getValue();
+                value = Math.max(value, newValue);
+                player.addPotionEffect(new PotionEffect(effect, newValue, 0, false, false));
             }
         }
         if (value != -1 && sound != EnumHurtSound.NONE)

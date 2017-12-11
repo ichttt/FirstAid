@@ -12,8 +12,11 @@ import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.damagesystem.debuff.AbstractDebuff;
 import ichttt.mods.firstaid.damagesystem.debuff.Debuffs;
 import ichttt.mods.firstaid.damagesystem.debuff.SharedDebuff;
+import ichttt.mods.firstaid.network.MessageAddHealth;
+import ichttt.mods.firstaid.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.util.DataManagerWrapper;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
@@ -209,8 +212,13 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                     this.waitingForHelp = false;
                     player.isDead = false;
                     for (AbstractDamageablePart part : this) {
-                        if (part.canCauseDeath && part.currentHealth <= 0F) part.currentHealth = 1F;
+                        if (part.canCauseDeath && part.currentHealth <= 0F) {
+                            part.currentHealth = 1F;
+                        }
                     }
+                    //make sure to resync everything TODO only sync health?
+                    if (!player.world.isRemote && player instanceof EntityPlayerMP)
+                        FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(this, FirstAidConfig.externalHealing, FirstAidConfig.damageSystem, FirstAidConfig.scaleMaxHealth), (EntityPlayerMP) player);
                     return false;
                 }
             }
@@ -220,8 +228,9 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             return true;
 
         for (AbstractDamageablePart part : this) {
-            if (part.canCauseDeath && part.currentHealth <= 0)
+            if (part.canCauseDeath && part.currentHealth <= 0) {
                 return true;
+            }
         }
         return false;
     }

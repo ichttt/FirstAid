@@ -138,7 +138,7 @@ public class GuiApplyHealthItem extends GuiScreen {
     private void tooltipButton(GuiButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
         if (!enabled && button.hovered)
-            drawHoveringText(I18n.format("gui.active_item") + " :" + I18n.format("item." + part.activeHealer.healingType.toString().toLowerCase(Locale.ENGLISH) + ".name"), mouseX, mouseY);
+            drawHoveringText(I18n.format("gui.active_item") + ": " + I18n.format("item." + part.activeHealer.healingType.toString().toLowerCase(Locale.ENGLISH) + ".name"), mouseX, mouseY);
         if (!disableButtons)
             button.enabled = enabled;
     }

@@ -1,5 +1,6 @@
 package ichttt.mods.firstaid;
 
+import com.creativemd.playerrevive.api.IRevival;
 import com.creativemd.playerrevive.api.capability.CapaRevive;
 import com.google.common.collect.MapMaker;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
@@ -25,6 +26,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.ResourceLocation;
@@ -79,7 +81,7 @@ public class EventHandler {
                 Arrays.stream(EnumPlayerPart.VALUES).forEach(part -> FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, Float.MAX_VALUE, 0F), (EntityPlayerMP) player));
             if (CapaRevive.reviveCapa != null && player.hasCapability(CapaRevive.reviveCapa, null)) { //special path for PlayerRevival
                 event.setCanceled(true);
-                ((DataManagerWrapper)player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
+                killPlayer(player);
             }
             return;
         }
@@ -114,10 +116,19 @@ public class EventHandler {
         }
 
         event.setCanceled(true);
-        if (damageModel.isDead(null) && (!FirstAid.activeHealingConfig.allowOtherHealingItems || !player.checkTotemDeathProtection(source)))
-            ((DataManagerWrapper)player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
+        if (damageModel.isDead(player))
+            killPlayer(player);
 
         hitList.remove(player);
+    }
+
+    private static void killPlayer(EntityPlayer player) {
+        IRevival revival = player.getCapability(CapaRevive.reviveCapa, null);
+        MinecraftServer server = player.getServer();
+        if (revival != null && server != null && server.getPlayerList().getCurrentPlayerCount() > 1) {
+            revival.startBleeding();
+        } else
+            ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
     }
 
     @SubscribeEvent(priority =  EventPriority.LOWEST)

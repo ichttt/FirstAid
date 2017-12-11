@@ -5,6 +5,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.potion.PotionEffect;
 
+import java.util.function.BooleanSupplier;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -13,8 +14,8 @@ public class ConstantDebuff extends AbstractDebuff {
     private final LinkedHashMap<Float, Integer> map = new LinkedHashMap<>();
     private int activeMultiplier = 0;
 
-    public ConstantDebuff(String potionName) {
-        super(potionName);
+    public ConstantDebuff(String potionName, BooleanSupplier disableEnableSupplier) {
+        super(potionName, disableEnableSupplier);
     }
 
     public ConstantDebuff addBound(float value, int multiplier) {
@@ -23,7 +24,7 @@ public class ConstantDebuff extends AbstractDebuff {
     }
 
     private void syncMultiplier(float healthPerMax) {
-        if (!FirstAidConfig.enableDebuffs)
+        if (!this.isEnabled.getAsBoolean())
             return;
         boolean found = false;
         for (Map.Entry entry : map.entrySet()) {
@@ -51,7 +52,7 @@ public class ConstantDebuff extends AbstractDebuff {
     }
 
     public void update(EntityPlayer player) {
-        if (!FirstAidConfig.enableDebuffs)
+        if (!this.isEnabled.getAsBoolean())
             return;
         if (activeMultiplier == 0) {
             ticks = 0;

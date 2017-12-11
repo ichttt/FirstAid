@@ -56,7 +56,7 @@ public class GuiTutorial extends GuiScreen {
     }
 
     @Override
-    protected void actionPerformed(GuiButton button) throws IOException {
+    protected void actionPerformed(GuiButton button) {
         if (button.id == 9) {
             FirstAid.NETWORKING.sendToServer(new MessageHasTutorial());
             mc.displayGuiScreen(null);

@@ -19,9 +19,9 @@ public class FirstAidConfig {
     @Config.LangKey("firstaid.config.externalhealing")
     public static final ExternalHealing externalHealing = new ExternalHealing();
 
-    @Config.Comment("Set to false to disable dynamic debuffs based on the health. Makes morphine useless")
-    @Config.LangKey("firstaid.config.enabledebuffs")
-    public static boolean enableDebuffs = true;
+    @Config.Comment("Enable/Disable specify debuffs on specific body parts")
+    @Config.LangKey("firstaid.config.debuffs")
+    public static final Debuffs debuffs = new Debuffs();
 
     @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
     @Config.LangKey("firstaid.config.enablesoundsystem")
@@ -103,5 +103,32 @@ public class FirstAidConfig {
 
         @Config.RangeInt(min = 2, max = 12)
         public int maxHealthRightFoot = 4;
+    }
+
+    public static class Debuffs {
+        public final Head head = new Head();
+        public final Body body = new Body();
+        public final Arms arms = new Arms();
+        public final LegsAndFeet legsAndFeet = new LegsAndFeet();
+
+        public static class Head {
+            public boolean blindness = true;
+
+            public boolean nausea = true;
+        }
+
+        public static class Body {
+            public boolean nausea = true;
+
+            public boolean weakness = true;
+        }
+
+        public static class Arms {
+            public boolean mining_fatigue = true;
+        }
+
+        public static class LegsAndFeet {
+            public boolean slowness = true;
+        }
     }
 }

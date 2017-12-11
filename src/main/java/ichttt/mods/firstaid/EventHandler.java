@@ -1,6 +1,8 @@
 package ichttt.mods.firstaid;
 
+import com.creativemd.playerrevive.api.IRevival;
 import com.creativemd.playerrevive.api.capability.CapaRevive;
+import com.google.common.collect.MapMaker;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
@@ -24,6 +26,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.ResourceLocation;
@@ -54,8 +57,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.ConcurrentMap;
 
 public class EventHandler {
     public static final Random rand = new Random();
@@ -75,7 +78,7 @@ public class EventHandler {
                 Arrays.stream(EnumPlayerPart.VALUES).forEach(part -> FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, Float.MAX_VALUE, 0F), (EntityPlayerMP) player));
             if (CapaRevive.reviveCapa != null && player.hasCapability(CapaRevive.reviveCapa, null)) { //special path for PlayerRevival
                 event.setCanceled(true);
-                ((DataManagerWrapper)player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
+                killPlayer(player);
             }
             return;
         }
@@ -100,8 +103,17 @@ public class EventHandler {
         }
 
         event.setCanceled(true);
-        if (damageModel.isDead(null) && (!FirstAid.activeHealingConfig.allowOtherHealingItems || !player.checkTotemDeathProtection(source)))
-            ((DataManagerWrapper)player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
+        if (damageModel.isDead(player))
+            killPlayer(player);
+    }
+
+    private static void killPlayer(EntityPlayer player) {
+        IRevival revival = player.getCapability(CapaRevive.reviveCapa, null);
+        MinecraftServer server = player.getServer();
+        if (revival != null && server != null && server.getPlayerList().getCurrentPlayerCount() > 1) {
+            revival.startBleeding();
+        } else
+            ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
     }
 
     @SubscribeEvent
@@ -125,8 +137,10 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && !event.player.isCreative())
+        if (event.phase == TickEvent.Phase.END && !event.player.isCreative()) {
             PlayerDataManager.tickPlayer(event.player);
+            hitList.remove(event.player); //Damage should be done in the same tick as the hit was noted, otherwise we got a false-positive
+        }
     }
 
     @SubscribeEvent

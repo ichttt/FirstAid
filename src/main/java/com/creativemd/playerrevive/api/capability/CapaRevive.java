@@ -11,6 +11,7 @@ import java.util.List;
 
 public class CapaRevive {
 
+    @SuppressWarnings("CanBeFinal")
     @CapabilityInject(IRevival.class)
     public static Capability<IRevival> reviveCapa = null;
 

@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.11.2-1.4.0", acceptedMinecraftVersions = "[1.11,1.12)")
+@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.11.2-1.4.2", acceptedMinecraftVersions = "[1.11,1.12)")
 public class FirstAid {
     public static Logger logger;
     public static final String MODID = "firstaid";
@@ -127,7 +127,6 @@ public class FirstAid {
 
         List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> headList = new ArrayList<>(1);
         headList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumPlayerPart[]{EnumPlayerPart.HEAD}));
-        registry.bindDamageSourceStandard("starve", headList);
         registry.bindDamageSourceStandard("anvil", headList);
 
         List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> bodyList = new ArrayList<>(1);
@@ -136,6 +135,7 @@ public class FirstAid {
 
         registry.bindDamageSourceRandom("magic", false, false);
         registry.bindDamageSourceRandom("drown", false, true);
+        registry.bindDamageSourceRandom("inWall", false, true);
 
         logger.debug("Initializing debuffs");
         //noinspection ResultOfMethodCallIgnored
@@ -147,6 +147,7 @@ public class FirstAid {
     @Mod.EventHandler
     public void loadComplete(FMLLoadCompleteEvent event) {
         FirstAidRegistryImpl.verify();
+        checkEarlyExit();
     }
 
     private static void checkEarlyExit() {
@@ -169,5 +170,6 @@ public class FirstAid {
         logger.debug("Cleaning up");
         PlayerDataManager.capList.clear();
         PlayerDataManager.tutorialDone.clear();
+        EventHandler.hitList.clear();
     }
 }

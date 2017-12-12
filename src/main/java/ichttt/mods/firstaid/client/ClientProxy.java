@@ -1,12 +1,12 @@
 package ichttt.mods.firstaid.client;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.IProxy;
+import ichttt.mods.firstaid.common.FirstAidConfig;
+import ichttt.mods.firstaid.common.IProxy;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.client.gui.GuiApplyHealthItem;
 import ichttt.mods.firstaid.client.gui.HUDHandler;
-import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
+import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;

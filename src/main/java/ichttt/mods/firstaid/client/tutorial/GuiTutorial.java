@@ -5,16 +5,14 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.gui.GuiApplyHealthItem;
 import ichttt.mods.firstaid.client.gui.GuiUtils;
-import ichttt.mods.firstaid.damagesystem.PlayerDamageModel;
-import ichttt.mods.firstaid.damagesystem.capability.PlayerDataManager;
-import ichttt.mods.firstaid.network.MessageHasTutorial;
+import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
+import ichttt.mods.firstaid.common.network.MessageClientUpdate;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.io.IOException;
 
 @SideOnly(Side.CLIENT)
 public class GuiTutorial extends GuiScreen {
@@ -58,13 +56,13 @@ public class GuiTutorial extends GuiScreen {
     @Override
     protected void actionPerformed(GuiButton button) {
         if (button.id == 9) {
-            FirstAid.NETWORKING.sendToServer(new MessageHasTutorial());
+            FirstAid.NETWORKING.sendToServer(new MessageClientUpdate(MessageClientUpdate.Type.TUTORIAL_COMPLETE));
             mc.displayGuiScreen(null);
         } else if (button.id == 0) {
             if (action.hasNext())
                 this.action.next();
             else {
-                FirstAid.NETWORKING.sendToServer(new MessageHasTutorial());
+                FirstAid.NETWORKING.sendToServer(new MessageClientUpdate(MessageClientUpdate.Type.TUTORIAL_COMPLETE));
                 mc.displayGuiScreen(new GuiApplyHealthItem(PlayerDataManager.getDamageModel(mc.player)));
             }
         }

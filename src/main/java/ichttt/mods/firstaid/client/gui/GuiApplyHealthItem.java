@@ -1,13 +1,14 @@
 package ichttt.mods.firstaid.client.gui;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.FirstAidRegistryImpl;
+import ichttt.mods.firstaid.common.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.ClientProxy;
-import ichttt.mods.firstaid.network.MessageApplyHealingItem;
+import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
+import ichttt.mods.firstaid.common.network.MessageClientUpdate;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -16,6 +17,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.StringUtils;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -94,6 +96,12 @@ public class GuiApplyHealthItem extends GuiScreen {
 
         GuiButton buttonCancel = new GuiButton(9, this.width / 2 - 100, this.height - 50, I18n.format("gui.cancel"));
         this.buttonList.add(buttonCancel);
+
+        if (this.mc.gameSettings.showDebugInfo) {
+            GuiButton REFRESH = new GuiButton(10, this.guiLeft + 218, this.guiTop + 115, 36, 20, "resync");
+            this.buttonList.add(REFRESH);
+        }
+
         super.initGui();
     }
 
@@ -104,7 +112,9 @@ public class GuiApplyHealthItem extends GuiScreen {
         this.mc.getTextureManager().bindTexture(GuiUtils.GUI_LOCATION);
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
         GuiInventory.drawEntityOnScreen(this.width / 2, this.height / 2 + 30, 45, 0, 0, mc.player);
+
         super.drawScreen(mouseX, mouseY, partialTicks);
+
         int morphineTicks = damageModel.getMorphineTicks();
         if (morphineTicks > 0)
             drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", StringUtils.ticksToElapsedTime(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - 29, 0xFFFFFF);
@@ -162,6 +172,10 @@ public class GuiApplyHealthItem extends GuiScreen {
             //TODO notify the user somehow (sound?)
             AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
             part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(healingType);
+        } else if (button.id == 10) {
+            FirstAid.NETWORKING.sendToServer(new MessageClientUpdate(MessageClientUpdate.Type.REQUEST_REFRESH));
+            FirstAid.logger.info("Requesting refresh");
+            mc.player.sendStatusMessage(new TextComponentString("Re-downloading health data from server..."), true);
         }
         mc.displayGuiScreen(null);
     }

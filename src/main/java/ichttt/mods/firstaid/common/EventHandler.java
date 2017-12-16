@@ -1,7 +1,5 @@
 package ichttt.mods.firstaid.common;
 
-import com.creativemd.playerrevive.api.IRevival;
-import com.creativemd.playerrevive.api.capability.CapaRevive;
 import com.google.common.collect.MapMaker;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
@@ -28,7 +26,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.ResourceLocation;

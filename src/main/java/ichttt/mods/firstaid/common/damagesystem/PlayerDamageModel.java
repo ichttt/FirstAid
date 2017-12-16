@@ -52,7 +52,6 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         return new PlayerDamageModel(config, headDebuffs, bodyDebuffs, armDebuff, legFootDebuff);
     }
 
-
     protected PlayerDamageModel(FirstAidConfig.DamageSystem config, AbstractDebuff[] headDebuffs, AbstractDebuff[] bodyDebuffs, SharedDebuff armDebuff, SharedDebuff legFootDebuff) {
         super(new DamageablePart(config.maxHealthHead,      true,  EnumPlayerPart.HEAD,       headDebuffs  ),
               new DamageablePart(config.maxHealthLeftArm,   false, EnumPlayerPart.LEFT_ARM,   armDebuff    ),
@@ -116,14 +115,16 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             return;
 
         float currentHealth = getCurrentHealth();
-        if (currentHealth == 0)
+        if (currentHealth <= 0F) {
+            FirstAid.logger.error("Got {} health left, but isn't marked as dead!", currentHealth);
             return;
+        }
 
         if (FirstAid.playerMaxHealth != -1) {
             float newCurrentHealth = player.getMaxHealth() * (currentHealth / (FirstAid.scaleMaxHealth ? player.getMaxHealth() : FirstAid.playerMaxHealth));
 
             if (Float.isInfinite(newCurrentHealth)) {
-                FirstAid.logger.error("Error calculating current health: Value was infinite");
+                FirstAid.logger.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe
             } else {
                 if (newCurrentHealth != prevHealthCurrent)
                     ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
@@ -134,7 +135,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         if (!this.hasTutorial)
             this.hasTutorial = PlayerDataManager.tutorialDone.contains(player.getName());
 
-        if (FirstAid.scaleMaxHealth) {
+        if (FirstAid.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
             float globalFactor = player.getMaxHealth() / 20F;
             if (prevScaleFactor != globalFactor) {
                 boolean reduce = false;
@@ -206,19 +207,19 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         IRevival revival = CommonUtils.getRevivalIfPossible(player);
         if (revival != null) {
             if (!revival.isHealty() && !revival.isDead()) {
-                this.waitingForHelp = true;
+                this.waitingForHelp = true; //Technically not dead yet, but we should still return true
                 return true;
-            } else if (this.waitingForHelp && revival.isRevived()) {
+            } else if (this.waitingForHelp && revival.isRevived()) { //We just got revived
                 this.waitingForHelp = false;
                 player.isDead = false;
                 for (AbstractDamageablePart part : this) {
                     if (part.canCauseDeath && part.currentHealth <= 0F) {
-                        part.currentHealth = 1F;
+                        part.currentHealth = 1F; // Set the critical health to a non-zero value
                     }
                 }
                 //make sure to resync the client health
                 if (!player.world.isRemote && player instanceof EntityPlayerMP)
-                    FirstAid.NETWORKING.sendTo(new MessageResync(this), (EntityPlayerMP) player);
+                    FirstAid.NETWORKING.sendTo(new MessageResync(this), (EntityPlayerMP) player); //Upload changes to the client
                 return false;
             }
         }
@@ -235,7 +236,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     @Override
-    public Float getAbsorption() {
+    public Float getAbsorption() { //Float class because of DataManager
         float value = 0;
         for (AbstractDamageablePart part : this)
                 value += part.getAbsorption();

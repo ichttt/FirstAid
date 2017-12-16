@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Locale;
 
 @SideOnly(Side.CLIENT)
-public class GuiApplyHealthItem extends GuiScreen {
-    public static GuiApplyHealthItem INSTANCE;
+public class GuiHealthScreen extends GuiScreen {
+    public static GuiHealthScreen INSTANCE;
     public static final int xSize = 256;
     public static final int ySize = 137;
 
@@ -43,13 +43,13 @@ public class GuiApplyHealthItem extends GuiScreen {
 
     public static boolean isOpen = false;
 
-    public GuiApplyHealthItem(AbstractPlayerDamageModel damageModel) {
+    public GuiHealthScreen(AbstractPlayerDamageModel damageModel) {
         this.damageModel = damageModel;
 
         disableButtons = true;
     }
 
-    public GuiApplyHealthItem(AbstractPlayerDamageModel damageModel, EnumHealingType healingType, EnumHand activeHand) {
+    public GuiHealthScreen(AbstractPlayerDamageModel damageModel, EnumHealingType healingType, EnumHand activeHand) {
         this.damageModel = damageModel;
         this.healingType = healingType;
         this.activeHand = activeHand;
@@ -117,8 +117,9 @@ public class GuiApplyHealthItem extends GuiScreen {
 
         int morphineTicks = damageModel.getMorphineTicks();
         if (morphineTicks > 0)
-            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", StringUtils.ticksToElapsedTime(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - 29, 0xFFFFFF);
-        drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
+            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", StringUtils.ticksToElapsedTime(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - (this.healingType == null ? 21 : 29), 0xFFFFFF);
+        if (this.healingType != null)
+            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
 
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
         boolean playerDead = damageModel.isDead(mc.player);

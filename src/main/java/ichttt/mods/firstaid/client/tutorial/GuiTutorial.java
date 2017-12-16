@@ -3,7 +3,7 @@ package ichttt.mods.firstaid.client.tutorial;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientProxy;
-import ichttt.mods.firstaid.client.gui.GuiApplyHealthItem;
+import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.gui.GuiUtils;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
@@ -16,14 +16,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiTutorial extends GuiScreen {
-    private final GuiApplyHealthItem parent;
+    private final GuiHealthScreen parent;
     private final AbstractPlayerDamageModel demoModel;
     private int guiTop;
     private final TutorialAction action;
 
     public GuiTutorial() {
         this.demoModel = PlayerDamageModel.create();
-        this.parent = new GuiApplyHealthItem(demoModel);
+        this.parent = new GuiHealthScreen(demoModel);
         this.action = new TutorialAction(this);
 
         this.action.addTextWrapper("firstaid.tutorial.welcome");
@@ -48,7 +48,7 @@ public class GuiTutorial extends GuiScreen {
     public void initGui() {
         parent.setWorldAndResolution(mc, this.width, this.height);
         guiTop = parent.guiTop - 30;
-        this.buttonList.add(new GuiButton(0, parent.guiLeft + GuiApplyHealthItem.xSize - 34, guiTop + 4, 32, 20, ">"));
+        this.buttonList.add(new GuiButton(0, parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, ">"));
         this.buttonList.addAll(parent.getButtons());
         parent.getButtons().clear();
     }
@@ -63,7 +63,7 @@ public class GuiTutorial extends GuiScreen {
                 this.action.next();
             else {
                 FirstAid.NETWORKING.sendToServer(new MessageClientUpdate(MessageClientUpdate.Type.TUTORIAL_COMPLETE));
-                mc.displayGuiScreen(new GuiApplyHealthItem(PlayerDataManager.getDamageModel(mc.player)));
+                mc.displayGuiScreen(new GuiHealthScreen(PlayerDataManager.getDamageModel(mc.player)));
             }
         }
     }
@@ -78,7 +78,7 @@ public class GuiTutorial extends GuiScreen {
         parent.drawScreen(mouseX, mouseY, partialTicks);
         GlStateManager.popMatrix();
         mc.getTextureManager().bindTexture(GuiUtils.GUI_LOCATION);
-        drawTexturedModalRect(parent.guiLeft, guiTop ,0, 139, GuiApplyHealthItem.xSize, 28);
+        drawTexturedModalRect(parent.guiLeft, guiTop ,0, 139, GuiHealthScreen.xSize, 28);
         GlStateManager.pushMatrix();
         this.action.draw();
         GlStateManager.popMatrix();

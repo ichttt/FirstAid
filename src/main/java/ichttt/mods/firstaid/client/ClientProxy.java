@@ -4,7 +4,7 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.IProxy;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
-import ichttt.mods.firstaid.client.gui.GuiApplyHealthItem;
+import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.gui.HUDHandler;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import net.minecraft.client.Minecraft;
@@ -36,7 +36,7 @@ public class ClientProxy implements IProxy {
     @Override
     public void showGuiApplyHealth(EnumHealingType healingType, EnumHand activeHand) {
         Minecraft mc = Minecraft.getMinecraft();
-        GuiApplyHealthItem.INSTANCE = new GuiApplyHealthItem(PlayerDataManager.getDamageModel(mc.player), healingType, activeHand);
-        mc.displayGuiScreen(GuiApplyHealthItem.INSTANCE);
+        GuiHealthScreen.INSTANCE = new GuiHealthScreen(PlayerDataManager.getDamageModel(mc.player), healingType, activeHand);
+        mc.displayGuiScreen(GuiHealthScreen.INSTANCE);
     }
 }

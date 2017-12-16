@@ -48,14 +48,27 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
         }
     }
 
+    /**
+     * Updates the part.
+     * Should not be called by other mods!
+     */
     public abstract void tick(World world, EntityPlayer player);
 
+    /**
+     * Applies morphine effects
+     */
     public abstract void applyMorphine();
 
     public abstract int getMorphineTicks();
 
     public abstract float getCurrentHealth();
 
+    /**
+     * Checks if the player is dead.
+     * This does not mean that the player cannot be revived.
+     * @param player The player to check. If null, it will not be checked if the player can be revived (Using PlayerRevival)
+     * @return true if dead, false otherwise
+     */
     public abstract boolean isDead(@Nullable EntityPlayer player);
 
     public abstract Float getAbsorption();

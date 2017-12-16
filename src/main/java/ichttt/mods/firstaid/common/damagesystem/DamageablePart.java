@@ -14,6 +14,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class DamageablePart extends AbstractDamageablePart {
     private int maxHealth;
@@ -29,7 +30,7 @@ public class DamageablePart extends AbstractDamageablePart {
     }
 
     @Override
-    public float heal(float amount, EntityPlayer player, boolean applyDebuff) {
+    public float heal(float amount, @Nullable EntityPlayer player, boolean applyDebuff) {
         float notFitting = Math.abs(Math.min(0F, maxHealth - (currentHealth + amount)));
         currentHealth = Math.min(maxHealth, currentHealth + amount);
         if (notFitting > 0) {
@@ -38,18 +39,20 @@ public class DamageablePart extends AbstractDamageablePart {
             notFitting = notFitting - (currentHealth - oldHealth);
         }
         final float finalNotFitting = notFitting;
-        if (applyDebuff)
+        if (applyDebuff) {
+            Objects.requireNonNull(player, "Got null player with applyDebuff = true");
             Arrays.stream(debuffs).forEach(debuff -> debuff.handleHealing(amount - finalNotFitting, currentHealth / maxHealth, (EntityPlayerMP) player));
+        }
         return notFitting;
     }
 
     @Override
-    public float damage(float amount, EntityPlayer player, boolean applyDebuff) {
+    public float damage(float amount, @Nullable EntityPlayer player, boolean applyDebuff) {
         return damage(amount, player, applyDebuff, 0F);
     }
 
     @Override
-    public float damage(float amount, EntityPlayer player, boolean applyDebuff, float minHealth) {
+    public float damage(float amount, @Nullable EntityPlayer player, boolean applyDebuff, float minHealth) {
         if (minHealth > maxHealth)
             throw new IllegalArgumentException("Cannot damage part with minHealth " + minHealth + " while he has more max health (" + maxHealth + ")");
         float origAmount = amount;
@@ -59,8 +62,10 @@ public class DamageablePart extends AbstractDamageablePart {
         }
         float notFitting = Math.abs(Math.min(minHealth, currentHealth - amount) - minHealth);
         currentHealth = Math.max(minHealth, currentHealth - amount);
-        if (applyDebuff)
+        if (applyDebuff) {
+            Objects.requireNonNull(player, "Got null player with applyDebuff = true");
             Arrays.stream(debuffs).forEach(debuff -> debuff.handleDamageTaken(origAmount - notFitting, currentHealth / maxHealth, (EntityPlayerMP) player));
+        }
         return notFitting;
     }
 

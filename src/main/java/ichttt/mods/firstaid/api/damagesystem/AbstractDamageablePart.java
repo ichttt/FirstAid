@@ -24,12 +24,38 @@ public abstract class AbstractDamageablePart implements INBTSerializable<NBTTagC
         this.part = playerPart;
     }
 
-    public abstract float heal(float amount, EntityPlayer player, boolean applyDebuff);
+    /**
+     * Heals the part for the specified amount.
+     * @param amount The amount the part should be healed, clamped to max health
+     * @param player The entity that this part belongs to. May be null if applyDebuff is false, otherwise this is required nonnull
+     * @param applyDebuff If all registered debuffs should be notified of the healing done
+     * @return The amount of health that could not be added
+     */
+    public abstract float heal(float amount, @Nullable EntityPlayer player, boolean applyDebuff);
 
-    public abstract float damage(float amount, EntityPlayer player, boolean applyDebuff);
+    /**
+     * Damages the part for the specified amount.
+     * @param amount The amount the part should be damaged, clamped to 0
+     * @param player The entity that this part belongs to. May be null if applyDebuff is false, otherwise this is required nonnull
+     * @param applyDebuff If all registered debuffs should be notified of the damage taken
+     * @return The amount of damage that could not be done
+     */
+    public abstract float damage(float amount, @Nullable EntityPlayer player, boolean applyDebuff);
 
-    public abstract float damage(float amount, EntityPlayer player, boolean applyDebuff, float minHealth);
+    /**
+     * Damages the part for the specified amount.
+     * @param amount The amount the part should be damaged, clamped to minHealth
+     * @param player The entity that this part belongs to. May be null if applyDebuff is false, otherwise this is required nonnull
+     * @param applyDebuff If all registered debuffs should be notified of the damage taken
+     * @param minHealth The minimum health the part should drop to
+     * @return The amount of damage that could not be done
+     */
+    public abstract float damage(float amount, @Nullable EntityPlayer player, boolean applyDebuff, float minHealth);
 
+    /**
+     * Updates the part.
+     * Should not be called by other mods!
+     */
     public abstract void tick(World world, EntityPlayer player, boolean tickDebuffs);
 
     public abstract void setAbsorption(float absorption);

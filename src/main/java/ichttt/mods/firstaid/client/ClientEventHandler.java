@@ -2,7 +2,7 @@ package ichttt.mods.firstaid.client;
 
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.client.gui.GuiApplyHealthItem;
+import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.gui.HUDHandler;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
@@ -39,7 +39,7 @@ public class ClientEventHandler {
                 Minecraft.getMinecraft().displayGuiScreen(new GuiTutorial());
             }
             else {
-                mc.displayGuiScreen(new GuiApplyHealthItem(damageModel));
+                mc.displayGuiScreen(new GuiHealthScreen(damageModel));
             }
         }
     }

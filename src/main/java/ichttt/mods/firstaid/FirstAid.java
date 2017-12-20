@@ -1,23 +1,17 @@
 package ichttt.mods.firstaid;
 
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.FirstAidRegistry;
-import ichttt.mods.firstaid.api.enums.EnumHealingType;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
-import ichttt.mods.firstaid.common.FirstAidRegistryImpl;
+import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.IProxy;
-import ichttt.mods.firstaid.common.damagesystem.PartHealer;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
-import ichttt.mods.firstaid.common.damagesystem.debuff.Debuffs;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.*;
 import ichttt.mods.firstaid.common.DebugDamageCommand;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -27,13 +21,9 @@ import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.4.2", acceptedMinecraftVersions = "[1.12.2,1.13)", dependencies = "required-after:forge@[14.23.0.2526,);")
 public class FirstAid {
@@ -66,17 +56,16 @@ public class FirstAid {
             }
         };
 
+        MinecraftForge.EVENT_BUS.register(EventHandler.class);
         FirstAidItems.init();
         proxy.init();
         //Setup API
-        FirstAidRegistry.setImpl(FirstAidRegistryImpl.INSTANCE);
+        RegistryManager.setupRegistries();
         checkEarlyExit();
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(EventHandler.class);
-
         logger.debug("Registering capability");
         CapabilityExtendedHealthSystem.register();
 
@@ -93,40 +82,13 @@ public class FirstAid {
         NETWORKING.registerMessage(MessageResync.Handler.class, MessageResync.class, ++i, Side.CLIENT);
         MessageReceiveConfiguration.validate();
 
-        logger.debug("Registering defaults registry values");
-        FirstAidRegistry registry = Objects.requireNonNull(FirstAidRegistry.getImpl());
-
-        registry.bindHealingType(EnumHealingType.BANDAGE, type -> new PartHealer(400, 3, type));
-        registry.bindHealingType(EnumHealingType.PLASTER, type -> new PartHealer(500, 2, type));
-
-        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> feetList = new ArrayList<>(2);
-        feetList.add(Pair.of(EntityEquipmentSlot.FEET, new EnumPlayerPart[]{EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT}));
-        feetList.add(Pair.of(EntityEquipmentSlot.LEGS, new EnumPlayerPart[]{EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG}));
-        registry.bindDamageSourceStandard("fall", feetList);
-        registry.bindDamageSourceStandard("hotFloor", feetList);
-
-        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> headList = new ArrayList<>(1);
-        headList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumPlayerPart[]{EnumPlayerPart.HEAD}));
-        registry.bindDamageSourceStandard("anvil", headList);
-
-        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> bodyList = new ArrayList<>(1);
-        bodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.BODY}));
-        registry.bindDamageSourceStandard("starve", bodyList);
-
-        registry.bindDamageSourceRandom("magic", false, false);
-        registry.bindDamageSourceRandom("drown", false, true);
-        registry.bindDamageSourceRandom("inWall", false, true);
-
-        logger.debug("Initializing debuffs");
-        //noinspection ResultOfMethodCallIgnored
-        Debuffs.getArmDebuffs().toString();
-        logger.info("Initialized 4 debuffs");
+        RegistryManager.registerDefaults();
         checkEarlyExit();
     }
 
     @Mod.EventHandler
     public void loadComplete(FMLLoadCompleteEvent event) {
-        FirstAidRegistryImpl.verify();
+        RegistryManager.finalizeRegistries();
         checkEarlyExit();
     }
 

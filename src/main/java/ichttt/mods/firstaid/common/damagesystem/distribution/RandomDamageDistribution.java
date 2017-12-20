@@ -2,6 +2,7 @@ package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import org.apache.commons.lang3.tuple.Pair;
@@ -46,9 +47,9 @@ public class RandomDamageDistribution extends DamageDistribution {
             List<EntityEquipmentSlot> slots = Arrays.asList(EntityEquipmentSlot.values());
             Collections.shuffle(slots, RANDOM);
             for (EntityEquipmentSlot slot : slots) {
-                if (slot == EntityEquipmentSlot.MAINHAND || slot == EntityEquipmentSlot.OFFHAND)
+                if (!CommonUtils.isValidArmorSlot(slot))
                     continue;
-                List<EnumPlayerPart> parts = slotToParts.get(slot);
+                List<EnumPlayerPart> parts = CommonUtils.slotToParts.get(slot);
                 Collections.shuffle(parts);
                 partList.add(Pair.of(slot, parts.toArray(new EnumPlayerPart[0])));
             }
@@ -58,12 +59,12 @@ public class RandomDamageDistribution extends DamageDistribution {
 
     public static List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> addAllRandom(int startValue, boolean up) {
         List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList = new ArrayList<>();
-        for (int i = 0; i < ARMOR_SLOTS.length; i ++) {
+        for (int i = 0; i < CommonUtils.ARMOR_SLOTS.length; i ++) {
             int posInArray = Math.abs(i - (up ? 0 : 3)) + startValue;
             if (posInArray > 3)
                 posInArray -= 4;
-            EntityEquipmentSlot slot = ARMOR_SLOTS[posInArray];
-            List<EnumPlayerPart> parts = slotToParts.get(slot);
+            EntityEquipmentSlot slot = CommonUtils.ARMOR_SLOTS[posInArray];
+            List<EnumPlayerPart> parts = CommonUtils.slotToParts.get(slot);
             Collections.shuffle(parts);
             partList.add(Pair.of(slot, parts.toArray(new EnumPlayerPart[0])));
         }

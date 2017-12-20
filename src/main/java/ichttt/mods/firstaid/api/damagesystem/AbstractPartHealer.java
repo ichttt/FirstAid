@@ -15,6 +15,7 @@ public abstract class AbstractPartHealer {
 
     /**
      * Called when the part is loaded with saved data.
+     *
      * @return this
      */
     public abstract AbstractPartHealer loadNBT(int ticksPassed, int heals);
@@ -22,6 +23,7 @@ public abstract class AbstractPartHealer {
     /**
      * Returns true if the healer is finished healing the body part.
      * The healer will be removed from the part at the next tick
+     *
      * @return True if the healer is finished, otherwise false
      */
     public abstract boolean hasFinished();

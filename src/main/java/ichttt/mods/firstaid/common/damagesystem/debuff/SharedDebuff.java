@@ -2,42 +2,46 @@ package ichttt.mods.firstaid.common.damagesystem.debuff;
 
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.debuff.IDebuff;
+import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 public class SharedDebuff implements IDebuff {
-    private final AbstractDebuff debuff;
+    private final IDebuff debuff;
     private final EnumPlayerPart[] parts;
     private int damage;
     private int healingDone;
     private int damageCount;
     private int healingCount;
 
-    public SharedDebuff(AbstractDebuff debuff, EnumPlayerPart... parts) {
+    public SharedDebuff(IDebuff debuff, EnumDebuffSlot slot) {
+        if (slot.playerParts.length <= 1)
+            throw new IllegalArgumentException("Only slots with more then more parts can be wrapped by SharedDebuff!");
         this.debuff = debuff;
-        this.parts = parts;
+        this.parts = slot.playerParts;
     }
 
     @Override
     public void handleDamageTaken(float damage, float healthPerMax, EntityPlayerMP player) {
-        if (!debuff.isEnabled.getAsBoolean())
-            return;
-        this.damage += damage;
-        this.damageCount++;
+        if (debuff.isEnabled()) {
+            this.damage += damage;
+            this.damageCount++;
+        }
     }
 
     @Override
     public void handleHealing(float healingDone, float healthPerMax, EntityPlayerMP player) {
-        if (!debuff.isEnabled.getAsBoolean())
-            return;
-        this.healingDone += healingDone;
-        this.healingCount++;
+        if (debuff.isEnabled()) {
+            this.healingDone += healingDone;
+            this.healingCount++;
+        }
     }
 
     public void tick(EntityPlayer player) {
-        if (!debuff.isEnabled.getAsBoolean())
+        if (!debuff.isEnabled())
             return;
         if (player.world.isRemote || !(player instanceof EntityPlayerMP))
             return;
@@ -63,7 +67,6 @@ public class SharedDebuff implements IDebuff {
             this.damageCount = 0;
             this.healingCount = 0;
         }
-        if (debuff instanceof ConstantDebuff)
-            ((ConstantDebuff) debuff).update(player);
+        debuff.update(player);
     }
 }

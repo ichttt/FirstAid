@@ -1,26 +1,19 @@
 package ichttt.mods.firstaid.common.damagesystem.debuff;
 
-import ichttt.mods.firstaid.common.FirstAidConfig;
-import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.floats.Float2IntMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.potion.PotionEffect;
 
+import javax.annotation.Nonnull;
 import java.util.function.BooleanSupplier;
 
 public class ConstantDebuff extends AbstractDebuff {
     private int ticks = 0;
-    private final Float2IntLinkedOpenHashMap map = new Float2IntLinkedOpenHashMap();
     private int activeMultiplier = 0;
 
-    public ConstantDebuff(String potionName, BooleanSupplier disableEnableSupplier) {
-        super(potionName, disableEnableSupplier);
-    }
-
-    public ConstantDebuff addBound(float value, int multiplier) {
-        map.put(value, multiplier);
-        return this;
+    public ConstantDebuff(@Nonnull String potionName, @Nonnull Float2IntMap map, @Nonnull BooleanSupplier isEnabled) {
+        super(potionName, map, isEnabled);
     }
 
     private void syncMultiplier(float healthPerMax) {
@@ -49,6 +42,7 @@ public class ConstantDebuff extends AbstractDebuff {
         syncMultiplier(healthPerMax);
     }
 
+    @Override
     public void update(EntityPlayer player) {
         if (!this.isEnabled.getAsBoolean())
             return;

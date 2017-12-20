@@ -17,6 +17,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
 @SideOnly(Side.CLIENT)
 public class DebuffTimedSound implements ITickableSound {
@@ -28,17 +30,26 @@ public class DebuffTimedSound implements ITickableSound {
     private Sound sound;
     private float volume = volumeMultiplier;
     private int ticks;
-    private static DebuffTimedSound HURT_SOUND;
+    private final static Map<SoundEvent, DebuffTimedSound> activeSounds = new HashMap<>();
 
-    public static void playHurtSound(int duration) {
+    public static void playHurtSound(SoundEvent event, int duration) {
         if (!FirstAidConfig.enableSoundSystem)
             return;
         SoundHandler soundHandler = Minecraft.getMinecraft().getSoundHandler();
-        if (HURT_SOUND != null)
-            soundHandler.stopSound(HURT_SOUND);
-        HURT_SOUND = new DebuffTimedSound(EventHandler.HEARTBEAT, duration);
-        soundHandler.playSound(HURT_SOUND);
+        DebuffTimedSound matchingSound = activeSounds.get(event);
+        if (matchingSound != null) {
+            if (!matchingSound.isDonePlaying())
+                soundHandler.stopSound(matchingSound);
+            activeSounds.remove(event);
+        }
+        DebuffTimedSound newSound = new DebuffTimedSound(EventHandler.HEARTBEAT, duration);
+        soundHandler.playSound(newSound);
+        activeSounds.put(event, newSound);
     }
+
+//    public static void tick() {
+//        activeSounds.entrySet().removeIf(next -> next.getValue().isDonePlaying());
+//    }
 
     public DebuffTimedSound(SoundEvent event, int debuffDuration) {
         this.soundLocation = event.getSoundName();

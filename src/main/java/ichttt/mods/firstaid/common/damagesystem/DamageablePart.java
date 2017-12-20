@@ -1,11 +1,11 @@
 package ichttt.mods.firstaid.common.damagesystem;
 
-import ichttt.mods.firstaid.common.FirstAidRegistryImpl;
+import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.damagesystem.debuff.ConstantDebuff;
-import ichttt.mods.firstaid.common.damagesystem.debuff.IDebuff;
+import ichttt.mods.firstaid.api.debuff.IDebuff;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -79,7 +79,7 @@ public class DamageablePart extends AbstractDamageablePart {
                 activeHealer = null;
         }
         if (!world.isRemote && tickDebuffs)
-            Arrays.stream(debuffs).filter(debuff -> debuff instanceof ConstantDebuff).forEach(debuff -> ((ConstantDebuff) debuff).update(player));
+            Arrays.stream(debuffs).forEach(debuff -> debuff.update(player));
     }
 
     @Override

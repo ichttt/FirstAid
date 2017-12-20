@@ -6,6 +6,7 @@ import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.capability.CapProvider;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
@@ -25,6 +26,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
@@ -63,7 +65,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class EventHandler {
     public static final Random rand = new Random();
-    public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
+    public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")).setRegistryName(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
     public static final ConcurrentMap<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new MapMaker().weakKeys().concurrencyLevel(1).makeMap();
 
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
@@ -74,16 +76,17 @@ public class EventHandler {
             return;
         EntityPlayer player = (EntityPlayer) entity;
         AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+        DamageSource source = event.getSource();
+
         if (amountToDamage == Float.MAX_VALUE) {
             damageModel.forEach(damageablePart -> damageablePart.currentHealth = 0F);
             if (player instanceof EntityPlayerMP)
                 Arrays.stream(EnumPlayerPart.VALUES).forEach(part -> FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, Float.MAX_VALUE, 0F), (EntityPlayerMP) player));
             event.setCanceled(true);
-            CommonUtils.killPlayer(player);
+            CommonUtils.killPlayer(player, source);
             return;
         }
 
-        DamageSource source = event.getSource();
         amountToDamage = ArmorUtils.applyGlobalPotionModifieres(player, source, amountToDamage);
 
         //VANILLA COPY - combat tracker and exhaustion
@@ -114,7 +117,7 @@ public class EventHandler {
 
         event.setCanceled(true);
         if (damageModel.isDead(player))
-            CommonUtils.killPlayer(player);
+            CommonUtils.killPlayer(player, source);
 
         hitList.remove(player);
     }
@@ -148,6 +151,11 @@ public class EventHandler {
             //replace the data manager with our wrapper to grab absorption
             player.dataManager = new DataManagerWrapper(player, player.dataManager);
         }
+    }
+
+    @SubscribeEvent
+    public static void registerItems(RegistryEvent.Register<Item> event) {
+        event.getRegistry().registerAll(FirstAidItems.BANDAGE, FirstAidItems.PLASTER, FirstAidItems.MORPHINE);
     }
 
     @SubscribeEvent

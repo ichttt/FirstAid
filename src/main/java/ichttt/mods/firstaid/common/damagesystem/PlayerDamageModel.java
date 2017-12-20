@@ -1,39 +1,41 @@
 package ichttt.mods.firstaid.common.damagesystem;
 
 import com.creativemd.playerrevive.api.IRevival;
-import com.creativemd.playerrevive.api.capability.CapaRevive;
-import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.common.FirstAidConfig;
+import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.debuff.IDebuff;
+import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.EventHandler;
+import ichttt.mods.firstaid.common.FirstAidConfig;
+import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
-import ichttt.mods.firstaid.common.damagesystem.debuff.AbstractDebuff;
-import ichttt.mods.firstaid.common.damagesystem.debuff.Debuffs;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
-import ichttt.mods.firstaid.common.network.MessageAddHealth;
-import ichttt.mods.firstaid.common.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.common.network.MessageResync;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.DataManagerWrapper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Set;
 
 public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private int morphineTicksLeft = 0;
     private float prevHealthCurrent = -1F;
     private float prevScaleFactor;
-    private final List<SharedDebuff> sharedDebuffs = new ArrayList<>(2);
+    private final Set<SharedDebuff> sharedDebuffs = new HashSet<>();
     private boolean waitingForHelp = false;
 
     public static PlayerDamageModel create() {
@@ -45,24 +47,27 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     private static PlayerDamageModel create_impl(FirstAidConfig.DamageSystem config) {
-        AbstractDebuff[] headDebuffs = Debuffs.getHeadDebuffs();
-        AbstractDebuff[] bodyDebuffs = Debuffs.getBodyDebuffs();
-        SharedDebuff armDebuff = Debuffs.getArmDebuffs();
-        SharedDebuff legFootDebuff = Debuffs.getLegFootDebuffs();
-        return new PlayerDamageModel(config, headDebuffs, bodyDebuffs, armDebuff, legFootDebuff);
+        FirstAidRegistry registry = FirstAidRegistryImpl.INSTANCE;
+        IDebuff[] headDebuffs = registry.getDebuffs(EnumDebuffSlot.HEAD);
+        IDebuff[] bodyDebuffs = registry.getDebuffs(EnumDebuffSlot.BODY);
+        IDebuff[] armsDebuffs = registry.getDebuffs(EnumDebuffSlot.ARMS);
+        IDebuff[] legFootDebuffs = registry.getDebuffs(EnumDebuffSlot.LEGS_AND_FEET);
+        return new PlayerDamageModel(config, headDebuffs, bodyDebuffs, armsDebuffs, legFootDebuffs);
     }
 
-    protected PlayerDamageModel(FirstAidConfig.DamageSystem config, AbstractDebuff[] headDebuffs, AbstractDebuff[] bodyDebuffs, SharedDebuff armDebuff, SharedDebuff legFootDebuff) {
-        super(new DamageablePart(config.maxHealthHead,      true,  EnumPlayerPart.HEAD,       headDebuffs  ),
-              new DamageablePart(config.maxHealthLeftArm,   false, EnumPlayerPart.LEFT_ARM,   armDebuff    ),
-              new DamageablePart(config.maxHealthLeftLeg,   false, EnumPlayerPart.LEFT_LEG,   legFootDebuff),
-              new DamageablePart(config.maxHealthLeftFoot,  false, EnumPlayerPart.LEFT_FOOT,  legFootDebuff),
-              new DamageablePart(config.maxHealthBody,      true,  EnumPlayerPart.BODY,       bodyDebuffs  ),
-              new DamageablePart(config.maxHealthRightArm,  false, EnumPlayerPart.RIGHT_ARM,  armDebuff    ),
-              new DamageablePart(config.maxHealthRightLeg,  false, EnumPlayerPart.RIGHT_LEG,  legFootDebuff),
-              new DamageablePart(config.maxHealthRightFoot, false, EnumPlayerPart.RIGHT_FOOT, legFootDebuff));
-        sharedDebuffs.add(armDebuff);
-        sharedDebuffs.add(legFootDebuff);
+    protected PlayerDamageModel(FirstAidConfig.DamageSystem config, IDebuff[] headDebuffs, IDebuff[] bodyDebuffs, IDebuff[] armDebuffs, IDebuff[] legFootDebuffs) {
+        super(new DamageablePart(config.maxHealthHead,      true,  EnumPlayerPart.HEAD,       headDebuffs   ),
+              new DamageablePart(config.maxHealthLeftArm,   false, EnumPlayerPart.LEFT_ARM,   armDebuffs    ),
+              new DamageablePart(config.maxHealthLeftLeg,   false, EnumPlayerPart.LEFT_LEG,   legFootDebuffs),
+              new DamageablePart(config.maxHealthLeftFoot,  false, EnumPlayerPart.LEFT_FOOT,  legFootDebuffs),
+              new DamageablePart(config.maxHealthBody,      true,  EnumPlayerPart.BODY,       bodyDebuffs   ),
+              new DamageablePart(config.maxHealthRightArm,  false, EnumPlayerPart.RIGHT_ARM,  armDebuffs    ),
+              new DamageablePart(config.maxHealthRightLeg,  false, EnumPlayerPart.RIGHT_LEG,  legFootDebuffs),
+              new DamageablePart(config.maxHealthRightFoot, false, EnumPlayerPart.RIGHT_FOOT, legFootDebuffs));
+        for (IDebuff debuff : armDebuffs)
+            this.sharedDebuffs.add((SharedDebuff) debuff);
+        for (IDebuff debuff : legFootDebuffs)
+            this.sharedDebuffs.add((SharedDebuff) debuff);
     }
 
     @Override

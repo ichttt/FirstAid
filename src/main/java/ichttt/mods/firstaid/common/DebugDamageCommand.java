@@ -12,6 +12,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
@@ -77,7 +78,7 @@ public class DebugDamageCommand extends CommandBase {
             FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, damage, 0F), (EntityPlayerMP) player);
             if (damageModel.isDead(player)) {
                 player.sendMessage(new TextComponentTranslation("death.attack.generic", player.getDisplayName()));
-                CommonUtils.killPlayer(player);
+                CommonUtils.killPlayer(player, null);
             }
         } catch (RuntimeException e) {
             throw new CommandException(e.toString());

@@ -1,21 +1,24 @@
 package ichttt.mods.firstaid.common.network;
 
-import ichttt.mods.firstaid.common.EnumHurtSound;
+import ichttt.mods.firstaid.client.DebuffTimedSound;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.SoundEvent;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class MessagePlayHurtSound implements IMessage {
-    private EnumHurtSound sound;
+    private SoundEvent sound;
     private int duration;
 
     public MessagePlayHurtSound () {}
 
-    public MessagePlayHurtSound(EnumHurtSound sound, int duration) {
+    public MessagePlayHurtSound(SoundEvent sound, int duration) {
         this.sound = sound;
         this.duration = duration;
     }
@@ -23,13 +26,13 @@ public class MessagePlayHurtSound implements IMessage {
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        sound = EnumHurtSound.values()[buf.readByte()];
+        sound = ByteBufUtils.readRegistryEntry(buf, ForgeRegistries.SOUND_EVENTS);
         duration = buf.readInt();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-        buf.writeByte(sound.ordinal());
+        ByteBufUtils.writeRegistryEntry(buf, sound);
         buf.writeInt(duration);
     }
 
@@ -38,7 +41,7 @@ public class MessagePlayHurtSound implements IMessage {
         @SideOnly(Side.CLIENT)
         @Override
         public IMessage onMessage(MessagePlayHurtSound message, MessageContext ctx) {
-            Minecraft.getMinecraft().addScheduledTask(() -> message.sound.playSound(message.duration));
+            Minecraft.getMinecraft().addScheduledTask(() -> DebuffTimedSound.playHurtSound(message.sound, message.duration));
             return null;
         }
     }

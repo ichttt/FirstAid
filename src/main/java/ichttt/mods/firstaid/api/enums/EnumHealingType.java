@@ -1,7 +1,12 @@
 package ichttt.mods.firstaid.api.enums;
 
+/**
+ * This class will be deleted soon, no replacement intended
+ */
+@Deprecated
 public enum EnumHealingType {
-    BANDAGE, PLASTER;
+    @Deprecated BANDAGE, @Deprecated PLASTER;
 
+    @Deprecated
     public static final EnumHealingType[] VALUES = values();
 }

@@ -1,13 +1,12 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
-import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.items.ItemHealing;
+import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
+import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -20,28 +19,24 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageApplyHealingItem implements IMessage {
     private EnumPlayerPart part;
-    private EnumHealingType healingType;
     private EnumHand hand;
 
     public MessageApplyHealingItem() {}
 
-    public MessageApplyHealingItem(EnumPlayerPart part, EnumHealingType healingType, EnumHand hand) {
+    public MessageApplyHealingItem(EnumPlayerPart part, EnumHand hand) {
         this.part = part;
-        this.healingType = healingType;
         this.hand = hand;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         part = EnumPlayerPart.fromID(buf.readByte());
-        healingType = EnumHealingType.VALUES[buf.readByte()];
         hand = buf.readBoolean() ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeByte(part.id);
-        buf.writeByte(healingType.ordinal());
         buf.writeBoolean(hand == EnumHand.MAIN_HAND);
     }
 
@@ -55,21 +50,15 @@ public class MessageApplyHealingItem implements IMessage {
                 AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
                 ItemStack stack = player.getHeldItem(message.hand);
                 Item item = stack.getItem();
-                if (!(item instanceof ItemHealing)) {
+                AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
+                if (healer == null) {
                     FirstAid.logger.warn("Player {} has invalid item in hand {} while it should be an healing item", player.getName(), item.getUnlocalizedName());
                     player.sendMessage(new TextComponentString("Unable to apply healing item!"));
                     return;
-                } else {
-                    ItemHealing itemHealing = (ItemHealing) item;
-                    if (itemHealing.type != message.healingType) {
-                        FirstAid.logger.warn("Player {} has invalid item with type {} in hand while it should be {}", player.getName(), itemHealing.type, message.healingType);
-                        player.sendMessage(new TextComponentString("Unable to apply healing item!"));
-                        return;
-                    }
                 }
                 stack.shrink(1);
                 AbstractDamageablePart damageablePart = damageModel.getFromEnum(message.part);
-                damageablePart.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(message.healingType);
+                damageablePart.activeHealer = healer;
             });
             return null;
         }

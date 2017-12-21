@@ -29,6 +29,7 @@ public class TutorialAction {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void next() {
         if (activeWrapper != null) {
             writeFromActiveWrapper();
@@ -40,12 +41,10 @@ public class TutorialAction {
             writeFromActiveWrapper();
             pos++;
         } else if (obj instanceof Consumer) {
-            //noinspection unchecked
             Consumer<GuiTutorial> consumer = (Consumer<GuiTutorial>) obj;
             consumer.accept(guiContext);
             pos++;
-            if (hasNext())
-                next();
+            if (hasNext()) next();
         } else {
             throw new RuntimeException("Found invalid object " + obj.toString());
         }

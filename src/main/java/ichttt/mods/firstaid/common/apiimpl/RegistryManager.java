@@ -4,11 +4,11 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.debuff.builder.DebuffBuilderFactory;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.damagesystem.PartHealer;
+import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -28,8 +28,8 @@ public class RegistryManager {
         FirstAidRegistry registry = Objects.requireNonNull(FirstAidRegistry.getImpl());
 
         //---HEALING TYPES---
-        registry.bindHealingType(EnumHealingType.BANDAGE, type -> new PartHealer(400, 3, type));
-        registry.bindHealingType(EnumHealingType.PLASTER, type -> new PartHealer(500, 2, type));
+        registry.registerHealingType(FirstAidItems.BANDAGE, stack -> new PartHealer(18 * 20, 4, stack));
+        registry.registerHealingType(FirstAidItems.PLASTER, stack -> new PartHealer(22 * 20, 2, stack));
 
         //---DAMAGE SOURCES---
         List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> feetList = new ArrayList<>(2);

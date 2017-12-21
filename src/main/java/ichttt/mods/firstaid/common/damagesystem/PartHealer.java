@@ -1,14 +1,14 @@
 package ichttt.mods.firstaid.common.damagesystem;
 
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
-import ichttt.mods.firstaid.api.enums.EnumHealingType;
+import net.minecraft.item.ItemStack;
 
 public class PartHealer extends AbstractPartHealer {
     private int ticksPassed = 0;
     private int heals = 0;
 
-    public PartHealer(int ticksPerHeal, int maxHeal, EnumHealingType type) {
-        super(maxHeal, type, ticksPerHeal);
+    public PartHealer(int ticksPerHeal, int maxHeal, ItemStack stack) {
+        super(maxHeal, stack, ticksPerHeal);
     }
 
     @Override

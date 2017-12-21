@@ -1,12 +1,11 @@
 package ichttt.mods.firstaid.client.gui;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.ClientProxy;
+import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientUpdate;
 import net.minecraft.client.gui.Gui;
@@ -23,7 +22,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 
 @SideOnly(Side.CLIENT)
 public class GuiHealthScreen extends GuiScreen {
@@ -37,7 +35,6 @@ public class GuiHealthScreen extends GuiScreen {
     private GuiButton HEAD, LEFT_ARM, LEFT_LEG, LEFT_FOOT, BODY, RIGHT_ARM, RIGHT_LEG, RIGHT_FOOT;
 
     private final AbstractPlayerDamageModel damageModel;
-    private EnumHealingType healingType;
     private EnumHand activeHand;
     private final boolean disableButtons;
 
@@ -49,9 +46,8 @@ public class GuiHealthScreen extends GuiScreen {
         disableButtons = true;
     }
 
-    public GuiHealthScreen(AbstractPlayerDamageModel damageModel, EnumHealingType healingType, EnumHand activeHand) {
+    public GuiHealthScreen(AbstractPlayerDamageModel damageModel, EnumHand activeHand) {
         this.damageModel = damageModel;
-        this.healingType = healingType;
         this.activeHand = activeHand;
 
         disableButtons = false;
@@ -117,8 +113,8 @@ public class GuiHealthScreen extends GuiScreen {
 
         int morphineTicks = damageModel.getMorphineTicks();
         if (morphineTicks > 0)
-            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", StringUtils.ticksToElapsedTime(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - (this.healingType == null ? 21 : 29), 0xFFFFFF);
-        if (this.healingType != null)
+            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", StringUtils.ticksToElapsedTime(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - (this.activeHand == null ? 21 : 29), 0xFFFFFF);
+        if (this.activeHand != null)
             drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
 
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
@@ -149,7 +145,7 @@ public class GuiHealthScreen extends GuiScreen {
     private void tooltipButton(GuiButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
         if (!enabled && button.hovered)
-            drawHoveringText(I18n.format("gui.active_item") + ": " + I18n.format("item." + part.activeHealer.healingType.toString().toLowerCase(Locale.ENGLISH) + ".name"), mouseX, mouseY);
+            drawHoveringText(I18n.format("gui.active_item") + ": " + I18n.format(part.activeHealer.stack.getUnlocalizedName() + ".name"), mouseX, mouseY);
         if (!disableButtons)
             button.enabled = enabled;
     }
@@ -169,10 +165,10 @@ public class GuiHealthScreen extends GuiScreen {
     protected void actionPerformed(GuiButton button) {
         if (button.id < 9) {
             EnumPlayerPart playerPart = EnumPlayerPart.fromID((button.id));
-            FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, healingType, activeHand));
+            FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, activeHand));
             //TODO notify the user somehow (sound?)
             AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
-            part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(healingType);
+            part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(mc.player.getHeldItem(this.activeHand));
         } else if (button.id == 10) {
             FirstAid.NETWORKING.sendToServer(new MessageClientUpdate(MessageClientUpdate.Type.REQUEST_REFRESH));
             FirstAid.logger.info("Requesting refresh");

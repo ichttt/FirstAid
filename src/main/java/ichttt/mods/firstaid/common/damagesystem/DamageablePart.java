@@ -1,13 +1,16 @@
 package ichttt.mods.firstaid.common.damagesystem;
 
+import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.damagesystem.debuff.ConstantDebuff;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
+import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemArmorStand;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 
@@ -89,7 +92,7 @@ public class DamageablePart extends AbstractDamageablePart {
         if (absorption > 0F)
             compound.setFloat("absorption", absorption);
         if (activeHealer != null) {
-            compound.setByte("healingItem", (byte) (activeHealer.healingType.ordinal() + 1)); //+1 because of backward compat
+            compound.setTag("healer", activeHealer.stack.serializeNBT());
             compound.setInteger("itemTicks", activeHealer.getTicksPassed());
             compound.setInteger("itemHeals", activeHealer.getHealsDone());
         }
@@ -101,8 +104,16 @@ public class DamageablePart extends AbstractDamageablePart {
         if (nbt == null)
             return;
         currentHealth = Math.min(maxHealth, nbt.getFloat("health"));
+        ItemStack stack = null;
         if (nbt.hasKey("healingItem"))
-            activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(EnumHealingType.VALUES[nbt.getByte("healingItem") - 1]).loadNBT(nbt.getInteger("itemTicks"), nbt.getInteger("itemHeals"));
+            stack = new ItemStack(nbt.getByte("healingItem") == 1 ? FirstAidItems.PLASTER : FirstAidItems.BANDAGE);
+        else if (nbt.hasKey("healer")) stack = new ItemStack((NBTTagCompound) nbt.getTag("healer"));
+
+        if (stack != null) {
+            AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
+            if (healer == null) FirstAid.logger.warn("Failed to lookup healer for item {}", stack.getItem());
+            else activeHealer = healer.loadNBT(nbt.getInteger("itemTicks"), nbt.getInteger("itemHeals"));
+        }
         if (nbt.hasKey("absorption"))
             absorption = nbt.getFloat("absorption");
         //kick constant debuffs active

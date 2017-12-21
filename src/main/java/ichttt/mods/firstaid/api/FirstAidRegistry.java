@@ -7,6 +7,8 @@ import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -98,8 +100,21 @@ public abstract class FirstAidRegistry {
      */
     public abstract void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull IDebuff debuff);
 
+    /**
+     * @deprecated Use {@link #registerHealingType(Item, Function)} instead
+     */
+    @Deprecated
     public abstract void bindHealingType(@Nonnull EnumHealingType type, @Nonnull Function<EnumHealingType, AbstractPartHealer> factory);
 
+    public abstract void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory);
+
+    @Nullable
+    public abstract AbstractPartHealer getPartHealer(@Nonnull ItemStack type);
+
+    /**
+     * @deprecated Use {@link #getPartHealer(ItemStack)} instead
+     */
+    @Deprecated
     @Nonnull
     public abstract AbstractPartHealer getPartHealer(@Nonnull EnumHealingType type);
 

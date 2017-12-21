@@ -9,6 +9,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -67,5 +69,10 @@ public class CommonUtils {
 
     public static boolean isValidArmorSlot(EntityEquipmentSlot slot) {
         return slot.getSlotType() == EntityEquipmentSlot.Type.ARMOR;
+    }
+
+    public static String getActiveModidSave() {
+        ModContainer activeModContainer = Loader.instance().activeModContainer();
+        return activeModContainer == null ? "UNKNOWN-NULL" : activeModContainer.getModId();
     }
 }

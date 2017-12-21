@@ -18,13 +18,18 @@ import ichttt.mods.firstaid.common.damagesystem.debuff.OnHitDebuff;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistribution;
+import ichttt.mods.firstaid.common.items.FirstAidItems;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +40,7 @@ import java.util.function.Function;
 public class FirstAidRegistryImpl extends FirstAidRegistry {
     public static final FirstAidRegistryImpl INSTANCE = new FirstAidRegistryImpl();
     private final Map<String, IDamageDistribution> DISTRIBUTION_MAP = new HashMap<>();
-    private final Map<EnumHealingType, Function<EnumHealingType, AbstractPartHealer>> HEALER_MAP = new HashMap<>();
+    private final Map<Item, Function<ItemStack, AbstractPartHealer>> HEALER_MAP = new HashMap<>();
     private final Multimap<EnumDebuffSlot, IDebuff> RAW_DEBUFF_MAP = HashMultimap.create();
     private ImmutableMap<EnumDebuffSlot, IDebuff[]> finishedDebuff;
     private boolean registrationAllowed = true;
@@ -72,6 +77,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         DISTRIBUTION_MAP.put(damageType, new StandardDamageDistribution(priorityTable));
     }
 
+    @Deprecated
     @Override
     public void bindDamageSourceRandom(@Nonnull String damageType, boolean nearestFirst) {
         bindDamageSourceRandom(damageType, nearestFirst, false);
@@ -94,9 +100,33 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         DISTRIBUTION_MAP.put(damageType, distributionTable);
     }
 
+    @Deprecated
     @Override
     public void bindHealingType(@Nonnull EnumHealingType type, @Nonnull Function<EnumHealingType, AbstractPartHealer> healer) {
-        this.HEALER_MAP.put(type, healer);
+        FirstAid.logger.warn("Deprecated method \"bindHealingType\" is still being used by mod {} for type {}", CommonUtils.getActiveModidSave(), type);
+        Function<ItemStack, AbstractPartHealer> newFunction = stack -> healer.apply(type);
+        registerHealingType(type == EnumHealingType.BANDAGE ? FirstAidItems.BANDAGE : FirstAidItems.PLASTER, newFunction);
+    }
+
+    @Override
+    public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory) {
+        this.HEALER_MAP.put(item, factory);
+    }
+
+    @Nullable
+    @Override
+    public AbstractPartHealer getPartHealer(@Nonnull ItemStack type) {
+        Function<ItemStack, AbstractPartHealer> function = this.HEALER_MAP.get(type.getItem());
+        if (function != null) return function.apply(type);
+        return null;
+    }
+
+    @Deprecated
+    @Nonnull
+    @Override
+    public AbstractPartHealer getPartHealer(@Nonnull EnumHealingType type) {
+        FirstAid.logger.warn("Deprecated method \"getPartHealer\" is still being used by mod {} for type {}", CommonUtils.getActiveModidSave(), type);
+        return Objects.requireNonNull(getPartHealer(new ItemStack(type == EnumHealingType.BANDAGE ? FirstAidItems.BANDAGE : FirstAidItems.PLASTER)));
     }
 
     @Override
@@ -108,9 +138,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             throw new IllegalArgumentException("Builder must an instance of the default builder received via DebuffBuilderFactory!", e);
         }
         //Build the finished debuff
-        ModContainer activeModContainer = Loader.instance().activeModContainer();
-        String activeModID = activeModContainer == null ? "UNKNOWN-NULL" : activeModContainer.getModId();
-        FirstAid.logger.debug("Building debuff from mod {} for slot {} with potion effect {}, type = {}", activeModID, slot, builder.potionName, builder.isOnHit ? "OnHit" : "Constant");
+        FirstAid.logger.debug("Building debuff from mod {} for slot {} with potion effect {}, type = {}", CommonUtils.getActiveModidSave(), slot, builder.potionName, builder.isOnHit ? "OnHit" : "Constant");
         BooleanSupplier isEnabled = builder.isEnabledSupplier;
         if (isEnabled == null)
             isEnabled = () -> true;
@@ -135,12 +163,6 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             debuff = new SharedDebuff(debuff, slot);
 
         this.RAW_DEBUFF_MAP.put(slot, debuff);
-    }
-
-    @Nonnull
-    @Override
-    public AbstractPartHealer getPartHealer(@Nonnull EnumHealingType type) {
-        return Objects.requireNonNull(HEALER_MAP.get(type), "Did not find part healer for healing type " + type).apply(type);
     }
 
     @Nonnull

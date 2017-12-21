@@ -17,6 +17,7 @@ import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.MessageAddHealth;
 import ichttt.mods.firstaid.common.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
+import ichttt.mods.firstaid.common.network.MessageResync;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.DataManagerWrapper;
@@ -260,5 +261,11 @@ public class EventHandler {
         World world = event.getWorld();
         if (!world.isRemote)
             world.getGameRules().setOrCreateGameRule("naturalRegeneration", Boolean.toString(FirstAidConfig.externalHealing.allowNaturalRegeneration));
+    }
+
+    @SubscribeEvent
+    public static void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (!event.player.world.isRemote && event.player instanceof EntityPlayerMP) //Mojang seems to wipe all caps on teleport
+            FirstAid.NETWORKING.sendTo(new MessageResync(PlayerDataManager.getDamageModel(event.player)), (EntityPlayerMP) event.player);
     }
 }

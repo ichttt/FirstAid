@@ -9,6 +9,7 @@ import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.GuiOverlayDebug;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -62,9 +63,10 @@ public class HUDHandler {
             default:
                 throw new RuntimeException("Invalid config option for position: " + FirstAidConfig.overlay.position);
         }
-        if (mc.currentScreen instanceof GuiChat && FirstAidConfig.overlay.position == 2) {
+        if (mc.currentScreen instanceof GuiChat && FirstAidConfig.overlay.position == 2)
             return;
-        }
+        if (mc.gameSettings.showDebugInfo && FirstAidConfig.overlay.position == 0)
+            return;
         GlStateManager.pushMatrix();
         GlStateManager.translate(xOffset, yOffset, 0F);
         boolean playerDead = damageModel.isDead(mc.player);

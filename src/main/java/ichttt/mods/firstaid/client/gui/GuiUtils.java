@@ -83,10 +83,11 @@ public class GuiUtils {
     private static void renderLine(int yTexture, int maxHealth, int maxExtraHearts, int current, int absorption, Gui gui, boolean highlight) {
         GlStateManager.pushMatrix();
         renderMax(maxHealth, yTexture, gui, highlight);
-        if (maxExtraHearts > 0) {
-            if (maxHealth != 0)
-                GlStateManager.translate(2, 0, 0);
-            renderMax(maxExtraHearts, yTexture, gui, highlight);
+        if (maxExtraHearts > 0) { //for absorption
+            if (maxHealth != 0) {
+                GlStateManager.translate(2 + 9 * maxHealth, 0, 0);
+            }
+            renderMax(maxExtraHearts, yTexture, gui, false); //Do not highlight absorption
         }
         GlStateManager.popMatrix();
         GlStateManager.translate(0, 0, 1);

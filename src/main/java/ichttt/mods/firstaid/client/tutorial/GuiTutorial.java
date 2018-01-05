@@ -4,7 +4,7 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
-import ichttt.mods.firstaid.client.gui.GuiUtils;
+import ichttt.mods.firstaid.client.util.GuiUtils;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.network.MessageClientUpdate;

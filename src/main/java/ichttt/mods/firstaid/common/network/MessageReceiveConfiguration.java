@@ -23,7 +23,7 @@ public class MessageReceiveConfiguration implements IMessage {
     public static void validate() {
         if (FirstAidConfig.DamageSystem.class.getDeclaredFields().length != 8)
             throw new RuntimeException("ICHTTT HAS NOT UPDATED HIS PACKETS! GOT NEW FIELDS IN DAMAGE SYSTEM");
-        if (FirstAidConfig.ExternalHealing.class.getDeclaredFields().length != 4)
+        if (FirstAidConfig.ExternalHealing.class.getDeclaredFields().length != 5) //this is nice, I would have forgotten this totally
             throw new RuntimeException("ICHTTT HAS NOT UPDATED HIS PACKETS! GOT NEW FIELDS IN HEALING SYSTEM");
     }
 
@@ -46,6 +46,7 @@ public class MessageReceiveConfiguration implements IMessage {
         healingCfg = new FirstAidConfig.ExternalHealing();
         healingCfg.allowNaturalRegeneration = buf.readBoolean();
         healingCfg.allowOtherHealingItems = buf.readBoolean();
+        healingCfg.sleepHealing = buf.readFloat();
         healingCfg.otherRegenMultiplier = buf.readDouble();
         healingCfg.naturalRegenMultiplier = buf.readDouble();
 
@@ -68,6 +69,7 @@ public class MessageReceiveConfiguration implements IMessage {
     public void toBytes(ByteBuf buf) {
         buf.writeBoolean(healingCfg.allowNaturalRegeneration);
         buf.writeBoolean(healingCfg.allowOtherHealingItems);
+        buf.writeFloat(healingCfg.sleepHealing);
         buf.writeDouble(healingCfg.otherRegenMultiplier);
         buf.writeDouble(healingCfg.naturalRegenMultiplier);
 

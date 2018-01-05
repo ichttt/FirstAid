@@ -236,8 +236,7 @@ public class EventHandler {
             amount = amount * (float) FirstAid.activeHealingConfig.naturalRegenMultiplier;
         else
             amount = amount * (float) FirstAid.activeHealingConfig.otherRegenMultiplier;
-        HealthDistribution.distributeHealth(amount, (EntityPlayer) entity);
-        FirstAid.NETWORKING.sendTo(new MessageAddHealth(amount), (EntityPlayerMP) entity);
+        HealthDistribution.distributeHealth(amount, (EntityPlayer) entity, true);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)

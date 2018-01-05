@@ -1,6 +1,8 @@
-package ichttt.mods.firstaid.client.gui;
+package ichttt.mods.firstaid.client;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
+import ichttt.mods.firstaid.client.util.GuiUtils;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
@@ -9,7 +11,6 @@ import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiChat;
-import net.minecraft.client.gui.GuiOverlayDebug;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -75,6 +76,7 @@ public class HUDHandler {
             mc.getTextureManager().bindTexture(Gui.ICONS);
             GuiUtils.drawHealth(part, maxLength * 5 + 6, 0, gui, false, playerDead);
             GlStateManager.translate(0, 10F, 0F);
+
         }
         GlStateManager.popMatrix();
     }

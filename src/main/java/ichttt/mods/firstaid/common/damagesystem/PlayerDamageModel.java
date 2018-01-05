@@ -13,6 +13,8 @@ import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
+import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
+import ichttt.mods.firstaid.common.network.MessageAddHealth;
 import ichttt.mods.firstaid.common.network.MessageResync;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.DataManagerWrapper;
@@ -20,6 +22,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -159,6 +162,13 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                 }
             }
             prevScaleFactor = globalFactor;
+        }
+
+        if (!world.isRemote && world instanceof WorldServer && FirstAid.activeHealingConfig.sleepHealing != 0) {
+            WorldServer worldServer = (WorldServer) player.world;
+            if (worldServer.areAllPlayersAsleep()) { // We are going to wake up on the next tick, add health TODO morpheus compat?
+                HealthDistribution.distributeHealth(FirstAid.activeHealingConfig.sleepHealing, player, true);
+            }
         }
 
         forEach(part -> part.tick(world, player, morphineTicksLeft == 0));

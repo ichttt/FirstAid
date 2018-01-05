@@ -1,5 +1,8 @@
 package ichttt.mods.firstaid.common.network;
 
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import io.netty.buffer.ByteBuf;
@@ -12,22 +15,26 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class MessageAddHealth implements IMessage {
-    private float amount;
+    private float[] table;
 
     public MessageAddHealth() {}
 
-    public MessageAddHealth(float amount) {
-        this.amount = amount;
+    public MessageAddHealth(float[] table) {
+        this.table = table;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        this.amount = buf.readFloat();
+        this.table = new float[8];
+        for (int i = 0; i < 8; i++) {
+            this.table[i] = buf.readFloat();
+        }
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-        buf.writeFloat(this.amount);
+        for (float f : table)
+            buf.writeFloat(f);
     }
 
     public static class Handler implements IMessageHandler<MessageAddHealth, IMessage> {
@@ -36,11 +43,13 @@ public class MessageAddHealth implements IMessage {
         @Override
         public IMessage onMessage(MessageAddHealth message, MessageContext ctx) {
             EntityPlayerSP playerSP = Minecraft.getMinecraft().player;
-            float amount = message.amount;
-            if (amount == Float.MAX_VALUE) //short cut
-                PlayerDataManager.getDamageModel(playerSP).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
-            else
-                HealthDistribution.distributeHealth(message.amount, playerSP);
+            AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(playerSP);
+            for (int i = 0; i < message.table.length; i++) {
+                float f = message.table[i];
+                //EnumPlayerPart is 1-indexed
+                EnumPlayerPart part = EnumPlayerPart.fromID(i + 1);
+                damageModel.getFromEnum(part).heal(f, playerSP, false);
+            }
             return null;
         }
     }

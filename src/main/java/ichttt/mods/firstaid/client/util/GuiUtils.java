@@ -1,9 +1,10 @@
-package ichttt.mods.firstaid.client.gui;
+package ichttt.mods.firstaid.client.util;
 
 import com.google.common.collect.ImmutableMap;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.client.gui.FlashStateManager;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;

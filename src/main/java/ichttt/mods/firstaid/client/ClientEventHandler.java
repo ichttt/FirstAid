@@ -1,10 +1,10 @@
 package ichttt.mods.firstaid.client;
 
-import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
-import ichttt.mods.firstaid.client.gui.HUDHandler;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
+import ichttt.mods.firstaid.client.util.EventCalendar;
+import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
@@ -15,17 +15,30 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ClientEventHandler {
+    private static int id;
 
     @SubscribeEvent
     public static void registerModels(ModelRegistryEvent event) {
         ModelLoader.setCustomModelResourceLocation(FirstAidItems.BANDAGE, 0, new ModelResourceLocation("firstaid:bandage"));
         ModelLoader.setCustomModelResourceLocation(FirstAidItems.PLASTER, 0, new ModelResourceLocation("firstaid:plaster"));
         ModelLoader.setCustomModelResourceLocation(FirstAidItems.MORPHINE, 0, new ModelResourceLocation("firstaid:morphine"));
+    }
+
+    @SubscribeEvent
+    public static void clientTick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) return;
+        if (EventCalendar.isGuiFun()) {
+            GuiHealthScreen.BED_ITEMSTACK.setItemDamage(id);
+            Minecraft mc = Minecraft.getMinecraft();
+            if (mc.world != null && mc.world.getWorldTime() % 5 == 0) id++;
+            if (id > 15) id = 0;
+        }
     }
 
     @SubscribeEvent

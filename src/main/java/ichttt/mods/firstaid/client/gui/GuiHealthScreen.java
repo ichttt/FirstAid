@@ -5,6 +5,8 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.ClientProxy;
+import ichttt.mods.firstaid.client.util.EventCalendar;
+import ichttt.mods.firstaid.client.util.GuiUtils;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientUpdate;
@@ -13,7 +15,10 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.TextComponentString;
@@ -21,6 +26,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
@@ -28,6 +34,8 @@ public class GuiHealthScreen extends GuiScreen {
     public static GuiHealthScreen INSTANCE;
     public static final int xSize = 256;
     public static final int ySize = 137;
+    private static final DecimalFormat FORMAT = new DecimalFormat("##.#");
+    public static final ItemStack BED_ITEMSTACK = new ItemStack(Items.BED);
 
     public int guiLeft;
     public int guiTop;
@@ -35,6 +43,7 @@ public class GuiHealthScreen extends GuiScreen {
     private GuiButton HEAD, LEFT_ARM, LEFT_LEG, LEFT_FOOT, BODY, RIGHT_ARM, RIGHT_LEG, RIGHT_FOOT;
 
     private final AbstractPlayerDamageModel damageModel;
+    private final float bedScaleFactor = EventCalendar.isGuiFun() ? 2F : 1.25F;
     private EnumHand activeHand;
     private final boolean disableButtons;
 
@@ -42,14 +51,12 @@ public class GuiHealthScreen extends GuiScreen {
 
     public GuiHealthScreen(AbstractPlayerDamageModel damageModel) {
         this.damageModel = damageModel;
-
         disableButtons = true;
     }
 
     public GuiHealthScreen(AbstractPlayerDamageModel damageModel, EnumHand activeHand) {
         this.damageModel = damageModel;
         this.activeHand = activeHand;
-
         disableButtons = false;
     }
 
@@ -107,7 +114,13 @@ public class GuiHealthScreen extends GuiScreen {
         this.drawGradientRect(this.guiLeft, this.guiTop, this.guiLeft + xSize, this.guiTop + ySize, -16777216, -16777216);
         this.mc.getTextureManager().bindTexture(GuiUtils.GUI_LOCATION);
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
-        GuiInventory.drawEntityOnScreen(this.width / 2, this.height / 2 + 30, 45, 0, 0, mc.player);
+        int entityLookX = this.guiLeft + (xSize / 2) - mouseX;
+        int entityLookY = this.guiTop + 20 - mouseY;
+        if (EventCalendar.isGuiFun()) {
+            entityLookX = -entityLookX;
+            entityLookY = -entityLookY;
+        }
+        GuiInventory.drawEntityOnScreen(this.width / 2, this.height / 2 + 30, 45, entityLookX, entityLookY, mc.player);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
 
@@ -119,6 +132,7 @@ public class GuiHealthScreen extends GuiScreen {
 
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
         boolean playerDead = damageModel.isDead(mc.player);
+        GlStateManager.color(1, 1, 1, 1);
         drawHealth(damageModel.HEAD, false, 14, playerDead);
         drawHealth(damageModel.LEFT_ARM, false, 39, playerDead);
         drawHealth(damageModel.LEFT_LEG, false, 64, playerDead);
@@ -138,7 +152,23 @@ public class GuiHealthScreen extends GuiScreen {
         tooltipButton(RIGHT_LEG, damageModel.RIGHT_LEG, mouseX, mouseY);
         tooltipButton(RIGHT_FOOT, damageModel.RIGHT_FOOT, mouseX, mouseY);
         GlStateManager.popMatrix();
-        GlStateManager.disableLighting();
+
+        float sleepHealing = FirstAid.activeHealingConfig.sleepHealing;
+        int renderBedX = Math.round(guiLeft / bedScaleFactor) + 2;
+        int renderBedY = Math.round((guiTop + ySize) / bedScaleFactor) - 18;
+        int bedX = (int) (renderBedX * bedScaleFactor);
+        int bedY = (int) (renderBedY * bedScaleFactor);
+
+        GlStateManager.pushMatrix();
+        if (sleepHealing > 0F) RenderHelper.enableGUIStandardItemLighting();
+        GlStateManager.scale(bedScaleFactor, bedScaleFactor, bedScaleFactor);
+        mc.getRenderItem().renderItemAndEffectIntoGUI(null, BED_ITEMSTACK, renderBedX, renderBedY);
+        GlStateManager.popMatrix();
+        if (mouseX >= bedX && mouseY >= bedY && mouseX < bedX + (16 * bedScaleFactor) && mouseY < bedY + (16 * bedScaleFactor)) {
+            String s = sleepHealing == 0F ? "Sleeping does not restore any health" : I18n.format("Sleeping restores %s health", FORMAT.format(sleepHealing)); //TODO i18n
+            drawHoveringText(s, mouseX, mouseY);
+        }
+
         //TODO color the critical parts of the player red?
     }
 

@@ -1,6 +1,7 @@
 package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.config.Config;
 
 @SuppressWarnings("CanBeFinal")
@@ -35,7 +36,7 @@ public class FirstAidConfig {
 
     public static class ExternalHealing {
 
-        @Config.Comment("Allow vanilla's natural regeneration. Requires \"allowOtherHealingItems\" to be true")
+        @Config.Comment("Allow vanilla's natural regeneration. Requires \"allowOtherHealingItems\" to be true" + "\n**WARNING** This sets the gamerule \"naturalRegeneration\" for all of your worlds internally, so it persists even if you remove the mod")
         @Config.LangKey("firstaid.config.allownaturalregeneration")
         @Config.RequiresWorldRestart
         public boolean allowNaturalRegeneration = false;
@@ -44,14 +45,19 @@ public class FirstAidConfig {
         @Config.LangKey("firstaid.config.allowotherhealingitems")
         public boolean allowOtherHealingItems = true;
 
+        @Config.Comment("The total amount of health that will be distributed to all body parts after sleeping")
+        @Config.LangKey("firstaid.config.sleephealing") //TODO lang and tutorial info
+        @Config.RangeDouble(min = 0D, max = 20D)
+        public float sleepHealing = 1F;
+
         @Config.Comment("The value external regen will be multiplied with. Has no effect if \"allowOtherHealingItems\" is disabled")
         @Config.LangKey("firstaid.config.otherregenmultiplier")
-        @Config.RangeDouble(min = 0D)
+        @Config.RangeDouble(min = 0D, max = 20D)
         public double otherRegenMultiplier = 0.75D;
 
         @Config.Comment("The value vanilla's natural regeneration will be multiplied with. Has no effect if \"allowNaturalRegeneration\" is disabled")
         @Config.LangKey("firstaid.config.naturalregenmultiplier")
-        @Config.RangeDouble(min = 0D)
+        @Config.RangeDouble(min = 0D, max = 20D)
         public double naturalRegenMultiplier = 0.5D;
     }
 

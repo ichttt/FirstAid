@@ -24,8 +24,6 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.ModContainer;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -103,7 +101,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Deprecated
     @Override
     public void bindHealingType(@Nonnull EnumHealingType type, @Nonnull Function<EnumHealingType, AbstractPartHealer> healer) {
-        FirstAid.logger.warn("Deprecated method \"bindHealingType\" is still being used by mod {} for type {}", CommonUtils.getActiveModidSave(), type);
+        FirstAid.logger.warn("Deprecated method \"bindHealingType\" is still being used by mod {} for type {}", CommonUtils.getActiveModidSafe(), type);
         Function<ItemStack, AbstractPartHealer> newFunction = stack -> healer.apply(type);
         registerHealingType(type == EnumHealingType.BANDAGE ? FirstAidItems.BANDAGE : FirstAidItems.PLASTER, newFunction);
     }
@@ -125,7 +123,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Nonnull
     @Override
     public AbstractPartHealer getPartHealer(@Nonnull EnumHealingType type) {
-        FirstAid.logger.warn("Deprecated method \"getPartHealer\" is still being used by mod {} for type {}", CommonUtils.getActiveModidSave(), type);
+        FirstAid.logger.warn("Deprecated method \"getPartHealer\" is still being used by mod {} for type {}", CommonUtils.getActiveModidSafe(), type);
         return Objects.requireNonNull(getPartHealer(new ItemStack(type == EnumHealingType.BANDAGE ? FirstAidItems.BANDAGE : FirstAidItems.PLASTER)));
     }
 
@@ -138,7 +136,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             throw new IllegalArgumentException("Builder must an instance of the default builder received via DebuffBuilderFactory!", e);
         }
         //Build the finished debuff
-        FirstAid.logger.debug("Building debuff from mod {} for slot {} with potion effect {}, type = {}", CommonUtils.getActiveModidSave(), slot, builder.potionName, builder.isOnHit ? "OnHit" : "Constant");
+        FirstAid.logger.debug("Building debuff from mod {} for slot {} with potion effect {}, type = {}", CommonUtils.getActiveModidSafe(), slot, builder.potionName, builder.isOnHit ? "OnHit" : "Constant");
         BooleanSupplier isEnabled = builder.isEnabledSupplier;
         if (isEnabled == null)
             isEnabled = () -> true;

@@ -73,8 +73,6 @@ public class ArmorUtils {
                 ((ISpecialArmor) stack.getItem()).damageArmor(entity, stack, source, itemDamage, prop.Slot);
             else
                 stack.damageItem(itemDamage, entity);
-            if (stack.isEmpty())
-                inventory.set(prop.Slot, ItemStack.EMPTY);
         }
         damage -= (damage * ratio);
 
@@ -92,7 +90,7 @@ public class ArmorUtils {
     /**
      * Changed copy of the first part from {@link EnchantmentHelper#applyEnchantmentModifier(EnchantmentHelper.IModifier, ItemStack)}
      */
-    public static float applyGlobalPotionModifieres(EntityPlayer player, DamageSource source, float damage) {
+    public static float applyGlobalPotionModifiers(EntityPlayer player, DamageSource source, float damage) {
         if (source.isDamageAbsolute())
             return damage;
         if (player.isPotionActive(MobEffects.RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
@@ -112,7 +110,7 @@ public class ArmorUtils {
     /**
      * Changed copy of the second part from {@link EnchantmentHelper#applyEnchantmentModifier(EnchantmentHelper.IModifier, ItemStack)}
      */
-    public static float applyEnchantmentModifieres(ItemStack stack, DamageSource source, float damage) {
+    public static float applyEnchantmentModifiers(ItemStack stack, DamageSource source, float damage) {
         int k = EnchantmentHelper.getEnchantmentModifierDamage(() -> Iterators.singletonIterator(stack), source);
         k *= 4;
 

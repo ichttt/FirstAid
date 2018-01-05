@@ -26,6 +26,7 @@ public class DebuffTimedSound implements ITickableSound {
     private final float minusPerTick;
     private final int debuffDuration;
     private final ResourceLocation soundLocation;
+    private final SoundEvent event;
     private final EntityPlayerSP player;
     private Sound sound;
     private float volume = volumeMultiplier;
@@ -42,16 +43,13 @@ public class DebuffTimedSound implements ITickableSound {
                 soundHandler.stopSound(matchingSound);
             activeSounds.remove(event);
         }
-        DebuffTimedSound newSound = new DebuffTimedSound(EventHandler.HEARTBEAT, duration);
+        DebuffTimedSound newSound = new DebuffTimedSound(event, duration);
         soundHandler.playSound(newSound);
         activeSounds.put(event, newSound);
     }
 
-//    public static void tick() {
-//        activeSounds.entrySet().removeIf(next -> next.getValue().isDonePlaying());
-//    }
-
     public DebuffTimedSound(SoundEvent event, int debuffDuration) {
+        this.event = event;
         this.soundLocation = event.getSoundName();
         this.player = Minecraft.getMinecraft().player;
         this.debuffDuration = Integer.min(15 * 20, debuffDuration);
@@ -60,7 +58,9 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Override
     public boolean isDonePlaying() {
-        return ticks >= debuffDuration || this.player.getHealth() <= 0;
+        boolean done = ticks >= debuffDuration || this.player.getHealth() <= 0;
+        if (done) activeSounds.remove(this.event);
+        return done;
     }
 
     @Nonnull

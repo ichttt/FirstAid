@@ -88,7 +88,7 @@ public class EventHandler {
             return;
         }
 
-        amountToDamage = ArmorUtils.applyGlobalPotionModifieres(player, source, amountToDamage);
+        amountToDamage = ArmorUtils.applyGlobalPotionModifiers(player, source, amountToDamage);
 
         //VANILLA COPY - combat tracker and exhaustion
         if (amountToDamage != 0.0F) {

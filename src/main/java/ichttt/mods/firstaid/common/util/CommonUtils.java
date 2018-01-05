@@ -71,7 +71,7 @@ public class CommonUtils {
         return slot.getSlotType() == EntityEquipmentSlot.Type.ARMOR;
     }
 
-    public static String getActiveModidSave() {
+    public static String getActiveModidSafe() {
         ModContainer activeModContainer = Loader.instance().activeModContainer();
         return activeModContainer == null ? "UNKNOWN-NULL" : activeModContainer.getModId();
     }

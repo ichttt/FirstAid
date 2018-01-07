@@ -44,16 +44,23 @@ public class ConstantDebuff extends AbstractDebuff {
 
     @Override
     public void update(EntityPlayer player) {
-        if (!this.isEnabled.getAsBoolean())
-            return;
+        this.update(player, -1);
+    }
+
+    @Override
+    public void update(EntityPlayer player, float healthPerMax) {
+        if (!this.isEnabled.getAsBoolean()) return;
         if (activeMultiplier == 0) {
             ticks = 0;
         } else {
-            if (ticks == 0)
-                player.addPotionEffect(new PotionEffect(effect, 200, activeMultiplier - 1, false, false));
+            if (ticks == 0) {
+                if (healthPerMax != -1)
+                    syncMultiplier(healthPerMax); //There are apparently some cases where the multiplier does not sync up right... fix this
+                if (activeMultiplier != 0)
+                    player.addPotionEffect(new PotionEffect(effect, 240, activeMultiplier - 1, false, false));
+            }
             ticks++;
-            if (ticks >= 140)
-                ticks = 0;
+            if (ticks >= 200) ticks = 0;
         }
     }
 }

@@ -13,6 +13,7 @@ import static java.util.Calendar.*;
  */
 @SideOnly(Side.CLIENT)
 public class EventCalendar {
+    public static final boolean disableEasterEggs = Boolean.parseBoolean(System.getProperty("firstaid.disableEasterEgg", "false"));
 
     private static boolean isNewYear; //1/1
     private static boolean isValentinesDay; //14/2
@@ -23,6 +24,7 @@ public class EventCalendar {
     public static int day;
 
     public static void checkDate() {
+        if (disableEasterEggs) return;
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
 

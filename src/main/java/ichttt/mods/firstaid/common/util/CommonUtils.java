@@ -5,6 +5,7 @@ import com.creativemd.playerrevive.api.capability.CapaRevive;
 import com.google.common.collect.ImmutableMap;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.DataManagerWrapper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.server.MinecraftServer;

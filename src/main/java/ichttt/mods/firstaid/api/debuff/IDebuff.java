@@ -14,4 +14,8 @@ public interface IDebuff {
     }
 
     default void update(EntityPlayer player) {}
+
+    default void update(EntityPlayer player, float healthPerMax) {
+        update(player);
+    }
 }

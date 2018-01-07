@@ -36,7 +36,7 @@ public class ClientEventHandler {
         if (EventCalendar.isGuiFun()) {
             GuiHealthScreen.BED_ITEMSTACK.setItemDamage(id);
             Minecraft mc = Minecraft.getMinecraft();
-            if (mc.world != null && mc.world.getWorldTime() % 5 == 0) id++;
+            if (mc.world != null && mc.world.getWorldTime() % 3 == 0) id++;
             if (id > 15) id = 0;
         }
     }

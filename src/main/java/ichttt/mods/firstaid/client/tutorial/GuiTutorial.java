@@ -84,4 +84,9 @@ public class GuiTutorial extends GuiScreen {
         GlStateManager.popMatrix();
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
+
+    @Override
+    public void onGuiClosed() {
+        GuiHealthScreen.isOpen = false;
+    }
 }

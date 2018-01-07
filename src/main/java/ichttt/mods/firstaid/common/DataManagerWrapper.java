@@ -1,4 +1,4 @@
-package ichttt.mods.firstaid.common.util;
+package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;

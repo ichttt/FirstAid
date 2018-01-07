@@ -1,7 +1,6 @@
 package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.config.Config;
 
 @SuppressWarnings("CanBeFinal")

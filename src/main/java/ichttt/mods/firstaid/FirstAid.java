@@ -16,12 +16,14 @@ import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
 import ichttt.mods.firstaid.common.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.network.MessageResync;
+import ichttt.mods.firstaid.common.util.MorpheusHelper;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -54,6 +56,7 @@ public class FirstAid {
 
     public static CreativeTabs creativeTab;
     public static SimpleNetworkWrapper NETWORKING;
+    public static boolean enableMorpheusCompat = false;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent pre) {
@@ -77,10 +80,8 @@ public class FirstAid {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        logger.debug("Registering capability");
         CapabilityExtendedHealthSystem.register();
 
-        logger.debug("Registering networking");
         int i = 0;
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
         NETWORKING.registerMessage(MessageReceiveDamage.Handler.class, MessageReceiveDamage.class, ++i, Side.CLIENT);
@@ -92,6 +93,12 @@ public class FirstAid {
         NETWORKING.registerMessage(MessageClientUpdate.Handler.class, MessageClientUpdate.class, ++i, Side.SERVER);
         NETWORKING.registerMessage(MessageResync.Handler.class, MessageResync.class, ++i, Side.CLIENT);
         MessageReceiveConfiguration.validate();
+
+        if (Loader.isModLoaded("morpheus")) {
+            enableMorpheusCompat = true;
+            logger.info("Morpheus present - enabling compatibility module");
+            MorpheusHelper.register();
+        }
 
         RegistryManager.registerDefaults();
         checkEarlyExit();

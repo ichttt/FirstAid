@@ -9,7 +9,6 @@ import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemArmorStand;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -82,7 +81,7 @@ public class DamageablePart extends AbstractDamageablePart {
                 activeHealer = null;
         }
         if (!world.isRemote && tickDebuffs)
-            Arrays.stream(debuffs).forEach(debuff -> debuff.update(player));
+            Arrays.stream(debuffs).forEach(debuff -> debuff.update(player, currentHealth / maxHealth));
     }
 
     @Override

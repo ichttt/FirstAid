@@ -1,6 +1,5 @@
 package ichttt.mods.firstaid.client;
 
-import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import net.minecraft.client.Minecraft;

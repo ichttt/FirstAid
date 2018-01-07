@@ -40,7 +40,7 @@ public class GuiHealthScreen extends GuiScreen {
     public int guiLeft;
     public int guiTop;
 
-    private GuiButton HEAD, LEFT_ARM, LEFT_LEG, LEFT_FOOT, BODY, RIGHT_ARM, RIGHT_LEG, RIGHT_FOOT;
+    private GuiButton head, leftArm, leftLeg, leftFoot, body, rightArm, rightLeg, rightFoot;
 
     private final AbstractPlayerDamageModel damageModel;
     private final float bedScaleFactor = EventCalendar.isGuiFun() ? 2F : 1.25F;
@@ -66,43 +66,43 @@ public class GuiHealthScreen extends GuiScreen {
         this.guiLeft = (this.width - xSize) / 2;
         this.guiTop = (this.height - ySize) / 2;
 
-        HEAD = new GuiButton(1, this.guiLeft + 4, this.guiTop + 8, 52, 20, I18n.format("gui.head"));
-        this.buttonList.add(HEAD);
+        head = new GuiButton(1, this.guiLeft + 4, this.guiTop + 8, 52, 20, I18n.format("gui.head"));
+        this.buttonList.add(head);
 
-        LEFT_ARM = new GuiButton(2, this.guiLeft + 4, this.guiTop + 33, 52, 20, I18n.format("gui.left_arm"));
-        this.buttonList.add(LEFT_ARM);
-        LEFT_LEG = new GuiButton(3, this.guiLeft + 4, this.guiTop + 58, 52, 20, I18n.format("gui.left_leg"));
-        this.buttonList.add(LEFT_LEG);
-        LEFT_FOOT = new GuiButton(4, this.guiLeft + 4, this.guiTop + 83, 52, 20, I18n.format("gui.left_foot"));
-        this.buttonList.add(LEFT_FOOT);
+        leftArm = new GuiButton(2, this.guiLeft + 4, this.guiTop + 33, 52, 20, I18n.format("gui.left_arm"));
+        this.buttonList.add(leftArm);
+        leftLeg = new GuiButton(3, this.guiLeft + 4, this.guiTop + 58, 52, 20, I18n.format("gui.left_leg"));
+        this.buttonList.add(leftLeg);
+        leftFoot = new GuiButton(4, this.guiLeft + 4, this.guiTop + 83, 52, 20, I18n.format("gui.left_foot"));
+        this.buttonList.add(leftFoot);
 
-        BODY = new GuiButton(5, this.guiLeft + 199, this.guiTop + 8, 52, 20, I18n.format("gui.body"));
-        this.buttonList.add(BODY);
+        body = new GuiButton(5, this.guiLeft + 199, this.guiTop + 8, 52, 20, I18n.format("gui.body"));
+        this.buttonList.add(body);
 
-        RIGHT_ARM = new GuiButton(6, this.guiLeft + 199, this.guiTop + 33, 52, 20, I18n.format("gui.right_arm"));
-        this.buttonList.add(RIGHT_ARM);
-        RIGHT_LEG = new GuiButton(7, this.guiLeft + 199, this.guiTop + 58, 52, 20, I18n.format("gui.right_leg"));
-        this.buttonList.add(RIGHT_LEG);
-        RIGHT_FOOT = new GuiButton(8, this.guiLeft + 199, this.guiTop + 83, 52, 20, I18n.format("gui.right_foot"));
-        this.buttonList.add(RIGHT_FOOT);
+        rightArm = new GuiButton(6, this.guiLeft + 199, this.guiTop + 33, 52, 20, I18n.format("gui.right_arm"));
+        this.buttonList.add(rightArm);
+        rightLeg = new GuiButton(7, this.guiLeft + 199, this.guiTop + 58, 52, 20, I18n.format("gui.right_leg"));
+        this.buttonList.add(rightLeg);
+        rightFoot = new GuiButton(8, this.guiLeft + 199, this.guiTop + 83, 52, 20, I18n.format("gui.right_foot"));
+        this.buttonList.add(rightFoot);
 
         if (disableButtons) {
-            HEAD.enabled = false;
-            LEFT_ARM.enabled = false;
-            LEFT_LEG.enabled = false;
-            LEFT_FOOT.enabled = false;
-            BODY.enabled = false;
-            RIGHT_ARM.enabled = false;
-            RIGHT_LEG.enabled = false;
-            RIGHT_FOOT.enabled = false;
+            head.enabled = false;
+            leftArm.enabled = false;
+            leftLeg.enabled = false;
+            leftFoot.enabled = false;
+            body.enabled = false;
+            rightArm.enabled = false;
+            rightLeg.enabled = false;
+            rightFoot.enabled = false;
         }
 
         GuiButton buttonCancel = new GuiButton(9, this.width / 2 - 100, this.height - 50, I18n.format("gui.cancel"));
         this.buttonList.add(buttonCancel);
 
         if (this.mc.gameSettings.showDebugInfo) {
-            GuiButton REFRESH = new GuiButton(10, this.guiLeft + 218, this.guiTop + 115, 36, 20, "resync");
-            this.buttonList.add(REFRESH);
+            GuiButton refresh = new GuiButton(10, this.guiLeft + 218, this.guiTop + 115, 36, 20, "resync");
+            this.buttonList.add(refresh);
         }
 
         super.initGui();
@@ -110,10 +110,12 @@ public class GuiHealthScreen extends GuiScreen {
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        //Setup background
         this.drawDefaultBackground();
         this.drawGradientRect(this.guiLeft, this.guiTop, this.guiLeft + xSize, this.guiTop + ySize, -16777216, -16777216);
         this.mc.getTextureManager().bindTexture(GuiUtils.GUI_LOCATION);
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
+        //Player
         int entityLookX = this.guiLeft + (xSize / 2) - mouseX;
         int entityLookY = this.guiTop + 20 - mouseY;
         if (EventCalendar.isGuiFun()) {
@@ -122,14 +124,17 @@ public class GuiHealthScreen extends GuiScreen {
         }
         GuiInventory.drawEntityOnScreen(this.width / 2, this.height / 2 + 30, 45, entityLookX, entityLookY, mc.player);
 
+        //Button
         super.drawScreen(mouseX, mouseY, partialTicks);
 
+        //Text info
         int morphineTicks = damageModel.getMorphineTicks();
         if (morphineTicks > 0)
             drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", StringUtils.ticksToElapsedTime(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - (this.activeHand == null ? 21 : 29), 0xFFFFFF);
         if (this.activeHand != null)
             drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
 
+        //Health
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
         boolean playerDead = damageModel.isDead(mc.player);
         GlStateManager.color(1, 1, 1, 1);
@@ -142,28 +147,33 @@ public class GuiHealthScreen extends GuiScreen {
         drawHealth(damageModel.RIGHT_LEG, true, 64, playerDead);
         drawHealth(damageModel.RIGHT_FOOT, true, 89, playerDead);
 
+        //Tooltip
         GlStateManager.pushMatrix();
-        tooltipButton(HEAD, damageModel.HEAD, mouseX, mouseY);
-        tooltipButton(LEFT_ARM, damageModel.LEFT_ARM, mouseX, mouseY);
-        tooltipButton(LEFT_LEG, damageModel.LEFT_LEG, mouseX, mouseY);
-        tooltipButton(LEFT_FOOT, damageModel.LEFT_FOOT, mouseX, mouseY);
-        tooltipButton(BODY, damageModel.BODY, mouseX, mouseY);
-        tooltipButton(RIGHT_ARM, damageModel.RIGHT_ARM, mouseX, mouseY);
-        tooltipButton(RIGHT_LEG, damageModel.RIGHT_LEG, mouseX, mouseY);
-        tooltipButton(RIGHT_FOOT, damageModel.RIGHT_FOOT, mouseX, mouseY);
+        tooltipButton(head, damageModel.HEAD, mouseX, mouseY);
+        tooltipButton(leftArm, damageModel.LEFT_ARM, mouseX, mouseY);
+        tooltipButton(leftLeg, damageModel.LEFT_LEG, mouseX, mouseY);
+        tooltipButton(leftFoot, damageModel.LEFT_FOOT, mouseX, mouseY);
+        tooltipButton(body, damageModel.BODY, mouseX, mouseY);
+        tooltipButton(rightArm, damageModel.RIGHT_ARM, mouseX, mouseY);
+        tooltipButton(rightLeg, damageModel.RIGHT_LEG, mouseX, mouseY);
+        tooltipButton(rightFoot, damageModel.RIGHT_FOOT, mouseX, mouseY);
         GlStateManager.popMatrix();
 
+        //Sleep info setup
         float sleepHealing = FirstAid.activeHealingConfig.sleepHealing;
         int renderBedX = Math.round(guiLeft / bedScaleFactor) + 2;
         int renderBedY = Math.round((guiTop + ySize) / bedScaleFactor) - 18;
         int bedX = (int) (renderBedX * bedScaleFactor);
         int bedY = (int) (renderBedY * bedScaleFactor);
 
+        //Sleep info icon
         GlStateManager.pushMatrix();
         if (sleepHealing > 0F) RenderHelper.enableGUIStandardItemLighting();
         GlStateManager.scale(bedScaleFactor, bedScaleFactor, bedScaleFactor);
         mc.getRenderItem().renderItemAndEffectIntoGUI(null, BED_ITEMSTACK, renderBedX, renderBedY);
         GlStateManager.popMatrix();
+
+        //Sleep info tooltip
         if (mouseX >= bedX && mouseY >= bedY && mouseX < bedX + (16 * bedScaleFactor) && mouseY < bedY + (16 * bedScaleFactor)) {
             String s = sleepHealing == 0F ? "Sleeping does not restore any health" : I18n.format("Sleeping restores %s health", FORMAT.format(sleepHealing)); //TODO i18n
             drawHoveringText(s, mouseX, mouseY);
@@ -181,7 +191,8 @@ public class GuiHealthScreen extends GuiScreen {
     }
 
     public void drawHealth(AbstractDamageablePart damageablePart, boolean right, int yOffset, boolean playerDead) {
-        GuiUtils.drawHealth(damageablePart, guiLeft + (right ? 200 - Math.min(38, GuiUtils.getMaxHearts(damageablePart.getMaxHealth()) * 9 + GuiUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 57), guiTop + yOffset, this, true, playerDead);
+        int xTranslation = guiLeft + (right ? 200 - Math.min(38, GuiUtils.getMaxHearts(damageablePart.getMaxHealth()) * 9 + GuiUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 57);
+        GuiUtils.drawHealth(damageablePart, xTranslation, guiTop + yOffset, this, true, playerDead);
     }
 
     @Override

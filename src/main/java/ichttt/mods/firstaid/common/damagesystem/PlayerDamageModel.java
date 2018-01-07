@@ -14,10 +14,9 @@ import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
-import ichttt.mods.firstaid.common.network.MessageAddHealth;
 import ichttt.mods.firstaid.common.network.MessageResync;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import ichttt.mods.firstaid.common.util.DataManagerWrapper;
+import ichttt.mods.firstaid.common.DataManagerWrapper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -166,7 +165,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
         if (!world.isRemote && world instanceof WorldServer && FirstAid.activeHealingConfig.sleepHealing != 0) {
             WorldServer worldServer = (WorldServer) player.world;
-            if (worldServer.areAllPlayersAsleep()) { // We are going to wake up on the next tick, add health TODO morpheus compat?
+            if (worldServer.areAllPlayersAsleep()) { // We are going to wake up on the next tick, add health
                 HealthDistribution.distributeHealth(FirstAid.activeHealingConfig.sleepHealing, player, true);
             }
         }
@@ -255,7 +254,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         float value = 0;
         for (AbstractDamageablePart part : this)
                 value += part.getAbsorption();
-        return value;
+        return value; //Autoboxing FTW
     }
 
     @Override

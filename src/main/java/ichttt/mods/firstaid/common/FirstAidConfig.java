@@ -45,7 +45,7 @@ public class FirstAidConfig {
         public boolean allowOtherHealingItems = true;
 
         @Config.Comment("The total amount of health that will be distributed to all body parts after sleeping")
-        @Config.LangKey("firstaid.config.sleephealing") //TODO lang and tutorial info
+        @Config.LangKey("firstaid.config.sleephealing")
         @Config.RangeDouble(min = 0D, max = 20D)
         public float sleepHealing = 1F;
 

@@ -14,6 +14,8 @@ gui.right_foot=Rechter Fuß
 gui.apply_hint=Wähle die Stelle, wo das Item angebracht werden soll
 gui.morphine_left=Morphium aktiv(%s verbleibend)
 gui.active_item=Gerade aktiv
+gui.no_sleep_heal=Schlafen stellt kein Leben wieder her
+gui.sleep_heal_amount=Schlafen stellt %s Herzen wieder her
 
 firstaid.tutorial.hint=Drücke %s für das Tutorial
 firstaid.tutorial.welcome=Willkommen zum FirstAid Mod! Dieses Tutorial wird dich durch den Mod und seine Mechaniken führen.
@@ -22,6 +24,7 @@ firstaid.tutorial.line2=Jeder Teil deines Körpers hat seine eigene Lebensleiste
 firstaid.tutorial.line3=Wird einer deiner Füße verletzt! Dies kann negative Effekte herbeiführen, wie Langsamkeit für wunde Füße, langames Abbauen für wunde Arme und so weiter.
 firstaid.tutorial.line4=Diese Effekte können durch Morphium oder durch das Heilen der Wunde behoben werden
 firstaid.tutorial.line5=Wunden können durch Bandagen oder Plaster geheilt werden (Rechtsklick auf den Gegenstand).
+firstaid.tutorial.sleephint=Außerdem heilt sich dein Köper ein wenig von selbst, wenn du in einem Bett schläfst.
 firstaid.tutorial.line6=Ein Spieler stirbt dann, wenn ein kritisches Organ (Kopf oder Torso) kein Leben mehr hat.
 firstaid.tutorial.line7=In diesem Fall wäre der Spieler z.B. tot, egal wie viel Leben die anderen Organe haben.
 firstaid.tutorial.line8=Wenn du dein derzeitiges Leben und aktive Heilungsgegenstände sehen willst, drücke %s, um dieses Fenster wieder zu öffnen.
@@ -43,6 +46,8 @@ firstaid.config.allownaturalregeneration=Natürliche Regeneration erlauben
 firstaid.config.allownaturalregeneration.tooltip=Falls aktiv, greift die normale natürliche Regeneration\n**WARNUNG** Dies setzt intern die Spielregel "naturalRegeneration" für alle Welten, sodass die Einstellung auch nach dem Entfernen der Mod aktiv bleibt
 firstaid.config.allowotherhealingitems=Andere Heilungsgegenstände aktivieren
 firstaid.config.allowotherhealingitems.tooltip=Wenn deaktiviert haben z.B. Heilungstränke keinen Effekt
+firstaid.config.sleephealing=Heilung durch Schlafen
+firstaid.config.sleephealing.tooltip=Das Leben, welches durch Schlafen in einem Bett geheilt wird(1 = ein halbes Herz)
 firstaid.config.otherregenmultiplier=Multiplikator anderer Regeneration
 firstaid.config.otherregenmultiplier.tooltip=Der Wert, mit dem die externe Heilung verrechnet wird. Kein Effekt, falls andere Heilungsgegenstände deaktiviert sind.
 firstaid.config.naturalregenmultiplier=Multiplikator natürlicher Regeneration

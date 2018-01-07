@@ -175,7 +175,7 @@ public class GuiHealthScreen extends GuiScreen {
 
         //Sleep info tooltip
         if (mouseX >= bedX && mouseY >= bedY && mouseX < bedX + (16 * bedScaleFactor) && mouseY < bedY + (16 * bedScaleFactor)) {
-            String s = sleepHealing == 0F ? "Sleeping does not restore any health" : I18n.format("Sleeping restores %s health", FORMAT.format(sleepHealing)); //TODO i18n
+            String s = sleepHealing == 0F ? I18n.format("gui.no_sleep_heal") : I18n.format("gui.sleep_heal_amount", FORMAT.format(sleepHealing / 2));
             drawHoveringText(s, mouseX, mouseY);
         }
 

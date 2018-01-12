@@ -121,6 +121,7 @@ public class DamageablePart extends AbstractDamageablePart {
 
     @Override
     public void setAbsorption(float absorption) {
+        if (absorption > 4F) absorption = 4F;
         this.absorption = absorption;
         currentHealth = Math.min(maxHealth + absorption, currentHealth);
     }
@@ -132,6 +133,7 @@ public class DamageablePart extends AbstractDamageablePart {
 
     @Override
     public void setMaxHealth(int maxHealth) {
+        if (maxHealth > 12) maxHealth = 12;
         this.maxHealth = Math.max(2, maxHealth); //set 2 as a minimum
         this.currentHealth = Math.min(currentHealth, this.maxHealth);
     }

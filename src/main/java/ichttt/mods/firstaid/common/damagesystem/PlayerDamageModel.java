@@ -90,30 +90,17 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public void deserializeNBT(NBTTagCompound nbt) {
-        if (nbt.hasKey("headHealth")) {
-            deserializeNBT_legacy(nbt, "head", HEAD);
-            deserializeNBT_legacy(nbt, "leftArm", LEFT_ARM);
-            deserializeNBT_legacy(nbt, "leftLeg", LEFT_LEG);
-            deserializeNBT_legacy(nbt, "body", BODY);
-            deserializeNBT_legacy(nbt, "rightArm", RIGHT_ARM);
-            deserializeNBT_legacy(nbt, "rightLeg", RIGHT_LEG);
-        } else {
-            HEAD.deserializeNBT((NBTTagCompound) nbt.getTag("head"));
-            LEFT_ARM.deserializeNBT((NBTTagCompound) nbt.getTag("leftArm"));
-            LEFT_LEG.deserializeNBT((NBTTagCompound) nbt.getTag("leftLeg"));
-            LEFT_FOOT.deserializeNBT((NBTTagCompound) nbt.getTag("leftFoot"));
-            BODY.deserializeNBT((NBTTagCompound) nbt.getTag("body"));
-            RIGHT_ARM.deserializeNBT((NBTTagCompound) nbt.getTag("rightArm"));
-            RIGHT_LEG.deserializeNBT((NBTTagCompound) nbt.getTag("rightLeg"));
-            RIGHT_FOOT.deserializeNBT((NBTTagCompound) nbt.getTag("rightFoot"));
-        }
+        HEAD.deserializeNBT((NBTTagCompound) nbt.getTag("head"));
+        LEFT_ARM.deserializeNBT((NBTTagCompound) nbt.getTag("leftArm"));
+        LEFT_LEG.deserializeNBT((NBTTagCompound) nbt.getTag("leftLeg"));
+        LEFT_FOOT.deserializeNBT((NBTTagCompound) nbt.getTag("leftFoot"));
+        BODY.deserializeNBT((NBTTagCompound) nbt.getTag("body"));
+        RIGHT_ARM.deserializeNBT((NBTTagCompound) nbt.getTag("rightArm"));
+        RIGHT_LEG.deserializeNBT((NBTTagCompound) nbt.getTag("rightLeg"));
+        RIGHT_FOOT.deserializeNBT((NBTTagCompound) nbt.getTag("rightFoot"));
         morphineTicksLeft = nbt.getInteger("morphineTicks");
         if (nbt.hasKey("hasTutorial"))
             hasTutorial = nbt.getBoolean("hasTutorial");
-    }
-
-    private static void deserializeNBT_legacy(NBTTagCompound nbt, String key, AbstractDamageablePart part) {
-        part.currentHealth = Math.min(nbt.getFloat(key + "Health"), part.getMaxHealth());
     }
 
     @Override

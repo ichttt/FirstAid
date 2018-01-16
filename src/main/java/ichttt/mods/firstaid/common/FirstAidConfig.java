@@ -70,8 +70,12 @@ public class FirstAidConfig {
         @Config.LangKey("firstaid.config.showoverlay")
         public boolean showOverlay = true;
 
+        @Config.Comment("If true the HUD will display the health as numbers instead of the \"normal\" icons")
+        @Config.LangKey("firstaid.config.displayhealthasnumber")
         public boolean displayHealthAsNumber = false;
 
+        @Config.Comment("A scaling option for the HUD in addition to minecraft's GUI scale")
+        @Config.LangKey("firstaid.config.hudscale")
         @Config.RangeDouble(min = 0.2F, max = 2F)
         public float hudScale = 1F;
 

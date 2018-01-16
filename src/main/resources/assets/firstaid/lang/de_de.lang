@@ -56,6 +56,10 @@ firstaid.config.showvanillahealthbar=Zeige die normale Lebensleiste
 firstaid.config.showvanillahealthbar.tooltip=Falls aktiviert wird die normale Lebensleiste dargestellt (zeigt dein durchschnittliches Leben)
 firstaid.config.showoverlay=Overlay anzeigen
 firstaid.config.showoverlay.tooltip=Zeigt das neue Overlay
+firstaid.config.displayhealthasnumber=Stelle Leben als Nummer dar
+firstaid.config.displayhealthasnumber.tooltip=Falls aktiv wird das Overlay das Leben als Nummer darstellen
+firstaid.config.hudscale=Skalierung des Overlays
+firstaid.config.hudscale.tooltip=Eine zusätzliche Option, das Overlay zu skalieren.
 firstaid.config.position=Position
 firstaid.config.position.tooltip=Der relative Punkt des Overlays. 0=oben+links, 1=oben+rechts, 2=unten+links, 3=unten+rechts
 firstaid.config.xoffset=X-Achsenoffset

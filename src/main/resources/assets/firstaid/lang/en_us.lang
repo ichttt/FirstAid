@@ -56,6 +56,10 @@ firstaid.config.showvanillahealthbar=Show vanilla health bar
 firstaid.config.showvanillahealthbar.tooltip=True if the main health bar should be rendered (Will be average health)
 firstaid.config.showoverlay=Show overlay
 firstaid.config.showoverlay.tooltip=True if the overlay should be shown, false otherwise
+firstaid.config.displayhealthasnumber=Display health as number
+firstaid.config.displayhealthasnumber.tooltip=If true the HUD will display the health as numbers instead of the "normal" icons
+firstaid.config.hudscale=HUD scale
+firstaid.config.hudscale.tooltip=A scaling option for the HUD in addition to minecraft's GUI scale
 firstaid.config.position=Position
 firstaid.config.position.tooltip=The relative point of the overlay. 0=top+left, 1=top+right, 2=bottom+left, 3=bottom+right
 firstaid.config.xoffset=X-Axis Offset

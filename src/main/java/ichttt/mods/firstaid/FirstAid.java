@@ -66,7 +66,7 @@ public class FirstAid {
             @Nonnull
             @Override
             public ItemStack getTabIconItem() {
-                return new ItemStack(FirstAidItems.BANDAGE, 1);
+                return new ItemStack(FirstAidItems.BANDAGE);
             }
         };
 

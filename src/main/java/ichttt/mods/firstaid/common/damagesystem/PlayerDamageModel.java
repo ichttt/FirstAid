@@ -115,10 +115,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         }
 
         if (FirstAid.playerMaxHealth != -1) {
-            float newCurrentHealth;
-            if (FirstAid.scaleMaxHealth)
-                newCurrentHealth = player.getMaxHealth() * (currentHealth / (FirstAid.playerMaxHealth));
-            else newCurrentHealth = currentHealth / (player.getMaxHealth());
+            float newCurrentHealth = (player.getMaxHealth() * currentHealth) / FirstAid.playerMaxHealth;
 
             if (Float.isInfinite(newCurrentHealth)) {
                 FirstAid.logger.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe

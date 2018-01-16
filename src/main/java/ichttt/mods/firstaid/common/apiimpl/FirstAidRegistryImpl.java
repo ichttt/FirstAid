@@ -55,6 +55,8 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     }
 
     private void buildDebuffs(boolean finalize) {
+        if (!registrationAllowed) throw new IllegalStateException("Registry is closed");
+
         if (finalize) {
             FirstAid.logger.info("Finalizing registry");
             registrationAllowed = false;

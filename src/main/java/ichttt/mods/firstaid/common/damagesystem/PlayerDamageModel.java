@@ -8,6 +8,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
@@ -16,7 +17,6 @@ import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.network.MessageResync;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import ichttt.mods.firstaid.common.DataManagerWrapper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -115,7 +115,10 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         }
 
         if (FirstAid.playerMaxHealth != -1) {
-            float newCurrentHealth = player.getMaxHealth() * (currentHealth / (FirstAid.scaleMaxHealth ? player.getMaxHealth() : FirstAid.playerMaxHealth));
+            float newCurrentHealth;
+            if (FirstAid.scaleMaxHealth)
+                newCurrentHealth = player.getMaxHealth() * (currentHealth / (FirstAid.playerMaxHealth));
+            else newCurrentHealth = currentHealth / (player.getMaxHealth());
 
             if (Float.isInfinite(newCurrentHealth)) {
                 FirstAid.logger.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe
@@ -132,16 +135,24 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         if (FirstAid.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
             float globalFactor = player.getMaxHealth() / 20F;
             if (prevScaleFactor != globalFactor) {
-                boolean reduce = false;
+                int reduced = 0;
+                int added = 0;
                 for (AbstractDamageablePart part : this) {
                     int result = Math.round(part.initialMaxHealth * globalFactor);
                     if (result % 2 == 1) {
-                        if (reduce) {
+                        int partMaxHealth = part.getMaxHealth();
+                        if (part.currentHealth < partMaxHealth && reduced < 4) {
                             result--;
-                            reduce = false;
-                        } else {
+                            reduced++;
+                        } else if (part.currentHealth > partMaxHealth && added < 4) {
                             result++;
-                            reduce = true;
+                            added++;
+                        } else if (reduced > added) {
+                            result++;
+                            added++;
+                        } else {
+                            result--;
+                            reduced++;
                         }
                     }
                     part.setMaxHealth(result);

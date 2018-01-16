@@ -144,6 +144,7 @@ public class EventHandler {
             else {
                 FirstAid.activeDamageConfig = FirstAidConfig.damageSystem;
                 FirstAid.activeHealingConfig = FirstAidConfig.externalHealing;
+                FirstAid.scaleMaxHealth = FirstAidConfig.scaleMaxHealth;
                 damageModel = PlayerDamageModel.create();
             }
             event.addCapability(CapProvider.IDENTIFIER, new CapProvider(player, damageModel));

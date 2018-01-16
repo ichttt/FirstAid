@@ -13,5 +13,6 @@ public class ServerProxy implements IProxy {
         //On dedicated server, it starts ticking before any player joins.
         FirstAid.activeDamageConfig = FirstAidConfig.damageSystem;
         FirstAid.activeHealingConfig = FirstAidConfig.externalHealing;
+        FirstAid.scaleMaxHealth = FirstAidConfig.scaleMaxHealth;
     }
 }

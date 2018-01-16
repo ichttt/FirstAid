@@ -70,6 +70,11 @@ public class FirstAidConfig {
         @Config.LangKey("firstaid.config.showoverlay")
         public boolean showOverlay = true;
 
+        public boolean displayHealthAsNumber = false;
+
+        @Config.RangeDouble(min = 0.2F, max = 2F)
+        public float hudScale = 1F;
+
         @Config.Comment("The relative point of the overlay. 0=top+left, 1=top+right, 2=bottom+left, 3=bottom+right")
         @Config.LangKey("firstaid.config.position")
         @Config.RangeInt(min = 0, max = 3)

@@ -17,6 +17,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -26,6 +27,7 @@ import java.util.Objects;
 public class HUDHandler {
     private static final Map<EnumPlayerPart, String> TRANSLATION_MAP = new HashMap<>();
     private static int maxLength;
+    private static final DecimalFormat TEXT_FORMAT = new DecimalFormat("#.#");
 
     public static void rebuildTranslationTable() {
         FirstAid.logger.debug("Building GUI translation table");
@@ -69,12 +71,17 @@ public class HUDHandler {
         if (mc.gameSettings.showDebugInfo && FirstAidConfig.overlay.position == 0)
             return;
         GlStateManager.pushMatrix();
+        GlStateManager.scale(FirstAidConfig.overlay.hudScale, FirstAidConfig.overlay.hudScale, 1);
         GlStateManager.translate(xOffset, yOffset, 0F);
         boolean playerDead = damageModel.isDead(mc.player);
         for (AbstractDamageablePart part : damageModel) {
             mc.fontRenderer.drawString(TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF);
-            mc.getTextureManager().bindTexture(Gui.ICONS);
-            GuiUtils.drawHealth(part, maxLength * 5 + 6, 0, gui, false, playerDead);
+            if (FirstAidConfig.overlay.displayHealthAsNumber) {
+                mc.fontRenderer.drawString(TEXT_FORMAT.format(part.currentHealth) + "/" + part.getMaxHealth(), maxLength * 5 + 6, 0, 0xFFFFFF);
+            } else {
+                mc.getTextureManager().bindTexture(Gui.ICONS);
+                GuiUtils.drawHealth(part, maxLength * 5 + 6, 0, gui, false, playerDead);
+            }
             GlStateManager.translate(0, 10F, 0F);
 
         }

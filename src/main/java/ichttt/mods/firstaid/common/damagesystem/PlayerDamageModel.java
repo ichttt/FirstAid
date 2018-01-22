@@ -41,23 +41,23 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private boolean waitingForHelp = false;
 
     public static PlayerDamageModel create() {
-        return create_impl(Objects.requireNonNull(FirstAid.activeDamageConfig));
+        return create_impl(Objects.requireNonNull(FirstAid.activeDamageConfig), false);
     }
 
     public static PlayerDamageModel createTemp() {
-        return create_impl(FirstAidConfig.damageSystem);
+        return create_impl(FirstAidConfig.damageSystem, true);
     }
 
-    private static PlayerDamageModel create_impl(FirstAidConfig.DamageSystem config) {
+    private static PlayerDamageModel create_impl(FirstAidConfig.DamageSystem config, boolean temp) {
         FirstAidRegistry registry = FirstAidRegistryImpl.INSTANCE;
         IDebuff[] headDebuffs = registry.getDebuffs(EnumDebuffSlot.HEAD);
         IDebuff[] bodyDebuffs = registry.getDebuffs(EnumDebuffSlot.BODY);
         IDebuff[] armsDebuffs = registry.getDebuffs(EnumDebuffSlot.ARMS);
         IDebuff[] legFootDebuffs = registry.getDebuffs(EnumDebuffSlot.LEGS_AND_FEET);
-        return new PlayerDamageModel(config, headDebuffs, bodyDebuffs, armsDebuffs, legFootDebuffs);
+        return new PlayerDamageModel(config, headDebuffs, bodyDebuffs, armsDebuffs, legFootDebuffs, temp);
     }
 
-    protected PlayerDamageModel(FirstAidConfig.DamageSystem config, IDebuff[] headDebuffs, IDebuff[] bodyDebuffs, IDebuff[] armDebuffs, IDebuff[] legFootDebuffs) {
+    protected PlayerDamageModel(FirstAidConfig.DamageSystem config, IDebuff[] headDebuffs, IDebuff[] bodyDebuffs, IDebuff[] armDebuffs, IDebuff[] legFootDebuffs, boolean isTemp) {
         super(new DamageablePart(config.maxHealthHead,      true,  EnumPlayerPart.HEAD,       headDebuffs   ),
               new DamageablePart(config.maxHealthLeftArm,   false, EnumPlayerPart.LEFT_ARM,   armDebuffs    ),
               new DamageablePart(config.maxHealthLeftLeg,   false, EnumPlayerPart.LEFT_LEG,   legFootDebuffs),
@@ -65,7 +65,8 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
               new DamageablePart(config.maxHealthBody,      true,  EnumPlayerPart.BODY,       bodyDebuffs   ),
               new DamageablePart(config.maxHealthRightArm,  false, EnumPlayerPart.RIGHT_ARM,  armDebuffs    ),
               new DamageablePart(config.maxHealthRightLeg,  false, EnumPlayerPart.RIGHT_LEG,  legFootDebuffs),
-              new DamageablePart(config.maxHealthRightFoot, false, EnumPlayerPart.RIGHT_FOOT, legFootDebuffs));
+              new DamageablePart(config.maxHealthRightFoot, false, EnumPlayerPart.RIGHT_FOOT, legFootDebuffs),
+              isTemp);
         for (IDebuff debuff : armDebuffs)
             this.sharedDebuffs.add((SharedDebuff) debuff);
         for (IDebuff debuff : legFootDebuffs)
@@ -115,7 +116,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         }
 
         if (FirstAid.playerMaxHealth != -1) {
-            float newCurrentHealth = (player.getMaxHealth() * currentHealth) / FirstAid.playerMaxHealth;
+            float newCurrentHealth = (player.getMaxHealth() * currentHealth) / FirstAid.playerMaxHealth; //TODO double check this for both scale and no scale
 
             if (Float.isInfinite(newCurrentHealth)) {
                 FirstAid.logger.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe

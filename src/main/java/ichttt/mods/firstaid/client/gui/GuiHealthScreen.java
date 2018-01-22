@@ -138,14 +138,16 @@ public class GuiHealthScreen extends GuiScreen {
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
         boolean playerDead = damageModel.isDead(mc.player);
         GlStateManager.color(1, 1, 1, 1);
-        drawHealth(damageModel.HEAD, false, 14, playerDead);
-        drawHealth(damageModel.LEFT_ARM, false, 39, playerDead);
-        drawHealth(damageModel.LEFT_LEG, false, 64, playerDead);
-        drawHealth(damageModel.LEFT_FOOT, false, 89, playerDead);
-        drawHealth(damageModel.BODY, true, 14, playerDead);
-        drawHealth(damageModel.RIGHT_ARM, true, 39, playerDead);
-        drawHealth(damageModel.RIGHT_LEG, true, 64, playerDead);
-        drawHealth(damageModel.RIGHT_FOOT, true, 89, playerDead);
+        if (!damageModel.isTemp) {
+            drawHealth(damageModel.HEAD, false, 14, playerDead);
+            drawHealth(damageModel.LEFT_ARM, false, 39, playerDead);
+            drawHealth(damageModel.LEFT_LEG, false, 64, playerDead);
+            drawHealth(damageModel.LEFT_FOOT, false, 89, playerDead);
+            drawHealth(damageModel.BODY, true, 14, playerDead);
+            drawHealth(damageModel.RIGHT_ARM, true, 39, playerDead);
+            drawHealth(damageModel.RIGHT_LEG, true, 64, playerDead);
+            drawHealth(damageModel.RIGHT_FOOT, true, 89, playerDead);
+        }
 
         //Tooltip
         GlStateManager.pushMatrix();

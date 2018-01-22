@@ -46,6 +46,8 @@ public class HUDHandler {
             return;
         AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(mc.player);
         Objects.requireNonNull(damageModel);
+        if (damageModel.isTemp) //Wait until we receive the remote model
+            return;
         mc.getTextureManager().bindTexture(Gui.ICONS);
         Gui gui = mc.ingameGUI;
         int xOffset = FirstAidConfig.overlay.xOffset;

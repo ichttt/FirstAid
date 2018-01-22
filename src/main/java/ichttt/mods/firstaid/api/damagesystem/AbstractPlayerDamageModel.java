@@ -11,10 +11,23 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 
 public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDamageablePart>, INBTSerializable<NBTTagCompound> {
-    public final AbstractDamageablePart HEAD, LEFT_ARM, LEFT_LEG, LEFT_FOOT, BODY, RIGHT_ARM, RIGHT_LEG, RIGHT_FOOT;
+    public final AbstractDamageablePart HEAD;
+    public final AbstractDamageablePart LEFT_ARM;
+    public final AbstractDamageablePart LEFT_LEG;
+    public final AbstractDamageablePart LEFT_FOOT;
+    public final AbstractDamageablePart BODY;
+    public final AbstractDamageablePart RIGHT_ARM;
+    public final AbstractDamageablePart RIGHT_LEG;
+    public final AbstractDamageablePart RIGHT_FOOT;
+    public final boolean isTemp;
     public boolean hasTutorial;
 
+    @Deprecated
     public AbstractPlayerDamageModel(AbstractDamageablePart head, AbstractDamageablePart leftArm, AbstractDamageablePart leftLeg, AbstractDamageablePart leftFoot, AbstractDamageablePart body, AbstractDamageablePart rightArm, AbstractDamageablePart rightLeg, AbstractDamageablePart rightFoot) {
+        this(head, leftArm, leftLeg, leftFoot, body, rightArm, rightLeg, rightFoot, false);
+    }
+
+    public AbstractPlayerDamageModel(AbstractDamageablePart head, AbstractDamageablePart leftArm, AbstractDamageablePart leftLeg, AbstractDamageablePart leftFoot, AbstractDamageablePart body, AbstractDamageablePart rightArm, AbstractDamageablePart rightLeg, AbstractDamageablePart rightFoot, boolean isTemp) {
         this.HEAD = head;
         this.LEFT_ARM = leftArm;
         this.LEFT_LEG = leftLeg;
@@ -23,6 +36,7 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
         this.RIGHT_ARM = rightArm;
         this.RIGHT_LEG = rightLeg;
         this.RIGHT_FOOT = rightFoot;
+        this.isTemp = isTemp;
     }
 
     public AbstractDamageablePart getFromEnum(EnumPlayerPart part) {

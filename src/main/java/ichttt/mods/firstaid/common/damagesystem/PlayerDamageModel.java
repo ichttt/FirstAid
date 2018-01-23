@@ -115,8 +115,8 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             return;
         }
 
-        if (FirstAid.playerMaxHealth != -1) {
-            float newCurrentHealth = (player.getMaxHealth() * currentHealth) / FirstAid.playerMaxHealth; //TODO double check this for both scale and no scale
+        if (!this.isTemp) {
+            float newCurrentHealth = (currentHealth / getCurrentMaxHealth()) * player.getMaxHealth();
 
             if (Float.isInfinite(newCurrentHealth)) {
                 FirstAid.logger.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe
@@ -266,5 +266,13 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         for (AbstractDamageablePart part : this)
             max = Math.max(max, (int) (part.getMaxHealth() + part.getAbsorption() + 0.9999F));
         return (int) (((max + 1) / 2F) * 9);
+    }
+
+    private int getCurrentMaxHealth() {
+        int maxHealth = 0;
+        for (AbstractDamageablePart part : this) {
+            maxHealth += part.getMaxHealth();
+        }
+        return maxHealth;
     }
 }

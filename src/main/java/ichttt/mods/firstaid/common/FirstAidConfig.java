@@ -128,22 +128,64 @@ public class FirstAidConfig {
 
         public static class Head {
             public boolean blindness = true;
+            @Config.Comment("Holds the information how the debuff should be applied at different damage taken. Only use this if you know what you are doing.")
+            public final ConditionOnHit blindnessConditions = new ConditionOnHit(new float[]{2F, 1F}, new int[]{8 * 20, 4 * 20});
 
             public boolean nausea = true;
+            @Config.Comment("Holds the information how the debuff should be applied at different damage taken. Only use this if you know what you are doing.")
+            public final ConditionOnHit nauseaConditions = new ConditionOnHit(new float[]{3F, 2F}, new int[]{16 * 20, 12 * 20});
         }
 
         public static class Body {
             public boolean nausea = true;
+            @Config.Comment("Holds the information how the debuff should be applied at different damage taken. Only use this if you know what you are doing.")
+            public final ConditionOnHit nauseaConditions = new ConditionOnHit(new float[]{4F, 2F}, new int[]{16 * 20, 8 * 20});
 
             public boolean weakness = true;
+            @Config.Comment("Holds the information how the debuff should be applied at different health left. Only use this if you know what you are doing.")
+            public final ConditionConstant weaknessConditions = new ConditionConstant(new float[]{0.25F, 0.50F}, new int[]{2, 1});
         }
 
         public static class Arms {
             public boolean mining_fatigue = true;
+            @Config.Comment("Holds the information how the debuff should be applied at different health left. Only use this if you know what you are doing.")
+            public final ConditionConstant miningFatigueConditions = new ConditionConstant(new float[]{0.25F, 0.50F, 0.75F}, new int[]{3, 2, 1});
         }
 
         public static class LegsAndFeet {
             public boolean slowness = true;
+            @Config.Comment("Holds the information how the debuff should be applied at different health left. Only use this if you know what you are doing.")
+            public final ConditionConstant slownessConditions = new ConditionConstant(new float[]{0.35F, 0.6F, 0.8F}, new int[]{3, 2, 1});
+        }
+
+        public static class ConditionOnHit {
+            public ConditionOnHit(float[] defaultTaken, int[] defaultLength) {
+                this.damageTaken = defaultTaken;
+                this.debuffLength = defaultLength;
+            }
+
+            @Config.RequiresMcRestart
+            @Config.Comment("How much damage the user must have taken for the debuff to apply at the mapped length. Must be sorted so the **highest** value comes first")
+            public float[] damageTaken;
+
+            @Config.RequiresMcRestart
+            @Config.Comment("How long the debuff should stay. If the first condition from the damageTaken config is met, the first value in this list will be taken")
+            public int[] debuffLength;
+        }
+
+        public static class ConditionConstant {
+            public ConditionConstant(float[] defaultPercentage, int[] defaultStrength) {
+                this.healthPercentageLeft = defaultPercentage;
+                this.debuffStrength = defaultStrength;
+            }
+
+            @Config.RequiresMcRestart
+            @Config.Comment("How much health the user must have left for the debuff to apply at the mapped length. Must be sorted so the **lowest** value comes first")
+            public float[] healthPercentageLeft;
+
+            @Config.RequiresMcRestart
+            @Config.Comment("How strong the potion effect should stay. If the first condition from the healthPercentageLeft config is met, the first value in this list will be taken")
+            public int[] debuffStrength;
         }
     }
 }

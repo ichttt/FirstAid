@@ -5,10 +5,12 @@ import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.FirstAidConfig;
+import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -33,11 +35,17 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void clientTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
+        Minecraft mc = Minecraft.getMinecraft();
         if (EventCalendar.isGuiFun()) {
             GuiHealthScreen.BED_ITEMSTACK.setItemDamage(id);
-            Minecraft mc = Minecraft.getMinecraft();
             if (mc.world != null && mc.world.getWorldTime() % 3 == 0) id++;
             if (id > 15) id = 0;
+        }
+        if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.world != null && mc.world.isRemote && mc.player != null) {
+            mc.player.sendStatusMessage(new TextComponentString("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
+            for (String s : RegistryManager.debuffConfigErrors)
+                mc.player.sendStatusMessage(new TextComponentString("[FirstAid] " + s), false);
+            RegistryManager.debuffConfigErrors.clear();
         }
     }
 

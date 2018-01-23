@@ -165,11 +165,13 @@ public class FirstAidConfig {
             }
 
             @Config.RequiresMcRestart
-            @Config.Comment("How much damage the user must have taken for the debuff to apply at the mapped length. Must be sorted so the **highest** value comes first")
+            @Config.Comment("How much damage the user must have taken for the debuff to apply at the mapped length. Must be sorted so the **highest** value comes first. 2 = 1 heart")
+            @Config.RangeDouble(min = 0, max = 10)
             public float[] damageTaken;
 
             @Config.RequiresMcRestart
             @Config.Comment("How long the debuff should stay. If the first condition from the damageTaken config is met, the first value in this list will be taken")
+            @Config.RangeInt(min = 0, max = Short.MAX_VALUE)
             public int[] debuffLength;
         }
 
@@ -181,10 +183,12 @@ public class FirstAidConfig {
 
             @Config.RequiresMcRestart
             @Config.Comment("How much health the user must have left for the debuff to apply at the mapped length. Must be sorted so the **lowest** value comes first")
+            @Config.RangeDouble(min = 0, max = 1)
             public float[] healthPercentageLeft;
 
             @Config.RequiresMcRestart
             @Config.Comment("How strong the potion effect should stay. If the first condition from the healthPercentageLeft config is met, the first value in this list will be taken")
+            @Config.RangeInt(min = 0, max = Byte.MAX_VALUE)
             public int[] debuffStrength;
         }
     }

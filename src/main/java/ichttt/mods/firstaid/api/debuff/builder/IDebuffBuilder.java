@@ -49,6 +49,7 @@ public interface IDebuffBuilder {
     /**
      * Builds and registers this debuff to the FirstAid registry.
      * This is the final step.
+     * This does the same as {@link ichttt.mods.firstaid.api.FirstAidRegistry#registerDebuff(EnumDebuffSlot, IDebuffBuilder)}
      *
      * @param slot The slot where the debuff should apply
      */

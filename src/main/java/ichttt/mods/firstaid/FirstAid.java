@@ -47,7 +47,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 
-@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.4.5", acceptedMinecraftVersions = "[1.12.2,1.13)", dependencies = "required-after:forge@[14.23.0.2526,);")
+@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.4.6", acceptedMinecraftVersions = "[1.12.2,1.13)", dependencies = "required-after:forge@[14.23.0.2526,);")
 public class FirstAid {
     public static Logger logger;
     public static final String MODID = "firstaid";
@@ -57,7 +57,6 @@ public class FirstAid {
     public static FirstAidConfig.DamageSystem activeDamageConfig;
     public static FirstAidConfig.ExternalHealing activeHealingConfig;
     public static boolean scaleMaxHealth;
-    public static int playerMaxHealth = -1;
 
     @SuppressWarnings("unused")
     @SidedProxy(clientSide = "ichttt.mods.firstaid.client.ClientProxy", serverSide = "ichttt.mods.firstaid.server.ServerProxy")

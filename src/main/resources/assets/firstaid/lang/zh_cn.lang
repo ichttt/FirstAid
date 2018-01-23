@@ -14,6 +14,8 @@ gui.right_foot=右脚
 gui.apply_hint=选择治疗的位置
 gui.morphine_left=吗啡治疗（左%s）
 gui.active_item=相当有效
+gui.no_sleep_heal=睡觉并不使你恢复健康
+gui.sleep_heal_amount=睡觉恢复了 %s 点健康值
 
 firstaid.tutorial.hint=按%s观看教程
 firstaid.tutorial.welcome=欢迎使用‘医疗护理’模组！本教程将引导你了解这个模组不同的机制。
@@ -22,25 +24,30 @@ firstaid.tutorial.line2=你身体的每一个部分都有对应的健康值，�
 firstaid.tutorial.line3=你的一只脚将会受伤！它将可能导致你获得一些负面的Buff，比如受伤的脚获得的缓慢，挖掘与进攻时的挖掘疲劳。
 firstaid.tutorial.line4=这种效果只有服用吗啡来进行治疗。
 firstaid.tutorial.line5=创伤则可以通过绷带或者石膏右击对应部位来治愈。
+firstaid.tutorial.sleephint=如果你躺在床上睡觉，那么你的身体将会进行自我恢复。
 firstaid.tutorial.line6=如果是一个关键的部位（头或者身体）的健康值下降为零时，玩家将会死亡。
 firstaid.tutorial.line7=在这种情况下无论其他部位依旧完好如初，玩家依旧难逃死亡的命运。
 firstaid.tutorial.line8=如果你想看到你当前的健康值与治疗情况，只需按下%s键打开这个界面即可。
 firstaid.tutorial.end=这是本章教程的结尾。
 
 firstaid.config.damagesystem=损伤系统
-firstaid.config.damagesystem.tooltip=关于身体各部位最大健康值设置。2 = 1 heart
+firstaid.config.damagesystem.tooltip=关于身体各部位最大健康值设置（2 = 1颗心）。
 firstaid.config.overlay=增益
 firstaid.config.overlay.tooltip=在游戏时关于健康值的叠加设置。
 firstaid.config.externalhealing=外部治疗
 firstaid.config.externalhealing.tooltip=关于对部位治疗的设置（包含原版的药水与血小板的修补）。
+firstaid.config.debuffs=减益
+firstaid.config.debuffs.tooltip=启用/禁止特定身体部位的减益效果。
 firstaid.config.enablesoundsystem=启动真实声源
-firstaid.config.enablesoundsystem.tooltip=设置为true以启动减增时的声音系统。Requieres enableDebuffs to be true
+firstaid.config.enablesoundsystem.tooltip=设置为true以启动减增时的声音系统。需要"enableDebuffs"设置为true。
 firstaid.config.scalemaxhealth=最大心率
 firstaid.config.scalemaxhealth.tooltip=设置为true，则将设置你的最大心脏，并且将原心跳乘以设置的匹配值作为最大心跳值。
 firstaid.config.allownaturalregeneration=自我修补
 firstaid.config.allownaturalregeneration.tooltip=允许原版的自然恢复健康值，需要"allowOtherHealingItems"设置为true。
 firstaid.config.allowotherhealingitems=其他治疗
 firstaid.config.allowotherhealingitems.tooltip=设置为false，治疗药水以及其他Buff效果将不起任何作用。
+firstaid.config.sleephealing=睡觉治愈
+firstaid.config.sleephealing.tooltip=设置睡觉所恢复的身体各部分健康值（1 = 半颗心）
 firstaid.config.otherregenmultiplier=成倍治疗
 firstaid.config.otherregenmultiplier.tooltip=外部治疗健康值将成倍增长，如果"Allow other healing items" 被禁用，则不起作用。
 firstaid.config.naturalregenmultiplier=成倍自我修补
@@ -49,6 +56,10 @@ firstaid.config.showvanillahealthbar=显示原版生命值
 firstaid.config.showvanillahealthbar.tooltip=如果设置为ture将其开启，则原版的生命值将平均分配各部位的健康值。
 firstaid.config.showoverlay=显示增益
 firstaid.config.showoverlay.tooltip=如果想要显示堆叠的效果，则设置为ture开启，否则为flase禁用。
+firstaid.config.displayhealthasnumber=健康值显示
+firstaid.config.displayhealthasnumber.tooltip=如果设置为true，那么HUD将以码字代替‘图标’显示。
+firstaid.config.hudscale=HUD比例
+firstaid.config.hudscale.tooltip=用于设置HUD比例，必须小于Minecraft的GUI比例。
 firstaid.config.position=Position
 firstaid.config.position.tooltip=The relative point of the overlay. 0=top+left, 1=top+right, 2=bottom+left, 3=bottom+right
 firstaid.config.xoffset=X-Axis Offset

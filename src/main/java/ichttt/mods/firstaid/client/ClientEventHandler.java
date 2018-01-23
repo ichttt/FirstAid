@@ -24,13 +24,6 @@ public class ClientEventHandler {
     private static int id;
 
     @SubscribeEvent
-    public static void registerModels(ModelRegistryEvent event) {
-        ModelLoader.setCustomModelResourceLocation(FirstAidItems.BANDAGE, 0, new ModelResourceLocation("firstaid:bandage"));
-        ModelLoader.setCustomModelResourceLocation(FirstAidItems.PLASTER, 0, new ModelResourceLocation("firstaid:plaster"));
-        ModelLoader.setCustomModelResourceLocation(FirstAidItems.MORPHINE, 0, new ModelResourceLocation("firstaid:morphine"));
-    }
-
-    @SubscribeEvent
     public static void clientTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
         if (EventCalendar.isGuiFun()) {

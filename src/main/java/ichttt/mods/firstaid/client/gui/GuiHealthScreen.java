@@ -27,6 +27,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
@@ -130,9 +132,9 @@ public class GuiHealthScreen extends GuiScreen {
         //Text info
         int morphineTicks = damageModel.getMorphineTicks();
         if (morphineTicks > 0)
-            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", StringUtils.ticksToElapsedTime(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - (this.activeHand == null ? 21 : 29), 0xFFFFFF);
+            drawCenteredString(this.mc.fontRendererObj, I18n.format("gui.morphine_left", StringUtils.ticksToElapsedTime(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - (this.activeHand == null ? 21 : 29), 0xFFFFFF);
         if (this.activeHand != null)
-            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
+            drawCenteredString(this.mc.fontRendererObj, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
 
         //Health
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
@@ -176,7 +178,7 @@ public class GuiHealthScreen extends GuiScreen {
         //Sleep info tooltip
         if (mouseX >= bedX && mouseY >= bedY && mouseX < bedX + (16 * bedScaleFactor) && mouseY < bedY + (16 * bedScaleFactor)) {
             String s = sleepHealing == 0F ? I18n.format("gui.no_sleep_heal") : I18n.format("gui.sleep_heal_amount", FORMAT.format(sleepHealing / 2));
-            drawHoveringText(s, mouseX, mouseY);
+            drawHoveringText(Collections.singletonList(s), mouseX, mouseY);
         }
 
         //TODO color the critical parts of the player red?
@@ -185,7 +187,7 @@ public class GuiHealthScreen extends GuiScreen {
     private void tooltipButton(GuiButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
         if (!enabled && button.hovered)
-            drawHoveringText(I18n.format("gui.active_item") + ": " + I18n.format(part.activeHealer.stack.getUnlocalizedName() + ".name"), mouseX, mouseY);
+            drawHoveringText(Collections.singletonList(I18n.format("gui.active_item") + ": " + I18n.format(part.activeHealer.stack.getUnlocalizedName() + ".name")), mouseX, mouseY);
         if (!disableButtons)
             button.enabled = enabled;
     }

@@ -45,8 +45,8 @@ public class MessageApplyHealingItem implements IMessage {
         @Override
         public IMessage onMessage(final MessageApplyHealingItem message, final MessageContext ctx) {
             //noinspection ConstantConditions
-            ctx.getServerHandler().player.getServer().addScheduledTask(() -> {
-                EntityPlayer player = ctx.getServerHandler().player;
+            ctx.getServerHandler().playerEntity.getServer().addScheduledTask(() -> {
+                EntityPlayer player = ctx.getServerHandler().playerEntity;
                 AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
                 ItemStack stack = player.getHeldItem(message.hand);
                 Item item = stack.getItem();

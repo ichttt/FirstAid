@@ -1,7 +1,7 @@
 package ichttt.mods.firstaid.common.damagesystem.debuff;
 
+import gnu.trove.map.TFloatIntMap;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
-import it.unimi.dsi.fastutil.floats.Float2IntMap;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
@@ -16,9 +16,9 @@ public abstract class AbstractDebuff implements IDebuff {
     @Nonnull
     public final BooleanSupplier isEnabled;
     @Nonnull
-    protected final Float2IntMap map;
+    protected final TFloatIntMap map;
 
-    public AbstractDebuff(@Nonnull String potionName, @Nonnull Float2IntMap map, @Nonnull BooleanSupplier isEnabled) {
+    public AbstractDebuff(@Nonnull String potionName, @Nonnull TFloatIntMap map, @Nonnull BooleanSupplier isEnabled) {
         this.effect = Objects.requireNonNull(ForgeRegistries.POTIONS.getValue(new ResourceLocation(potionName)));
         this.isEnabled = isEnabled;
         this.map = map;

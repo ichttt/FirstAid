@@ -1,8 +1,9 @@
 package ichttt.mods.firstaid.common.damagesystem.debuff;
 
+import gnu.trove.iterator.TFloatIntIterator;
+import gnu.trove.map.TFloatIntMap;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
-import it.unimi.dsi.fastutil.floats.Float2IntMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.SoundEvent;
@@ -15,7 +16,7 @@ public class OnHitDebuff extends AbstractDebuff {
     @Nullable
     private final SoundEvent sound;
 
-    public OnHitDebuff(@Nonnull String potionName, @Nonnull Float2IntMap map, @Nonnull BooleanSupplier isEnabled, @Nullable SoundEvent sound) {
+    public OnHitDebuff(@Nonnull String potionName, @Nonnull TFloatIntMap map, @Nonnull BooleanSupplier isEnabled, @Nullable SoundEvent sound) {
         super(potionName, map, isEnabled);
         this.sound = sound;
     }
@@ -25,11 +26,13 @@ public class OnHitDebuff extends AbstractDebuff {
         if (!this.isEnabled.getAsBoolean())
             return;
         int value = -1;
-        for (Float2IntMap.Entry entry : map.float2IntEntrySet()) {
-            if (damage >= entry.getFloatKey()) {
-                value = Math.max(value, entry.getIntValue());
-                player.addPotionEffect(new PotionEffect(effect, entry.getIntValue(), 0, false, false));
+        TFloatIntIterator iterator = map.iterator();
+        while (iterator.hasNext()) {
+            if (damage >= iterator.key()) {
+                value = Math.max(value, iterator.value());
+                player.addPotionEffect(new PotionEffect(effect, iterator.value(), 0, false, false));
             }
+            iterator.advance();
         }
         if (value != -1 && sound != null)
             FirstAid.NETWORKING.sendTo(new MessagePlayHurtSound(sound, value), player);

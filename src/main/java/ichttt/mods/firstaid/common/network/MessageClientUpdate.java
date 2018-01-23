@@ -39,7 +39,7 @@ public class MessageClientUpdate implements IMessage {
 
         @Override
         public IMessage onMessage(MessageClientUpdate message, MessageContext ctx) {
-            EntityPlayerMP player = ctx.getServerHandler().player;
+            EntityPlayerMP player = ctx.getServerHandler().playerEntity;
             if (message.type == Type.TUTORIAL_COMPLETE) {
                 PlayerDataManager.tutorialDone.add(player.getName());
                 Objects.requireNonNull(player.getServer()).addScheduledTask(() -> PlayerDataManager.getDamageModel(player).hasTutorial = true);

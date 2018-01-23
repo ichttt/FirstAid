@@ -1,6 +1,7 @@
 package ichttt.mods.firstaid.common.damagesystem.debuff;
 
-import it.unimi.dsi.fastutil.floats.Float2IntMap;
+import gnu.trove.iterator.TFloatIntIterator;
+import gnu.trove.map.TFloatIntMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.potion.PotionEffect;
@@ -12,7 +13,7 @@ public class ConstantDebuff extends AbstractDebuff {
     private int ticks = 0;
     private int activeMultiplier = 0;
 
-    public ConstantDebuff(@Nonnull String potionName, @Nonnull Float2IntMap map, @Nonnull BooleanSupplier isEnabled) {
+    public ConstantDebuff(@Nonnull String potionName, @Nonnull TFloatIntMap map, @Nonnull BooleanSupplier isEnabled) {
         super(potionName, map, isEnabled);
     }
 
@@ -20,13 +21,15 @@ public class ConstantDebuff extends AbstractDebuff {
         if (!this.isEnabled.getAsBoolean())
             return;
         boolean found = false;
-        for (Float2IntMap.Entry entry : map.float2IntEntrySet()) {
-            if (healthPerMax < entry.getFloatKey()) {
+        TFloatIntIterator iterator = map.iterator();
+        while (iterator.hasNext()) {
+            if (healthPerMax < iterator.key()) {
                 ticks = 0;
-                activeMultiplier = entry.getIntValue();
+                activeMultiplier = iterator.value();
                 found = true;
                 break;
             }
+            iterator.advance();
         }
         if (!found)
             activeMultiplier = 0;

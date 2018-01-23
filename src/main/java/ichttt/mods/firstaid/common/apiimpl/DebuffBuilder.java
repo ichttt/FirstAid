@@ -1,9 +1,10 @@
 package ichttt.mods.firstaid.common.apiimpl;
 
+import gnu.trove.map.TFloatIntMap;
+import gnu.trove.map.hash.TFloatIntHashMap;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
 import net.minecraft.util.SoundEvent;
 
 import javax.annotation.Nonnull;
@@ -15,7 +16,7 @@ public class DebuffBuilder implements IDebuffBuilder {
     @Nonnull
     public final String potionName;
     @Nonnull
-    public final Float2IntLinkedOpenHashMap map = new Float2IntLinkedOpenHashMap();
+    public final TFloatIntMap map = new TFloatIntHashMap();
     public final boolean isOnHit;
     @Nullable
     public SoundEvent sound;

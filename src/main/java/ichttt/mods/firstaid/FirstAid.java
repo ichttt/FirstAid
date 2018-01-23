@@ -20,7 +20,11 @@ import ichttt.mods.firstaid.common.util.MorpheusHelper;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
@@ -33,10 +37,15 @@ import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.oredict.ShapedOreRecipe;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Objects;
 
 @Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.4.5", acceptedMinecraftVersions = "[1.12.2,1.13)", dependencies = "required-after:forge@[14.23.0.2526,);")
 public class FirstAid {
@@ -76,6 +85,24 @@ public class FirstAid {
         //Setup API
         RegistryManager.setupRegistries();
         checkEarlyExit();
+
+        GameRegistry.register(EventHandler.HEARTBEAT);
+        List<ItemStack> stacks = NonNullList.create();
+        stacks.add(new ItemStack(Items.GLASS_BOTTLE));
+        stacks.add(new ItemStack(Items.FERMENTED_SPIDER_EYE));
+        stacks.add(new ItemStack(Items.FERMENTED_SPIDER_EYE));
+
+        GameRegistry.addRecipe(new ShapelessRecipes(new ItemStack(FirstAidItems.MORPHINE), stacks));
+
+        GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(FirstAidItems.BANDAGE),
+                "S S", "WWW", "S S",
+                'W', new ItemStack(Objects.requireNonNull(Item.getByNameOrId("wool")), 1, OreDictionary.WILDCARD_VALUE),
+                'S', "string"));
+
+        GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(FirstAidItems.PLASTER),
+                "SS", "WW",
+                'W', new ItemStack(Objects.requireNonNull(Item.getByNameOrId("wool")), 1, OreDictionary.WILDCARD_VALUE),
+                'S', "string"));
     }
 
     @Mod.EventHandler
@@ -130,6 +157,5 @@ public class FirstAid {
         logger.debug("Cleaning up");
         PlayerDataManager.capList.clear();
         PlayerDataManager.tutorialDone.clear();
-        EventHandler.hitList.clear();
     }
 }

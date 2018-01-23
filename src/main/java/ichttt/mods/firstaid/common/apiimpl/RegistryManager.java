@@ -10,7 +10,6 @@ import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.damagesystem.PartHealer;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
-import it.unimi.dsi.fastutil.floats.FloatArrays;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.SoundEvent;
 import org.apache.commons.lang3.ArrayUtils;
@@ -110,7 +109,11 @@ public class RegistryManager {
             return;
         }
 
-        if (!ArrayUtils.isSorted(config.healthPercentageLeft)) {
+        float[] healthPercentageLeft = new float[config.healthPercentageLeft.length];
+        System.arraycopy(config.healthPercentageLeft, 0, healthPercentageLeft, 0, config.healthPercentageLeft.length);
+        Arrays.sort(healthPercentageLeft);
+
+        if (!Arrays.equals(healthPercentageLeft, config.healthPercentageLeft)) {
             logError("The healthPercentageLeft field is not sorted right!", potionName, slot);
             return;
         }

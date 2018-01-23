@@ -28,11 +28,11 @@ public class OnHitDebuff extends AbstractDebuff {
         int value = -1;
         TFloatIntIterator iterator = map.iterator();
         while (iterator.hasNext()) {
+            iterator.advance();
             if (damage >= iterator.key()) {
                 value = Math.max(value, iterator.value());
                 player.addPotionEffect(new PotionEffect(effect, iterator.value(), 0, false, false));
             }
-            iterator.advance();
         }
         if (value != -1 && sound != null)
             FirstAid.NETWORKING.sendTo(new MessagePlayHurtSound(sound, value), player);

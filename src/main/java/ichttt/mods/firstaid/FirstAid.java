@@ -47,7 +47,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 
-@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.4.6", acceptedMinecraftVersions = "[1.12.2,1.13)", dependencies = "required-after:forge@[14.23.0.2526,);")
+@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.11.2-1.4.6", acceptedMinecraftVersions = "[1.11,1.12)")
 public class FirstAid {
     public static Logger logger;
     public static final String MODID = "firstaid";

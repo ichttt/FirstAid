@@ -23,13 +23,13 @@ public class ConstantDebuff extends AbstractDebuff {
         boolean found = false;
         TFloatIntIterator iterator = map.iterator();
         while (iterator.hasNext()) {
+            iterator.advance();
             if (healthPerMax < iterator.key()) {
                 ticks = 0;
                 activeMultiplier = iterator.value();
                 found = true;
                 break;
             }
-            iterator.advance();
         }
         if (!found)
             activeMultiplier = 0;

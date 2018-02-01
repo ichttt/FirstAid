@@ -42,7 +42,7 @@ public class HUDHandler {
 
     public static void renderOverlay(ScaledResolution scaledResolution) {
         Minecraft mc = Minecraft.getMinecraft();
-        if (!FirstAidConfig.overlay.showOverlay || mc.player == null || GuiHealthScreen.isOpen || mc.player.isCreative())
+        if (!FirstAidConfig.overlay.showOverlay || mc.player == null || GuiHealthScreen.isOpen || mc.player.isCreative() || mc.player.isSpectator())
             return;
         AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(mc.player);
         Objects.requireNonNull(damageModel);

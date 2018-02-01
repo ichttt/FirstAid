@@ -74,6 +74,8 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
     @Override
     public void bindDamageSourceStandard(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable) {
+        if (DISTRIBUTION_MAP.containsKey(damageType))
+            FirstAid.logger.info("Damage Distribution override detected for source " + damageType);
         DISTRIBUTION_MAP.put(damageType, new StandardDamageDistribution(priorityTable));
     }
 
@@ -110,6 +112,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
     @Override
     public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory) {
+        if (this.HEALER_MAP.containsKey(item)) FirstAid.logger.info("Healing type override detected for item " + item);
         this.HEALER_MAP.put(item, factory);
     }
 
@@ -161,6 +164,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
         if (slot.playerParts.length > 1 && !(debuff instanceof SharedDebuff))
             debuff = new SharedDebuff(debuff, slot);
+        if (this.RAW_DEBUFF_MAP.containsKey(slot)) FirstAid.logger.info("Debuff override detected for slot " + slot);
 
         this.RAW_DEBUFF_MAP.put(slot, debuff);
     }

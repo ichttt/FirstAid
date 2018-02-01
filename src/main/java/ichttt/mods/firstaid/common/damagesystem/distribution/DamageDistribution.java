@@ -13,6 +13,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
+import net.minecraftforge.common.ForgeHooks;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -63,6 +64,8 @@ public abstract class DamageDistribution implements IDamageDistribution {
             damage = ArmorUtils.applyEnchantmentModifiers(player.getItemStackFromSlot(slot), source, damage);
             if (damage <= 0F)
                 return 0F;
+            damage = ForgeHooks.onLivingDamage(player, source, damage); //we post every time we damage a part, make it so other mods can modify
+            if (damage <= 0F) return 0F;
 
             damage = distributeDamageOnParts(damage, damageModel, pair.getRight(), player, addStat);
             if (damage == 0F)

@@ -91,8 +91,8 @@ public class EventHandler {
         //VANILLA COPY - combat tracker and exhaustion
         if (amountToDamage != 0.0F) {
             player.addExhaustion(source.getHungerDamage());
-            //2nd param is actually never queried, no need to worry about wrong values
-            player.getCombatTracker().trackDamage(source, -1, amountToDamage);
+            float currentHealth = player.getHealth();
+            player.getCombatTracker().trackDamage(source, currentHealth, amountToDamage);
         }
 
         boolean addStat = amountToDamage < 3.4028235E37F;

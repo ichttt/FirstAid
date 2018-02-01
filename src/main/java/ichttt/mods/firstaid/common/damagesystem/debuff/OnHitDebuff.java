@@ -2,6 +2,7 @@ package ichttt.mods.firstaid.common.damagesystem.debuff;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
+import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.floats.Float2IntMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.potion.PotionEffect;
@@ -15,7 +16,7 @@ public class OnHitDebuff extends AbstractDebuff {
     @Nullable
     private final SoundEvent sound;
 
-    public OnHitDebuff(@Nonnull String potionName, @Nonnull Float2IntMap map, @Nonnull BooleanSupplier isEnabled, @Nullable SoundEvent sound) {
+    public OnHitDebuff(@Nonnull String potionName, @Nonnull Float2IntLinkedOpenHashMap map, @Nonnull BooleanSupplier isEnabled, @Nullable SoundEvent sound) {
         super(potionName, map, isEnabled);
         this.sound = sound;
     }

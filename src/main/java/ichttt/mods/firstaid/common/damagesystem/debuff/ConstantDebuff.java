@@ -1,5 +1,6 @@
 package ichttt.mods.firstaid.common.damagesystem.debuff;
 
+import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.floats.Float2IntMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -12,7 +13,7 @@ public class ConstantDebuff extends AbstractDebuff {
     private int ticks = 0;
     private int activeMultiplier = 0;
 
-    public ConstantDebuff(@Nonnull String potionName, @Nonnull Float2IntMap map, @Nonnull BooleanSupplier isEnabled) {
+    public ConstantDebuff(@Nonnull String potionName, @Nonnull Float2IntLinkedOpenHashMap map, @Nonnull BooleanSupplier isEnabled) {
         super(potionName, map, isEnabled);
     }
 

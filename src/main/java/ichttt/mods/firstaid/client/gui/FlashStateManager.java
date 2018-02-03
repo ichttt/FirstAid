@@ -14,7 +14,7 @@ public class FlashStateManager {
             return false;
         if (worldTime - startTime > 150) {
             startTime = worldTime;
-            currentState = currentState + 1;
+            currentState++;
             if (currentState >= 8)
                 currentState = 0;
         }

@@ -10,6 +10,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.world.GameType;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 
@@ -70,6 +71,10 @@ public class CommonUtils {
 
     public static boolean isValidArmorSlot(EntityEquipmentSlot slot) {
         return slot.getSlotType() == EntityEquipmentSlot.Type.ARMOR;
+    }
+
+    public static boolean isSurvivalOrAdventure(EntityPlayer player) {
+        return !player.isSpectator() && !player.isCreative();
     }
 
     public static String getActiveModidSafe() {

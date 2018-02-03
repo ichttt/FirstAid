@@ -27,7 +27,6 @@ public class GuiUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
     private static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
     private static final ImmutableMap<EnumPlayerPart, FlashStateManager> flashStates;
-    public static final Map<EnumPlayerPart, Int2IntArrayMap> lowHealthList = new HashMap<>();
 
     static {
         ImmutableMap.Builder<EnumPlayerPart, FlashStateManager> builder = ImmutableMap.builder();
@@ -164,8 +163,7 @@ public class GuiUtils {
     private static void renderTexturedModalRects(int regen, Int2IntFunction function, int toDraw, boolean lastOneHalf, int halfTextureX, int textureX, int textureY, Gui gui) {
         if (toDraw == 0)
             return;
-        if (toDraw < 0)
-            throw new IllegalArgumentException("Cannot draw negative amount of hearts " + toDraw);
+        if (toDraw < 0) throw new IllegalArgumentException("Cannot draw negative amount of icons " + toDraw);
         for (int i = 0; i < toDraw; i++) {
             boolean renderHalf = lastOneHalf && i + 1 == toDraw;
             gui.drawTexturedModalRect(9F * i, (i == regen ? -2 : 0) - function.get(i), renderHalf ? halfTextureX : textureX, textureY, 9, 9);

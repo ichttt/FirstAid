@@ -8,6 +8,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiChat;
@@ -42,7 +43,7 @@ public class HUDHandler {
 
     public static void renderOverlay(ScaledResolution scaledResolution) {
         Minecraft mc = Minecraft.getMinecraft();
-        if (!FirstAidConfig.overlay.showOverlay || mc.player == null || GuiHealthScreen.isOpen || mc.player.isCreative() || mc.player.isSpectator())
+        if (!FirstAidConfig.overlay.showOverlay || mc.player == null || GuiHealthScreen.isOpen || !CommonUtils.isSurvivalOrAdventure(mc.player))
             return;
         AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(mc.player);
         Objects.requireNonNull(damageModel);

@@ -17,6 +17,10 @@ import javax.annotation.Nonnull;
 
 public class ArmorUtils {
 
+    /**
+     * Helper function to make {@link #applyArmor(EntityPlayer, ItemStack, DamageSource, double, EntityEquipmentSlot)}
+     * more diffable
+     */
     private static float getModifier(EntityEquipmentSlot slot) {
         switch (slot) {
             case CHEST:
@@ -31,9 +35,11 @@ public class ArmorUtils {
         }
     }
 
+    /**
+     * Changed copy of ISpecialArmor{@link #applyArmor(EntityPlayer, ItemStack, DamageSource, double, EntityEquipmentSlot)}
+     */
     public static float applyArmor(@Nonnull EntityPlayer entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, double damage, @Nonnull EntityEquipmentSlot slot) {
-        if (source.isUnblockable() || itemStack.isEmpty())
-            return (float)damage;
+        if (source.isUnblockable() || itemStack.isEmpty()) return (float)damage;
         NonNullList<ItemStack> inventory = entity.inventory.armorInventory;
 
         double totalArmor;
@@ -59,8 +65,7 @@ public class ArmorUtils {
 
         totalArmor = totalArmor * getModifier(slot);
         totalToughness = totalToughness * (slot == EntityEquipmentSlot.CHEST || slot == EntityEquipmentSlot.LEGS ? 3 : 4);
-        if (totalArmor != 0)
-            totalArmor += 0.5F;
+        if (totalArmor != 0) totalArmor += 0.5F;
 
         prop.Slot = slot.getIndex();
         double ratio = prop.AbsorbRatio;
@@ -69,18 +74,15 @@ public class ArmorUtils {
         if (absorb > 0) {
             ItemStack stack = inventory.get(prop.Slot);
             int itemDamage = (int) Math.max(1, absorb);
-            if (stack.getItem() instanceof ISpecialArmor)
-                ((ISpecialArmor) stack.getItem()).damageArmor(entity, stack, source, itemDamage, prop.Slot);
-            else
-                stack.damageItem(itemDamage, entity);
+            if (stack.getItem() instanceof ISpecialArmor) ((ISpecialArmor) stack.getItem()).damageArmor(entity, stack, source, itemDamage, prop.Slot);
+            else stack.damageItem(itemDamage, entity);
         }
         damage -= (damage * ratio);
 
         if (damage > 0 && (totalArmor > 0 || totalToughness > 0)) {
             double armorDamage = Math.max(1.0F, damage);
 
-            if (item instanceof ItemArmor)
-                itemStack.damageItem((int) armorDamage, entity);
+            if (item instanceof ItemArmor) itemStack.damageItem((int) armorDamage, entity);
             damage = CombatRules.getDamageAfterAbsorb((float)damage, (float)totalArmor, (float)totalToughness);
         }
 

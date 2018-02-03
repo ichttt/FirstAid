@@ -77,9 +77,9 @@ public class HUDHandler {
         GlStateManager.translate(xOffset, yOffset, 0F);
         boolean playerDead = damageModel.isDead(mc.player);
         for (AbstractDamageablePart part : damageModel) {
-            mc.fontRenderer.drawString(TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF);
+            mc.fontRenderer.drawStringWithShadow(TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF);
             if (FirstAidConfig.overlay.displayHealthAsNumber) {
-                mc.fontRenderer.drawString(TEXT_FORMAT.format(part.currentHealth) + "/" + part.getMaxHealth(), maxLength * 5 + 6, 0, 0xFFFFFF);
+                mc.fontRenderer.drawStringWithShadow(TEXT_FORMAT.format(part.currentHealth) + "/" + part.getMaxHealth(), maxLength * 5 + 6, 0, 0xFFFFFF);
             } else {
                 mc.getTextureManager().bindTexture(Gui.ICONS);
                 GuiUtils.drawHealth(part, maxLength * 5 + 6, 0, gui, false, playerDead);

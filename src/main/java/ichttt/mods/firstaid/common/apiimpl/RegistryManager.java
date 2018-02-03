@@ -10,7 +10,6 @@ import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.damagesystem.PartHealer;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
-import it.unimi.dsi.fastutil.floats.FloatArrays;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.SoundEvent;
 import org.apache.commons.lang3.ArrayUtils;

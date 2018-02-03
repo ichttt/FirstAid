@@ -2,6 +2,7 @@ package ichttt.mods.firstaid.common.util;
 
 import com.google.common.collect.Iterators;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -36,7 +37,7 @@ public class ArmorUtils {
     }
 
     /**
-     * Changed copy of ISpecialArmor{@link #applyArmor(EntityPlayer, ItemStack, DamageSource, double, EntityEquipmentSlot)}
+     * Changed copy of ISpecialArmor{@link ISpecialArmor.ArmorProperties#applyArmor(EntityLivingBase, NonNullList, DamageSource, double)}
      */
     public static float applyArmor(@Nonnull EntityPlayer entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, double damage, @Nonnull EntityEquipmentSlot slot) {
         if (source.isUnblockable() || itemStack.isEmpty()) return (float)damage;

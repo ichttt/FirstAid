@@ -22,6 +22,7 @@ import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.ProjectileHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -166,6 +167,7 @@ public class EventHandler {
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END && !event.player.isCreative()) {
+//            event.player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(40D);
             PlayerDataManager.tickPlayer(event.player);
             hitList.remove(event.player); //Damage should be done in the same tick as the hit was noted, otherwise we got a false-positive
         }

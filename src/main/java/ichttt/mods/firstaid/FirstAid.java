@@ -48,6 +48,7 @@ public class FirstAid {
     public static FirstAidConfig.DamageSystem activeDamageConfig;
     public static FirstAidConfig.ExternalHealing activeHealingConfig;
     public static boolean scaleMaxHealth;
+    public static boolean capMaxHealth;
 
     @SuppressWarnings("unused")
     @SidedProxy(clientSide = "ichttt.mods.firstaid.client.ClientProxy", serverSide = "ichttt.mods.firstaid.server.ServerProxy")

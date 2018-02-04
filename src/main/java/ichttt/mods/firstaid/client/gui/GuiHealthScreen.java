@@ -6,7 +6,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.util.EventCalendar;
-import ichttt.mods.firstaid.client.util.GuiUtils;
+import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientUpdate;
@@ -113,7 +113,7 @@ public class GuiHealthScreen extends GuiScreen {
         //Setup background
         this.drawDefaultBackground();
         this.drawGradientRect(this.guiLeft, this.guiTop, this.guiLeft + xSize, this.guiTop + ySize, -16777216, -16777216);
-        this.mc.getTextureManager().bindTexture(GuiUtils.GUI_LOCATION);
+        this.mc.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
         //Player
         int entityLookX = this.guiLeft + (xSize / 2) - mouseX;
@@ -193,8 +193,8 @@ public class GuiHealthScreen extends GuiScreen {
     }
 
     public void drawHealth(AbstractDamageablePart damageablePart, boolean right, int yOffset, boolean playerDead) {
-        int xTranslation = guiLeft + (right ? 200 - Math.min(38, GuiUtils.getMaxHearts(damageablePart.getMaxHealth()) * 9 + GuiUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 57);
-        GuiUtils.drawHealth(damageablePart, xTranslation, guiTop + yOffset, this, true, playerDead);
+        int xTranslation = guiLeft + (right ? 200 - Math.min(38, HealthRenderUtils.getMaxHearts(damageablePart.getMaxHealth()) * 9 + HealthRenderUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 57);
+        HealthRenderUtils.drawHealth(damageablePart, xTranslation, guiTop + yOffset, this, true, playerDead);
     }
 
     @Override

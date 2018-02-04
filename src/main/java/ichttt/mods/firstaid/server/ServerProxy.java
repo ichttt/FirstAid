@@ -14,5 +14,6 @@ public class ServerProxy implements IProxy {
         FirstAid.activeDamageConfig = FirstAidConfig.damageSystem;
         FirstAid.activeHealingConfig = FirstAidConfig.externalHealing;
         FirstAid.scaleMaxHealth = FirstAidConfig.scaleMaxHealth;
+        FirstAid.capMaxHealth = FirstAidConfig.capMaxHealth;
     }
 }

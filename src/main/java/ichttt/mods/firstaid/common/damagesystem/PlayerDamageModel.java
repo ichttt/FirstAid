@@ -255,7 +255,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public void setAbsorption(float absorption) {
-        float newAbsorption = Math.min(4F, absorption / 8F);
+        final float newAbsorption = absorption / 8F;
         forEach(damageablePart -> damageablePart.setAbsorption(newAbsorption));
     }
 

@@ -22,7 +22,6 @@ import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.ProjectileHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -146,6 +145,7 @@ public class EventHandler {
                 FirstAid.activeDamageConfig = FirstAidConfig.damageSystem;
                 FirstAid.activeHealingConfig = FirstAidConfig.externalHealing;
                 FirstAid.scaleMaxHealth = FirstAidConfig.scaleMaxHealth;
+                FirstAid.capMaxHealth = FirstAidConfig.capMaxHealth;
                 damageModel = PlayerDamageModel.create();
             }
             event.addCapability(CapProvider.IDENTIFIER, new CapProvider(player, damageModel));
@@ -233,10 +233,12 @@ public class EventHandler {
             return;
         float amount = event.getAmount();
         //Hacky shit to reduce vanilla regen
-        if (FirstAid.activeHealingConfig.allowNaturalRegeneration && Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch(stackTraceElement -> stackTraceElement.getClassName().equals(FoodStats.class.getName())))
-            amount = amount * (float) FirstAid.activeHealingConfig.naturalRegenMultiplier;
-        else
+        if (Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch(stackTraceElement -> stackTraceElement.getClassName().equals(FoodStats.class.getName()))) {
+            if (FirstAid.activeHealingConfig.allowNaturalRegeneration)
+                amount = amount * (float) FirstAid.activeHealingConfig.naturalRegenMultiplier;
+        } else {
             amount = amount * (float) FirstAid.activeHealingConfig.otherRegenMultiplier;
+        }
         HealthDistribution.distributeHealth(amount, (EntityPlayer) entity, true);
     }
 
@@ -247,7 +249,7 @@ public class EventHandler {
             AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(event.player);
             if (damageModel.hasTutorial)
                 PlayerDataManager.tutorialDone.add(event.player.getName());
-            FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(damageModel, FirstAidConfig.externalHealing, FirstAidConfig.damageSystem, FirstAidConfig.scaleMaxHealth), (EntityPlayerMP) event.player);
+            FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(damageModel, FirstAidConfig.externalHealing, FirstAidConfig.damageSystem, FirstAidConfig.scaleMaxHealth, FirstAidConfig.capMaxHealth), (EntityPlayerMP) event.player);
         }
     }
 

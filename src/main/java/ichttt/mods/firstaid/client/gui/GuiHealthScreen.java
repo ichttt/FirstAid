@@ -27,6 +27,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
@@ -43,6 +44,7 @@ public class GuiHealthScreen extends GuiScreen {
     private GuiButton head, leftArm, leftLeg, leftFoot, body, rightArm, rightLeg, rightFoot;
 
     private final AbstractPlayerDamageModel damageModel;
+    private final List<GuiHoldButton> holdButtons = new ArrayList<>();
     private final float bedScaleFactor = EventCalendar.isGuiFun() ? 2F : 1.25F;
     private EnumHand activeHand;
     private final boolean disableButtons;
@@ -66,24 +68,24 @@ public class GuiHealthScreen extends GuiScreen {
         this.guiLeft = (this.width - xSize) / 2;
         this.guiTop = (this.height - ySize) / 2;
 
-        head = new GuiButton(1, this.guiLeft + 4, this.guiTop + 8, 52, 20, I18n.format("gui.head"));
+        head = new GuiHoldButton(1, this.guiLeft + 4, this.guiTop + 8, 52, 20, I18n.format("gui.head"), false);
         this.buttonList.add(head);
 
-        leftArm = new GuiButton(2, this.guiLeft + 4, this.guiTop + 33, 52, 20, I18n.format("gui.left_arm"));
+        leftArm = new GuiHoldButton(2, this.guiLeft + 4, this.guiTop + 33, 52, 20, I18n.format("gui.left_arm"), false);
         this.buttonList.add(leftArm);
-        leftLeg = new GuiButton(3, this.guiLeft + 4, this.guiTop + 58, 52, 20, I18n.format("gui.left_leg"));
+        leftLeg = new GuiHoldButton(3, this.guiLeft + 4, this.guiTop + 58, 52, 20, I18n.format("gui.left_leg"), false);
         this.buttonList.add(leftLeg);
-        leftFoot = new GuiButton(4, this.guiLeft + 4, this.guiTop + 83, 52, 20, I18n.format("gui.left_foot"));
+        leftFoot = new GuiHoldButton(4, this.guiLeft + 4, this.guiTop + 83, 52, 20, I18n.format("gui.left_foot"), false);
         this.buttonList.add(leftFoot);
 
-        body = new GuiButton(5, this.guiLeft + 199, this.guiTop + 8, 52, 20, I18n.format("gui.body"));
+        body = new GuiHoldButton(5, this.guiLeft + 199, this.guiTop + 8, 52, 20, I18n.format("gui.body"), true);
         this.buttonList.add(body);
 
-        rightArm = new GuiButton(6, this.guiLeft + 199, this.guiTop + 33, 52, 20, I18n.format("gui.right_arm"));
+        rightArm = new GuiHoldButton(6, this.guiLeft + 199, this.guiTop + 33, 52, 20, I18n.format("gui.right_arm"), true);
         this.buttonList.add(rightArm);
-        rightLeg = new GuiButton(7, this.guiLeft + 199, this.guiTop + 58, 52, 20, I18n.format("gui.right_leg"));
+        rightLeg = new GuiHoldButton(7, this.guiLeft + 199, this.guiTop + 58, 52, 20, I18n.format("gui.right_leg"), true);
         this.buttonList.add(rightLeg);
-        rightFoot = new GuiButton(8, this.guiLeft + 199, this.guiTop + 83, 52, 20, I18n.format("gui.right_foot"));
+        rightFoot = new GuiHoldButton(8, this.guiLeft + 199, this.guiTop + 83, 52, 20, I18n.format("gui.right_foot"), true);
         this.buttonList.add(rightFoot);
 
         if (disableButtons) {
@@ -103,6 +105,13 @@ public class GuiHealthScreen extends GuiScreen {
         if (this.mc.gameSettings.showDebugInfo) {
             GuiButton refresh = new GuiButton(10, this.guiLeft + 218, this.guiTop + 115, 36, 20, "resync");
             this.buttonList.add(refresh);
+        }
+
+        holdButtons.clear();
+        for (GuiButton button : this.buttonList) {
+            if (button instanceof GuiHoldButton) {
+                holdButtons.add((GuiHoldButton) button);
+            }
         }
 
         super.initGui();
@@ -181,6 +190,7 @@ public class GuiHealthScreen extends GuiScreen {
             drawHoveringText(s, mouseX, mouseY);
         }
 
+        holdButtonMouseCallback(mouseX, mouseY, true); //callback: check if buttons are finish
         //TODO color the critical parts of the player red?
     }
 
@@ -218,6 +228,33 @@ public class GuiHealthScreen extends GuiScreen {
             mc.player.sendStatusMessage(new TextComponentString("Re-downloading health data from server..."), true);
         }
         mc.displayGuiScreen(null);
+    }
+
+    protected void holdButtonMouseCallback(int mouseX, int mouseY, boolean renderPass) {
+        for (GuiHoldButton button : this.holdButtons) {
+            if (button.mousePressed(mc, mouseX, mouseY)) {
+                //VANILLA COPY: GuiScreen#mouseClicked(without forge events)
+                this.selectedButton = button;
+                button.playPressSound(this.mc.getSoundHandler());
+                this.actionPerformed(button);
+            } else if (renderPass) {
+                int timeLeft = button.getTimeLeft();
+                if (timeLeft != -1) {
+                    float timeInSecs = (timeLeft / 1000F);
+                    if (timeInSecs < 0)
+                        timeInSecs = 0;
+                    this.mc.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
+                    this.drawTexturedModalRect(button.x + (button.isRightSide ? 56 : - 25), button.y - 2, button.isRightSide ? 2 : 0, 169, 22, 24);
+                    this.mc.fontRenderer.drawString(HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), button.x - 20, button.y + 6, 0xFFFFFF);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
+        super.mouseReleased(mouseX, mouseY, state);
+        holdButtonMouseCallback(mouseX, mouseY, false);
     }
 
     @Override

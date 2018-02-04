@@ -24,7 +24,8 @@ public class ItemHealing extends Item {
     @Override
     @Nonnull
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
-        if (world.isRemote) FirstAid.proxy.showGuiApplyHealth(hand);
+        if (world.isRemote)
+            FirstAid.proxy.showGuiApplyHealth(hand);
         return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
     }
 }

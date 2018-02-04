@@ -25,9 +25,9 @@ import java.util.Objects;
 @SideOnly(Side.CLIENT)
 public class HealthRenderUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
+    public static final DecimalFormat TEXT_FORMAT = new DecimalFormat("0.0");
     private static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
     private static final ImmutableMap<EnumPlayerPart, FlashStateManager> flashStates;
-    private static final DecimalFormat TEXT_FORMAT = new DecimalFormat("#.#");
 
     static {
         ImmutableMap.Builder<EnumPlayerPart, FlashStateManager> builder = ImmutableMap.builder();

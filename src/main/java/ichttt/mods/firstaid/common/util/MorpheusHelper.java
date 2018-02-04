@@ -23,12 +23,15 @@ public class MorpheusHelper implements INewDayHandler {
 
     @Override
     public void startNewDay() {
-        if (oldHandler != null) oldHandler.startNewDay(); //Start the new day
+        if (oldHandler != null)
+            oldHandler.startNewDay(); //Start the new day
 
-        if (FirstAidConfig.externalHealing.sleepHealing == 0F) return;
+        if (FirstAidConfig.externalHealing.sleepHealing == 0F)
+            return;
 
         WorldSleepState sleepState = Morpheus.playerSleepStatus.get(0);
-        if (sleepState == null) return;
+        if (sleepState == null)
+            return;
 
         if (areEnoughPlayersAsleep(sleepState)) {
             World world = DimensionManager.getWorld(0);

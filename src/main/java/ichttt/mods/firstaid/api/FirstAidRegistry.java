@@ -101,15 +101,32 @@ public abstract class FirstAidRegistry {
     public abstract void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull IDebuff debuff);
 
     /**
-     * @deprecated Use {@link #registerHealingType(Item, Function)} instead
+     * @deprecated Use {@link #registerHealingType(Item, Function, int)} instead
      */
     @Deprecated
     public abstract void bindHealingType(@Nonnull EnumHealingType type, @Nonnull Function<EnumHealingType, AbstractPartHealer> factory);
 
+    /**
+     * @deprecated Use {@link #registerHealingType(Item, Function, int)} instead
+     */
+    @Deprecated
     public abstract void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory);
+
+    /**
+     * Registers a healing type, so it can be used by the damage system when the user applies it.
+     *
+     * @param item      The item to bind to
+     * @param factory   The factory to create a new healing type.
+     *                  This should always create a new healer and get the itemstack that will shrink after creating the healer
+     * @param applyTime The time it takes to apply this in the UI
+     */
+    public abstract void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, int applyTime);
 
     @Nullable
     public abstract AbstractPartHealer getPartHealer(@Nonnull ItemStack type);
+
+    @Nullable
+    public abstract Integer getPartHealingTime(@Nonnull Item item);
 
     /**
      * @deprecated Use {@link #getPartHealer(ItemStack)} instead

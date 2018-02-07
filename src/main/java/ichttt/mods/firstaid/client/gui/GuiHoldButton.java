@@ -8,13 +8,14 @@ import org.lwjgl.input.Mouse;
 import javax.annotation.Nonnull;
 
 public class GuiHoldButton extends GuiButton {
-    private static final int HOLD_TIME = 3000;
+    private final int HOLD_TIME;
     public final boolean isRightSide;
     private long pressStart = -1;
 
-    public GuiHoldButton(int buttonId, int x, int y, int widthIn, int heightIn, String buttonText, boolean isRightSide) {
+    public GuiHoldButton(int buttonId, int x, int y, int widthIn, int heightIn, String buttonText, boolean isRightSide, int holdTime) {
         super(buttonId, x, y, widthIn, heightIn, buttonText);
         this.isRightSide = isRightSide;
+        this.HOLD_TIME = holdTime;
     }
 
     @Override
@@ -23,6 +24,7 @@ public class GuiHoldButton extends GuiButton {
             FirstAid.logger.warn("Mouse is not created!");
             return;
         }
+        //TODO progress bar?
 
         boolean pressed = Mouse.isButtonDown(0);
         if (pressed)

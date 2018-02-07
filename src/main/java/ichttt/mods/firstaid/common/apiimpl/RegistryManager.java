@@ -34,8 +34,8 @@ public class RegistryManager {
         FirstAidRegistry registry = Objects.requireNonNull(FirstAidRegistry.getImpl());
 
         //---HEALING TYPES---
-        registry.registerHealingType(FirstAidItems.BANDAGE, stack -> new PartHealer(18 * 20, 4, stack));
-        registry.registerHealingType(FirstAidItems.PLASTER, stack -> new PartHealer(22 * 20, 2, stack));
+        registry.registerHealingType(FirstAidItems.BANDAGE, stack -> new PartHealer(18 * 20, 4, stack), 2500);
+        registry.registerHealingType(FirstAidItems.PLASTER, stack -> new PartHealer(22 * 20, 2, stack), 3000);
 
         //---DAMAGE SOURCES---
         List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> feetList = new ArrayList<>(2);

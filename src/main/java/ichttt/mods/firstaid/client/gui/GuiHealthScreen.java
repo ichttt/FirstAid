@@ -67,25 +67,28 @@ public class GuiHealthScreen extends GuiScreen {
         isOpen = true;
         this.guiLeft = (this.width - xSize) / 2;
         this.guiTop = (this.height - ySize) / 2;
+        Integer holdTime = activeHand == null ? null : FirstAidRegistryImpl.INSTANCE.getPartHealingTime(mc.player.getHeldItem(activeHand).getItem());
+        if (holdTime == null)
+            holdTime = Integer.MAX_VALUE;
 
-        head = new GuiHoldButton(1, this.guiLeft + 4, this.guiTop + 8, 52, 20, I18n.format("gui.head"), false);
+        head = new GuiHoldButton(1, this.guiLeft + 4, this.guiTop + 8, 52, 20, I18n.format("gui.head"), false, holdTime);
         this.buttonList.add(head);
 
-        leftArm = new GuiHoldButton(2, this.guiLeft + 4, this.guiTop + 33, 52, 20, I18n.format("gui.left_arm"), false);
+        leftArm = new GuiHoldButton(2, this.guiLeft + 4, this.guiTop + 33, 52, 20, I18n.format("gui.left_arm"), false, holdTime);
         this.buttonList.add(leftArm);
-        leftLeg = new GuiHoldButton(3, this.guiLeft + 4, this.guiTop + 58, 52, 20, I18n.format("gui.left_leg"), false);
+        leftLeg = new GuiHoldButton(3, this.guiLeft + 4, this.guiTop + 58, 52, 20, I18n.format("gui.left_leg"), false, holdTime);
         this.buttonList.add(leftLeg);
-        leftFoot = new GuiHoldButton(4, this.guiLeft + 4, this.guiTop + 83, 52, 20, I18n.format("gui.left_foot"), false);
+        leftFoot = new GuiHoldButton(4, this.guiLeft + 4, this.guiTop + 83, 52, 20, I18n.format("gui.left_foot"), false, holdTime);
         this.buttonList.add(leftFoot);
 
-        body = new GuiHoldButton(5, this.guiLeft + 199, this.guiTop + 8, 52, 20, I18n.format("gui.body"), true);
+        body = new GuiHoldButton(5, this.guiLeft + 199, this.guiTop + 8, 52, 20, I18n.format("gui.body"), true, holdTime);
         this.buttonList.add(body);
 
-        rightArm = new GuiHoldButton(6, this.guiLeft + 199, this.guiTop + 33, 52, 20, I18n.format("gui.right_arm"), true);
+        rightArm = new GuiHoldButton(6, this.guiLeft + 199, this.guiTop + 33, 52, 20, I18n.format("gui.right_arm"), true, holdTime);
         this.buttonList.add(rightArm);
-        rightLeg = new GuiHoldButton(7, this.guiLeft + 199, this.guiTop + 58, 52, 20, I18n.format("gui.right_leg"), true);
+        rightLeg = new GuiHoldButton(7, this.guiLeft + 199, this.guiTop + 58, 52, 20, I18n.format("gui.right_leg"), true, holdTime);
         this.buttonList.add(rightLeg);
-        rightFoot = new GuiHoldButton(8, this.guiLeft + 199, this.guiTop + 83, 52, 20, I18n.format("gui.right_foot"), true);
+        rightFoot = new GuiHoldButton(8, this.guiLeft + 199, this.guiTop + 83, 52, 20, I18n.format("gui.right_foot"), true, holdTime);
         this.buttonList.add(rightFoot);
 
         if (disableButtons) {
@@ -245,7 +248,7 @@ public class GuiHealthScreen extends GuiScreen {
                         timeInSecs = 0;
                     this.mc.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
                     this.drawTexturedModalRect(button.x + (button.isRightSide ? 56 : - 25), button.y - 2, button.isRightSide ? 2 : 0, 169, 22, 24);
-                    this.mc.fontRenderer.drawString(HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), button.x - 20, button.y + 6, 0xFFFFFF);
+                    this.mc.fontRenderer.drawString(HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), button.x  + (button.isRightSide ? 60 : -20), button.y + 6, 0xFFFFFF);
                 }
             }
         }

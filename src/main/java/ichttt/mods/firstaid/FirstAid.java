@@ -43,7 +43,7 @@ public class FirstAid {
     public static Logger logger;
     public static final String MODID = "firstaid";
     public static final String NAME = "First Aid";
-    public static final String VERSION = "1.5.0-BETA";
+    public static final String VERSION = "1.5.0";
 
     //RECEIVED CONFIG FIELDS
     public static FirstAidConfig.DamageSystem activeDamageConfig;
@@ -57,7 +57,6 @@ public class FirstAid {
 
     public static CreativeTabs creativeTab;
     public static SimpleNetworkWrapper NETWORKING;
-    public static boolean enableMorpheusCompat = false;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent pre) {
@@ -96,7 +95,6 @@ public class FirstAid {
         MessageReceiveConfiguration.validate();
 
         if (Loader.isModLoaded("morpheus")) {
-            enableMorpheusCompat = true;
             logger.info("Morpheus present - enabling compatibility module");
             MorpheusHelper.register();
         }

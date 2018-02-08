@@ -39,6 +39,10 @@ public class HUDHandler {
         }
     }
 
+    public static int getMaxLength() {
+        return maxLength;
+    }
+
     public static void renderOverlay(ScaledResolution scaledResolution) {
         Minecraft mc = Minecraft.getMinecraft();
         if (!FirstAidConfig.overlay.showOverlay || mc.player == null || GuiHealthScreen.isOpen || !CommonUtils.isSurvivalOrAdventure(mc.player))

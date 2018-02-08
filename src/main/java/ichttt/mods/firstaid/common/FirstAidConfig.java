@@ -34,7 +34,7 @@ public class FirstAidConfig {
     public static boolean scaleMaxHealth = false;
 
     @Config.Comment("If true, max health will be capped at 6 hearts and absorption at 2 hearts per limb. If false, the health cap will be much higher (64 hearts normal and 16 absorption)")
-    @Config.LangKey("firstaid.config.capmaxhealth") //TODO
+    @Config.LangKey("firstaid.config.capmaxhealth")
     @Config.RequiresWorldRestart
     public static boolean capMaxHealth = true;
 

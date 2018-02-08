@@ -5,6 +5,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.ClientProxy;
+import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
@@ -67,28 +68,25 @@ public class GuiHealthScreen extends GuiScreen {
         isOpen = true;
         this.guiLeft = (this.width - xSize) / 2;
         this.guiTop = (this.height - ySize) / 2;
-        Integer holdTime = activeHand == null ? null : FirstAidRegistryImpl.INSTANCE.getPartHealingTime(mc.player.getHeldItem(activeHand).getItem());
-        if (holdTime == null)
-            holdTime = Integer.MAX_VALUE;
 
-        head = new GuiHoldButton(1, this.guiLeft + 4, this.guiTop + 8, 52, 20, I18n.format("gui.head"), false, holdTime);
+        head = new GuiHoldButton(1, this.guiLeft + 4, this.guiTop + 8, 52, 20, I18n.format("gui.head"), false);
         this.buttonList.add(head);
 
-        leftArm = new GuiHoldButton(2, this.guiLeft + 4, this.guiTop + 33, 52, 20, I18n.format("gui.left_arm"), false, holdTime);
+        leftArm = new GuiHoldButton(2, this.guiLeft + 4, this.guiTop + 33, 52, 20, I18n.format("gui.left_arm"), false);
         this.buttonList.add(leftArm);
-        leftLeg = new GuiHoldButton(3, this.guiLeft + 4, this.guiTop + 58, 52, 20, I18n.format("gui.left_leg"), false, holdTime);
+        leftLeg = new GuiHoldButton(3, this.guiLeft + 4, this.guiTop + 58, 52, 20, I18n.format("gui.left_leg"), false);
         this.buttonList.add(leftLeg);
-        leftFoot = new GuiHoldButton(4, this.guiLeft + 4, this.guiTop + 83, 52, 20, I18n.format("gui.left_foot"), false, holdTime);
+        leftFoot = new GuiHoldButton(4, this.guiLeft + 4, this.guiTop + 83, 52, 20, I18n.format("gui.left_foot"), false);
         this.buttonList.add(leftFoot);
 
-        body = new GuiHoldButton(5, this.guiLeft + 199, this.guiTop + 8, 52, 20, I18n.format("gui.body"), true, holdTime);
+        body = new GuiHoldButton(5, this.guiLeft + 199, this.guiTop + 8, 52, 20, I18n.format("gui.body"), true);
         this.buttonList.add(body);
 
-        rightArm = new GuiHoldButton(6, this.guiLeft + 199, this.guiTop + 33, 52, 20, I18n.format("gui.right_arm"), true, holdTime);
+        rightArm = new GuiHoldButton(6, this.guiLeft + 199, this.guiTop + 33, 52, 20, I18n.format("gui.right_arm"), true);
         this.buttonList.add(rightArm);
-        rightLeg = new GuiHoldButton(7, this.guiLeft + 199, this.guiTop + 58, 52, 20, I18n.format("gui.right_leg"), true, holdTime);
+        rightLeg = new GuiHoldButton(7, this.guiLeft + 199, this.guiTop + 58, 52, 20, I18n.format("gui.right_leg"), true);
         this.buttonList.add(rightLeg);
-        rightFoot = new GuiHoldButton(8, this.guiLeft + 199, this.guiTop + 83, 52, 20, I18n.format("gui.right_foot"), true, holdTime);
+        rightFoot = new GuiHoldButton(8, this.guiLeft + 199, this.guiTop + 83, 52, 20, I18n.format("gui.right_foot"), true);
         this.buttonList.add(rightFoot);
 
         if (disableButtons) {
@@ -113,6 +111,10 @@ public class GuiHealthScreen extends GuiScreen {
         holdButtons.clear();
         for (GuiButton button : this.buttonList) {
             if (button instanceof GuiHoldButton) {
+                Integer holdTime = activeHand == null ? null : FirstAidRegistryImpl.INSTANCE.getPartHealingTime(mc.player.getHeldItem(activeHand).getItem());
+                if (holdTime == null)
+                    holdTime = Integer.MAX_VALUE;
+                ((GuiHoldButton) button).setup(holdTime, button.width / (HUDHandler.getMaxLength() * 5));
                 holdButtons.add((GuiHoldButton) button);
             }
         }

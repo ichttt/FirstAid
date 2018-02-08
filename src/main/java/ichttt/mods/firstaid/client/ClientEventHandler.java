@@ -12,6 +12,7 @@ import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.TextComponentString;
@@ -91,13 +92,13 @@ public class ClientEventHandler {
     public static void tooltipItems(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
         if (stack.getItem() == FirstAidItems.MORPHINE) {
-            event.getToolTip().add(String.format("Suppresses health debuffs for %s", "3:30-4:30")); //TODO i18n
+            event.getToolTip().add(I18n.format("firstaid.tooltip.morphine", "3:30-4:30"));
             return;
         }
 
         AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
         if (healer != null) {
-            event.getToolTip().add(String.format("When applied: %s heals total, %s per heal", healer.maxHeal, StringUtils.ticksToElapsedTime(healer.ticksPerHeal)));
+            event.getToolTip().add(I18n.format("firstaid.tooltip.healer", healer.maxHeal, StringUtils.ticksToElapsedTime(healer.ticksPerHeal)));
         }
     }
 }

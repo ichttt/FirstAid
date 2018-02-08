@@ -17,6 +17,9 @@ gui.active_item=Currently active
 gui.no_sleep_heal=Sleeping does not restore any health
 gui.sleep_heal_amount=Sleeping restores %s hearts
 
+firstaid.tooltip.morphine=Suppresses health debuffs for %s
+firstaid.tooltip.healer=When applied: %s heals total, %s per heal
+
 firstaid.tutorial.hint=Press %s for the tutorial
 firstaid.tutorial.welcome=Welcome to the FirstAid mod! This tutorial will guide you through this mod and explain the different mechanics.
 firstaid.tutorial.line1=As you may already have noticed, the vanilla health bar is gone. It has been replaced by this system.
@@ -42,6 +45,8 @@ firstaid.config.enablesoundsystem=Enable soundsystem
 firstaid.config.enablesoundsystem.tooltip=Set to true to enable the debuff sounds. Requieres enableDebuffs to be true
 firstaid.config.scalemaxhealth=Scale max health
 firstaid.config.scalemaxhealth.tooltip=If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health
+firstaid.config.capmaxhealth=Cap max health
+firstaid.config.capmaxhealth.tooltip=If true, max health will be capped at 6 hearts and absorption at 2 hearts per limb. If false, the health cap will be much higher (64 hearts normal and 16 absorption)
 firstaid.config.allownaturalregeneration=Allow natural regeneration
 firstaid.config.allownaturalregeneration.tooltip=Allow vanilla's natural regeneration. Requires "allowOtherHealingItems" to be true\n**WARNING** This sets the gamerule "naturalRegeneration" for all of your worlds internally, so it persists even if you remove the mod
 firstaid.config.allowotherhealingitems=Allow other healing items

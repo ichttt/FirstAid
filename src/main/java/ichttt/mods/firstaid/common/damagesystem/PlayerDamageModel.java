@@ -174,8 +174,8 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     @Override
-    public void applyMorphine() {
-        morphineTicksLeft = (EventHandler.rand.nextInt(2) * 20 * 45) + 20 * 210;
+    public void applyMorphine() { //Tweak tooltip event when changing as well
+        morphineTicksLeft = ((EventHandler.rand.nextInt(5) * 20 * 15) + 20 * 210);
     }
 
     @Override
@@ -255,7 +255,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public void setAbsorption(float absorption) {
-        float newAbsorption = Math.min(4F, absorption / 8F);
+        final float newAbsorption = absorption / 8F;
         forEach(damageablePart -> damageablePart.setAbsorption(newAbsorption));
     }
 

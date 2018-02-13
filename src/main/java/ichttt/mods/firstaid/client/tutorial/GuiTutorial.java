@@ -4,7 +4,7 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
-import ichttt.mods.firstaid.client.util.GuiUtils;
+import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.network.MessageClientUpdate;
@@ -78,7 +78,7 @@ public class GuiTutorial extends GuiScreen {
         GlStateManager.pushMatrix();
         parent.drawScreen(mouseX, mouseY, partialTicks);
         GlStateManager.popMatrix();
-        mc.getTextureManager().bindTexture(GuiUtils.GUI_LOCATION);
+        mc.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
         drawTexturedModalRect(parent.guiLeft, guiTop ,0, 139, GuiHealthScreen.xSize, 28);
         GlStateManager.pushMatrix();
         this.action.draw();

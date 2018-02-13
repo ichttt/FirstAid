@@ -112,6 +112,7 @@ public class EventHandler {
                 FirstAid.activeDamageConfig = FirstAidConfig.damageSystem;
                 FirstAid.activeHealingConfig = FirstAidConfig.externalHealing;
                 FirstAid.scaleMaxHealth = FirstAidConfig.scaleMaxHealth;
+                FirstAid.capMaxHealth = FirstAidConfig.capMaxHealth;
                 damageModel = PlayerDamageModel.create();
             }
             event.addCapability(CapProvider.IDENTIFIER, new CapProvider(player, damageModel));
@@ -122,7 +123,8 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && !event.player.isCreative()) {
+        if (event.phase == TickEvent.Phase.END && CommonUtils.isSurvivalOrAdventure(event.player)) {
+//            event.player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(40D);
             PlayerDataManager.tickPlayer(event.player);
         }
     }
@@ -187,10 +189,12 @@ public class EventHandler {
             return;
         float amount = event.getAmount();
         //Hacky shit to reduce vanilla regen
-        if (FirstAid.activeHealingConfig.allowNaturalRegeneration && Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch(stackTraceElement -> stackTraceElement.getClassName().equals(FoodStats.class.getName())))
-            amount = amount * (float) FirstAid.activeHealingConfig.naturalRegenMultiplier;
-        else
+        if (Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch(stackTraceElement -> stackTraceElement.getClassName().equals(FoodStats.class.getName()))) {
+            if (FirstAid.activeHealingConfig.allowNaturalRegeneration)
+                amount = amount * (float) FirstAid.activeHealingConfig.naturalRegenMultiplier;
+        } else {
             amount = amount * (float) FirstAid.activeHealingConfig.otherRegenMultiplier;
+        }
         HealthDistribution.distributeHealth(amount, (EntityPlayer) entity, true);
     }
 
@@ -201,7 +205,7 @@ public class EventHandler {
             AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(event.player);
             if (damageModel.hasTutorial)
                 PlayerDataManager.tutorialDone.add(event.player.getName());
-            FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(damageModel, FirstAidConfig.externalHealing, FirstAidConfig.damageSystem, FirstAidConfig.scaleMaxHealth), (EntityPlayerMP) event.player);
+            FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(damageModel, FirstAidConfig.externalHealing, FirstAidConfig.damageSystem, FirstAidConfig.scaleMaxHealth, FirstAidConfig.capMaxHealth), (EntityPlayerMP) event.player);
         }
     }
 

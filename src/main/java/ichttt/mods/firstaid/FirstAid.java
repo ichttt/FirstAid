@@ -47,16 +47,18 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 
-@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = "1.11.2-1.4.7", acceptedMinecraftVersions = "[1.11,1.12)")
+@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = FirstAid.VERSION, acceptedMinecraftVersions = "[1.11,1.12)")
 public class FirstAid {
     public static Logger logger;
     public static final String MODID = "firstaid";
     public static final String NAME = "First Aid";
+    public static final String VERSION = "1.5.0-1.11.2";
 
     //RECEIVED CONFIG FIELDS
     public static FirstAidConfig.DamageSystem activeDamageConfig;
     public static FirstAidConfig.ExternalHealing activeHealingConfig;
     public static boolean scaleMaxHealth;
+    public static boolean capMaxHealth;
 
     @SuppressWarnings("unused")
     @SidedProxy(clientSide = "ichttt.mods.firstaid.client.ClientProxy", serverSide = "ichttt.mods.firstaid.server.ServerProxy")
@@ -64,12 +66,11 @@ public class FirstAid {
 
     public static CreativeTabs creativeTab;
     public static SimpleNetworkWrapper NETWORKING;
-    public static boolean enableMorpheusCompat = false;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent pre) {
         logger = pre.getModLog();
-        logger.debug("FirstAid starting");
+        logger.debug("FirstAid version {} starting", VERSION);
         creativeTab = new CreativeTabs(FirstAid.MODID) {
             @Nonnull
             @Override
@@ -121,7 +122,6 @@ public class FirstAid {
         MessageReceiveConfiguration.validate();
 
         if (Loader.isModLoaded("morpheus")) {
-            enableMorpheusCompat = true;
             logger.info("Morpheus present - enabling compatibility module");
             MorpheusHelper.register();
         }

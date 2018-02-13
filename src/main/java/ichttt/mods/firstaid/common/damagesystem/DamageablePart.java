@@ -1,11 +1,11 @@
 package ichttt.mods.firstaid.common.damagesystem;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
-import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -88,6 +88,7 @@ public class DamageablePart extends AbstractDamageablePart {
     public NBTTagCompound serializeNBT() {
         NBTTagCompound compound = new NBTTagCompound();
         compound.setFloat("health", currentHealth);
+        if (FirstAid.scaleMaxHealth) compound.setInteger("maxHealth", maxHealth);
         if (absorption > 0F)
             compound.setFloat("absorption", absorption);
         if (activeHealer != null) {
@@ -102,6 +103,7 @@ public class DamageablePart extends AbstractDamageablePart {
     public void deserializeNBT(@Nullable NBTTagCompound nbt) {
         if (nbt == null)
             return;
+        if (nbt.hasKey("maxHealth") && FirstAid.scaleMaxHealth) maxHealth = nbt.getInteger("maxHealth");
         currentHealth = Math.min(maxHealth, nbt.getFloat("health"));
         ItemStack stack = null;
         if (nbt.hasKey("healingItem"))
@@ -121,7 +123,8 @@ public class DamageablePart extends AbstractDamageablePart {
 
     @Override
     public void setAbsorption(float absorption) {
-        if (absorption > 4F) absorption = 4F;
+        if (absorption > 4F && FirstAid.capMaxHealth) absorption = 4F;
+        if (absorption > 32F) absorption = 32F;
         this.absorption = absorption;
         currentHealth = Math.min(maxHealth + absorption, currentHealth);
     }
@@ -133,7 +136,9 @@ public class DamageablePart extends AbstractDamageablePart {
 
     @Override
     public void setMaxHealth(int maxHealth) {
-        if (maxHealth > 12) maxHealth = 12;
+        if (maxHealth > 12 && FirstAid.capMaxHealth) maxHealth = 12;
+        if (maxHealth > 128) //Apply a max cap even if disabled - This is already OP and I know no use case where the limit might be reached
+            maxHealth = 128;
         this.maxHealth = Math.max(2, maxHealth); //set 2 as a minimum
         this.currentHealth = Math.min(currentHealth, this.maxHealth);
     }

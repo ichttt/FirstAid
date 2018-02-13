@@ -1,9 +1,9 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientProxy;
+import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import io.netty.buffer.ByteBuf;
@@ -31,14 +31,16 @@ public class MessageReceiveConfiguration implements IMessage {
     private FirstAidConfig.ExternalHealing healingCfg;
     private FirstAidConfig.DamageSystem damageCfg;
     private boolean scaleMaxHealth;
+    private boolean capMaxHealth;
 
     public MessageReceiveConfiguration() {}
 
-    public MessageReceiveConfiguration(AbstractPlayerDamageModel model, FirstAidConfig.ExternalHealing healingCfg, FirstAidConfig.DamageSystem damageCfg, boolean scaleMaxHealth) {
+    public MessageReceiveConfiguration(AbstractPlayerDamageModel model, FirstAidConfig.ExternalHealing healingCfg, FirstAidConfig.DamageSystem damageCfg, boolean scaleMaxHealth, boolean capMaxHealth) {
         this.playerDamageModel = model.serializeNBT();
         this.healingCfg = healingCfg;
         this.damageCfg = damageCfg;
         this.scaleMaxHealth = scaleMaxHealth;
+        this.capMaxHealth = capMaxHealth;
     }
 
     @Override
@@ -61,6 +63,7 @@ public class MessageReceiveConfiguration implements IMessage {
         damageCfg.maxHealthRightFoot = buf.readByte();
 
         scaleMaxHealth = buf.readBoolean();
+        capMaxHealth = buf.readBoolean();
 
         playerDamageModel = ByteBufUtils.readTag(buf);
     }
@@ -83,6 +86,7 @@ public class MessageReceiveConfiguration implements IMessage {
         buf.writeByte(damageCfg.maxHealthRightFoot);
 
         buf.writeBoolean(scaleMaxHealth);
+        buf.writeBoolean(capMaxHealth);
 
         ByteBufUtils.writeTag(buf, playerDamageModel);
     }
@@ -95,6 +99,7 @@ public class MessageReceiveConfiguration implements IMessage {
             FirstAid.activeHealingConfig = message.healingCfg;
             FirstAid.activeDamageConfig = message.damageCfg;
             FirstAid.scaleMaxHealth = message.scaleMaxHealth;
+            FirstAid.capMaxHealth = message.capMaxHealth;
             AbstractPlayerDamageModel damageModel = PlayerDamageModel.create();
             damageModel.deserializeNBT(message.playerDamageModel);
             Minecraft mc = Minecraft.getMinecraft();

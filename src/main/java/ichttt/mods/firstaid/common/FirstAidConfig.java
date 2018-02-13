@@ -33,6 +33,11 @@ public class FirstAidConfig {
     @Config.RequiresWorldRestart
     public static boolean scaleMaxHealth = false;
 
+    @Config.Comment("If true, max health will be capped at 6 hearts and absorption at 2 hearts per limb. If false, the health cap will be much higher (64 hearts normal and 16 absorption)")
+    @Config.LangKey("firstaid.config.capmaxhealth")
+    @Config.RequiresWorldRestart
+    public static boolean capMaxHealth = true;
+
     public static class ExternalHealing {
 
         @Config.Comment("Allow vanilla's natural regeneration. Requires \"allowOtherHealingItems\" to be true" + "\n**WARNING** This sets the gamerule \"naturalRegeneration\" for all of your worlds internally, so it persists even if you remove the mod")
@@ -91,6 +96,10 @@ public class FirstAidConfig {
         @Config.Comment("The offset on the y axis")
         @Config.LangKey("firstaid.config.yoffset")
         public int yOffset = 1;
+
+        @Config.Comment("aeskfil")
+        @Config.LangKey("firstaid.config.heartthreshold")
+        public int heartThreshold = 8;
     }
 
     public static class DamageSystem {

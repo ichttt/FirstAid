@@ -38,9 +38,9 @@ import java.util.function.Function;
 public class FirstAidRegistryImpl extends FirstAidRegistry {
     public static final FirstAidRegistryImpl INSTANCE = new FirstAidRegistryImpl();
     private final Map<String, IDamageDistribution> DISTRIBUTION_MAP = new HashMap<>();
-    private final Map<Item, Function<ItemStack, AbstractPartHealer>> HEALER_MAP = new HashMap<>();
+    private final Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Integer>> HEALER_MAP = new HashMap<>();
     private final Multimap<EnumDebuffSlot, IDebuff> RAW_DEBUFF_MAP = HashMultimap.create();
-    private ImmutableMap<EnumDebuffSlot, IDebuff[]> finishedDebuff;
+    private ImmutableMap<EnumDebuffSlot, IDebuff[]> BAKED_DEBUFF_MAP;
     private boolean registrationAllowed = true;
 
     public static void finish() {
@@ -61,7 +61,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             FirstAid.logger.info("Finalizing registry");
             registrationAllowed = false;
         }
-        this.finishedDebuff = ImmutableMap.<EnumDebuffSlot, IDebuff[]>builder()
+        this.BAKED_DEBUFF_MAP = ImmutableMap.<EnumDebuffSlot, IDebuff[]>builder()
                 .put(EnumDebuffSlot.HEAD, RAW_DEBUFF_MAP.get(EnumDebuffSlot.HEAD).toArray(new IDebuff[0]))
                 .put(EnumDebuffSlot.ARMS, RAW_DEBUFF_MAP.get(EnumDebuffSlot.ARMS).toArray(new IDebuff[0]))
                 .put(EnumDebuffSlot.BODY, RAW_DEBUFF_MAP.get(EnumDebuffSlot.BODY).toArray(new IDebuff[0]))
@@ -111,16 +111,32 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     }
 
     @Override
+    public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, int applyTime) {
+        if (this.HEALER_MAP.containsKey(item))
+            FirstAid.logger.info("Healing type override detected for item " + item);
+        this.HEALER_MAP.put(item, Pair.of(factory, applyTime));
+    }
+
+    @Override
     public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory) {
-        if (this.HEALER_MAP.containsKey(item)) FirstAid.logger.info("Healing type override detected for item " + item);
-        this.HEALER_MAP.put(item, factory);
+        registerHealingType(item, factory, 3000);
     }
 
     @Nullable
     @Override
     public AbstractPartHealer getPartHealer(@Nonnull ItemStack type) {
-        Function<ItemStack, AbstractPartHealer> function = this.HEALER_MAP.get(type.getItem());
-        if (function != null) return function.apply(type);
+        Pair<Function<ItemStack, AbstractPartHealer>, Integer> pair = this.HEALER_MAP.get(type.getItem());
+        if (pair != null)
+            return pair.getLeft().apply(type);
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public Integer getPartHealingTime(@Nonnull Item item) {
+        Pair<Function<ItemStack, AbstractPartHealer>, Integer> pair = this.HEALER_MAP.get(item);
+        if (pair != null)
+            return pair.getRight();
         return null;
     }
 
@@ -164,7 +180,6 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
         if (slot.playerParts.length > 1 && !(debuff instanceof SharedDebuff))
             debuff = new SharedDebuff(debuff, slot);
-        if (this.RAW_DEBUFF_MAP.containsKey(slot)) FirstAid.logger.info("Debuff override detected for slot " + slot);
 
         this.RAW_DEBUFF_MAP.put(slot, debuff);
     }
@@ -185,6 +200,6 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             FirstAid.logger.warn("getDebuffs called early - building temp list snapshot");
             buildDebuffs(false);
         }
-        return finishedDebuff.get(slot);
+        return BAKED_DEBUFF_MAP.get(slot);
     }
 }

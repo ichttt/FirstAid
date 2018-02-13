@@ -1,20 +1,26 @@
 package ichttt.mods.firstaid.client;
 
+import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.FirstAidConfig;
+import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -72,6 +78,20 @@ public class ClientEventHandler {
         if (type == RenderGameOverlayEvent.ElementType.ALL || (type == RenderGameOverlayEvent.ElementType.TEXT && FirstAidConfig.overlay.position == 2)) {
             GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
             HUDHandler.renderOverlay(event.getResolution());
+        }
+    }
+
+    @SubscribeEvent
+    public static void tooltipItems(ItemTooltipEvent event) {
+        ItemStack stack = event.getItemStack();
+        if (stack.getItem() == FirstAidItems.MORPHINE) {
+            event.getToolTip().add(I18n.format("firstaid.tooltip.morphine", "3:30-4:30"));
+            return;
+        }
+
+        AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
+        if (healer != null) {
+            event.getToolTip().add(I18n.format("firstaid.tooltip.healer", healer.maxHeal, StringUtils.ticksToElapsedTime(healer.ticksPerHeal)));
         }
     }
 }

@@ -1,6 +1,5 @@
 package ichttt.mods.firstaid.common.damagesystem.debuff;
 
-import gnu.trove.iterator.TFloatIntIterator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.potion.PotionEffect;

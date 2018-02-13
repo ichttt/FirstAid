@@ -40,7 +40,7 @@ public class CapabilityExtendedHealthSystem {
     private static class DefaultImpl extends AbstractPlayerDamageModel {
 
         public DefaultImpl() {
-            super(null, null, null, null, null, null, null, null);
+            super(null, null, null, null, null, null, null, null, true);
         }
 
         @Override

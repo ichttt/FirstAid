@@ -1,16 +1,16 @@
 package ichttt.mods.firstaid.client.util;
 
 import com.google.common.collect.ImmutableMap;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.gui.FlashStateManager;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
-import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2IntFunction;
-import it.unimi.dsi.fastutil.ints.Int2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -26,7 +26,7 @@ import java.util.Objects;
 public class HealthRenderUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
     public static final DecimalFormat TEXT_FORMAT = new DecimalFormat("0.0");
-    private static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
+    private static final TObjectIntMap<EnumPlayerPart> prevHealth = new TObjectIntHashMap<>();
     private static final ImmutableMap<EnumPlayerPart, FlashStateManager> flashStates;
 
     static {
@@ -43,13 +43,13 @@ public class HealthRenderUtils {
         if (absorption > 0) {
             String line2 = "+ " + TEXT_FORMAT.format(absorption);
             if (allowSecondLine) {
-                Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(line2, xTranslation + 5, yTranslation, 0xFFFFFF);
+                Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(line2, xTranslation + 5, yTranslation, 0xFFFFFF);
                 GlStateManager.translate(-5, 0, 0);
             } else {
                 text += " " + line2;
             }
         }
-        Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(text, xTranslation, yTranslation, 0xFFFFFF);
+        Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(text, xTranslation, yTranslation, 0xFFFFFF);
     }
 
     public static void drawHealth(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean allowSecondLine, boolean playerDead) {
@@ -65,7 +65,7 @@ public class HealthRenderUtils {
         int absorption = (int) Math.ceil(damageablePart.getAbsorption());
         FlashStateManager activeFlashState = Objects.requireNonNull(flashStates.get(damageablePart.part));
         if (prevHealth.containsKey(damageablePart.part)) {
-            int prev = prevHealth.getInt(damageablePart.part);
+            int prev = prevHealth.get(damageablePart.part);
             if (prev != current)
                 activeFlashState.setActive(Minecraft.getSystemTime());
         }
@@ -120,7 +120,7 @@ public class HealthRenderUtils {
 
     private static void renderLine(int regen, boolean low, int yTexture, int maxHealth, int maxExtraHearts, int current, int absorption, Gui gui, boolean highlight) {
         GlStateManager.pushMatrix();
-        Int2IntMap map = new Int2IntArrayMap();
+        TIntIntMap map = new TIntIntHashMap();
         if (low) {
             for (int i = 0; i < (maxHealth + maxExtraHearts); i++)
                 map.put(i, EventHandler.rand.nextInt(2));
@@ -151,12 +151,12 @@ public class HealthRenderUtils {
         return maxCurrentHearths >> 1;
     }
 
-    private static void renderMax(int regen, Int2IntFunction function, int max, int yTexture, Gui gui, boolean highlight) {
+    private static void renderMax(int regen, TIntIntMap function, int max, int yTexture, Gui gui, boolean highlight) {
         final int BACKGROUND = (highlight ? 25 : 16);
         renderTexturedModalRects(regen, function, max, false, BACKGROUND, BACKGROUND, yTexture, gui);
     }
 
-    private static void renderCurrentHealth(int regen, Int2IntFunction function, int current, int yTexture, Gui gui) {
+    private static void renderCurrentHealth(int regen, TIntIntMap function, int current, int yTexture, Gui gui) {
         boolean renderLastHalf;
         int render;
 
@@ -169,7 +169,7 @@ public class HealthRenderUtils {
         renderTexturedModalRects(regen, function, render, renderLastHalf, 61, 52, yTexture, gui);
     }
 
-    private static void renderAbsorption(int regen, Int2IntFunction function, int absorption, int yTexture, Gui gui) {
+    private static void renderAbsorption(int regen, TIntIntMap function, int absorption, int yTexture, Gui gui) {
         boolean renderLastHalf = false;
         int render = absorption >> 1;
         if (absorption % 2 != 0) {
@@ -180,7 +180,7 @@ public class HealthRenderUtils {
         if (render > 0) renderTexturedModalRects(regen, function, render, renderLastHalf, 169, 160, yTexture, gui);
     }
 
-    private static void renderTexturedModalRects(int regen, Int2IntFunction function, int toDraw, boolean lastOneHalf, int halfTextureX, int textureX, int textureY, Gui gui) {
+    private static void renderTexturedModalRects(int regen, TIntIntMap function, int toDraw, boolean lastOneHalf, int halfTextureX, int textureX, int textureY, Gui gui) {
         if (toDraw == 0)
             return;
         if (toDraw < 0) throw new IllegalArgumentException("Cannot draw negative amount of icons " + toDraw);

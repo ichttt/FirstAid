@@ -251,8 +251,8 @@ public class GuiHealthScreen extends GuiScreen {
                     if (timeInSecs < 0)
                         timeInSecs = 0;
                     this.mc.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
-                    this.drawTexturedModalRect(button.x + (button.isRightSide ? 56 : - 25), button.y - 2, button.isRightSide ? 2 : 0, 169, 22, 24);
-                    this.mc.fontRenderer.drawString(HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), button.x  + (button.isRightSide ? 60 : -20), button.y + 6, 0xFFFFFF);
+                    this.drawTexturedModalRect(button.xPosition + (button.isRightSide ? 56 : - 25), button.yPosition - 2, button.isRightSide ? 2 : 0, 169, 22, 24);
+                    this.mc.fontRendererObj.drawString(HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), button.xPosition  + (button.isRightSide ? 60 : -20), button.yPosition + 6, 0xFFFFFF);
                 }
             }
         }

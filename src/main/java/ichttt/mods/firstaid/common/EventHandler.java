@@ -1,6 +1,5 @@
 package ichttt.mods.firstaid.common;
 
-import com.google.common.collect.MapMaker;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.IDamageDistribution;
@@ -59,13 +58,14 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentMap;
+import java.util.WeakHashMap;
 
 public class EventHandler {
     public static final Random rand = new Random();
     public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")).setRegistryName(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
-    public static final ConcurrentMap<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new MapMaker().weakKeys().concurrencyLevel(1).makeMap();
+    public static final Map<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
 
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
@@ -211,7 +211,7 @@ public class EventHandler {
     public static void onLivingDeath(LivingDeathEvent event) {
         EntityLivingBase entityLiving = event.getEntityLiving();
         if (entityLiving instanceof EntityPlayer && !(entityLiving instanceof FakePlayer)) {
-            PlayerDataManager.clearPlayer((EntityPlayer) entityLiving);
+            PlayerDataManager.resetPlayer((EntityPlayer) entityLiving);
         }
     }
 

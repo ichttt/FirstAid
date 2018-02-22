@@ -23,7 +23,7 @@ public class HealthDistribution {
         parts.addAll(Arrays.asList(partArray));
     }
 
-    public static void distribute(float health, AbstractPlayerDamageModel damageModel, EntityPlayer player, boolean sendChanges) {
+    public static void manageHealth(float health, AbstractPlayerDamageModel damageModel, EntityPlayer player, boolean sendChanges, boolean distribute) {
         if (sendChanges && player.world.isRemote) {
             FirstAid.logger.catching(new RuntimeException("Someone set flag sendChanges on the client, this is not supported!"));
             sendChanges = false;
@@ -31,13 +31,16 @@ public class HealthDistribution {
             sendChanges = false;
         }
 
-        float toHeal = health / 8F;
-        Collections.shuffle(parts);
+        float toHeal = distribute ? health / 8F : health;
+        Collections.shuffle(parts, player.world.rand);
         List<AbstractDamageablePart> damageableParts = new ArrayList<>(parts.size());
+
         for (EnumPlayerPart part : parts) {
             damageableParts.add(damageModel.getFromEnum(part));
         }
-        damageableParts.sort(Comparator.comparingDouble(value -> value.getMaxHealth() - value.currentHealth));
+
+        if (distribute)
+            damageableParts.sort(Comparator.comparingDouble(value -> value.getMaxHealth() - value.currentHealth));
         float[] healingDone = new float[8];
 
         for (int i = 0; i < 8; i++) {
@@ -48,15 +51,28 @@ public class HealthDistribution {
             healingDone[part.part.id - 1] = diff;
 
             health -= diff;
-            if (i < 7)
-                toHeal = health / (7F - i);
+            if (distribute) {
+                if (i < 7)
+                    toHeal = health / (7F - i);
+            } else {
+                System.out.println(String.format("Healed %s for %s", part.part, diff));
+                toHeal -= diff;
+                if (toHeal <= 0)
+                    break;
+            }
         }
 
-        if (sendChanges) FirstAid.NETWORKING.sendTo(new MessageAddHealth(healingDone), (EntityPlayerMP) player);
+        if (sendChanges)
+            FirstAid.NETWORKING.sendTo(new MessageAddHealth(healingDone), (EntityPlayerMP) player);
     }
 
     public static void distributeHealth(float health, EntityPlayer player, boolean sendChanges) {
         AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
-        distribute(health, damageModel, player, sendChanges);
+        manageHealth(health, damageModel, player, sendChanges, true);
+    }
+
+    public static void addRandomHealth(float health, EntityPlayer player, boolean sendChanges) {
+        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+        manageHealth(health, damageModel, player, sendChanges, false);
     }
 }

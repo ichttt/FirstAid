@@ -162,7 +162,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         if (!world.isRemote && world instanceof WorldServer && FirstAid.activeHealingConfig.sleepHealing != 0) {
             WorldServer worldServer = (WorldServer) player.world;
             if (worldServer.areAllPlayersAsleep()) { // We are going to wake up on the next tick, add health
-                HealthDistribution.distributeHealth(FirstAid.activeHealingConfig.sleepHealing, player, true);
+                HealthDistribution.manageHealth(FirstAid.activeHealingConfig.sleepHealing, this, player, true, false);
             }
         }
 

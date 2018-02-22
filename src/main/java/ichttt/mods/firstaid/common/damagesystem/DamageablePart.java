@@ -33,6 +33,8 @@ public class DamageablePart extends AbstractDamageablePart {
 
     @Override
     public float heal(float amount, @Nullable EntityPlayer player, boolean applyDebuff) {
+        if (amount <= 0F)
+            return 0F;
         float notFitting = Math.abs(Math.min(0F, maxHealth - (currentHealth + amount)));
         currentHealth = Math.min(maxHealth, currentHealth + amount);
         if (notFitting > 0) {
@@ -55,6 +57,8 @@ public class DamageablePart extends AbstractDamageablePart {
 
     @Override
     public float damage(float amount, @Nullable EntityPlayer player, boolean applyDebuff, float minHealth) {
+        if (amount <= 0F)
+            return 0F;
         if (minHealth > maxHealth)
             throw new IllegalArgumentException("Cannot damage part with minHealth " + minHealth + " while he has more max health (" + maxHealth + ")");
         float origAmount = amount;

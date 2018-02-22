@@ -39,7 +39,7 @@ public class MessageResync implements IMessage {
         public IMessage onMessage(MessageResync message, MessageContext ctx) {
             PlayerDamageModel damageModel = PlayerDamageModel.create();
             damageModel.deserializeNBT(message.playerDamageModel);
-            PlayerDataManager.capList.put(Minecraft.getMinecraft().player, damageModel);
+            PlayerDataManager.put(Minecraft.getMinecraft().player, damageModel);
             return null;
         }
     }

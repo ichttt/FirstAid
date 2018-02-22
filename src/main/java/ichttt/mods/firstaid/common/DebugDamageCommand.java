@@ -2,8 +2,8 @@ package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.command.CommandBase;
@@ -34,6 +34,7 @@ public class DebugDamageCommand extends CommandBase {
             List<String> values = new ArrayList<>(parts.length);
             for (EnumPlayerPart part : parts)
                 values.add(part.toString());
+            values.add("ALL");
             return getListOfStringsMatchingLastWord(args, values);
         } else if (args.length == 3) {
             List<String> values = new ArrayList<>(2);
@@ -66,21 +67,36 @@ public class DebugDamageCommand extends CommandBase {
         if (args.length != 2 && args.length != 3)
             throw new CommandException("Missing arguments. Usage: " + getUsage(sender));
         try {
-            EnumPlayerPart part = EnumPlayerPart.valueOf(args[0].toUpperCase(Locale.ENGLISH));
             float damage = Float.parseFloat(args[1]);
             boolean debuff = true;
             if (args.length == 3)
                 debuff = Boolean.parseBoolean(args[2]);
-            EntityPlayer player = (EntityPlayer) sender;
-            AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
-            damageModel.getFromEnum(part).damage(damage, player, debuff);
-            FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, damage, 0F), (EntityPlayerMP) player);
-            if (damageModel.isDead(player)) {
-                player.sendMessage(new TextComponentTranslation("death.attack.generic", player.getDisplayName()));
-                CommonUtils.killPlayer(player, null);
+
+            if (args[0].equalsIgnoreCase("ALL")) {
+                for (EnumPlayerPart part : EnumPlayerPart.VALUES)
+                    damage(part, damage, debuff, (EntityPlayer) sender);
+            } else {
+                EnumPlayerPart part = EnumPlayerPart.valueOf(args[0].toUpperCase(Locale.ENGLISH));
+                damage(part, damage, debuff, (EntityPlayer) sender);
             }
         } catch (RuntimeException e) {
             throw new CommandException(e.toString());
+        }
+    }
+
+    private static void damage(EnumPlayerPart part, float damage, boolean debuff, EntityPlayer player) {
+        if (damage == 0F)
+            return;
+        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+        if (damage > 0F) {
+            damageModel.getFromEnum(part).damage(damage, player, debuff);
+        } else {
+            damageModel.getFromEnum(part).heal(-damage, player, debuff);
+        }
+        FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, damage, 0F), (EntityPlayerMP) player);
+        if (damageModel.isDead(player)) {
+            player.sendMessage(new TextComponentTranslation("death.attack.generic", player.getDisplayName()));
+            CommonUtils.killPlayer(player, null);
         }
     }
 }

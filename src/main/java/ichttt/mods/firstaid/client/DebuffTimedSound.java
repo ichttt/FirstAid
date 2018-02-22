@@ -16,6 +16,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +27,7 @@ public class DebuffTimedSound implements ITickableSound {
     private final int debuffDuration;
     private final ResourceLocation soundLocation;
     private final SoundEvent event;
-    private final EntityPlayerSP player;
+    private final WeakReference<EntityPlayerSP> player;
     private Sound sound;
     private float volume = volumeMultiplier;
     private int ticks;
@@ -50,15 +51,17 @@ public class DebuffTimedSound implements ITickableSound {
     public DebuffTimedSound(SoundEvent event, int debuffDuration) {
         this.event = event;
         this.soundLocation = event.getSoundName();
-        this.player = Minecraft.getMinecraft().player;
+        this.player = new WeakReference<>(Minecraft.getMinecraft().player);
         this.debuffDuration = Integer.min(15 * 20, debuffDuration);
         this.minusPerTick = (1F / this.debuffDuration) * volumeMultiplier;
     }
 
     @Override
     public boolean isDonePlaying() {
-        boolean done = ticks >= debuffDuration || this.player.getHealth() <= 0;
-        if (done) activeSounds.remove(this.event);
+        EntityPlayerSP player = this.player.get();
+        boolean done = player == null || ticks >= debuffDuration || player.getHealth() <= 0;
+        if (done)
+            activeSounds.remove(this.event);
         return done;
     }
 
@@ -120,16 +123,25 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Override
     public float getXPosF() {
+        EntityPlayerSP player = this.player.get();
+        if (player == null)
+            return 0F;
         return (float) player.posX;
     }
 
     @Override
     public float getYPosF() {
+        EntityPlayerSP player = this.player.get();
+        if (player == null)
+            return 0F;
         return (float) player.posY;
     }
 
     @Override
     public float getZPosF() {
+        EntityPlayerSP player = this.player.get();
+        if (player == null)
+            return 0F;
         return (float) player.posZ;
     }
 

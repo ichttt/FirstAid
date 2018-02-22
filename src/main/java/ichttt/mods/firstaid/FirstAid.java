@@ -127,8 +127,7 @@ public class FirstAid {
     @Mod.EventHandler
     public void onServerStop(FMLServerStoppedEvent event) {
         logger.debug("Cleaning up");
-        PlayerDataManager.capList.clear();
-        PlayerDataManager.tutorialDone.clear();
+        PlayerDataManager.clear();
         EventHandler.hitList.clear();
     }
 }

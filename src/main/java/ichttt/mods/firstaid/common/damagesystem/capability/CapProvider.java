@@ -1,8 +1,8 @@
 package ichttt.mods.firstaid.common.damagesystem.capability;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -13,40 +13,53 @@ import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.ref.WeakReference;
 
 public class CapProvider implements ICapabilityProvider, INBTSerializable<NBTTagCompound> {
     public static final ResourceLocation IDENTIFIER = new ResourceLocation(FirstAid.MODID, "capExtendedHealthSystem");
 
-    private final EntityPlayer player;
+    private final WeakReference<EntityPlayer> player;
 
     public CapProvider(EntityPlayer player, AbstractPlayerDamageModel damageModel) {
-        this.player = player;
-        PlayerDataManager.capList.put(player, damageModel);
+        this.player = new WeakReference<>(player);
+        PlayerDataManager.put(player, damageModel);
     }
 
     @Override
     public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
-        return capability == CapabilityExtendedHealthSystem.INSTANCE;
+        return player.get() != null && capability == CapabilityExtendedHealthSystem.INSTANCE;
     }
 
     @Nullable
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
-        if (capability == CapabilityExtendedHealthSystem.INSTANCE)
-            return (T) PlayerDataManager.capList.get(player);
+        EntityPlayer player = this.player.get();
+        if (player != null && capability == CapabilityExtendedHealthSystem.INSTANCE)
+            return (T) getModel();
         return null;
+    }
+
+    @Nullable
+    private AbstractPlayerDamageModel getModel() {
+        EntityPlayer player = this.player.get();
+        if (player == null)
+            return null;
+        return PlayerDataManager.getDamageModel(player);
     }
 
     @Override
     public NBTTagCompound serializeNBT() {
-        AbstractPlayerDamageModel damageModel = PlayerDataManager.capList.get(player);
-        return damageModel.serializeNBT();
+        AbstractPlayerDamageModel playerDamageModel = getModel();
+        if (playerDamageModel == null)
+            return new NBTTagCompound();
+        return playerDamageModel.serializeNBT();
     }
 
     @Override
     public void deserializeNBT(NBTTagCompound nbt) {
-        AbstractPlayerDamageModel damageModel = PlayerDataManager.capList.get(player);
-        damageModel.deserializeNBT(nbt);
+        AbstractPlayerDamageModel playerDamageModel = getModel();
+        if (playerDamageModel != null)
+            playerDamageModel.deserializeNBT(nbt);
     }
 }

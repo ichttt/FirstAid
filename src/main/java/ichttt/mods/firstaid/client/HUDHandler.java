@@ -34,7 +34,7 @@ public class HUDHandler {
         maxLength = 0;
         for (EnumPlayerPart part : EnumPlayerPart.VALUES) {
             String translated = I18n.format("gui." + part.toString().toLowerCase(Locale.ENGLISH));
-            maxLength = Math.max(maxLength, translated.length());
+            maxLength = Math.max(maxLength, Minecraft.getMinecraft().fontRenderer.getStringWidth(translated));
             TRANSLATION_MAP.put(part, translated);
         }
     }
@@ -83,7 +83,7 @@ public class HUDHandler {
         GlStateManager.translate(xOffset, yOffset, 0F);
         boolean playerDead = damageModel.isDead(mc.player);
 
-        int xTranslation = maxLength * 5 + 6;
+        int xTranslation = maxLength;
         for (AbstractDamageablePart part : damageModel) {
             mc.fontRenderer.drawStringWithShadow(TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF);
             if (FirstAidConfig.overlay.displayHealthAsNumber) {

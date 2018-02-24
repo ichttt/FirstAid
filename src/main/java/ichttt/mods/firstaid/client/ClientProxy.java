@@ -1,10 +1,10 @@
 package ichttt.mods.firstaid.client;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.IProxy;
-import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IReloadableResourceManager;
@@ -24,13 +24,17 @@ public class ClientProxy implements IProxy {
     public static final KeyBinding showWounds = new KeyBinding("keybinds.show_wounds", KeyConflictContext.IN_GAME, Keyboard.KEY_H, FirstAid.NAME);
 
     @Override
-    public void init() {
+    public void preInit() {
         FirstAid.logger.debug("Loading ClientProxy");
         MinecraftForge.EVENT_BUS.register(ClientEventHandler.class);
         ClientRegistry.registerKeyBinding(showWounds);
+    }
+
+    @Override
+    public void init() {
         GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
-        ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(manager -> HUDHandler.rebuildTranslationTable());
         EventCalendar.checkDate();
+        ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(manager -> HUDHandler.rebuildTranslationTable());
     }
 
     @Override

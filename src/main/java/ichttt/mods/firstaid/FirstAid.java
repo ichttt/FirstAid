@@ -6,6 +6,7 @@ import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.IProxy;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
+import ichttt.mods.firstaid.common.config.ExtraConfigManager;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.MessageAddHealth;
@@ -38,7 +39,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 
-@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = FirstAid.VERSION, acceptedMinecraftVersions = "[1.12.2,1.13)", dependencies = "required-after:forge@[14.23.0.2526,);")
+@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = FirstAid.VERSION, acceptedMinecraftVersions = "[1.12.2,1.13)", dependencies = "required-after:forge@[14.23.0.2526,);", guiFactory = "ichttt.mods.firstaid.client.config.GuiFactory")
 public class FirstAid {
     public static Logger logger;
     public static final String MODID = "firstaid";
@@ -72,7 +73,8 @@ public class FirstAid {
 
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
         FirstAidItems.init();
-        proxy.init();
+        proxy.preInit();
+        ExtraConfigManager.init();
         //Setup API
         RegistryManager.setupRegistries();
         checkEarlyExit();
@@ -93,6 +95,8 @@ public class FirstAid {
         NETWORKING.registerMessage(MessageClientUpdate.Handler.class, MessageClientUpdate.class, ++i, Side.SERVER);
         NETWORKING.registerMessage(MessageResync.Handler.class, MessageResync.class, ++i, Side.CLIENT);
         MessageReceiveConfiguration.validate();
+
+        proxy.init();
 
         if (Loader.isModLoaded("morpheus")) {
             logger.info("Morpheus present - enabling compatibility module");

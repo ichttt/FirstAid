@@ -1,10 +1,12 @@
 package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.common.config.ExtraConfig;
 import net.minecraftforge.common.config.Config;
 
 @SuppressWarnings("CanBeFinal")
 @Config(modid = FirstAid.MODID, name = FirstAid.NAME)
+@ExtraConfig
 public class FirstAidConfig {
 
     @Config.Comment("Settings regarding the max health of the body's parts. 2 = 1 heart")
@@ -22,10 +24,12 @@ public class FirstAidConfig {
 
     @Config.Comment("Enable/Disable specify debuffs on specific body parts")
     @Config.LangKey("firstaid.config.debuffs")
+    @ExtraConfig.Advanced(warningKey = "firstaid.config.debuffwarn")
     public static final Debuffs debuffs = new Debuffs();
 
     @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
     @Config.LangKey("firstaid.config.enablesoundsystem")
+    @ExtraConfig.Advanced
     public static boolean enableSoundSystem = true;
 
     @Config.Comment("If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health")
@@ -57,11 +61,13 @@ public class FirstAidConfig {
         @Config.Comment("The value external regen will be multiplied with. Has no effect if \"allowOtherHealingItems\" is disabled")
         @Config.LangKey("firstaid.config.otherregenmultiplier")
         @Config.RangeDouble(min = 0D, max = 20D)
+        @ExtraConfig.Advanced
         public double otherRegenMultiplier = 0.75D;
 
         @Config.Comment("The value vanilla's natural regeneration will be multiplied with. Has no effect if \"allowNaturalRegeneration\" is disabled")
         @Config.LangKey("firstaid.config.naturalregenmultiplier")
         @Config.RangeDouble(min = 0D, max = 20D)
+        @ExtraConfig.Advanced
         public double naturalRegenMultiplier = 0.5D;
     }
 
@@ -91,14 +97,17 @@ public class FirstAidConfig {
 
         @Config.Comment("The offset on the x axis")
         @Config.LangKey("firstaid.config.xoffset")
+        @ExtraConfig.Advanced
         public int xOffset = 0;
 
         @Config.Comment("The offset on the y axis")
         @Config.LangKey("firstaid.config.yoffset")
+        @ExtraConfig.Advanced
         public int yOffset = 1;
 
-        @Config.Comment("aeskfil")
+        @Config.Comment("If the player has more hearts than the threshold, the health will be displayed as a number")
         @Config.LangKey("firstaid.config.heartthreshold")
+        @ExtraConfig.Advanced
         public int heartThreshold = 8;
     }
 

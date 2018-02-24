@@ -121,8 +121,8 @@ public class UniqueProperty
                 category.getLanguagekey().equals(langKey) && type == Type.CATEGORY;
     }
 
+    //TODO better matching
     public boolean matches(IConfigElement element) {
-        return Objects.equals(element.getComment(), comment) &&
-                element.getLanguageKey().equals(langKey) && (element.isProperty() ? Type.fromType(element.getType()).equals(type) : type == Type.CATEGORY);
+        return element.getLanguageKey().equals(langKey) && (element.isProperty() ? Type.fromType(element.getType()).equals(type) : type == Type.CATEGORY);
     }
 }

@@ -60,13 +60,13 @@ public class HUDHandler {
             case 0:
                 break;
             case 1:
-                xOffset = scaledResolution.getScaledWidth() - xOffset - damageModel.getMaxRenderSize() - (maxLength * 5 + 6);
+                xOffset = scaledResolution.getScaledWidth() - xOffset - damageModel.getMaxRenderSize() - (maxLength);
                 break;
             case 2:
                 yOffset = scaledResolution.getScaledHeight() - yOffset - 80;
                 break;
             case 3:
-                xOffset = scaledResolution.getScaledWidth() - xOffset - damageModel.getMaxRenderSize() - (maxLength * 5 + 6);
+                xOffset = scaledResolution.getScaledWidth() - xOffset - damageModel.getMaxRenderSize() - (maxLength);
                 yOffset = scaledResolution.getScaledHeight() - yOffset - 80;
                 break;
             default:

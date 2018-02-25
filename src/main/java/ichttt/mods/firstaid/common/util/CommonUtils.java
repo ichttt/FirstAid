@@ -3,9 +3,9 @@ package ichttt.mods.firstaid.common.util;
 import com.creativemd.playerrevive.api.IRevival;
 import com.creativemd.playerrevive.api.capability.CapaRevive;
 import com.google.common.collect.ImmutableMap;
-import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.DataManagerWrapper;
+import ichttt.mods.firstaid.common.FirstAidConfig;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.server.MinecraftServer;
@@ -39,7 +39,7 @@ public class CommonUtils {
     }
 
     public static void killPlayer(@Nonnull EntityPlayer player, @Nullable DamageSource source) {
-        if (source != null && FirstAid.activeHealingConfig.allowOtherHealingItems && player.checkTotemDeathProtection(source))
+        if (source != null && FirstAidConfig.externalHealing.allowOtherHealingItems && player.checkTotemDeathProtection(source))
             return;
 
         IRevival revival = getRevivalIfPossible(player);

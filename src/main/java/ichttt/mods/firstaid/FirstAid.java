@@ -3,9 +3,10 @@ package ichttt.mods.firstaid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.common.DebugDamageCommand;
 import ichttt.mods.firstaid.common.EventHandler;
-import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.IProxy;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
+import ichttt.mods.firstaid.common.config.ConfigEntry;
+import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.config.ExtraConfigManager;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
@@ -46,11 +47,7 @@ public class FirstAid {
     public static final String NAME = "First Aid";
     public static final String VERSION = "1.5.0";
 
-    //RECEIVED CONFIG FIELDS
-    public static FirstAidConfig.DamageSystem activeDamageConfig;
-    public static FirstAidConfig.ExternalHealing activeHealingConfig;
-    public static boolean scaleMaxHealth;
-    public static boolean capMaxHealth;
+    public static boolean isSynced = false;
 
     @SuppressWarnings("unused")
     @SidedProxy(clientSide = "ichttt.mods.firstaid.client.ClientProxy", serverSide = "ichttt.mods.firstaid.server.ServerProxy")
@@ -74,7 +71,6 @@ public class FirstAid {
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
         FirstAidItems.init();
         proxy.preInit();
-        ExtraConfigManager.init();
         //Setup API
         RegistryManager.setupRegistries();
         checkEarlyExit();
@@ -83,6 +79,7 @@ public class FirstAid {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         CapabilityExtendedHealthSystem.register();
+        ExtraConfigManager.init();
 
         int i = 0;
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
@@ -94,7 +91,6 @@ public class FirstAid {
         NETWORKING.registerMessage(MessagePlayHurtSound.Handler.class, MessagePlayHurtSound.class, ++i, Side.CLIENT);
         NETWORKING.registerMessage(MessageClientUpdate.Handler.class, MessageClientUpdate.class, ++i, Side.SERVER);
         NETWORKING.registerMessage(MessageResync.Handler.class, MessageResync.class, ++i, Side.CLIENT);
-        MessageReceiveConfiguration.validate();
 
         proxy.init();
 
@@ -131,7 +127,14 @@ public class FirstAid {
     @Mod.EventHandler
     public void onServerStop(FMLServerStoppedEvent event) {
         logger.debug("Cleaning up");
+        isSynced = false;
         PlayerDataManager.clear();
         EventHandler.hitList.clear();
+        for (ConfigEntry<ExtraConfig.Sync> option : ExtraConfigManager.syncedConfigOptions) {
+            if (option.hasRemoteData())
+                option.revert();
+            else
+                logger.error("Missing remote data for field " + option.field + ", cannot revert!");
+        }
     }
 }

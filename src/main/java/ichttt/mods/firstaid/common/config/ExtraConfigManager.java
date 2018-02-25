@@ -6,7 +6,6 @@ import ichttt.mods.firstaid.common.FirstAidConfig;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.FieldWrapper;
 import net.minecraftforge.common.config.Property;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -19,8 +18,8 @@ import java.util.Set;
 public class ExtraConfigManager
 {
     private static final Set<Class<?>> configClasses = Collections.singleton(FirstAidConfig.class);
-    public static List<Pair<ExtraConfig.Advanced, UniqueProperty>> advancedConfigOptions;
-    public static List<Pair<ExtraConfig.Sync, UniqueProperty>> syncedConfigOptions;
+    public static List<ConfigEntry<ExtraConfig.Advanced>> advancedConfigOptions;
+    public static List<ConfigEntry<ExtraConfig.Sync>> syncedConfigOptions;
 
     public static void init()
     {
@@ -35,16 +34,16 @@ public class ExtraConfigManager
         }
     }
 
-    private static <T extends Annotation> List<Pair<T, UniqueProperty>> getAnnotatedFields(Class<T> annotationClass, Class<?> clazz) {
+    private static <T extends Annotation> List<ConfigEntry<T>> getAnnotatedFields(Class<T> annotationClass, Class<?> clazz) {
         return getAnnotatedFields(annotationClass, clazz, "general", null);
     }
 
-    private static<T extends Annotation> List<Pair<T, UniqueProperty>> getAnnotatedFields(Class<T> annotationClass, Class<?> clazz, String category, Object instance) {
-        ImmutableList.Builder<Pair<T, UniqueProperty>> listBuilder = ImmutableList.builder();
+    private static<T extends Annotation> List<ConfigEntry<T>> getAnnotatedFields(Class<T> annotationClass, Class<?> clazz, String category, Object instance) {
+        ImmutableList.Builder<ConfigEntry<T>> listBuilder = ImmutableList.builder();
         for (Field f : clazz.getDeclaredFields()) {
             T annotation = f.getAnnotation(annotationClass);
             if (annotation != null) {
-                FirstAid.logger.info("Found annotation {} for field {}", annotation, f);
+//                FirstAid.logger.debug("Found annotation {} for field {}", annotation, field);
                 if (FieldWrapper.hasWrapperFor(f)) {
                     Object typeAdapter = FieldWrapper.get(instance, f, category).getTypeAdapter();
                     UniqueProperty.Type type;
@@ -61,13 +60,13 @@ public class ExtraConfigManager
                             type = UniqueProperty.Type.UNKNOWN;
                         }
                     }
-                    listBuilder.add(Pair.of(annotation, UniqueProperty.fromProperty(f, FirstAid.MODID, category, type)));
+                    listBuilder.add(new ConfigEntry<>(f, instance, annotation, annotationClass == ExtraConfig.Sync.class, UniqueProperty.fromProperty(f, FirstAid.MODID, category, type)));
                 }
             }
             if (!FieldWrapper.hasWrapperFor(f) && f.getType().getSuperclass() != null && f.getType().getSuperclass().equals(Object.class)) { //next object
                 String sub = (category.isEmpty() ? "" : category + ".") + getName(f).toLowerCase(Locale.ENGLISH);
                 if (annotation != null) {
-                    listBuilder.add(Pair.of(annotation, new UniqueProperty(sub, UniqueProperty.getLangKey(f, FirstAid.MODID, category), UniqueProperty.getComment(f), UniqueProperty.Type.CATEGORY)));
+                    listBuilder.add(new ConfigEntry<>(f, instance, annotation, annotationClass == ExtraConfig.Sync.class, new UniqueProperty(getName(f), UniqueProperty.getLangKey(f, FirstAid.MODID, category), UniqueProperty.getComment(f), UniqueProperty.Type.CATEGORY)));
                 }
                 try {
                     Object newInstance = f.get(instance);
@@ -77,6 +76,9 @@ public class ExtraConfigManager
                 }
             }
         }
+        List<ConfigEntry<T>> list = listBuilder.build();
+        if (instance == null)
+            FirstAid.logger.info("Found {} annotations of the type {} for the class {}", list.size(), annotationClass, clazz);
         return listBuilder.build();
     }
 

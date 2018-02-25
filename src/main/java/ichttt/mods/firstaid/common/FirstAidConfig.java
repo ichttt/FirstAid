@@ -12,6 +12,7 @@ public class FirstAidConfig {
     @Config.Comment("Settings regarding the max health of the body's parts. 2 = 1 heart")
     @Config.LangKey("firstaid.config.damagesystem")
     @Config.RequiresWorldRestart
+    @ExtraConfig.Sync
     public static final DamageSystem damageSystem = new DamageSystem();
 
     @Config.Comment("Settings regarding the health overlay when ingame")
@@ -20,11 +21,13 @@ public class FirstAidConfig {
 
     @Config.Comment("Settings regarding external healing system(like vanilla potions or natural regeneration")
     @Config.LangKey("firstaid.config.externalhealing")
+    @Config.RequiresWorldRestart
+    @ExtraConfig.Sync
     public static final ExternalHealing externalHealing = new ExternalHealing();
 
     @Config.Comment("Enable/Disable specify debuffs on specific body parts")
     @Config.LangKey("firstaid.config.debuffs")
-    @ExtraConfig.Advanced(warningKey = "firstaid.config.debuffwarn")
+    @ExtraConfig.Advanced
     public static final Debuffs debuffs = new Debuffs();
 
     @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
@@ -35,11 +38,13 @@ public class FirstAidConfig {
     @Config.Comment("If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health")
     @Config.LangKey("firstaid.config.scalemaxhealth")
     @Config.RequiresWorldRestart
+    @ExtraConfig.Sync
     public static boolean scaleMaxHealth = false;
 
     @Config.Comment("If true, max health will be capped at 6 hearts and absorption at 2 hearts per limb. If false, the health cap will be much higher (64 hearts normal and 16 absorption)")
     @Config.LangKey("firstaid.config.capmaxhealth")
     @Config.RequiresWorldRestart
+    @ExtraConfig.Sync
     public static boolean capMaxHealth = true;
 
     public static class ExternalHealing {

@@ -77,7 +77,7 @@ public class HealthRenderUtils {
 
         Minecraft mc = Minecraft.getMinecraft();
         int regen = -1;
-        if (FirstAid.activeHealingConfig != null && FirstAid.activeHealingConfig.allowOtherHealingItems && mc.player.isPotionActive(MobEffects.REGENERATION))
+        if (FirstAidConfig.externalHealing.allowOtherHealingItems && mc.player.isPotionActive(MobEffects.REGENERATION))
             regen = (mc.ingameGUI.updateCounter / 2) % 15;
         boolean low = (current + absorption) < 1.25F;
 

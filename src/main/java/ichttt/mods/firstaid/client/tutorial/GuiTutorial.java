@@ -5,6 +5,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
+import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.network.MessageClientUpdate;
@@ -35,7 +36,8 @@ public class GuiTutorial extends GuiScreen {
         this.action.addTextWrapper("firstaid.tutorial.line4");
         this.action.addTextWrapper("firstaid.tutorial.line5");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_FOOT.heal(3F, null, false));
-        if (FirstAid.activeHealingConfig.sleepHealing != 0) this.action.addTextWrapper("firstaid.tutorial.sleephint");
+        if (FirstAidConfig.externalHealing.sleepHealing != 0)
+            this.action.addTextWrapper("firstaid.tutorial.sleephint");
         this.action.addTextWrapper("firstaid.tutorial.line6");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.HEAD.damage(16F, null, false));
         this.action.addTextWrapper("firstaid.tutorial.line7");

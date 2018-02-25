@@ -8,6 +8,7 @@ import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
+import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientUpdate;
@@ -176,7 +177,7 @@ public class GuiHealthScreen extends GuiScreen {
         GlStateManager.popMatrix();
 
         //Sleep info setup
-        float sleepHealing = FirstAid.activeHealingConfig.sleepHealing;
+        float sleepHealing = FirstAidConfig.externalHealing.sleepHealing;
         int renderBedX = Math.round(guiLeft / bedScaleFactor) + 2;
         int renderBedY = Math.round((guiTop + ySize) / bedScaleFactor) - 18;
         int bedX = (int) (renderBedX * bedScaleFactor);

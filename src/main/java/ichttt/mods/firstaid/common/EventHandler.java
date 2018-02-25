@@ -6,6 +6,9 @@ import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
+import ichttt.mods.firstaid.common.config.ConfigEntry;
+import ichttt.mods.firstaid.common.config.ExtraConfig;
+import ichttt.mods.firstaid.common.config.ExtraConfigManager;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.capability.CapProvider;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
@@ -58,6 +61,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
@@ -140,14 +144,9 @@ public class EventHandler {
             EntityPlayer player = (EntityPlayer) obj;
             AbstractPlayerDamageModel damageModel;
             if (player.world.isRemote)
-                damageModel = FirstAid.activeDamageConfig == null ? PlayerDamageModel.createTemp() : PlayerDamageModel.create();
-            else {
-                FirstAid.activeDamageConfig = FirstAidConfig.damageSystem;
-                FirstAid.activeHealingConfig = FirstAidConfig.externalHealing;
-                FirstAid.scaleMaxHealth = FirstAidConfig.scaleMaxHealth;
-                FirstAid.capMaxHealth = FirstAidConfig.capMaxHealth;
+                damageModel = FirstAid.isSynced ? PlayerDamageModel.create() : PlayerDamageModel.createTemp();
+            else
                 damageModel = PlayerDamageModel.create();
-            }
             event.addCapability(CapProvider.IDENTIFIER, new CapProvider(player, damageModel));
             //replace the data manager with our wrapper to grab absorption
             player.dataManager = new DataManagerWrapper(player, player.dataManager);
@@ -218,7 +217,22 @@ public class EventHandler {
     @SubscribeEvent
     public static void onConfigChange(ConfigChangedEvent.OnConfigChangedEvent event) {
         if (event.getModID().equals(FirstAid.MODID)) {
-            ConfigManager.sync(FirstAid.MODID, Config.Type.INSTANCE);
+            Map<ConfigEntry<ExtraConfig.Sync>, Object> map = new LinkedHashMap<>();
+
+            for (ConfigEntry<ExtraConfig.Sync> option : ExtraConfigManager.syncedConfigOptions) {
+                if (option.hasRemoteData()) { //if we have remote data, we must make sure to revert it before saving to file
+                    map.put(option, option.getCurrentState()); //we still have to keep the value to put it back after saving to file
+                    option.revert(); //revert to client default state
+                }
+            }
+
+            ConfigManager.sync(FirstAid.MODID, Config.Type.INSTANCE); //sync to file
+
+            for (ConfigEntry<ExtraConfig.Sync> option : ExtraConfigManager.syncedConfigOptions) {
+                option.updateOrigState(); //make sure we revert to the correct value again
+                if (map.containsKey(option))
+                    option.setRemoteState(map.get(option)); //put back the old remote value if we have been connected
+            }
             event.setResult(Event.Result.ALLOW);
         }
     }
@@ -229,15 +243,15 @@ public class EventHandler {
         if (!entity.hasCapability(CapabilityExtendedHealthSystem.INSTANCE, null))
             return;
         event.setCanceled(true);
-        if (!FirstAid.activeHealingConfig.allowOtherHealingItems)
+        if (!FirstAidConfig.externalHealing.allowOtherHealingItems)
             return;
         float amount = event.getAmount();
         //Hacky shit to reduce vanilla regen
         if (Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch(stackTraceElement -> stackTraceElement.getClassName().equals(FoodStats.class.getName()))) {
-            if (FirstAid.activeHealingConfig.allowNaturalRegeneration)
-                amount = amount * (float) FirstAid.activeHealingConfig.naturalRegenMultiplier;
+            if (FirstAidConfig.externalHealing.allowNaturalRegeneration)
+                amount = amount * (float) FirstAidConfig.externalHealing.naturalRegenMultiplier;
         } else {
-            amount = amount * (float) FirstAid.activeHealingConfig.otherRegenMultiplier;
+            amount = amount * (float) FirstAidConfig.externalHealing.otherRegenMultiplier;
         }
         HealthDistribution.distributeHealth(amount, (EntityPlayer) entity, true);
     }
@@ -249,7 +263,7 @@ public class EventHandler {
             AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(event.player);
             if (damageModel.hasTutorial)
                 PlayerDataManager.tutorialDone.add(event.player.getName());
-            FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(damageModel, FirstAidConfig.externalHealing, FirstAidConfig.damageSystem, FirstAidConfig.scaleMaxHealth, FirstAidConfig.capMaxHealth), (EntityPlayerMP) event.player);
+            FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(damageModel), (EntityPlayerMP) event.player);
         }
     }
 

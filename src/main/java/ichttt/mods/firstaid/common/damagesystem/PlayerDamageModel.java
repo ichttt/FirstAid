@@ -41,7 +41,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private boolean waitingForHelp = false;
 
     public static PlayerDamageModel create() {
-        return create_impl(Objects.requireNonNull(FirstAid.activeDamageConfig), false);
+        return create_impl(Objects.requireNonNull(FirstAidConfig.damageSystem), false);
     }
 
     public static PlayerDamageModel createTemp() {
@@ -130,7 +130,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         if (!this.hasTutorial)
             this.hasTutorial = PlayerDataManager.tutorialDone.contains(player.getName());
 
-        if (FirstAid.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
+        if (FirstAidConfig.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
             float globalFactor = player.getMaxHealth() / 20F;
             if (prevScaleFactor != globalFactor) {
                 int reduced = 0;
@@ -159,10 +159,10 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             prevScaleFactor = globalFactor;
         }
 
-        if (!world.isRemote && world instanceof WorldServer && FirstAid.activeHealingConfig.sleepHealing != 0) {
+        if (!world.isRemote && world instanceof WorldServer && FirstAidConfig.externalHealing.sleepHealing != 0) {
             WorldServer worldServer = (WorldServer) player.world;
             if (worldServer.areAllPlayersAsleep()) { // We are going to wake up on the next tick, add health
-                HealthDistribution.manageHealth(FirstAid.activeHealingConfig.sleepHealing, this, player, true, false);
+                HealthDistribution.manageHealth(FirstAidConfig.externalHealing.sleepHealing, this, player, true, false);
             }
         }
 

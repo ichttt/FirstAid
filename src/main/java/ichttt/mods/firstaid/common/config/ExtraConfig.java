@@ -1,6 +1,5 @@
 package ichttt.mods.firstaid.common.config;
 
-import javax.annotation.Nonnull;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -29,7 +28,5 @@ public @interface ExtraConfig
     @Target(ElementType.FIELD)
     @interface Advanced
     {
-        @Nonnull
-        String warningKey() default "";
     }
 }

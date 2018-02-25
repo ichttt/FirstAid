@@ -39,6 +39,6 @@ public class PlayerDataManager {
     public static void resetPlayer(EntityPlayer player) {
         Objects.requireNonNull(player, "Player may not be null");
         capList.remove(player);
-        capList.put(player, FirstAid.activeDamageConfig == null ? PlayerDamageModel.createTemp() : PlayerDamageModel.create());
+        capList.put(player, FirstAid.isSynced ? PlayerDamageModel.create() : PlayerDamageModel.createTemp());
     }
 }

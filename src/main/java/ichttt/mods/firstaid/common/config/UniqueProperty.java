@@ -2,7 +2,6 @@ package ichttt.mods.firstaid.common.config;
 
 import com.google.common.base.Joiner;
 import net.minecraftforge.common.config.Config;
-import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.client.config.ConfigGuiType;
 import net.minecraftforge.fml.client.config.IConfigElement;
@@ -111,18 +110,18 @@ public class UniqueProperty
         this.type = type;
     }
 
-    public boolean matches(Property property) {
-        return Type.fromType(property.getType()).equals(this.type) && property.getName().equals(this.name) &&
-                property.getLanguageKey().equals(this.langKey) && Objects.equals(property.getComment(), this.comment);
-    }
+//    public boolean matches(Property property) {
+//        return Type.fromType(property.getType()).equals(this.type) && property.getName().equals(this.name) &&
+//                property.getLanguageKey().equals(this.langKey) && Objects.equals(property.getComment(), this.comment);
+//    }
+//
+//    public boolean matches(ConfigCategory category) {
+//        return Objects.equals(category.getComment(), comment) && category.getName().equals(name) &&
+//                category.getLanguagekey().equals(langKey) && type == Type.CATEGORY;
+//    }
 
-    public boolean matches(ConfigCategory category) {
-        return Objects.equals(category.getComment(), comment) && category.getName().equals(name) &&
-                category.getLanguagekey().equals(langKey) && type == Type.CATEGORY;
-    }
-
-    //TODO better matching
     public boolean matches(IConfigElement element) {
-        return element.getLanguageKey().equals(langKey) && (element.isProperty() ? Type.fromType(element.getType()).equals(type) : type == Type.CATEGORY);
+        return element.getLanguageKey().equals(langKey) && (element.isProperty() ? Type.fromType(element.getType()).equals(type) : type == Type.CATEGORY)
+                && Objects.equals(element.getName(), name);
     }
 }

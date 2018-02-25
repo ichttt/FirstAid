@@ -7,42 +7,33 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.GuiConfigEntries;
 import net.minecraftforge.fml.client.config.IConfigElement;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
+@SideOnly(Side.CLIENT)
 public class GuiConfigScreen extends GuiConfig {
-    private List<GuiConfigEntries.IConfigEntry> allConfigEntries;
+    private final List<GuiConfigEntries.IConfigEntry> removedEntries = new ArrayList<>();
     private static boolean isAdvanced = false;
     private GuiButton button;
 
     public GuiConfigScreen(GuiScreen parentScreen) {
         super(parentScreen, FirstAid.MODID, FirstAid.NAME);
-        allConfigEntries = this.entryList.listEntries;
     }
 
     public GuiConfigScreen(GuiScreen parentScreen, List<IConfigElement> configElements, String modID, boolean allRequireWorldRestart, boolean allRequireMcRestart, String title, String titleLine2) {
         super(parentScreen, configElements, modID, allRequireWorldRestart, allRequireMcRestart, title, titleLine2);
-        allConfigEntries = this.entryList.listEntries;
     }
 
     @Override
     public void initGui() {
-        if (this.entryList == null || this.needsRefresh)
-        {
-            this.entryList = new GuiConfigEntries(this, mc);
-            this.needsRefresh = false;
-            this.allConfigEntries = this.entryList.listEntries;
-        }
+        this.entryList.listEntries.addAll(removedEntries);
         super.initGui();
-//        allConfigEntries = this.entryList.listEntries;
+        this.entryList.listEntries.removeAll(removedEntries);
         setupButton();
-//        if (isAdvanced) {
-//            this.buttonList.clear();
-//            super.initGui();
-//            allConfigEntries = this.entryList.listEntries;
-//            setupButton();
-//        }
     }
 
     private void setupButton() {
@@ -50,9 +41,19 @@ public class GuiConfigScreen extends GuiConfig {
             this.buttonList.remove(this.button);
         this.button = new GuiButton(1999, 0, 0, 80, 20, "Show " + (isAdvanced ? "less" : "more"));
         this.buttonList.add(button);
-        this.entryList.listEntries = new ArrayList<>(this.allConfigEntries);
-        if (!isAdvanced)
-            this.entryList.listEntries.removeIf(guiEntry -> ExtraConfigManager.advancedConfigOptions.stream().anyMatch(entry -> entry.getRight().matches(guiEntry.getConfigElement())));
+        if (isAdvanced) {
+            this.entryList.listEntries.addAll(removedEntries);
+            removedEntries.clear();
+        } else {
+            ListIterator<GuiConfigEntries.IConfigEntry> iterator = this.entryList.listEntries.listIterator();
+            while (iterator.hasNext()) {
+                GuiConfigEntries.IConfigEntry next = iterator.next();
+                if (ExtraConfigManager.advancedConfigOptions.stream().anyMatch(entry -> entry.property.matches(next.getConfigElement()))) {
+                    removedEntries.add(next);
+                    iterator.remove();
+                }
+            }
+        }
         for (int i = 0; i < this.entryList.listEntries.size(); i++) {
             GuiConfigEntries.IConfigEntry guiEntry = this.entryList.listEntries.get(i);
             if (guiEntry instanceof GuiConfigEntries.CategoryEntry && !(guiEntry instanceof CustomCategoryEntry)) {
@@ -74,6 +75,7 @@ public class GuiConfigScreen extends GuiConfig {
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
-//        isAdvanced = false;
+        if (!(this.parentScreen instanceof GuiConfigScreen))
+            isAdvanced = false;
     }
 }

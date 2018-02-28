@@ -22,6 +22,8 @@ import ichttt.mods.firstaid.common.network.MessageResync;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.ProjectileHelper;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -217,11 +219,13 @@ public class EventHandler {
     @SubscribeEvent
     public static void onConfigChange(ConfigChangedEvent.OnConfigChangedEvent event) {
         if (event.getModID().equals(FirstAid.MODID)) {
-            Map<ConfigEntry<ExtraConfig.Sync>, Object> map = new LinkedHashMap<>();
+            Map<ConfigEntry<ExtraConfig.Sync>, ByteBuf> map = new LinkedHashMap<>();
 
             for (ConfigEntry<ExtraConfig.Sync> option : ExtraConfigManager.syncedConfigOptions) {
                 if (option.hasRemoteData()) { //if we have remote data, we must make sure to revert it before saving to file
-                    map.put(option, option.getCurrentState()); //we still have to keep the value to put it back after saving to file
+                    ByteBuf buf = ByteBufAllocator.DEFAULT.buffer();
+                    option.writeToBuf(buf);
+                    map.put(option, buf); //we still have to keep the value to put it back after saving to file
                     option.revert(); //revert to client default state
                 }
             }
@@ -230,8 +234,11 @@ public class EventHandler {
 
             for (ConfigEntry<ExtraConfig.Sync> option : ExtraConfigManager.syncedConfigOptions) {
                 option.updateOrigState(); //make sure we revert to the correct value again
-                if (map.containsKey(option))
-                    option.setRemoteState(map.get(option)); //put back the old remote value if we have been connected
+                if (map.containsKey(option)) {
+                    ByteBuf buf = map.get(option);
+                    option.readFromBuf(buf); //put back the old remote value if we have been connected
+                    buf.release();
+                }
             }
             event.setResult(Event.Result.ALLOW);
         }

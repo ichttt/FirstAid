@@ -23,7 +23,7 @@ public class ConfigEntry<T extends Annotation> {
     public final T annotation;
     private boolean hasRemoteData = false;
     @Nullable
-    private Object originalState;
+    private ByteBuf originalState;
 
     public ConfigEntry(@Nonnull Field f, @Nullable Object fieldAccessor, @Nonnull T annotation, boolean revertOnSave, @Nonnull UniqueProperty property) {
         this.field = f;
@@ -32,70 +32,51 @@ public class ConfigEntry<T extends Annotation> {
         this.property = property;
         this.annotation = annotation;
         if (revertOnSave) {
-            try {
-                this.originalState = f.get(fieldAccessor);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Failed to access field " + f, e);
-            }
-
             //validate we can write to bytebuf
             ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
             try {
+                Object originalState = f.get(fieldAccessor);
                 writeToBuf(buffer);
                 readFromBuf(buffer);
                 //noinspection ConstantConditions see above
                 if (!originalState.equals(f.get(fieldAccessor)))
                     throw new RuntimeException("Error while writing and reading: Values do not match!");
+                buffer.release();
             } catch (IllegalAccessException e) {
+                buffer.release();
                 throw new RuntimeException("Failed to access field " + f, e);
             } finally {
-                buffer.release();
                 hasRemoteData = false;
             }
             //valid
+            this.originalState = ByteBufAllocator.DEFAULT.buffer();
+            writeToBuf(this.originalState);
         }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        if (originalState != null && originalState.refCnt() > 0)
+            originalState.release(originalState.refCnt());
     }
 
     public boolean hasRemoteData() {
         return hasRemoteData;
     }
 
-    @Nonnull
-    public Object getCurrentState() {
-        try {
-            return field.get(fieldAccessor);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Cannot access field " + field, e);
-        }
-    }
-
-    public void setRemoteState(@Nonnull Object data) {
-        hasRemoteData = true;
-        try {
-            field.setAccessible(true);
-            field.set(fieldAccessor, Objects.requireNonNull(data));
-            field.setAccessible(false);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Cannot access field " + field, e);
-        }
-    }
-
     public void revert() {
         if (revert && hasRemoteData) {
+            readFromBuf(Objects.requireNonNull(this.originalState).copy());
             hasRemoteData = false;
-            try {
-                field.setAccessible(true);
-                field.set(fieldAccessor, originalState);
-                field.setAccessible(false);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Cannot access field " + field, e);
-            }
         }
     }
 
     public void updateOrigState() {
         if (revert) {
-            originalState = getCurrentState();
+            Objects.requireNonNull(originalState).release();
+            originalState = ByteBufAllocator.DEFAULT.buffer();
+            writeToBuf(originalState);
         }
     }
 

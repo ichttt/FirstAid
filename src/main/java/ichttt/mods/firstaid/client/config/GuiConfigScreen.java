@@ -4,6 +4,7 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.common.config.ExtraConfigManager;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.fml.client.GuiModList;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.GuiConfigEntries;
 import net.minecraftforge.fml.client.config.IConfigElement;
@@ -68,14 +69,10 @@ public class GuiConfigScreen extends GuiConfig {
         if (button.id == 1999) {
             isAdvanced = !isAdvanced;
             setupButton();
+        } else if (button.id == 2000 && this.parentScreen instanceof GuiModList) { //save and exit
+            isAdvanced = false;
+            super.actionPerformed(button);
         } else
             super.actionPerformed(button);
-    }
-
-    @Override
-    public void onGuiClosed() {
-        super.onGuiClosed();
-        if (!(this.parentScreen instanceof GuiConfigScreen))
-            isAdvanced = false;
     }
 }

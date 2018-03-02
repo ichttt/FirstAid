@@ -84,7 +84,10 @@ public class FirstAidConfig {
 
         @Config.Comment("True if the overlay should be shown, false otherwise")
         @Config.LangKey("firstaid.config.showoverlay")
+        @ExtraConfig.Advanced
         public boolean showOverlay = true;
+
+        public boolean onlyShowWhenDamaged = true;
 
         @Config.Comment("If true the HUD will display the health as numbers instead of the \"normal\" icons")
         @Config.LangKey("firstaid.config.displayhealthasnumber")

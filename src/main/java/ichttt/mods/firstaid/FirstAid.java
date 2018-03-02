@@ -5,8 +5,6 @@ import ichttt.mods.firstaid.common.DebugDamageCommand;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.IProxy;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
-import ichttt.mods.firstaid.common.config.ConfigEntry;
-import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.config.ExtraConfigManager;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
@@ -40,7 +38,12 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 
-@Mod(modid = FirstAid.MODID, name = FirstAid.NAME, version = FirstAid.VERSION, acceptedMinecraftVersions = "[1.12.2,1.13)", dependencies = "required-after:forge@[14.23.0.2526,);", guiFactory = "ichttt.mods.firstaid.client.config.GuiFactory")
+@Mod(modid = FirstAid.MODID,
+     name = FirstAid.NAME,
+     version = FirstAid.VERSION,
+     acceptedMinecraftVersions = "[1.12.2,1.13)",
+     dependencies = "required-after:forge@[14.23.0.2526,);",
+     guiFactory = "ichttt.mods.firstaid.client.config.GuiFactory")
 public class FirstAid {
     public static Logger logger;
     public static final String MODID = "firstaid";
@@ -127,14 +130,7 @@ public class FirstAid {
     @Mod.EventHandler
     public void onServerStop(FMLServerStoppedEvent event) {
         logger.debug("Cleaning up");
-        isSynced = false;
         PlayerDataManager.clear();
         EventHandler.hitList.clear();
-        for (ConfigEntry<ExtraConfig.Sync> option : ExtraConfigManager.syncedConfigOptions) {
-            if (option.hasRemoteData())
-                option.revert();
-            else
-                logger.error("Missing remote data for field " + option.field + ", cannot revert!");
-        }
     }
 }

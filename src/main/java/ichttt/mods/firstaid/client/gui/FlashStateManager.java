@@ -10,7 +10,7 @@ public class FlashStateManager {
     }
 
     public boolean update(long worldTime) {
-        if (currentState == 0)
+        if (isPaused())
             return false;
         if (worldTime - startTime > 150) {
             startTime = worldTime;
@@ -19,5 +19,9 @@ public class FlashStateManager {
                 currentState = 0;
         }
         return currentState % 2 == 0;
+    }
+
+    public boolean isPaused() {
+        return currentState == 0;
     }
 }

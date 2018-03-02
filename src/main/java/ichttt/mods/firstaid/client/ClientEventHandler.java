@@ -1,5 +1,6 @@
 package ichttt.mods.firstaid.client;
 
+import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
@@ -8,6 +9,9 @@ import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
+import ichttt.mods.firstaid.common.config.ConfigEntry;
+import ichttt.mods.firstaid.common.config.ExtraConfig;
+import ichttt.mods.firstaid.common.config.ExtraConfigManager;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
@@ -24,6 +28,7 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -53,6 +58,8 @@ public class ClientEventHandler {
                 mc.player.sendStatusMessage(new TextComponentString("[FirstAid] " + s), false);
             RegistryManager.debuffConfigErrors.clear();
         }
+        if (HUDHandler.ticker > 0)
+            HUDHandler.ticker--;
     }
 
     @SubscribeEvent
@@ -84,7 +91,7 @@ public class ClientEventHandler {
         RenderGameOverlayEvent.ElementType type = event.getType();
         if (type == RenderGameOverlayEvent.ElementType.ALL || (type == RenderGameOverlayEvent.ElementType.TEXT && FirstAidConfig.overlay.position == 2)) {
             GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
-            HUDHandler.renderOverlay(event.getResolution());
+            HUDHandler.renderOverlay(event.getResolution(), event.getPartialTicks());
         }
     }
 
@@ -100,5 +107,17 @@ public class ClientEventHandler {
         if (healer != null) {
             event.getToolTip().add(I18n.format("firstaid.tooltip.healer", healer.maxHeal, StringUtils.ticksToElapsedTime(healer.ticksPerHeal)));
         }
+    }
+
+    @SubscribeEvent
+    public static void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
+        FirstAid.isSynced = false;
+        for (ConfigEntry<ExtraConfig.Sync> option : ExtraConfigManager.syncedConfigOptions) {
+            if (option.hasRemoteData())
+                option.revert();
+            else
+                FirstAid.logger.error("Missing remote data for field " + option.field + ", cannot revert!");
+        }
+        HUDHandler.ticker = -1;
     }
 }

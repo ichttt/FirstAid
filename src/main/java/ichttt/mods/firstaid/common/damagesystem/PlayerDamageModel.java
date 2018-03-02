@@ -8,6 +8,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
@@ -17,6 +18,7 @@ import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.network.MessageResync;
 import ichttt.mods.firstaid.common.util.CommonUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -263,9 +265,15 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     @SideOnly(Side.CLIENT)
     public int getMaxRenderSize() {
         int max = 0;
-        for (AbstractDamageablePart part : this)
-            max = Math.max(max, (int) (part.getMaxHealth() + part.getAbsorption() + 0.9999F));
-        return (int) (((max + 1) / 2F) * 9);
+        for (AbstractDamageablePart part : this) {
+            int newMax;
+            if (FirstAidConfig.overlay.displayHealthAsNumber)
+                newMax = Minecraft.getMinecraft().fontRenderer.getStringWidth(HealthRenderUtils.TEXT_FORMAT.format(part.currentHealth) + "/" + part.getMaxHealth()) + 1;
+            else
+                newMax = (int) (((((int) (part.getMaxHealth() + part.getAbsorption() + 0.9999F)) + 1) / 2F) * 9F);
+            max = Math.max(max, newMax);
+        }
+        return max;
     }
 
     private int getCurrentMaxHealth() {

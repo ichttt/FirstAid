@@ -3,6 +3,7 @@ package ichttt.mods.firstaid.common.network;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientProxy;
+import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.config.ExtraConfigManager;
@@ -63,6 +64,7 @@ public class MessageReceiveConfiguration implements IMessage {
                     PlayerDataManager.tutorialDone.add(mc.player.getName());
                 else
                     mc.player.sendMessage(new TextComponentString("[First Aid] " + I18n.format("firstaid.tutorial.hint", ClientProxy.showWounds.getDisplayName())));
+                HUDHandler.ticker = 200;
             });
             return null;
         }

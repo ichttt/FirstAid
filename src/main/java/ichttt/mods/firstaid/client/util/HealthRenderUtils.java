@@ -43,13 +43,22 @@ public class HealthRenderUtils {
         if (absorption > 0) {
             String line2 = "+ " + TEXT_FORMAT.format(absorption);
             if (allowSecondLine) {
-                Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(line2, xTranslation + 5, yTranslation, 0xFFFFFF);
+                Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(line2, xTranslation + 3, yTranslation, 0xFFFFFF);
                 GlStateManager.translate(-5, 0, 0);
             } else {
                 text += " " + line2;
             }
         }
         Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(text, xTranslation, yTranslation, 0xFFFFFF);
+    }
+
+    public static boolean healthChanged(AbstractDamageablePart damageablePart) {
+        if (prevHealth.containsKey(damageablePart.part)) {
+            int prev = prevHealth.getInt(damageablePart.part);
+            int current = (int) Math.ceil(damageablePart.currentHealth);
+            return prev != current;
+        }
+        return false;
     }
 
     public static void drawHealth(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean allowSecondLine, boolean playerDead) {

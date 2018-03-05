@@ -23,7 +23,7 @@ public class ExtraConfigManager
 
     public static void init()
     {
-        for (Class clazz : configClasses) {
+        for (Class<?> clazz : configClasses) {
             FirstAid.logger.info("Setting up config for class " + clazz);
             if (!clazz.isAnnotationPresent(ExtraConfig.class)) {
                 FirstAid.logger.error("Cannot setup config for class " + clazz + " as it does not have the ExtraConfig annotation!");

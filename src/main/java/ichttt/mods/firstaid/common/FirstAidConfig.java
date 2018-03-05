@@ -82,11 +82,13 @@ public class FirstAidConfig {
         @Config.LangKey("firstaid.config.showvanillahealthbar")
         public boolean showVanillaHealthBar = false;
 
-        @Config.Comment("True if the overlay should be shown, false otherwise")
+        @Config.Comment("True if the overlay should be shown at all, false otherwise")
         @Config.LangKey("firstaid.config.showoverlay")
         @ExtraConfig.Advanced
         public boolean showOverlay = true;
 
+        @Config.Comment("If true the overlay will automatically be hidden while health isn't changing. It will be shown when connecting and any health changes")
+        @Config.LangKey("firstaid.config.onlyshowwhendamaged")
         public boolean onlyShowWhenDamaged = true;
 
         @Config.Comment("If true the HUD will display the health as numbers instead of the \"normal\" icons")

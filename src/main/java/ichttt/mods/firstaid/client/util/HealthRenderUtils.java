@@ -64,7 +64,7 @@ public class HealthRenderUtils {
     public static void drawHealth(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean allowSecondLine, boolean playerDead) {
         int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
-        if ((maxHealth + maxExtraHealth > 8 && allowSecondLine) || (maxHealth + maxExtraHealth > FirstAidConfig.overlay.heartThreshold)) {
+        if ((maxHealth + maxExtraHealth > 8 && allowSecondLine) || ((maxHealth + maxExtraHealth) > FirstAidConfig.overlay.heartThreshold)) {
             drawHealthString(damageablePart, xTranslation, yTranslation, allowSecondLine);
             return;
         }
@@ -155,9 +155,10 @@ public class HealthRenderUtils {
     }
 
     public static int getMaxHearts(float value) {
-        int maxCurrentHearths = (int) Math.ceil(value);
-        if (maxCurrentHearths % 2 != 0) maxCurrentHearths++;
-        return maxCurrentHearths >> 1;
+        int maxCurrentHearts = (int) Math.ceil(value);
+        if (maxCurrentHearts % 2 != 0)
+            maxCurrentHearts++;
+        return maxCurrentHearts >> 1;
     }
 
     private static void renderMax(int regen, Int2IntFunction function, int max, int yTexture, Gui gui, boolean highlight) {

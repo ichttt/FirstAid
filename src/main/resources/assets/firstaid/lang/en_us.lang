@@ -60,7 +60,9 @@ firstaid.config.naturalregenmultiplier.tooltip=The value vanilla's natural regen
 firstaid.config.showvanillahealthbar=Show vanilla health bar
 firstaid.config.showvanillahealthbar.tooltip=True if the main health bar should be rendered (Will be average health)
 firstaid.config.showoverlay=Show overlay
-firstaid.config.showoverlay.tooltip=True if the overlay should be shown, false otherwise
+firstaid.config.showoverlay.tooltip=True if the overlay should be shown at all, false otherwise
+firstaid.config.onlyshowwhendamaged=Show on health changes
+firstaid.config.onlyshowwhendamaged.tooltip=If true the overlay will automatically be hidden while health isn't changing. It will be shown when connecting and any health changes
 firstaid.config.displayhealthasnumber=Display health as number
 firstaid.config.displayhealthasnumber.tooltip=If true the HUD will display the health as numbers instead of the "normal" icons
 firstaid.config.hudscale=HUD scale
@@ -71,6 +73,8 @@ firstaid.config.xoffset=X-Axis Offset
 firstaid.config.xoffset.tooltip=The offset on the x axis
 firstaid.config.yoffset=Y-Axis Offset
 firstaid.config.yoffset.tooltip=The offset on the y axis
+firstaid.config.heartthreshold=Heart threshold
+firstaid.config.yoffset.tooltip=If the player has more hearts than the threshold, the health will be displayed as a number
 
 keybinds.show_wounds=Show wounds
 

@@ -17,8 +17,6 @@ import ichttt.mods.firstaid.common.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.network.MessageResync;
 import ichttt.mods.firstaid.common.util.MorpheusHelper;
-import net.minecraft.command.CommandHandler;
-import net.minecraft.command.ICommandManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -29,7 +27,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -120,11 +118,8 @@ public class FirstAid {
     }
 
     @Mod.EventHandler
-    public void beforeServerStart(FMLServerAboutToStartEvent event) {
-        ICommandManager manager = event.getServer().getCommandManager();
-        if (manager instanceof CommandHandler) {
-            ((CommandHandler) manager).registerCommand(new DebugDamageCommand());
-        }
+    public void beforeServerStart(FMLServerStartingEvent event) {
+        event.registerServerCommand(new DebugDamageCommand());
     }
 
     @Mod.EventHandler

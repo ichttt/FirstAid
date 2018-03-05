@@ -26,6 +26,7 @@ import java.util.Objects;
 @SideOnly(Side.CLIENT)
 public class HUDHandler {
     private static final Map<EnumPlayerPart, String> TRANSLATION_MAP = new HashMap<>();
+    private static final int FADE_TIME = 30;
     private static int maxLength;
     public static int ticker = -1;
 
@@ -90,7 +91,7 @@ public class HUDHandler {
         if (mc.gameSettings.showDebugInfo && FirstAidConfig.overlay.position == 0)
             return;
 
-        int alpha = Math.min(255, ticker >= 40 ? 255 : 1 - (int)((40 - (ticker + partialTicks)) * 255.0F / 40F));
+        int alpha = Math.min(255, ticker >= FADE_TIME ? 255 : (int)((FADE_TIME - (ticker + partialTicks)) * 255.0F / (float) FADE_TIME));
 
         GlStateManager.pushMatrix();
         GlStateManager.scale(FirstAidConfig.overlay.hudScale, FirstAidConfig.overlay.hudScale, 1);
@@ -100,10 +101,8 @@ public class HUDHandler {
         boolean playerDead = damageModel.isDead(mc.player);
 
         int xTranslation = maxLength;
-//        float alpha = ticker <= 0 || ticker >= 80 ? 1F : (1F / (80 - ticker));
         for (AbstractDamageablePart part : damageModel) {
-//            System.out.println(alpha);
-            mc.fontRenderer.drawStringWithShadow(TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF + (alpha << 24 & -0xFFFFFF));
+            mc.fontRenderer.drawStringWithShadow(TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF - (alpha << 24 & -0xFFFFFF));
             if (FirstAidConfig.overlay.displayHealthAsNumber) {
                 HealthRenderUtils.drawHealthString(part, xTranslation, 0, false);
             } else {

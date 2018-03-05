@@ -60,7 +60,9 @@ firstaid.config.naturalregenmultiplier.tooltip=Der Wert, mit dem die natürliche
 firstaid.config.showvanillahealthbar=Zeige die normale Lebensleiste
 firstaid.config.showvanillahealthbar.tooltip=Falls aktiviert wird die normale Lebensleiste dargestellt (zeigt dein durchschnittliches Leben)
 firstaid.config.showoverlay=Overlay anzeigen
-firstaid.config.showoverlay.tooltip=Zeigt das neue Overlay
+firstaid.config.showoverlay.tooltip=Falls nicht aktiv wird das Overlay niemals gezeigt
+firstaid.config.onlyshowwhendamaged=Zeige bei Lebensänderung
+firstaid.config.onlyshowwhendamaged.tooltip=Falls aktiv wird das Leben nur gezeigt wenn sich etwas ändert, also wenn ein Körperteil Schaden bekommt oder geheilt wird
 firstaid.config.displayhealthasnumber=Stelle Leben als Nummer dar
 firstaid.config.displayhealthasnumber.tooltip=Falls aktiv wird das Overlay das Leben als Nummer darstellen
 firstaid.config.hudscale=Skalierung des Overlays
@@ -71,6 +73,8 @@ firstaid.config.xoffset=X-Achsenoffset
 firstaid.config.xoffset.tooltip=Der Offset auf der X-Achse
 firstaid.config.yoffset=Y-Achsenoffset
 firstaid.config.yoffset.tooltip=Der Offset auf der Y-Achse
+firstaid.config.heartthreshold=Renderlimit Herzen
+firstaid.config.yoffset.tooltip=Falls der Spieler mehr Herzen als diese Zahl hat, wird das Leben als Zahl dargestellt
 
 keybinds.show_wounds=Wunden anzeigen
 

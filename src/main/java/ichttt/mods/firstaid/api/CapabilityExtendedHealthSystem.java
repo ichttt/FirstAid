@@ -21,6 +21,8 @@ public class CapabilityExtendedHealthSystem {
     @CapabilityInject(AbstractPlayerDamageModel.class)
     public static Capability<AbstractPlayerDamageModel> INSTANCE;
 
+    //TODO move
+    @Deprecated
     public static void register() {
         CapabilityManager.INSTANCE.register(AbstractPlayerDamageModel.class, new Capability.IStorage<AbstractPlayerDamageModel>() {
             @Nullable
@@ -37,7 +39,7 @@ public class CapabilityExtendedHealthSystem {
         , DefaultImpl::new);
     }
 
-    private static class DefaultImpl extends AbstractPlayerDamageModel {
+    public static class DefaultImpl extends AbstractPlayerDamageModel {
 
         public DefaultImpl() {
             super(null, null, null, null, null, null, null, null, true);

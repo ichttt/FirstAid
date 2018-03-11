@@ -15,6 +15,7 @@ import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -61,9 +62,9 @@ public class HUDHandler {
                     break;
                 }
             }
+            if (ticker <= 0)
+                return;
         }
-        if (ticker <= 0)
-            return;
 
         mc.getTextureManager().bindTexture(Gui.ICONS);
         Gui gui = mc.ingameGUI;
@@ -91,13 +92,16 @@ public class HUDHandler {
         if (mc.gameSettings.showDebugInfo && FirstAidConfig.overlay.position == 0)
             return;
 
-        int alpha = Math.min(255, ticker >= FADE_TIME ? 255 : (int)((FADE_TIME - (ticker + partialTicks)) * 255.0F / (float) FADE_TIME));
+        boolean enableAlphaBlend = FirstAidConfig.overlay.onlyShowWhenDamaged && ticker < FADE_TIME;
+        int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), 0, 250) : 0;
 
         GlStateManager.pushMatrix();
         GlStateManager.scale(FirstAidConfig.overlay.hudScale, FirstAidConfig.overlay.hudScale, 1);
         GlStateManager.translate(xOffset, yOffset, 0F);
-        GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        if (enableAlphaBlend) {
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        }
         boolean playerDead = damageModel.isDead(mc.player);
 
         int xTranslation = maxLength;
@@ -110,7 +114,8 @@ public class HUDHandler {
             }
             GlStateManager.translate(0, 10F, 0F);
         }
-        GlStateManager.disableBlend();
+        if (enableAlphaBlend)
+            GlStateManager.disableBlend();
         GlStateManager.popMatrix();
     }
 }

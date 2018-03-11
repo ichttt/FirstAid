@@ -1,6 +1,7 @@
 package ichttt.mods.firstaid;
 
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.DebugDamageCommand;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.IProxy;
@@ -19,7 +20,12 @@ import ichttt.mods.firstaid.common.network.MessageResync;
 import ichttt.mods.firstaid.common.util.MorpheusHelper;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -35,6 +41,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @Mod(modid = FirstAid.MODID,
      name = FirstAid.NAME,
@@ -79,7 +86,26 @@ public class FirstAid {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        CapabilityExtendedHealthSystem.register();
+        CapabilityManager.INSTANCE.register(AbstractPlayerDamageModel.class, new Capability.IStorage<AbstractPlayerDamageModel>() {
+                    @Nullable
+                    @Override
+                    public NBTBase writeNBT(Capability<AbstractPlayerDamageModel> capability, AbstractPlayerDamageModel instance, EnumFacing side) {
+                        return instance.serializeNBT();
+                    }
+
+                    @Override
+                    public void readNBT(Capability<AbstractPlayerDamageModel> capability, AbstractPlayerDamageModel instance, EnumFacing side, NBTBase nbt) {
+                        instance.deserializeNBT((NBTTagCompound) nbt);
+                    }
+                }
+                , () -> {
+                    try {
+                        throw new UnsupportedOperationException("No default implementation");
+                    } catch (UnsupportedOperationException e) { //TODO remove catch
+                        FirstAid.logger.warn("A mod still uses the default implementation of the capability. This is deprecated and will be removed in feature releases", e);
+                    }
+                    return new CapabilityExtendedHealthSystem.DefaultImpl();
+                });
         ExtraConfigManager.init();
 
         int i = 0;

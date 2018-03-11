@@ -58,21 +58,15 @@ public class HealthRenderUtils {
             int current = (int) Math.ceil(damageablePart.currentHealth);
             return prev != current;
         }
-        return false;
+        return true;
     }
 
     public static void drawHealth(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean allowSecondLine, boolean playerDead) {
         int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
-        if ((maxHealth + maxExtraHealth > 8 && allowSecondLine) || ((maxHealth + maxExtraHealth) > FirstAidConfig.overlay.heartThreshold)) {
-            drawHealthString(damageablePart, xTranslation, yTranslation, allowSecondLine);
-            return;
-        }
-
-        int yTexture = damageablePart.canCauseDeath ? 45 : 0;
         int current = (int) Math.ceil(damageablePart.currentHealth);
-        int absorption = (int) Math.ceil(damageablePart.getAbsorption());
         FlashStateManager activeFlashState = Objects.requireNonNull(flashStates.get(damageablePart.part));
+
         if (prevHealth.containsKey(damageablePart.part)) {
             int prev = prevHealth.getInt(damageablePart.part);
             if (prev != current)
@@ -82,6 +76,14 @@ public class HealthRenderUtils {
             prevHealth.put(damageablePart.part, current);
         else
             prevHealth.clear();
+
+        if ((maxHealth + maxExtraHealth > 8 && allowSecondLine) || ((maxHealth + maxExtraHealth) > FirstAidConfig.overlay.heartThreshold)) {
+            drawHealthString(damageablePart, xTranslation, yTranslation, allowSecondLine);
+            return;
+        }
+
+        int yTexture = damageablePart.canCauseDeath ? 45 : 0;
+        int absorption = (int) Math.ceil(damageablePart.getAbsorption());
         boolean highlight = activeFlashState.update(Minecraft.getSystemTime());
 
         Minecraft mc = Minecraft.getMinecraft();

@@ -8,7 +8,6 @@ import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
-import ichttt.mods.firstaid.common.config.ExtraConfigManager;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.capability.CapProvider;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
@@ -221,7 +220,7 @@ public class EventHandler {
         if (event.getModID().equals(FirstAid.MODID)) {
             Map<ConfigEntry<ExtraConfig.Sync>, ByteBuf> map = new LinkedHashMap<>();
 
-            for (ConfigEntry<ExtraConfig.Sync> option : ExtraConfigManager.syncedConfigOptions) {
+            for (ConfigEntry<ExtraConfig.Sync> option : FirstAid.syncedConfigOptions) {
                 if (option.hasRemoteData()) { //if we have remote data, we must make sure to revert it before saving to file
                     ByteBuf buf = ByteBufAllocator.DEFAULT.buffer();
                     option.writeToBuf(buf);
@@ -232,7 +231,7 @@ public class EventHandler {
 
             ConfigManager.sync(FirstAid.MODID, Config.Type.INSTANCE); //sync to file
 
-            for (ConfigEntry<ExtraConfig.Sync> option : ExtraConfigManager.syncedConfigOptions) {
+            for (ConfigEntry<ExtraConfig.Sync> option : FirstAid.syncedConfigOptions) {
                 option.updateOrigState(); //make sure we revert to the correct value again
                 if (map.containsKey(option)) {
                     ByteBuf buf = map.get(option);

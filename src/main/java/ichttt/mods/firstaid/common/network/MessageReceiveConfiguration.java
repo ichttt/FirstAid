@@ -6,7 +6,6 @@ import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
-import ichttt.mods.firstaid.common.config.ExtraConfigManager;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import io.netty.buffer.ByteBuf;
@@ -33,7 +32,7 @@ public class MessageReceiveConfiguration implements IMessage {
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        for (ConfigEntry<ExtraConfig.Sync> entry : ExtraConfigManager.syncedConfigOptions)
+        for (ConfigEntry<ExtraConfig.Sync> entry : FirstAid.syncedConfigOptions)
             entry.readFromBuf(buf);
 
         playerDamageModel = ByteBufUtils.readTag(buf);
@@ -41,7 +40,7 @@ public class MessageReceiveConfiguration implements IMessage {
 
     @Override
     public void toBytes(ByteBuf buf) {
-        for (ConfigEntry<ExtraConfig.Sync> entry : ExtraConfigManager.syncedConfigOptions)
+        for (ConfigEntry<ExtraConfig.Sync> entry : FirstAid.syncedConfigOptions)
             entry.writeToBuf(buf);
 
         ByteBufUtils.writeTag(buf, playerDamageModel);

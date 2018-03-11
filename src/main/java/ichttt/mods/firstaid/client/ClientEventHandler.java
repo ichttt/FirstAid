@@ -11,7 +11,6 @@ import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
-import ichttt.mods.firstaid.common.config.ExtraConfigManager;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
@@ -112,7 +111,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         FirstAid.isSynced = false;
-        for (ConfigEntry<ExtraConfig.Sync> option : ExtraConfigManager.syncedConfigOptions) {
+        for (ConfigEntry<ExtraConfig.Sync> option : FirstAid.syncedConfigOptions) {
             if (option.hasRemoteData())
                 option.revert();
             else

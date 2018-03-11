@@ -1,7 +1,7 @@
 package ichttt.mods.firstaid.client.config;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.common.config.ExtraConfigManager;
+import ichttt.mods.firstaid.client.ClientProxy;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.client.GuiModList;
@@ -49,7 +49,7 @@ public class GuiConfigScreen extends GuiConfig {
             ListIterator<GuiConfigEntries.IConfigEntry> iterator = this.entryList.listEntries.listIterator();
             while (iterator.hasNext()) {
                 GuiConfigEntries.IConfigEntry next = iterator.next();
-                if (ExtraConfigManager.advancedConfigOptions.stream().anyMatch(entry -> entry.property.matches(next.getConfigElement()))) {
+                if (ClientProxy.advancedConfigOptions.stream().anyMatch(entry -> entry.property.matches(next.getConfigElement()))) {
                     removedEntries.add(next);
                     iterator.remove();
                 }

@@ -4,8 +4,11 @@ import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.DebugDamageCommand;
 import ichttt.mods.firstaid.common.EventHandler;
+import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.IProxy;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
+import ichttt.mods.firstaid.common.config.ConfigEntry;
+import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.config.ExtraConfigManager;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
@@ -42,6 +45,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 @Mod(modid = FirstAid.MODID,
      name = FirstAid.NAME,
@@ -56,6 +60,7 @@ public class FirstAid {
     public static final String VERSION = "1.5.1";
 
     public static boolean isSynced = false;
+    public static List<ConfigEntry<ExtraConfig.Sync>> syncedConfigOptions;
 
     @SuppressWarnings("unused")
     @SidedProxy(clientSide = "ichttt.mods.firstaid.client.ClientProxy", serverSide = "ichttt.mods.firstaid.server.ServerProxy")
@@ -106,7 +111,7 @@ public class FirstAid {
                     }
                     return new CapabilityExtendedHealthSystem.DefaultImpl();
                 });
-        ExtraConfigManager.init();
+        syncedConfigOptions = ExtraConfigManager.getAnnotatedFields(ExtraConfig.Sync.class, FirstAidConfig.class);
 
         int i = 0;
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);

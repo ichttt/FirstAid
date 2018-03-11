@@ -2,7 +2,6 @@ package ichttt.mods.firstaid.common.config;
 
 import com.google.common.collect.ImmutableList;
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.common.FirstAidConfig;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.FieldWrapper;
 import net.minecraftforge.common.config.Property;
@@ -10,31 +9,12 @@ import net.minecraftforge.common.config.Property;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 public class ExtraConfigManager
 {
-    private static final Set<Class<?>> configClasses = Collections.singleton(FirstAidConfig.class);
-    public static List<ConfigEntry<ExtraConfig.Advanced>> advancedConfigOptions;
-    public static List<ConfigEntry<ExtraConfig.Sync>> syncedConfigOptions;
-
-    public static void init()
-    {
-        for (Class<?> clazz : configClasses) {
-            FirstAid.logger.info("Setting up config for class " + clazz);
-            if (!clazz.isAnnotationPresent(ExtraConfig.class)) {
-                FirstAid.logger.error("Cannot setup config for class " + clazz + " as it does not have the ExtraConfig annotation!");
-                continue;
-            }
-            advancedConfigOptions = getAnnotatedFields(ExtraConfig.Advanced.class, clazz);
-            syncedConfigOptions = getAnnotatedFields(ExtraConfig.Sync.class, clazz);
-        }
-    }
-
-    private static <T extends Annotation> List<ConfigEntry<T>> getAnnotatedFields(Class<T> annotationClass, Class<?> clazz) {
+    public static <T extends Annotation> List<ConfigEntry<T>> getAnnotatedFields(Class<T> annotationClass, Class<?> clazz) {
         return getAnnotatedFields(annotationClass, clazz, "general", null);
     }
 

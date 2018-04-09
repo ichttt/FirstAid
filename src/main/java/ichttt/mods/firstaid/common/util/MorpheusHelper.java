@@ -36,7 +36,7 @@ public class MorpheusHelper implements INewDayHandler {
             World world = DimensionManager.getWorld(0);
             for (EntityPlayer player : world.playerEntities) {
                 if (player.isPlayerFullyAsleep()) {
-                    HealthDistribution.distributeHealth(FirstAidConfig.externalHealing.sleepHealing, player, true); //heal the player who did sleep
+                    HealthDistribution.addRandomHealth(FirstAidConfig.externalHealing.sleepHealing, player, true); //heal the player who did sleep
                 }
             }
         }

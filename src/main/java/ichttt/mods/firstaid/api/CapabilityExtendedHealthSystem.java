@@ -17,7 +17,6 @@ import java.util.Iterator;
 
 public class CapabilityExtendedHealthSystem {
 
-    @SuppressWarnings("unused")
     @CapabilityInject(AbstractPlayerDamageModel.class)
     public static Capability<AbstractPlayerDamageModel> INSTANCE;
 
@@ -39,6 +38,8 @@ public class CapabilityExtendedHealthSystem {
         , DefaultImpl::new);
     }
 
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     public static class DefaultImpl extends AbstractPlayerDamageModel {
 
         public DefaultImpl() {

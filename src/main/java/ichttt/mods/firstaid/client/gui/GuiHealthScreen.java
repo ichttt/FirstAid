@@ -34,24 +34,23 @@ import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class GuiHealthScreen extends GuiScreen {
-    public static GuiHealthScreen INSTANCE;
     public static final int xSize = 256;
     public static final int ySize = 137;
-    private static final DecimalFormat FORMAT = new DecimalFormat("##.#");
     public static final ItemStack BED_ITEMSTACK = new ItemStack(Items.BED);
+    private static final DecimalFormat FORMAT = new DecimalFormat("##.#");
 
-    public int guiLeft;
-    public int guiTop;
-
-    private GuiButton head, leftArm, leftLeg, leftFoot, body, rightArm, rightLeg, rightFoot;
+    public static GuiHealthScreen INSTANCE;
+    public static boolean isOpen = false;
 
     private final AbstractPlayerDamageModel damageModel;
     private final List<GuiHoldButton> holdButtons = new ArrayList<>();
-    private final float bedScaleFactor = EventCalendar.isGuiFun() ? 2F : 1.25F;
-    private EnumHand activeHand;
     private final boolean disableButtons;
+    private final float bedScaleFactor = EventCalendar.isGuiFun() ? 2F : 1.25F;
 
-    public static boolean isOpen = false;
+    public int guiLeft;
+    public int guiTop;
+    private GuiButton head, leftArm, leftLeg, leftFoot, body, rightArm, rightLeg, rightFoot;
+    private EnumHand activeHand;
 
     public GuiHealthScreen(AbstractPlayerDamageModel damageModel) {
         this.damageModel = damageModel;
@@ -272,7 +271,6 @@ public class GuiHealthScreen extends GuiScreen {
     public void onGuiClosed() {
         INSTANCE = null;
         isOpen = false;
-        super.onGuiClosed();
     }
 
     public List<GuiButton> getButtons() {

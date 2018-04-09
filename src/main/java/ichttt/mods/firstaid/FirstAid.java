@@ -109,6 +109,7 @@ public class FirstAid {
                     } catch (UnsupportedOperationException e) { //TODO remove catch
                         FirstAid.logger.warn("A mod still uses the default implementation of the capability. This is deprecated and will be removed in feature releases", e);
                     }
+                    //noinspection deprecation
                     return new CapabilityExtendedHealthSystem.DefaultImpl();
                 });
         syncedConfigOptions = ExtraConfigManager.getAnnotatedFields(ExtraConfig.Sync.class, FirstAidConfig.class);

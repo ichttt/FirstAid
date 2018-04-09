@@ -6,6 +6,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
+import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.util.CommonUtils;
@@ -105,6 +106,7 @@ public class HUDHandler {
         boolean playerDead = damageModel.isDead(mc.player);
 
         int xTranslation = maxLength;
+        PlayerModelRenderer.renderPlayer(damageModel, 10, 1F);
         for (AbstractDamageablePart part : damageModel) {
             mc.fontRenderer.drawStringWithShadow(TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF - (alpha << 24 & -0xFFFFFF));
             if (FirstAidConfig.overlay.displayHealthAsNumber) {

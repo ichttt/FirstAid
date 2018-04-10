@@ -96,6 +96,9 @@ public class HUDHandler {
         boolean enableAlphaBlend = FirstAidConfig.overlay.onlyShowWhenDamaged && ticker < FADE_TIME;
         int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), 0, 250) : 0;
 
+        PlayerModelRenderer.renderPlayerHealth(damageModel, gui);
+        if (true)
+            return;
         GlStateManager.pushMatrix();
         GlStateManager.scale(FirstAidConfig.overlay.hudScale, FirstAidConfig.overlay.hudScale, 1);
         GlStateManager.translate(xOffset, yOffset, 0F);
@@ -106,7 +109,6 @@ public class HUDHandler {
         boolean playerDead = damageModel.isDead(mc.player);
 
         int xTranslation = maxLength;
-        PlayerModelRenderer.renderPlayer(damageModel, 10, 1F);
         for (AbstractDamageablePart part : damageModel) {
             mc.fontRenderer.drawStringWithShadow(TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF - (alpha << 24 & -0xFFFFFF));
             if (FirstAidConfig.overlay.displayHealthAsNumber) {

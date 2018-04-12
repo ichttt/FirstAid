@@ -78,32 +78,32 @@ public class FirstAidConfig {
 
     public static class Overlay {
 
+        public enum OverlayMode {
+            OFF, NUMBERS, HEARTS, PLAYER_MODEL
+        }
+
         @Config.Comment("True if the main health bar should be rendered (Will be average health)")
         @Config.LangKey("firstaid.config.showvanillahealthbar")
         public boolean showVanillaHealthBar = false;
 
-        @Config.Comment("True if the overlay should be shown at all, false otherwise")
-        @Config.LangKey("firstaid.config.showoverlay")
-        @ExtraConfig.Advanced
-        public boolean showOverlay = true;
+//        @Config.Comment("True if the overlay should be shown at all, false otherwise")
+//        @Config.LangKey("firstaid.config.showoverlay")
+//        @ExtraConfig.Advanced
+//        public boolean showOverlay = true;
 
         @Config.Comment("If true the overlay will automatically be hidden while health isn't changing. It will be shown when connecting and any health changes")
         @Config.LangKey("firstaid.config.onlyshowwhendamaged")
-        public boolean onlyShowWhenDamaged = true;
+        public boolean onlyShowWhenDamaged = true; //TODO rename, default on
 
-        @Config.Comment("If true the HUD will display the health as numbers instead of the \"normal\" icons")
-        @Config.LangKey("firstaid.config.displayhealthasnumber")
-        public boolean displayHealthAsNumber = false;
-
-        @Config.Comment("A scaling option for the HUD in addition to minecraft's GUI scale")
-        @Config.LangKey("firstaid.config.hudscale")
-        @Config.RangeDouble(min = 0.2F, max = 2F)
-        public float hudScale = 1F;
+//        @Config.Comment("If true the HUD will display the health as numbers instead of the \"normal\" icons")
+//        @Config.LangKey("firstaid.config.displayhealthasnumber")
+//        public boolean displayHealthAsNumber = false;
+        public OverlayMode overlayMode = OverlayMode.PLAYER_MODEL;
 
         @Config.Comment("The relative point of the overlay. 0=top+left, 1=top+right, 2=bottom+left, 3=bottom+right")
         @Config.LangKey("firstaid.config.position")
         @Config.RangeInt(min = 0, max = 3)
-        public int position = 0;
+        public int position = 0; //TODO make enum
 
         @Config.Comment("The offset on the x axis")
         @Config.LangKey("firstaid.config.xoffset")
@@ -115,10 +115,10 @@ public class FirstAidConfig {
         @ExtraConfig.Advanced
         public int yOffset = 1;
 
-        @Config.Comment("If the player has more hearts than the threshold, the health will be displayed as a number")
-        @Config.LangKey("firstaid.config.heartthreshold")
-        @ExtraConfig.Advanced
-        public int heartThreshold = 8;
+//        @Config.Comment("If the player has more hearts than the threshold, the health will be displayed as a number")
+//        @Config.LangKey("firstaid.config.heartthreshold")
+//        @ExtraConfig.Advanced
+//        public int heartThreshold = 8;
     }
 
     public static class DamageSystem {

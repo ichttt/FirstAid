@@ -2,18 +2,89 @@ package ichttt.mods.firstaid.common.config;
 
 import com.google.common.collect.ImmutableList;
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.common.FirstAidConfig;
+import joptsimple.internal.Strings;
 import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigCategory;
+import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.FieldWrapper;
 import net.minecraftforge.common.config.Property;
+import net.minecraftforge.fml.common.Loader;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-public class ExtraConfigManager
-{
+public class ExtraConfigManager {
+    private static List<String> toDeleteEntries = new ArrayList<>();
+    private static final Field CONFIG_FIELD;
+    static {
+        FirstAid.logger.debug("Setting up forge internal reflection");
+        Field field;
+        try {
+            field = ConfigManager.class.getDeclaredField("CONFIGS");
+            field.setAccessible(true);
+            field.get(null);
+        } catch (ReflectiveOperationException |IllegalArgumentException e) {
+            FirstAid.logger.error("Could not setup forge reflection - disabling config post processing", e);
+            field = null;
+        }
+        CONFIG_FIELD = field;
+    }
+
+    public static void deleteConfigEntry(String name) {
+        if (toDeleteEntries != null) toDeleteEntries.add(name);
+        else throw new IllegalStateException("Already cleaned up configs");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Configuration getConfigFromField(File f) {
+        if (CONFIG_FIELD != null) {
+            try {
+                return ((Map<String, Configuration>) CONFIG_FIELD.get(null)).get(f.getAbsolutePath());
+            } catch (Exception e) {
+                FirstAid.logger.error("Could not get config from field - enabling fallback", e);
+                return null;
+            }
+        }
+        return null;
+    }
+
+    public static void postProccessConfigs() {
+        Config annotation = FirstAidConfig.class.getAnnotation(Config.class);
+        String name = annotation.name();
+        if (Strings.isNullOrEmpty(name))
+            name = annotation.modid();
+        Configuration config = getConfigFromField(new File(Loader.instance().getConfigDir(), name + ".cfg"));
+
+        if (config == null) {
+            FirstAid.logger.warn("Skipping post processing due to null config");
+            return;
+        }
+
+        for (String s : toDeleteEntries) {
+            String path[] = s.split("\\.");
+            String catString = Configuration.CATEGORY_GENERAL + (path.length > 1 ? "." + s.substring(0, s.length() - (path[path.length - 1].length() + 1)) : "");
+            if (config.hasCategory(catString)) {
+                ConfigCategory cat = config.getCategory(catString);
+                if (cat.containsKey(path[path.length - 1])) {
+                    FirstAid.logger.info("Removing prop " + s);
+                    cat.remove(path[path.length - 1]);
+                }
+            } else {
+                FirstAid.logger.warn("Unable to find config category {} for removal of old config options", catString);
+            }
+        }
+        if (config.hasChanged()) config.save();
+        toDeleteEntries = null;
+    }
+
     public static <T extends Annotation> List<ConfigEntry<T>> getAnnotatedFields(Class<T> annotationClass, Class<?> clazz) {
         return getAnnotatedFields(annotationClass, clazz, "general", null);
     }

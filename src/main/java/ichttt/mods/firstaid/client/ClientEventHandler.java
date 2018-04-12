@@ -46,7 +46,7 @@ public class ClientEventHandler {
     public static void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getMinecraft();
-        if (mc.world == null || mc.player == null || mc.player.connection == null) return;
+        if (mc.world == null || mc.player == null || mc.player.connection == null || mc.isGamePaused()) return;
         if (EventCalendar.isGuiFun()) {
             GuiHealthScreen.BED_ITEMSTACK.setItemDamage(id);
             if (mc.world != null && mc.world.getWorldTime() % 3 == 0) id++;

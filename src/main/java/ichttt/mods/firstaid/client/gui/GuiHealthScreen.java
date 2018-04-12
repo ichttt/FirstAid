@@ -150,17 +150,16 @@ public class GuiHealthScreen extends GuiScreen {
 
         //Health
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
-        boolean playerDead = damageModel.isDead(mc.player);
         GlStateManager.color(1, 1, 1, 1);
         if (!damageModel.isTemp) {
-            drawHealth(damageModel.HEAD, false, 14, playerDead);
-            drawHealth(damageModel.LEFT_ARM, false, 39, playerDead);
-            drawHealth(damageModel.LEFT_LEG, false, 64, playerDead);
-            drawHealth(damageModel.LEFT_FOOT, false, 89, playerDead);
-            drawHealth(damageModel.BODY, true, 14, playerDead);
-            drawHealth(damageModel.RIGHT_ARM, true, 39, playerDead);
-            drawHealth(damageModel.RIGHT_LEG, true, 64, playerDead);
-            drawHealth(damageModel.RIGHT_FOOT, true, 89, playerDead);
+            drawHealth(damageModel.HEAD, false, 14);
+            drawHealth(damageModel.LEFT_ARM, false, 39);
+            drawHealth(damageModel.LEFT_LEG, false, 64);
+            drawHealth(damageModel.LEFT_FOOT, false, 89);
+            drawHealth(damageModel.BODY, true, 14);
+            drawHealth(damageModel.RIGHT_ARM, true, 39);
+            drawHealth(damageModel.RIGHT_LEG, true, 64);
+            drawHealth(damageModel.RIGHT_FOOT, true, 89);
         }
 
         //Tooltip
@@ -207,9 +206,9 @@ public class GuiHealthScreen extends GuiScreen {
             button.enabled = enabled;
     }
 
-    public void drawHealth(AbstractDamageablePart damageablePart, boolean right, int yOffset, boolean playerDead) {
+    public void drawHealth(AbstractDamageablePart damageablePart, boolean right, int yOffset) {
         int xTranslation = guiLeft + (right ? 200 - Math.min(38, HealthRenderUtils.getMaxHearts(damageablePart.getMaxHealth()) * 9 + HealthRenderUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 57);
-        HealthRenderUtils.drawHealth(damageablePart, xTranslation, guiTop + yOffset, this, true, playerDead);
+        HealthRenderUtils.drawHealth(damageablePart, xTranslation, guiTop + yOffset, this, true);
     }
 
     @Override

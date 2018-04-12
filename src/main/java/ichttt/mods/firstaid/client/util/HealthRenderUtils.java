@@ -52,16 +52,25 @@ public class HealthRenderUtils {
         Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(text, xTranslation, yTranslation, 0xFFFFFF);
     }
 
-    public static boolean healthChanged(AbstractDamageablePart damageablePart) {
+    private static void updatePrev(EnumPlayerPart part, int current, boolean playerDead) {
+        if (!playerDead)
+            prevHealth.put(part, current);
+        else
+            prevHealth.clear();
+    }
+
+    public static boolean healthChanged(AbstractDamageablePart damageablePart, boolean playerDead) {
+        int current = (int) Math.ceil(damageablePart.currentHealth);
         if (prevHealth.containsKey(damageablePart.part)) {
             int prev = prevHealth.getInt(damageablePart.part);
-            int current = (int) Math.ceil(damageablePart.currentHealth);
+            updatePrev(damageablePart.part, current, playerDead);
             return prev != current;
         }
+        updatePrev(damageablePart.part, current, playerDead);
         return true;
     }
 
-    public static void drawHealth(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean allowSecondLine, boolean playerDead) {
+    public static void drawHealth(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean allowSecondLine) {
         int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
         int current = (int) Math.ceil(damageablePart.currentHealth);
@@ -72,12 +81,8 @@ public class HealthRenderUtils {
             if (prev != current)
                 activeFlashState.setActive(Minecraft.getSystemTime());
         }
-        if (!playerDead)
-            prevHealth.put(damageablePart.part, current);
-        else
-            prevHealth.clear();
 
-        if ((maxHealth + maxExtraHealth > 8 && allowSecondLine) || ((maxHealth + maxExtraHealth) > FirstAidConfig.overlay.heartThreshold)) {
+        if ((maxHealth + maxExtraHealth > 8 && allowSecondLine) || ((maxHealth + maxExtraHealth) > 12)) {
             drawHealthString(damageablePart, xTranslation, yTranslation, allowSecondLine);
             return;
         }

@@ -15,8 +15,9 @@ public class PlayerModelRenderer {
     private static final ResourceLocation HEALTH_RENDER_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health.png");
     private static final int SIZE = 64;
 
-    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, Gui gui) {
+    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, Gui gui, float alpha) {
         GlStateManager.pushMatrix();
+        GlStateManager.color(1F, 1F, 1F, 1 - (alpha / 255));
         Minecraft mc = Minecraft.getMinecraft();
         mc.getTextureManager().bindTexture(HEALTH_RENDER_LOCATION);
         GlStateManager.scale(0.5F, 0.5F, 0.5F);

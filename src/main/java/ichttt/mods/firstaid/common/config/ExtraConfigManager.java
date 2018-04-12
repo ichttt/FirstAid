@@ -129,7 +129,7 @@ public class ExtraConfigManager {
         }
         List<ConfigEntry<T>> list = listBuilder.build();
         if (instance == null)
-            FirstAid.logger.info("Found {} annotations of the type {} for the class {}", list.size(), annotationClass, clazz);
+            FirstAid.logger.debug("Found {} annotations of the type {} for the {}", list.size(), annotationClass, clazz);
         return listBuilder.build();
     }
 

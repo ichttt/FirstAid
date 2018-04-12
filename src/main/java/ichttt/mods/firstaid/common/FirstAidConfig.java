@@ -90,18 +90,10 @@ public class FirstAidConfig {
         @Config.LangKey("firstaid.config.showvanillahealthbar")
         public boolean showVanillaHealthBar = false;
 
-//        @Config.Comment("True if the overlay should be shown at all, false otherwise")
-//        @Config.LangKey("firstaid.config.showoverlay")
-//        @ExtraConfig.Advanced
-//        public boolean showOverlay = true;
-
         @Config.Comment("If true the overlay will automatically be hidden while health isn't changing. It will be shown when connecting and any health changes")
         @Config.LangKey("firstaid.config.hideonnochange")
         public boolean hideOnNoChange = false;
 
-//        @Config.Comment("If true the HUD will display the health as numbers instead of the \"normal\" icons")
-//        @Config.LangKey("firstaid.config.displayhealthasnumber")
-//        public boolean displayHealthAsNumber = false;
         public OverlayMode overlayMode = OverlayMode.PLAYER_MODEL;
 
         @Config.Comment("The relative point of the overlay")
@@ -123,11 +115,6 @@ public class FirstAidConfig {
         @Config.RangeInt(min = 0, max = 200)
         @ExtraConfig.Advanced
         public int alpha = 50;
-
-//        @Config.Comment("If the player has more hearts than the threshold, the health will be displayed as a number")
-//        @Config.LangKey("firstaid.config.heartthreshold")
-//        @ExtraConfig.Advanced
-//        public int heartThreshold = 8;
     }
 
     public static class DamageSystem {

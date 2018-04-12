@@ -57,7 +57,7 @@ public class FirstAid {
     public static Logger logger;
     public static final String MODID = "firstaid";
     public static final String NAME = "First Aid";
-    public static final String VERSION = "1.5.2";
+    public static final String VERSION = "1.5.3";
 
     public static boolean isSynced = false;
     public static List<ConfigEntry<ExtraConfig.Sync>> syncedConfigOptions;
@@ -72,7 +72,7 @@ public class FirstAid {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent pre) {
         logger = pre.getModLog();
-        logger.debug("FirstAid version {} starting", VERSION);
+        logger.info("FirstAid version {} starting", VERSION);
         creativeTab = new CreativeTabs(FirstAid.MODID) {
             @Nonnull
             @Override

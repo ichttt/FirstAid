@@ -150,7 +150,7 @@ public class GuiHealthScreen extends GuiScreen {
 
         //Health
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
-        GlStateManager.color(1, 1, 1, 1);
+        GlStateManager.color(1F, 1F, 1F, 1F);
         if (!damageModel.isTemp) {
             drawHealth(damageModel.HEAD, false, 14);
             drawHealth(damageModel.LEFT_ARM, false, 39);

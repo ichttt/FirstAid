@@ -38,7 +38,7 @@ public class ExtraConfigManager {
         CONFIG_FIELD = field;
     }
 
-    public static void deleteConfigEntry(String name) {
+    public static void scheduleDelete(String name) {
         if (toDeleteEntries != null) toDeleteEntries.add(name);
         else throw new IllegalStateException("Already cleaned up configs");
     }

@@ -113,10 +113,12 @@ public class FirstAid {
                     return new CapabilityExtendedHealthSystem.DefaultImpl();
                 });
         syncedConfigOptions = ExtraConfigManager.getAnnotatedFields(ExtraConfig.Sync.class, FirstAidConfig.class);
-        ExtraConfigManager.deleteConfigEntry("Overlay.hudScale");
-        ExtraConfigManager.deleteConfigEntry("Overlay.displayHealthAsNumber");
-        ExtraConfigManager.deleteConfigEntry("Overlay.heartThreshold");
-        ExtraConfigManager.deleteConfigEntry("Overlay.showOverlay");
+        ExtraConfigManager.scheduleDelete("Overlay.hudScale");
+        ExtraConfigManager.scheduleDelete("Overlay.displayHealthAsNumber");
+        ExtraConfigManager.scheduleDelete("Overlay.heartThreshold");
+        ExtraConfigManager.scheduleDelete("Overlay.showOverlay");
+        ExtraConfigManager.scheduleDelete("Overlay.onlyShowWhenDamaged");
+        ExtraConfigManager.scheduleDelete("Overlay.position");
         ExtraConfigManager.postProccessConfigs();
 
         int i = 0;

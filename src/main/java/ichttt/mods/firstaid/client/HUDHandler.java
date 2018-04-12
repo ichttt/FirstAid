@@ -57,7 +57,7 @@ public class HUDHandler {
             return;
 
         boolean playerDead = damageModel.isDead(mc.player);
-        if (FirstAidConfig.overlay.onlyShowWhenDamaged) {
+        if (FirstAidConfig.overlay.hideOnNoChange) {
             for (AbstractDamageablePart damageablePart : damageModel) {
                 if (HealthRenderUtils.healthChanged(damageablePart, playerDead)) {
                     ticker = Math.max(ticker, 100);
@@ -73,34 +73,34 @@ public class HUDHandler {
         int xOffset = FirstAidConfig.overlay.xOffset;
         int yOffset = FirstAidConfig.overlay.yOffset;
         boolean playerModel = FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL;
-        switch (FirstAidConfig.overlay.position) { //TODO enum
-            case 0:
+        switch (FirstAidConfig.overlay.pos) {
+            case TOP_LEFT:
                 if (playerModel)
                     xOffset += 1;
                 break;
-            case 1:
+            case TOP_RIGHT:
                 xOffset = scaledResolution.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() - (maxLength));
                 break;
-            case 2:
+            case BOTTOM_LEFT:
                 if (playerModel)
                     xOffset += 1;
                 yOffset = scaledResolution.getScaledHeight() - yOffset - (playerModel ? 66 : 80);
                 break;
-            case 3:
+            case BOTTOM_RIGHT:
                 xOffset = scaledResolution.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() - (maxLength));
                 yOffset = scaledResolution.getScaledHeight() - yOffset - (playerModel ? 62 : 80);
                 break;
             default:
-                throw new RuntimeException("Invalid config option for position: " + FirstAidConfig.overlay.position);
+                throw new RuntimeException("Invalid config option for position: " + FirstAidConfig.overlay.pos);
         }
 
-        if (mc.currentScreen instanceof GuiChat && FirstAidConfig.overlay.position == 2)
+        if (mc.currentScreen instanceof GuiChat && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)
             return;
-        if (mc.gameSettings.showDebugInfo && FirstAidConfig.overlay.position == 0)
+        if (mc.gameSettings.showDebugInfo && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.TOP_LEFT)
             return;
 
-        boolean enableAlphaBlend = FirstAidConfig.overlay.onlyShowWhenDamaged && ticker < FADE_TIME;
-        int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), 0, 250) : 0;
+        boolean enableAlphaBlend = FirstAidConfig.overlay.hideOnNoChange && ticker < FADE_TIME;
+        int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), FirstAidConfig.overlay.alpha, 250) : FirstAidConfig.overlay.alpha;
 
         GlStateManager.pushMatrix();
         GlStateManager.translate(xOffset, yOffset, 0F);

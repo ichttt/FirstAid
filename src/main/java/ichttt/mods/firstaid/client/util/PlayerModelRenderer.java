@@ -16,10 +16,9 @@ public class PlayerModelRenderer {
     private static final int SIZE = 64;
 
     public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, Gui gui, float alpha) {
-        GlStateManager.pushMatrix();
+        GlStateManager.enableAlpha();
         GlStateManager.color(1F, 1F, 1F, 1 - (alpha / 255));
-        Minecraft mc = Minecraft.getMinecraft();
-        mc.getTextureManager().bindTexture(HEALTH_RENDER_LOCATION);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(HEALTH_RENDER_LOCATION);
         GlStateManager.scale(0.5F, 0.5F, 0.5F);
         drawPart(gui, damageModel.HEAD, 16, 0, 32, 32);
         drawPart(gui, damageModel.BODY, 16, 32, 32, 48);
@@ -30,7 +29,7 @@ public class PlayerModelRenderer {
         drawPart(gui, damageModel.LEFT_FOOT, 16, 112, 16, 16);
         drawPart(gui, damageModel.RIGHT_FOOT, 32, 112, 16, 16);
 
-        GlStateManager.popMatrix();
+        GlStateManager.color(1F, 1F, 1F, 1F);
     }
 
     private static void drawPart(Gui gui, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {

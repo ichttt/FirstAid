@@ -54,18 +54,6 @@ firstaid.config.naturalregenmultiplier=成倍自我修补
 firstaid.config.naturalregenmultiplier.tooltip=原版的自然恢复健康值将成倍增长，如果"Allow natural items"被禁用，则不起作用。
 firstaid.config.showvanillahealthbar=显示原版生命值
 firstaid.config.showvanillahealthbar.tooltip=如果设置为ture将其开启，则原版的生命值将平均分配各部位的健康值。
-firstaid.config.showoverlay=显示增益
-firstaid.config.showoverlay.tooltip=如果想要显示堆叠的效果，则设置为ture开启，否则为flase禁用。
-firstaid.config.displayhealthasnumber=健康值显示
-firstaid.config.displayhealthasnumber.tooltip=如果设置为true，那么HUD将以码字代替‘图标’显示。
-firstaid.config.hudscale=HUD比例
-firstaid.config.hudscale.tooltip=用于设置HUD比例，必须小于Minecraft的GUI比例。
-firstaid.config.position=Position
-firstaid.config.position.tooltip=The relative point of the overlay. 0=top+left, 1=top+right, 2=bottom+left, 3=bottom+right
-firstaid.config.xoffset=X-Axis Offset
-firstaid.config.xoffset.tooltip=The offset on the x axis
-firstaid.config.yoffset=Y-Axis Offset
-firstaid.config.yoffset.tooltip=The offset on the y axis
 
 keybinds.show_wounds=显示伤口
 

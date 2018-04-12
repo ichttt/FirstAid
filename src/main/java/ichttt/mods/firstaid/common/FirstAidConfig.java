@@ -82,6 +82,10 @@ public class FirstAidConfig {
             OFF, NUMBERS, HEARTS, PLAYER_MODEL
         }
 
+        public enum Position {
+            TOP_LEFT, TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT
+        }
+
         @Config.Comment("True if the main health bar should be rendered (Will be average health)")
         @Config.LangKey("firstaid.config.showvanillahealthbar")
         public boolean showVanillaHealthBar = false;
@@ -92,18 +96,17 @@ public class FirstAidConfig {
 //        public boolean showOverlay = true;
 
         @Config.Comment("If true the overlay will automatically be hidden while health isn't changing. It will be shown when connecting and any health changes")
-        @Config.LangKey("firstaid.config.onlyshowwhendamaged")
-        public boolean onlyShowWhenDamaged = true; //TODO rename, default on
+        @Config.LangKey("firstaid.config.hideonnochange")
+        public boolean hideOnNoChange = false;
 
 //        @Config.Comment("If true the HUD will display the health as numbers instead of the \"normal\" icons")
 //        @Config.LangKey("firstaid.config.displayhealthasnumber")
 //        public boolean displayHealthAsNumber = false;
         public OverlayMode overlayMode = OverlayMode.PLAYER_MODEL;
 
-        @Config.Comment("The relative point of the overlay. 0=top+left, 1=top+right, 2=bottom+left, 3=bottom+right")
+        @Config.Comment("The relative point of the overlay")
         @Config.LangKey("firstaid.config.position")
-        @Config.RangeInt(min = 0, max = 3)
-        public int position = 0; //TODO make enum
+        public Position pos = Position.TOP_LEFT;
 
         @Config.Comment("The offset on the x axis")
         @Config.LangKey("firstaid.config.xoffset")
@@ -114,6 +117,12 @@ public class FirstAidConfig {
         @Config.LangKey("firstaid.config.yoffset")
         @ExtraConfig.Advanced
         public int yOffset = 1;
+
+        @Config.Comment("Determines the transparency of the overlay. 200 = Maximum transparency, 0 = Fully opaque")
+        @Config.LangKey("firstaid.config.alpha")
+        @Config.RangeInt(min = 0, max = 200)
+        @ExtraConfig.Advanced
+        public int alpha = 50;
 
 //        @Config.Comment("If the player has more hearts than the threshold, the health will be displayed as a number")
 //        @Config.LangKey("firstaid.config.heartthreshold")

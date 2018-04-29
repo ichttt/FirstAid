@@ -105,7 +105,7 @@ public class ClientEventHandler {
 
         AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
         if (healer != null) {
-            event.getToolTip().add(I18n.format("firstaid.tooltip.healer", healer.maxHeal, StringUtils.ticksToElapsedTime(healer.ticksPerHeal)));
+            event.getToolTip().add(I18n.format("firstaid.tooltip.healer", healer.maxHeal / 2, StringUtils.ticksToElapsedTime(healer.ticksPerHeal)));
         }
     }
 
@@ -115,8 +115,6 @@ public class ClientEventHandler {
         for (ConfigEntry<ExtraConfig.Sync> option : FirstAid.syncedConfigOptions) {
             if (option.hasRemoteData())
                 option.revert();
-            else
-                FirstAid.logger.error("Missing remote data for field " + option.field + ", cannot revert!");
         }
         HUDHandler.ticker = -1;
     }

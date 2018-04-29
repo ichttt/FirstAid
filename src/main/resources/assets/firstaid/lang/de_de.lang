@@ -18,7 +18,7 @@ gui.no_sleep_heal=Schlafen stellt kein Leben wieder her
 gui.sleep_heal_amount=Schlafen stellt %s Herzen wieder her
 
 firstaid.tooltip.morphine=Undrückt negative Effekte von fehlendem Leben für %s
-firstaid.tooltip.healer=Wenn angebracht: %s Heilungen, %s pro Heilung
+firstaid.tooltip.healer=Stellt %s Herzen wieder her, braucht %s pro halbes Herz
 
 firstaid.tutorial.hint=Drücke %s für das Tutorial
 firstaid.tutorial.welcome=Willkommen zum FirstAid Mod! Dieses Tutorial wird dich durch den Mod und seine Mechaniken führen.

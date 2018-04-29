@@ -18,7 +18,7 @@ gui.no_sleep_heal=Sleeping does not restore any health
 gui.sleep_heal_amount=Sleeping restores %s hearts
 
 firstaid.tooltip.morphine=Suppresses health debuffs for %s
-firstaid.tooltip.healer=When applied: %s heals total, %s per heal
+firstaid.tooltip.healer=Restores %s hearts total, requires %s per half heart
 
 firstaid.tutorial.hint=Press %s for the tutorial
 firstaid.tutorial.welcome=Welcome to the FirstAid mod! This tutorial will guide you through this mod and explain the different mechanics.

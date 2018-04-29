@@ -15,7 +15,7 @@ public class FirstAidCoremod implements IFMLLoadingPlugin {
 
     @Override
     public String[] getASMTransformerClass() {
-        return new String[] {""}; //TODO
+        return new String[] {"ichttt.mods.firstaid.common.asm.PotionTransformer"};
     }
 
     @Override

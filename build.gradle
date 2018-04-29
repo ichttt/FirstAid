@@ -39,6 +39,7 @@ dependencies {
 
 jar {
     manifest {
+        attributes 'FMLCorePlugin': 'ichttt.mods.firstaid.common.asm.FirstAidCoremod'
         attributes 'FMLAT' : 'firstaid_at.cfg'
     }
 }

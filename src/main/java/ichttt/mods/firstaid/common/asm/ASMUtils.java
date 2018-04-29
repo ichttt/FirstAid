@@ -28,6 +28,14 @@ public class ASMUtils {
         return false;
     }
 
+    public static boolean matchFieldNode(int opcode, String owner, String nameSRG, String nameMCP, String desc, AbstractInsnNode node) {
+        if (node.getOpcode() == opcode) {
+            FieldInsnNode castedNode = (FieldInsnNode) node;
+            return (castedNode.name.equals(nameSRG) || castedNode.name.equals(nameMCP)) && castedNode.desc.equals(desc) && castedNode.owner.equals(owner);
+        }
+        return false;
+    }
+
     public static String nodeToString(AbstractInsnNode node) {
         int type = node.getType();
         int opcode = node.getOpcode();

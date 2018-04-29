@@ -31,7 +31,7 @@ public class ExtraConfigManager {
             field = ConfigManager.class.getDeclaredField("CONFIGS");
             field.setAccessible(true);
             field.get(null);
-        } catch (ReflectiveOperationException |IllegalArgumentException e) {
+        } catch (ReflectiveOperationException | IllegalArgumentException e) {
             FirstAid.logger.error("Could not setup forge reflection - disabling config post processing", e);
             field = null;
         }
@@ -57,6 +57,7 @@ public class ExtraConfigManager {
     }
 
     public static void postProccessConfigs() {
+        if (toDeleteEntries.isEmpty()) return;
         Config annotation = FirstAidConfig.class.getAnnotation(Config.class);
         String name = annotation.name();
         if (Strings.isNullOrEmpty(name))

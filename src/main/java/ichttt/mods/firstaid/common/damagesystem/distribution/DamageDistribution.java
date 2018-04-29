@@ -8,6 +8,7 @@ import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -22,6 +23,25 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class DamageDistribution implements IDamageDistribution {
+
+    public static void handleDamageTaken(IDamageDistribution damageDistribution, AbstractPlayerDamageModel damageModel, float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat, boolean redistributeIfLeft) {
+        damage = ArmorUtils.applyGlobalPotionModifiers(player, source, damage);
+        //VANILLA COPY - combat tracker and exhaustion
+        if (damage != 0.0F) {
+            player.addExhaustion(source.getHungerDamage());
+            float currentHealth = player.getHealth();
+            player.getCombatTracker().trackDamage(source, currentHealth, damage);
+        }
+
+        float left = damageDistribution.distributeDamage(damage, player, source, addStat);
+        if (left > 0 && redistributeIfLeft) {
+            damageDistribution = RandomDamageDistribution.NEAREST_KILL;
+            damageDistribution.distributeDamage(left, player, source, addStat);
+        }
+
+        if (damageModel.isDead(player))
+            CommonUtils.killPlayer(player, source);
+    }
 
     protected float minHealth(@Nonnull EntityPlayer player, @Nonnull AbstractDamageablePart part) {
         return 0F;

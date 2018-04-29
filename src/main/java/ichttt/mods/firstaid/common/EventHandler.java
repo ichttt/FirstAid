@@ -11,14 +11,13 @@ import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.capability.CapProvider;
 import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
+import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.PreferredDamageDistribution;
-import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.network.MessageResync;
-import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.ProjectileHelper;
 import io.netty.buffer.ByteBuf;
@@ -91,15 +90,6 @@ public class EventHandler {
             return;
         }
 
-        amountToDamage = ArmorUtils.applyGlobalPotionModifiers(player, source, amountToDamage);
-
-        //VANILLA COPY - combat tracker and exhaustion
-        if (amountToDamage != 0.0F) {
-            player.addExhaustion(source.getHungerDamage());
-            float currentHealth = player.getHealth();
-            player.getCombatTracker().trackDamage(source, currentHealth, amountToDamage);
-        }
-
         boolean addStat = amountToDamage < 3.4028235E37F;
         IDamageDistribution damageDistribution = FirstAidRegistryImpl.INSTANCE.getDamageDistribution(source);
 
@@ -112,16 +102,9 @@ public class EventHandler {
                     damageDistribution = new PreferredDamageDistribution(slot);
             }
         }
-
-        float left = damageDistribution.distributeDamage(amountToDamage, player, source, addStat);
-        if (left > 0) {
-            damageDistribution = RandomDamageDistribution.NEAREST_KILL;
-            damageDistribution.distributeDamage(left, player, source, addStat);
-        }
+        DamageDistribution.handleDamageTaken(damageDistribution, damageModel, amountToDamage, player, source, addStat, true);
 
         event.setCanceled(true);
-        if (damageModel.isDead(player))
-            CommonUtils.killPlayer(player, source);
 
         hitList.remove(player);
     }

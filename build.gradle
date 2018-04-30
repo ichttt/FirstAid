@@ -25,7 +25,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "1.5.3"
+version = "1.5.4"
 group = "ichttt.mods.firstaid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "firstaid"
 def archiveGroup = "ichttt"

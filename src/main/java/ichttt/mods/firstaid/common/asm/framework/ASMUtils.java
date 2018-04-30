@@ -1,4 +1,4 @@
-package ichttt.mods.firstaid.common.asm;
+package ichttt.mods.firstaid.common.asm.framework;
 
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;

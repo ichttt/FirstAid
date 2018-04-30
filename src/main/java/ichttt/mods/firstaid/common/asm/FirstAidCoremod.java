@@ -9,9 +9,10 @@ import java.util.Map;
 
 @IFMLLoadingPlugin.Name("FirstAid CoreMod")
 @IFMLLoadingPlugin.SortingIndex(1025)
-@IFMLLoadingPlugin.TransformerExclusions("ichttt.mods.firstaid.common.")
+@IFMLLoadingPlugin.TransformerExclusions("ichttt.mods.firstaid.common.asm.")
+@IFMLLoadingPlugin.MCVersion("1.12.2")
 public class FirstAidCoremod implements IFMLLoadingPlugin {
-    public static final Logger LOGGER = LogManager.getLogger("SleepWellCore");
+    public static final Logger LOGGER = LogManager.getLogger("FirstAidCore");
 
     @Override
     public String[] getASMTransformerClass() {
@@ -20,7 +21,7 @@ public class FirstAidCoremod implements IFMLLoadingPlugin {
 
     @Override
     public String getModContainerClass() {
-        return null;
+        return "ichttt.mods.firstaid.common.asm.CoreModContainer";
     }
 
     @Nullable

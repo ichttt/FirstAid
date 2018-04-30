@@ -1,5 +1,6 @@
-package ichttt.mods.firstaid.common.asm;
+package ichttt.mods.firstaid.common.asm.framework;
 
+import ichttt.mods.firstaid.common.asm.FirstAidCoremod;
 import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;

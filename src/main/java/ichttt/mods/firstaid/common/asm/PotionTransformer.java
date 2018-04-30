@@ -1,5 +1,8 @@
 package ichttt.mods.firstaid.common.asm;
 
+import ichttt.mods.firstaid.common.asm.framework.ASMUtils;
+import ichttt.mods.firstaid.common.asm.framework.AbstractMethodTransformer;
+import ichttt.mods.firstaid.common.asm.framework.PatchFailedException;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;

@@ -33,6 +33,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -41,6 +42,7 @@ import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -52,12 +54,13 @@ import java.util.List;
      version = FirstAid.VERSION,
      acceptedMinecraftVersions = "[1.12.2,1.13)",
      dependencies = "required-after:forge@[14.23.0.2526,);",
-     guiFactory = "ichttt.mods.firstaid.client.config.GuiFactory")
+     guiFactory = "ichttt.mods.firstaid.client.config.GuiFactory",
+     certificateFingerprint = "7904c4e13947c8a616c5f39b26bdeba796500722")
 public class FirstAid {
-    public static Logger logger;
     public static final String MODID = "firstaid";
     public static final String NAME = "First Aid";
     public static final String VERSION = "1.5.3";
+    public static final Logger logger = LogManager.getLogger(MODID);
 
     public static boolean isSynced = false;
     public static List<ConfigEntry<ExtraConfig.Sync>> syncedConfigOptions;
@@ -71,7 +74,6 @@ public class FirstAid {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent pre) {
-        logger = pre.getModLog();
         logger.info("FirstAid version {} starting", VERSION);
         creativeTab = new CreativeTabs(FirstAid.MODID) {
             @Nonnull
@@ -147,6 +149,20 @@ public class FirstAid {
     public void loadComplete(FMLLoadCompleteEvent event) {
         RegistryManager.finalizeRegistries();
         checkEarlyExit();
+    }
+
+    @Mod.EventHandler
+    public void wrongFingerprint(FMLFingerprintViolationEvent event) {
+        if (event.getFingerprints().isEmpty()) {
+            logger.error("NO VALID FINGERPRINT FOR FIRST AID! EXPECTED " + event.getExpectedFingerprint() + " BUT FOUND NONE!");
+        } else {
+            logger.error("FOUND AN INVALID FINGERPRINT FOR FIRST AID! EXPECTED " + event.getExpectedFingerprint() + " BUT GOT THE FOLLOWING:");
+            for (String fingerprint : event.getFingerprints()) {
+                logger.error(fingerprint);
+            }
+        }
+        logger.error("THIS IS NOT AN OFFICIAL BUILD OF FIRST AID!");
+        logger.error("Please download the official version from CurseForge");
     }
 
     private static void checkEarlyExit() {

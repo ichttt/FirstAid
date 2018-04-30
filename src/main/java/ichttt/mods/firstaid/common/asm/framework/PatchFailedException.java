@@ -1,4 +1,4 @@
-package ichttt.mods.firstaid.common.asm;
+package ichttt.mods.firstaid.common.asm.framework;
 
 public class PatchFailedException extends RuntimeException {
 

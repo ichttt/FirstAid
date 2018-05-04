@@ -52,6 +52,11 @@ dependencies {
     runtime files ('lib/FGLW.jar')
 }
 
+//Check if signing is enabled when building
+if (project.gradle.startParameter.taskNames.contains("build") && (!project.hasProperty('keyStore') || !project.hasProperty('storeAlias'))) {
+    throw new IllegalArgumentException("Building without signing is not allowed. Please specify the keyStore and storeAlias property!")
+}
+
 def signPass
 task setupKeys() {
     onlyIf {

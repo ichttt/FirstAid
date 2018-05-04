@@ -3,7 +3,6 @@ package ichttt.mods.firstaid.common.asm;
 import ichttt.mods.firstaid.common.asm.framework.ASMUtils;
 import ichttt.mods.firstaid.common.asm.framework.AbstractMethodTransformer;
 import ichttt.mods.firstaid.common.asm.framework.PatchFailedException;
-import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -14,7 +13,7 @@ import java.util.ListIterator;
 
 public class PotionTransformer extends AbstractMethodTransformer {
     public PotionTransformer() {
-        super("net.minecraft.potion.Potion", "func_76394_a", "performEffect", "(Lnet/minecraft/entity/EntityLivingBase;I)V", ClassWriter.COMPUTE_FRAMES);
+        super("net.minecraft.potion.Potion", "func_76394_a", "performEffect", "(Lnet/minecraft/entity/EntityLivingBase;I)V", 0);
     }
 
     @Override
@@ -26,8 +25,16 @@ public class PotionTransformer extends AbstractMethodTransformer {
             if (countSinceNeedle != -1) {
                 if (countSinceNeedle == 0) {
                     if (node.getOpcode() != IF_ACMPNE)
-                        throw new PatchFailedException(className, "Found invalid opcode for sanity check: Found node " + ASMUtils.nodeToString(node));
+                        throw new PatchFailedException(className, "Unexpected node while removing line " + countSinceNeedle + ". Found node " + ASMUtils.nodeToString(node));
                 } else if (countSinceNeedle > 2 && countSinceNeedle < 14) {
+                    if (countSinceNeedle == 4) {
+                        if (!ASMUtils.matchMethodNode(INVOKEVIRTUAL, "net/minecraft/entity/EntityLivingBase", "func_110143_aJ", "getHealth", "()F",  node)) {
+                            throw new PatchFailedException(className, "Unexpected node while removing line " + countSinceNeedle + ". Found node " + ASMUtils.nodeToString(node));
+                        }
+                    } else if (countSinceNeedle == 11) {
+                        if (!ASMUtils.matchFieldNode(GETSTATIC, "net/minecraft/util/DamageSource", "field_76376_m", "MAGIC", "Lnet/minecraft/util/DamageSource;", node))
+                            throw new PatchFailedException(className, "Unexpected node while removing line " + countSinceNeedle + ". Found node " + ASMUtils.nodeToString(node));
+                    }
                     nodeIterator.remove();
                 } else if (countSinceNeedle == 14) {
                     AbstractInsnNode addBefore = node.getNext();

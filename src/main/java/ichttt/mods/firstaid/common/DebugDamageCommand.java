@@ -1,9 +1,9 @@
 package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.command.CommandBase;
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class DebugDamageCommand extends CommandBase {
 
@@ -87,7 +88,7 @@ public class DebugDamageCommand extends CommandBase {
     private static void damage(EnumPlayerPart part, float damage, boolean debuff, EntityPlayer player) {
         if (damage == 0F)
             return;
-        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+        AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
         if (damage > 0F) {
             damageModel.getFromEnum(part).damage(damage, player, debuff);
         } else {

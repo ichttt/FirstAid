@@ -1,13 +1,15 @@
 package ichttt.mods.firstaid.common.damagesystem.debuff;
 
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+
+import java.util.Objects;
 
 public class SharedDebuff implements IDebuff {
     private final IDebuff debuff;
@@ -44,7 +46,7 @@ public class SharedDebuff implements IDebuff {
         if (!debuff.isEnabled() || player.world.isRemote || !(player instanceof EntityPlayerMP))
             return;
 
-        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+        AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
         float healthPerMax = 0;
         for (EnumPlayerPart part : parts) {
             AbstractDamageablePart damageablePart = damageModel.getFromEnum(part);

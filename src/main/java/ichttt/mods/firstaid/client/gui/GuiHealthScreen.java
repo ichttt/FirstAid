@@ -151,7 +151,7 @@ public class GuiHealthScreen extends GuiScreen {
         //Health
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
         GlStateManager.color(1F, 1F, 1F, 1F);
-        if (!damageModel.isTemp) {
+        if (FirstAid.isSynced) {
             drawHealth(damageModel.HEAD, false, 14);
             drawHealth(damageModel.LEFT_ARM, false, 39);
             drawHealth(damageModel.LEFT_LEG, false, 64);
@@ -228,7 +228,7 @@ public class GuiHealthScreen extends GuiScreen {
             part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(mc.player.getHeldItem(this.activeHand));
         } else if (button.id == 10) {
             FirstAid.NETWORKING.sendToServer(new MessageClientUpdate(MessageClientUpdate.Type.REQUEST_REFRESH));
-            FirstAid.logger.info("Requesting refresh");
+            FirstAid.LOGGER.info("Requesting refresh");
             mc.player.sendStatusMessage(new TextComponentString("Re-downloading health data from server..."), true);
         }
         mc.displayGuiScreen(null);

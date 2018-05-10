@@ -30,7 +30,7 @@ public class RegistryManager {
     }
 
     public static void registerDefaults() {
-        FirstAid.logger.debug("Registering defaults registry values");
+        FirstAid.LOGGER.debug("Registering defaults registry values");
         FirstAidRegistry registry = Objects.requireNonNull(FirstAidRegistry.getImpl());
 
         //---HEALING TYPES---
@@ -123,7 +123,7 @@ public class RegistryManager {
 
     private static void logError(String error, String potionName, EnumDebuffSlot slot) {
         String errorMsg = String.format("Invalid config entry for debuff %s at part %s: %s", potionName, slot.toString(), error);
-        FirstAid.logger.warn(errorMsg);
+        FirstAid.LOGGER.warn(errorMsg);
         debuffConfigErrors.add(errorMsg);
     }
 

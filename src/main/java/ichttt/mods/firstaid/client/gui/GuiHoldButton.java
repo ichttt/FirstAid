@@ -32,7 +32,7 @@ public class GuiHoldButton extends GuiButton {
     @Override
     public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         if (!Mouse.isCreated()) {
-            FirstAid.logger.warn("Mouse is not created!");
+            FirstAid.LOGGER.warn("Mouse is not created!");
             return;
         }
         //TODO progress bar?

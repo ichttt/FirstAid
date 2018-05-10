@@ -58,7 +58,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         if (!registrationAllowed) throw new IllegalStateException("Registry is closed");
 
         if (finalize) {
-            FirstAid.logger.info("Finalizing registry");
+            FirstAid.LOGGER.info("Finalizing registry");
             registrationAllowed = false;
         }
         this.BAKED_DEBUFF_MAP = ImmutableMap.<EnumDebuffSlot, IDebuff[]>builder()
@@ -75,7 +75,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Override
     public void bindDamageSourceStandard(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable) {
         if (DISTRIBUTION_MAP.containsKey(damageType))
-            FirstAid.logger.info("Damage Distribution override detected for source " + damageType);
+            FirstAid.LOGGER.info("Damage Distribution override detected for source " + damageType);
         DISTRIBUTION_MAP.put(damageType, new StandardDamageDistribution(priorityTable));
     }
 
@@ -105,7 +105,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Deprecated
     @Override
     public void bindHealingType(@Nonnull EnumHealingType type, @Nonnull Function<EnumHealingType, AbstractPartHealer> healer) {
-        FirstAid.logger.warn("Deprecated method \"bindHealingType\" is still being used by mod {} for type {}", CommonUtils.getActiveModidSafe(), type);
+        FirstAid.LOGGER.warn("Deprecated method \"bindHealingType\" is still being used by mod {} for type {}", CommonUtils.getActiveModidSafe(), type);
         Function<ItemStack, AbstractPartHealer> newFunction = stack -> healer.apply(type);
         registerHealingType(type == EnumHealingType.BANDAGE ? FirstAidItems.BANDAGE : FirstAidItems.PLASTER, newFunction);
     }
@@ -113,7 +113,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Override
     public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, int applyTime) {
         if (this.HEALER_MAP.containsKey(item))
-            FirstAid.logger.info("Healing type override detected for item " + item);
+            FirstAid.LOGGER.info("Healing type override detected for item " + item);
         this.HEALER_MAP.put(item, Pair.of(factory, applyTime));
     }
 
@@ -144,7 +144,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Nonnull
     @Override
     public AbstractPartHealer getPartHealer(@Nonnull EnumHealingType type) {
-        FirstAid.logger.warn("Deprecated method \"getPartHealer\" is still being used by mod {} for type {}", CommonUtils.getActiveModidSafe(), type);
+        FirstAid.LOGGER.warn("Deprecated method \"getPartHealer\" is still being used by mod {} for type {}", CommonUtils.getActiveModidSafe(), type);
         return Objects.requireNonNull(getPartHealer(new ItemStack(type == EnumHealingType.BANDAGE ? FirstAidItems.BANDAGE : FirstAidItems.PLASTER)));
     }
 
@@ -157,7 +157,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             throw new IllegalArgumentException("Builder must an instance of the default builder received via DebuffBuilderFactory!", e);
         }
         //Build the finished debuff
-        FirstAid.logger.debug("Building debuff from mod {} for slot {} with potion effect {}, type = {}", CommonUtils.getActiveModidSafe(), slot, builder.potionName, builder.isOnHit ? "OnHit" : "Constant");
+        FirstAid.LOGGER.debug("Building debuff from mod {} for slot {} with potion effect {}, type = {}", CommonUtils.getActiveModidSafe(), slot, builder.potionName, builder.isOnHit ? "OnHit" : "Constant");
         BooleanSupplier isEnabled = builder.isEnabledSupplier;
         if (isEnabled == null)
             isEnabled = () -> true;
@@ -197,7 +197,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Override
     public IDebuff[] getDebuffs(@Nonnull EnumDebuffSlot slot) {
         if (registrationAllowed) {
-            FirstAid.logger.warn("getDebuffs called early - building temp list snapshot");
+            FirstAid.LOGGER.warn("getDebuffs called early - building temp list snapshot");
             buildDebuffs(false);
         }
         return BAKED_DEBUFF_MAP.get(slot);

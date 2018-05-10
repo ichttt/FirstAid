@@ -2,6 +2,7 @@ package ichttt.mods.firstaid;
 
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.DebugDamageCommand;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
@@ -10,7 +11,6 @@ import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.config.ExtraConfigManager;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.MessageAddHealth;
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
@@ -60,12 +60,11 @@ public class FirstAid {
     public static final String MODID = "firstaid";
     public static final String NAME = "First Aid";
     public static final String VERSION = "1.5.4";
-    public static final Logger logger = LogManager.getLogger(MODID);
+    public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     public static boolean isSynced = false;
     public static List<ConfigEntry<ExtraConfig.Sync>> syncedConfigOptions;
 
-    @SuppressWarnings("unused")
     @SidedProxy(clientSide = "ichttt.mods.firstaid.client.ClientProxy", serverSide = "ichttt.mods.firstaid.server.ServerProxy")
     public static IProxy proxy;
 
@@ -74,7 +73,7 @@ public class FirstAid {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent pre) {
-        logger.info("FirstAid version {} starting", VERSION);
+        LOGGER.info("FirstAid version {} starting", VERSION);
         creativeTab = new CreativeTabs(FirstAid.MODID) {
             @Nonnull
             @Override
@@ -109,7 +108,7 @@ public class FirstAid {
                     try {
                         throw new UnsupportedOperationException("No default implementation");
                     } catch (UnsupportedOperationException e) { //TODO remove catch
-                        FirstAid.logger.warn("A mod still uses the default implementation of the capability. This is deprecated and will be removed in feature releases", e);
+                        FirstAid.LOGGER.warn("A mod still uses the default implementation of the capability. This is deprecated and will be removed in feature releases", e);
                     }
                     //noinspection deprecation
                     return new CapabilityExtendedHealthSystem.DefaultImpl();
@@ -137,7 +136,7 @@ public class FirstAid {
         proxy.init();
 
         if (Loader.isModLoaded("morpheus")) {
-            logger.info("Morpheus present - enabling compatibility module");
+            LOGGER.info("Morpheus present - enabling compatibility module");
             MorpheusHelper.register();
         }
 
@@ -154,20 +153,20 @@ public class FirstAid {
     @Mod.EventHandler
     public void wrongFingerprint(FMLFingerprintViolationEvent event) {
         if (event.getFingerprints().isEmpty()) {
-            logger.error("NO VALID FINGERPRINT FOR FIRST AID! EXPECTED " + event.getExpectedFingerprint() + " BUT FOUND NONE!");
+            LOGGER.error("NO VALID FINGERPRINT FOR FIRST AID! EXPECTED " + event.getExpectedFingerprint() + " BUT FOUND NONE!");
         } else {
-            logger.error("FOUND AN INVALID FINGERPRINT FOR FIRST AID! EXPECTED " + event.getExpectedFingerprint() + " BUT GOT THE FOLLOWING:");
+            LOGGER.error("FOUND AN INVALID FINGERPRINT FOR FIRST AID! EXPECTED " + event.getExpectedFingerprint() + " BUT GOT THE FOLLOWING:");
             for (String fingerprint : event.getFingerprints()) {
-                logger.error(fingerprint);
+                LOGGER.error(fingerprint);
             }
         }
-        logger.error("THIS IS NOT AN OFFICIAL BUILD OF FIRST AID!");
-        logger.error("Please download the official version from CurseForge");
+        LOGGER.error("THIS IS NOT AN OFFICIAL BUILD OF FIRST AID!");
+        LOGGER.error("Please download the official version from CurseForge");
     }
 
     private static void checkEarlyExit() {
         if (FMLCommonHandler.instance().isDisplayCloseRequested()) { //another early exit (forge only covers stage transition)
-            logger.info("Early exit requested by user - terminating minecraft");
+            LOGGER.info("Early exit requested by user - terminating minecraft");
             FMLCommonHandler.instance().exitJava(0, false);
         }
     }
@@ -179,8 +178,8 @@ public class FirstAid {
 
     @Mod.EventHandler
     public void onServerStop(FMLServerStoppedEvent event) {
-        logger.debug("Cleaning up");
-        PlayerDataManager.clear();
+        LOGGER.debug("Cleaning up");
+        CapProvider.clear();
         EventHandler.hitList.clear();
     }
 }

@@ -1,8 +1,8 @@
 package ichttt.mods.firstaid.common.network;
 
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -11,6 +11,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.Objects;
 
 public class MessageAddHealth implements IMessage {
     private float[] table;
@@ -41,7 +43,7 @@ public class MessageAddHealth implements IMessage {
         @Override
         public IMessage onMessage(MessageAddHealth message, MessageContext ctx) {
             EntityPlayerSP playerSP = Minecraft.getMinecraft().player;
-            AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(playerSP);
+            AbstractPlayerDamageModel damageModel = Objects.requireNonNull(playerSP.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
             for (int i = 0; i < message.table.length; i++) {
                 float f = message.table[i];
                 //EnumPlayerPart is 1-indexed

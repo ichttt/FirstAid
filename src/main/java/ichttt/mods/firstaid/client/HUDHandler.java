@@ -1,6 +1,7 @@
 package ichttt.mods.firstaid.client;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
@@ -8,7 +9,6 @@ import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
 import ichttt.mods.firstaid.common.FirstAidConfig;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -33,7 +33,7 @@ public class HUDHandler {
     public static int ticker = -1;
 
     public static void rebuildTranslationTable() {
-        FirstAid.logger.debug("Building GUI translation table");
+        FirstAid.LOGGER.debug("Building GUI translation table");
         TRANSLATION_MAP.clear();
         maxLength = 0;
         for (EnumPlayerPart part : EnumPlayerPart.VALUES) {
@@ -52,8 +52,8 @@ public class HUDHandler {
         if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.OFF || mc.player == null || (GuiHealthScreen.isOpen && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) || !CommonUtils.isSurvivalOrAdventure(mc.player))
             return;
 
-        AbstractPlayerDamageModel damageModel = Objects.requireNonNull(PlayerDataManager.getDamageModel(mc.player));
-        if (damageModel.isTemp) //Wait until we receive the remote model
+        AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+        if (!FirstAid.isSynced) //Wait until we receive the remote model
             return;
 
         boolean playerDead = damageModel.isDead(mc.player);

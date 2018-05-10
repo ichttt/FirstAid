@@ -1,7 +1,7 @@
 package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This is a hack to intervene all calls to absorption. It's not optimal but it's the best I could come up with without a coremod
@@ -36,7 +37,7 @@ public class DataManagerWrapper extends EntityDataManager {
     @Nonnull
     public <T> T get(@Nonnull DataParameter<T> key) {
         if (key == EntityPlayer.ABSORPTION)
-            parent.set(key, (T) PlayerDataManager.getDamageModel(player).getAbsorption());
+            parent.set(key, (T) Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).getAbsorption());
         return parent.get(key);
     }
 
@@ -53,10 +54,10 @@ public class DataManagerWrapper extends EntityDataManager {
                 if (playerMP.connection != null) //also fired when connecting, ignore(otherwise the net handler would crash)
                     FirstAid.NETWORKING.sendTo(new MessageApplyAbsorption(floatValue), playerMP);
             }
-            PlayerDataManager.getDamageModel(player).setAbsorption(floatValue);
+            Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).setAbsorption(floatValue);
         } else if (key == EntityLivingBase.HEALTH) {
              if (!player.world.isRemote && (Float) value > player.getMaxHealth())
-                PlayerDataManager.getDamageModel(player).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
+                Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
         }
         set_impl(key, value);
     }

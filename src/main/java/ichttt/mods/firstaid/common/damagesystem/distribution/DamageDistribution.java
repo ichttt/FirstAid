@@ -1,11 +1,11 @@
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class DamageDistribution implements IDamageDistribution {
 
@@ -63,7 +64,7 @@ public abstract class DamageDistribution implements IDamageDistribution {
             if (damage == 0)
                 break;
             else if (damage < 0) {
-                FirstAid.logger.error("Got negative damage {} left? Logic error? ", damage);
+                FirstAid.LOGGER.error("Got negative damage {} left? Logic error? ", damage);
                 break;
             }
         }
@@ -75,7 +76,7 @@ public abstract class DamageDistribution implements IDamageDistribution {
 
     @Override
     public float distributeDamage(float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat) {
-        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+        AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
         for (Pair<EntityEquipmentSlot, EnumPlayerPart[]> pair : getPartList()) {
             EntityEquipmentSlot slot = pair.getLeft();
             damage = ArmorUtils.applyArmor(player, player.getItemStackFromSlot(slot), source, damage, slot);

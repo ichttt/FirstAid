@@ -1,17 +1,18 @@
 package ichttt.mods.firstaid.client;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
 import ichttt.mods.firstaid.client.util.EventCalendar;
+import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -30,6 +31,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
 public class ClientEventHandler {
@@ -64,12 +67,12 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public static void onKeyPress(InputEvent.KeyInputEvent event) {
-        Minecraft mc = Minecraft.getMinecraft();
-        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(mc.player);
         if (ClientProxy.showWounds.isPressed()) {
+            Minecraft mc = Minecraft.getMinecraft();
+            AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
             if (!damageModel.hasTutorial) {
                 damageModel.hasTutorial = true;
-                PlayerDataManager.tutorialDone.add(mc.player.getName());
+                CapProvider.tutorialDone.add(mc.player.getName());
                 Minecraft.getMinecraft().displayGuiScreen(new GuiTutorial());
             }
             else {

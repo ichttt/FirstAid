@@ -1,13 +1,13 @@
 package ichttt.mods.firstaid.client.tutorial;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.network.MessageClientUpdate;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -66,7 +66,7 @@ public class GuiTutorial extends GuiScreen {
                 this.action.next();
             else {
                 FirstAid.NETWORKING.sendToServer(new MessageClientUpdate(MessageClientUpdate.Type.TUTORIAL_COMPLETE));
-                mc.displayGuiScreen(new GuiHealthScreen(PlayerDataManager.getDamageModel(mc.player)));
+                mc.displayGuiScreen(new GuiHealthScreen(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)));
             }
         }
     }

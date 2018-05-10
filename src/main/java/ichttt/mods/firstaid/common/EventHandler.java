@@ -9,8 +9,6 @@ import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
-import ichttt.mods.firstaid.common.damagesystem.capability.CapProvider;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.PreferredDamageDistribution;
@@ -48,7 +46,6 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -63,6 +60,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.WeakHashMap;
 
@@ -75,10 +73,10 @@ public class EventHandler {
     public static void onLivingHurt(LivingHurtEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
         float amountToDamage = event.getAmount();
-        if (entity.getEntityWorld().isRemote || !(entity instanceof EntityPlayer))
+        if (entity.world.isRemote || !(entity instanceof EntityPlayer) || entity instanceof FakePlayer)
             return;
         EntityPlayer player = (EntityPlayer) entity;
-        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+        AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
         DamageSource source = event.getSource();
 
         if (amountToDamage == Float.MAX_VALUE) {
@@ -126,12 +124,8 @@ public class EventHandler {
         Entity obj = event.getObject();
         if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer)) {
             EntityPlayer player = (EntityPlayer) obj;
-            AbstractPlayerDamageModel damageModel;
-            if (player.world.isRemote)
-                damageModel = FirstAid.isSynced ? PlayerDamageModel.create() : PlayerDamageModel.createTemp();
-            else
-                damageModel = PlayerDamageModel.create();
-            event.addCapability(CapProvider.IDENTIFIER, new CapProvider(player, damageModel));
+            AbstractPlayerDamageModel damageModel = PlayerDamageModel.create();
+            event.addCapability(CapProvider.IDENTIFIER, new CapProvider(damageModel));
             //replace the data manager with our wrapper to grab absorption
             player.dataManager = new DataManagerWrapper(player, player.dataManager);
         }
@@ -150,7 +144,7 @@ public class EventHandler {
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END && CommonUtils.isSurvivalOrAdventure(event.player)) {
-            PlayerDataManager.tickPlayer(event.player);
+            Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).tick(event.player.world, event.player);
             hitList.remove(event.player); //Damage should be done in the same tick as the hit was noted, otherwise we got a false-positive
         }
     }
@@ -186,14 +180,6 @@ public class EventHandler {
             pool.addEntry(new LootEntryItem(FirstAidItems.BANDAGE, bandage, 0, new SetCount[]{new SetCount(new LootCondition[0], new RandomValueRange(1, 3))}, new LootCondition[0], FirstAid.MODID + "bandage"));
             pool.addEntry(new LootEntryItem(FirstAidItems.PLASTER, plaster, 0, new SetCount[]{new SetCount(new LootCondition[0], new RandomValueRange(1, 5))}, new LootCondition[0], FirstAid.MODID + "plaster"));
             pool.addEntry(new LootEntryItem(FirstAidItems.MORPHINE, morphine, 0, new SetCount[]{new SetCount(new LootCondition[0], new RandomValueRange(1, 2))}, new LootCondition[0], FirstAid.MODID + "morphine"));
-        }
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onLivingDeath(LivingDeathEvent event) {
-        EntityLivingBase entityLiving = event.getEntityLiving();
-        if (entityLiving instanceof EntityPlayer && !(entityLiving instanceof FakePlayer)) {
-            PlayerDataManager.resetPlayer((EntityPlayer) entityLiving);
         }
     }
 
@@ -247,10 +233,10 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!event.player.world.isRemote) {
-            FirstAid.logger.debug("Sending damage model to " + event.player.getName());
-            AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(event.player);
+            FirstAid.LOGGER.debug("Sending damage model to " + event.player.getName());
+            AbstractPlayerDamageModel damageModel = Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
             if (damageModel.hasTutorial)
-                PlayerDataManager.tutorialDone.add(event.player.getName());
+                CapProvider.tutorialDone.add(event.player.getName());
             FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(damageModel), (EntityPlayerMP) event.player);
         }
     }
@@ -270,6 +256,6 @@ public class EventHandler {
     @SubscribeEvent
     public static void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (!event.player.world.isRemote && event.player instanceof EntityPlayerMP) //Mojang seems to wipe all caps on teleport
-            FirstAid.NETWORKING.sendTo(new MessageResync(PlayerDataManager.getDamageModel(event.player)), (EntityPlayerMP) event.player);
+            FirstAid.NETWORKING.sendTo(new MessageResync(Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), (EntityPlayerMP) event.player);
     }
 }

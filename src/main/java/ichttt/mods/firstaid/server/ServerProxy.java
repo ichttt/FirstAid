@@ -8,6 +8,6 @@ public class ServerProxy implements IProxy {
 
     @Override
     public void init() {
-        FirstAid.logger.debug("Loading ServerProxy");
+        FirstAid.LOGGER.debug("Loading ServerProxy");
     }
 }

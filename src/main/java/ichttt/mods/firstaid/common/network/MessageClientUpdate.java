@@ -1,7 +1,8 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
+import ichttt.mods.firstaid.common.CapProvider;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -41,10 +42,10 @@ public class MessageClientUpdate implements IMessage {
         public IMessage onMessage(MessageClientUpdate message, MessageContext ctx) {
             EntityPlayerMP player = ctx.getServerHandler().player;
             if (message.type == Type.TUTORIAL_COMPLETE) {
-                PlayerDataManager.tutorialDone.add(player.getName());
-                Objects.requireNonNull(player.getServer()).addScheduledTask(() -> PlayerDataManager.getDamageModel(player).hasTutorial = true);
+                CapProvider.tutorialDone.add(player.getName());
+                Objects.requireNonNull(player.getServer()).addScheduledTask(() -> Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).hasTutorial = true);
             } else if (message.type == Type.REQUEST_REFRESH) {
-                FirstAid.NETWORKING.sendTo(new MessageResync(PlayerDataManager.getDamageModel(player)), player);
+                FirstAid.NETWORKING.sendTo(new MessageResync(Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), player);
             }
             return null;
         }

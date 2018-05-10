@@ -119,7 +119,7 @@ public class DamageablePart extends AbstractDamageablePart {
 
         if (stack != null) {
             AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
-            if (healer == null) FirstAid.logger.warn("Failed to lookup healer for item {}", stack.getItem());
+            if (healer == null) FirstAid.LOGGER.warn("Failed to lookup healer for item {}", stack.getItem());
             else activeHealer = healer.loadNBT(nbt.getInteger("itemTicks"), nbt.getInteger("itemHeals"));
         }
         if (nbt.hasKey("absorption"))

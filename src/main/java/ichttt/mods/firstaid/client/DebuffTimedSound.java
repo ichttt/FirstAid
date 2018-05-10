@@ -78,7 +78,7 @@ public class DebuffTimedSound implements ITickableSound {
 
         if (soundEventAccessor == null)
         {
-            FirstAid.logger.warn("Missing sound for location " + this.soundLocation);
+            FirstAid.LOGGER.warn("Missing sound for location " + this.soundLocation);
             this.sound = SoundHandler.MISSING_SOUND;
         }
         else

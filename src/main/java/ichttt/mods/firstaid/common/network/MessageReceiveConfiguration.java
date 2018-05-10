@@ -1,13 +1,13 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.HUDHandler;
+import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
-import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -19,6 +19,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.Objects;
 
 public class MessageReceiveConfiguration implements IMessage {
 
@@ -51,19 +53,18 @@ public class MessageReceiveConfiguration implements IMessage {
         @Override
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(MessageReceiveConfiguration message, MessageContext ctx) {
-            AbstractPlayerDamageModel damageModel = PlayerDamageModel.create();
-            damageModel.deserializeNBT(message.playerDamageModel);
             Minecraft mc = Minecraft.getMinecraft();
 
-            FirstAid.logger.info("Received configuration");
+            FirstAid.LOGGER.info("Received configuration");
             mc.addScheduledTask(() -> {
-                FirstAid.isSynced = true;
-                PlayerDataManager.put(mc.player, damageModel);
+                AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                damageModel.deserializeNBT(message.playerDamageModel);
                 if (damageModel.hasTutorial)
-                    PlayerDataManager.tutorialDone.add(mc.player.getName());
+                    CapProvider.tutorialDone.add(mc.player.getName());
                 else
                     mc.player.sendMessage(new TextComponentString("[First Aid] " + I18n.format("firstaid.tutorial.hint", ClientProxy.showWounds.getDisplayName())));
                 HUDHandler.ticker = 200;
+                FirstAid.isSynced = true;
             });
             return null;
         }

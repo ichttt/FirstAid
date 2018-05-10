@@ -1,10 +1,10 @@
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.network.MessageAddHealth;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -25,7 +25,7 @@ public class HealthDistribution {
 
     public static void manageHealth(float health, AbstractPlayerDamageModel damageModel, EntityPlayer player, boolean sendChanges, boolean distribute) {
         if (sendChanges && player.world.isRemote) {
-            FirstAid.logger.catching(new RuntimeException("Someone set flag sendChanges on the client, this is not supported!"));
+            FirstAid.LOGGER.catching(new RuntimeException("Someone set flag sendChanges on the client, this is not supported!"));
             sendChanges = false;
         } else if (sendChanges && !(player instanceof EntityPlayerMP)) { //EntityOtherPlayerMP? log something?
             sendChanges = false;
@@ -67,12 +67,12 @@ public class HealthDistribution {
     }
 
     public static void distributeHealth(float health, EntityPlayer player, boolean sendChanges) {
-        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
         manageHealth(health, damageModel, player, sendChanges, true);
     }
 
     public static void addRandomHealth(float health, EntityPlayer player, boolean sendChanges) {
-        AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(player);
+        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
         manageHealth(health, damageModel, player, sendChanges, false);
     }
 }

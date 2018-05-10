@@ -1,9 +1,9 @@
 package ichttt.mods.firstaid.common.network;
 
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -47,14 +47,14 @@ public class MessageReceiveDamage implements IMessage {
         @Override
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(MessageReceiveDamage message, MessageContext ctx) {
-            Minecraft.getMinecraft().addScheduledTask(() -> {
-               AbstractPlayerDamageModel damageModel = PlayerDataManager.getDamageModel(Minecraft.getMinecraft().player);
-                Objects.requireNonNull(damageModel);
-                AbstractDamageablePart part = damageModel.getFromEnum(message.part);
-                if (message.damageAmount > 0F)
-                    part.damage(message.damageAmount, null, false, message.minHealth);
-                else if (message.damageAmount < 0F)
-                    part.heal(-message.damageAmount, null, false);
+            Minecraft mc = Minecraft.getMinecraft();
+            mc.addScheduledTask(() -> {
+               AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+               AbstractDamageablePart part = damageModel.getFromEnum(message.part);
+               if (message.damageAmount > 0F)
+                   part.damage(message.damageAmount, null, false, message.minHealth);
+               else if (message.damageAmount < 0F)
+                   part.heal(-message.damageAmount, null, false);
             });
             return null;
         }

@@ -19,15 +19,11 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
     public final AbstractDamageablePart RIGHT_ARM;
     public final AbstractDamageablePart RIGHT_LEG;
     public final AbstractDamageablePart RIGHT_FOOT;
-    public final boolean isTemp;
+    @Deprecated //Always false since 1.5.5
+    public final boolean isTemp = false;
     public boolean hasTutorial;
 
-    @Deprecated
     public AbstractPlayerDamageModel(AbstractDamageablePart head, AbstractDamageablePart leftArm, AbstractDamageablePart leftLeg, AbstractDamageablePart leftFoot, AbstractDamageablePart body, AbstractDamageablePart rightArm, AbstractDamageablePart rightLeg, AbstractDamageablePart rightFoot) {
-        this(head, leftArm, leftLeg, leftFoot, body, rightArm, rightLeg, rightFoot, false);
-    }
-
-    public AbstractPlayerDamageModel(AbstractDamageablePart head, AbstractDamageablePart leftArm, AbstractDamageablePart leftLeg, AbstractDamageablePart leftFoot, AbstractDamageablePart body, AbstractDamageablePart rightArm, AbstractDamageablePart rightLeg, AbstractDamageablePart rightFoot, boolean isTemp) {
         this.HEAD = head;
         this.LEFT_ARM = leftArm;
         this.LEFT_LEG = leftLeg;
@@ -36,7 +32,11 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
         this.RIGHT_ARM = rightArm;
         this.RIGHT_LEG = rightLeg;
         this.RIGHT_FOOT = rightFoot;
-        this.isTemp = isTemp;
+    }
+
+    @Deprecated
+    public AbstractPlayerDamageModel(AbstractDamageablePart head, AbstractDamageablePart leftArm, AbstractDamageablePart leftLeg, AbstractDamageablePart leftFoot, AbstractDamageablePart body, AbstractDamageablePart rightArm, AbstractDamageablePart rightLeg, AbstractDamageablePart rightFoot, boolean ignored) {
+        this(head, leftArm, leftLeg, leftFoot, body, rightArm, rightLeg, rightFoot);
     }
 
     public AbstractDamageablePart getFromEnum(EnumPlayerPart part) {

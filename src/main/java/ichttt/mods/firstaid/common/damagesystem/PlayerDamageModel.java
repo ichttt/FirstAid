@@ -9,11 +9,11 @@ import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
+import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.network.MessageResync;
@@ -43,23 +43,16 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private boolean waitingForHelp = false;
 
     public static PlayerDamageModel create() {
-        return create_impl(Objects.requireNonNull(FirstAidConfig.damageSystem), false);
-    }
-
-    public static PlayerDamageModel createTemp() {
-        return create_impl(FirstAidConfig.damageSystem, true);
-    }
-
-    private static PlayerDamageModel create_impl(FirstAidConfig.DamageSystem config, boolean temp) {
+        FirstAidConfig.DamageSystem config = Objects.requireNonNull(FirstAidConfig.damageSystem);
         FirstAidRegistry registry = FirstAidRegistryImpl.INSTANCE;
         IDebuff[] headDebuffs = registry.getDebuffs(EnumDebuffSlot.HEAD);
         IDebuff[] bodyDebuffs = registry.getDebuffs(EnumDebuffSlot.BODY);
         IDebuff[] armsDebuffs = registry.getDebuffs(EnumDebuffSlot.ARMS);
         IDebuff[] legFootDebuffs = registry.getDebuffs(EnumDebuffSlot.LEGS_AND_FEET);
-        return new PlayerDamageModel(config, headDebuffs, bodyDebuffs, armsDebuffs, legFootDebuffs, temp);
+        return new PlayerDamageModel(config, headDebuffs, bodyDebuffs, armsDebuffs, legFootDebuffs);
     }
 
-    protected PlayerDamageModel(FirstAidConfig.DamageSystem config, IDebuff[] headDebuffs, IDebuff[] bodyDebuffs, IDebuff[] armDebuffs, IDebuff[] legFootDebuffs, boolean isTemp) {
+    protected PlayerDamageModel(FirstAidConfig.DamageSystem config, IDebuff[] headDebuffs, IDebuff[] bodyDebuffs, IDebuff[] armDebuffs, IDebuff[] legFootDebuffs) {
         super(new DamageablePart(config.maxHealthHead,      true,  EnumPlayerPart.HEAD,       headDebuffs   ),
               new DamageablePart(config.maxHealthLeftArm,   false, EnumPlayerPart.LEFT_ARM,   armDebuffs    ),
               new DamageablePart(config.maxHealthLeftLeg,   false, EnumPlayerPart.LEFT_LEG,   legFootDebuffs),
@@ -67,8 +60,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
               new DamageablePart(config.maxHealthBody,      true,  EnumPlayerPart.BODY,       bodyDebuffs   ),
               new DamageablePart(config.maxHealthRightArm,  false, EnumPlayerPart.RIGHT_ARM,  armDebuffs    ),
               new DamageablePart(config.maxHealthRightLeg,  false, EnumPlayerPart.RIGHT_LEG,  legFootDebuffs),
-              new DamageablePart(config.maxHealthRightFoot, false, EnumPlayerPart.RIGHT_FOOT, legFootDebuffs),
-              isTemp);
+              new DamageablePart(config.maxHealthRightFoot, false, EnumPlayerPart.RIGHT_FOOT, legFootDebuffs));
         for (IDebuff debuff : armDebuffs)
             this.sharedDebuffs.add((SharedDebuff) debuff);
         for (IDebuff debuff : legFootDebuffs)
@@ -113,15 +105,15 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
         float currentHealth = getCurrentHealth();
         if (currentHealth <= 0F) {
-            FirstAid.logger.error("Got {} health left, but isn't marked as dead!", currentHealth);
+            FirstAid.LOGGER.error("Got {} health left, but isn't marked as dead!", currentHealth);
             return;
         }
 
-        if (!this.isTemp) {
+        if (FirstAid.isSynced) {
             float newCurrentHealth = (currentHealth / getCurrentMaxHealth()) * player.getMaxHealth();
 
             if (Float.isInfinite(newCurrentHealth)) {
-                FirstAid.logger.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe
+                FirstAid.LOGGER.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe
             } else {
                 if (newCurrentHealth != prevHealthCurrent)
                     ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
@@ -130,7 +122,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         }
 
         if (!this.hasTutorial)
-            this.hasTutorial = PlayerDataManager.tutorialDone.contains(player.getName());
+            this.hasTutorial = CapProvider.tutorialDone.contains(player.getName());
 
         if (FirstAidConfig.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
             float globalFactor = player.getMaxHealth() / 20F;

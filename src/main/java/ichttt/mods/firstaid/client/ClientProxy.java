@@ -1,6 +1,7 @@
 package ichttt.mods.firstaid.client;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.FirstAidConfig;
@@ -8,7 +9,6 @@ import ichttt.mods.firstaid.common.IProxy;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.config.ExtraConfigManager;
-import ichttt.mods.firstaid.common.damagesystem.capability.PlayerDataManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
@@ -31,7 +31,7 @@ public class ClientProxy implements IProxy {
 
     @Override
     public void preInit() {
-        FirstAid.logger.debug("Loading ClientProxy");
+        FirstAid.LOGGER.debug("Loading ClientProxy");
         MinecraftForge.EVENT_BUS.register(ClientEventHandler.class);
         ClientRegistry.registerKeyBinding(showWounds);
     }
@@ -47,7 +47,7 @@ public class ClientProxy implements IProxy {
     @Override
     public void showGuiApplyHealth(EnumHand activeHand) {
         Minecraft mc = Minecraft.getMinecraft();
-        GuiHealthScreen.INSTANCE = new GuiHealthScreen(PlayerDataManager.getDamageModel(mc.player), activeHand);
+        GuiHealthScreen.INSTANCE = new GuiHealthScreen(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null), activeHand);
         mc.displayGuiScreen(GuiHealthScreen.INSTANCE);
     }
 }

@@ -25,14 +25,14 @@ public class ExtraConfigManager {
     private static List<String> toDeleteEntries = new ArrayList<>();
     private static final Field CONFIG_FIELD;
     static {
-        FirstAid.logger.debug("Setting up forge internal reflection");
+        FirstAid.LOGGER.debug("Setting up forge internal reflection");
         Field field;
         try {
             field = ConfigManager.class.getDeclaredField("CONFIGS");
             field.setAccessible(true);
             field.get(null);
         } catch (ReflectiveOperationException | IllegalArgumentException e) {
-            FirstAid.logger.error("Could not setup forge reflection - disabling config post processing", e);
+            FirstAid.LOGGER.error("Could not setup forge reflection - disabling config post processing", e);
             field = null;
         }
         CONFIG_FIELD = field;
@@ -49,7 +49,7 @@ public class ExtraConfigManager {
             try {
                 return ((Map<String, Configuration>) CONFIG_FIELD.get(null)).get(f.getAbsolutePath());
             } catch (Exception e) {
-                FirstAid.logger.error("Could not get config from field - enabling fallback", e);
+                FirstAid.LOGGER.error("Could not get config from field - enabling fallback", e);
                 return null;
             }
         }
@@ -65,7 +65,7 @@ public class ExtraConfigManager {
         Configuration config = getConfigFromField(new File(Loader.instance().getConfigDir(), name + ".cfg"));
 
         if (config == null) {
-            FirstAid.logger.warn("Skipping post processing due to null config");
+            FirstAid.LOGGER.warn("Skipping post processing due to null config");
             return;
         }
 
@@ -75,11 +75,11 @@ public class ExtraConfigManager {
             if (config.hasCategory(catString)) {
                 ConfigCategory cat = config.getCategory(catString);
                 if (cat.containsKey(path[path.length - 1])) {
-                    FirstAid.logger.info("Removing prop " + s);
+                    FirstAid.LOGGER.info("Removing prop " + s);
                     cat.remove(path[path.length - 1]);
                 }
             } else {
-                FirstAid.logger.warn("Unable to find config category {} for removal of old config options", catString);
+                FirstAid.LOGGER.warn("Unable to find config category {} for removal of old config options", catString);
             }
         }
         if (config.hasChanged()) config.save();
@@ -95,7 +95,7 @@ public class ExtraConfigManager {
         for (Field f : clazz.getDeclaredFields()) {
             T annotation = f.getAnnotation(annotationClass);
             if (annotation != null) {
-//                FirstAid.logger.debug("Found annotation {} for field {}", annotation, field);
+//                FirstAid.LOGGER.debug("Found annotation {} for field {}", annotation, field);
                 if (FieldWrapper.hasWrapperFor(f)) {
                     Object typeAdapter = FieldWrapper.get(instance, f, category).getTypeAdapter();
                     UniqueProperty.Type type;
@@ -108,7 +108,7 @@ public class ExtraConfigManager {
                             Property.Type propType = (Property.Type) m.invoke(typeAdapter);
                             type = UniqueProperty.Type.fromType(propType);
                         } catch (ReflectiveOperationException | ClassCastException e) {
-                            FirstAid.logger.fatal("Error getting type from type adapter for field " + f, e);
+                            FirstAid.LOGGER.fatal("Error getting type from type adapter for field " + f, e);
                             type = UniqueProperty.Type.UNKNOWN;
                         }
                     }
@@ -124,13 +124,13 @@ public class ExtraConfigManager {
                     Object newInstance = f.get(instance);
                     listBuilder.addAll(getAnnotatedFields(annotationClass, newInstance.getClass(), sub, newInstance));
                 } catch (IllegalAccessException e) {
-                    FirstAid.logger.error("Error creating new instance of field " + f, e);
+                    FirstAid.LOGGER.error("Error creating new instance of field " + f, e);
                 }
             }
         }
         List<ConfigEntry<T>> list = listBuilder.build();
         if (instance == null)
-            FirstAid.logger.debug("Found {} annotations of the type {} for the {}", list.size(), annotationClass, clazz);
+            FirstAid.LOGGER.debug("Found {} annotations of the type {} for the {}", list.size(), annotationClass, clazz);
         return listBuilder.build();
     }
 

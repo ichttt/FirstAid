@@ -14,12 +14,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Objects;
 
-public class MessageResync implements IMessage {
+public class MessageSyncDamageModel implements IMessage {
     private NBTTagCompound playerDamageModel;
 
-    public MessageResync() {}
+    public MessageSyncDamageModel() {}
 
-    public MessageResync(AbstractPlayerDamageModel damageModel) {
+    public MessageSyncDamageModel(AbstractPlayerDamageModel damageModel) {
         this.playerDamageModel = damageModel.serializeNBT();
     }
 
@@ -33,11 +33,11 @@ public class MessageResync implements IMessage {
         ByteBufUtils.writeTag(buf, this.playerDamageModel);
     }
 
-    public static final class Handler implements IMessageHandler<MessageResync, IMessage> {
+    public static final class Handler implements IMessageHandler<MessageSyncDamageModel, IMessage> {
 
         @SideOnly(Side.CLIENT)
         @Override
-        public IMessage onMessage(MessageResync message, MessageContext ctx) {
+        public IMessage onMessage(MessageSyncDamageModel message, MessageContext ctx) {
             Minecraft mc = Minecraft.getMinecraft();
             mc.addScheduledTask(() -> Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).deserializeNBT(message.playerDamageModel));
             return null;

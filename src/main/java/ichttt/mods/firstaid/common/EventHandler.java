@@ -13,9 +13,9 @@ import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.PreferredDamageDistribution;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
-import ichttt.mods.firstaid.common.network.MessageReceiveConfiguration;
+import ichttt.mods.firstaid.common.network.MessageConfiguration;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
-import ichttt.mods.firstaid.common.network.MessageResync;
+import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.ProjectileHelper;
 import io.netty.buffer.ByteBuf;
@@ -237,7 +237,8 @@ public class EventHandler {
             AbstractPlayerDamageModel damageModel = Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
             if (damageModel.hasTutorial)
                 CapProvider.tutorialDone.add(event.player.getName());
-            FirstAid.NETWORKING.sendTo(new MessageReceiveConfiguration(damageModel), (EntityPlayerMP) event.player);
+            EntityPlayerMP playerMP = (EntityPlayerMP) event.player;
+            FirstAid.NETWORKING.sendTo(new MessageConfiguration(damageModel, !playerMP.connection.netManager.isLocalChannel()), playerMP);
         }
     }
 
@@ -256,6 +257,6 @@ public class EventHandler {
     @SubscribeEvent
     public static void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (!event.player.world.isRemote && event.player instanceof EntityPlayerMP) //Mojang seems to wipe all caps on teleport
-            FirstAid.NETWORKING.sendTo(new MessageResync(Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), (EntityPlayerMP) event.player);
+            FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), (EntityPlayerMP) event.player);
     }
 }

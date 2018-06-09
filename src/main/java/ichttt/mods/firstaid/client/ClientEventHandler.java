@@ -8,6 +8,7 @@ import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.CapProvider;
+import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
@@ -55,7 +56,7 @@ public class ClientEventHandler {
             if (mc.world != null && mc.world.getWorldTime() % 3 == 0) id++;
             if (id > 15) id = 0;
         }
-        if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.world != null && mc.world.isRemote && mc.player != null) {
+        if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.world.isRemote) {
             mc.player.sendStatusMessage(new TextComponentString("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
             for (String s : RegistryManager.debuffConfigErrors)
                 mc.player.sendStatusMessage(new TextComponentString("[FirstAid] " + s), false);

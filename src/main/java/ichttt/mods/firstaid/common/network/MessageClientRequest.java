@@ -11,12 +11,12 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.util.Objects;
 
-public class MessageClientUpdate implements IMessage {
+public class MessageClientRequest implements IMessage {
     private Type type;
 
-    public MessageClientUpdate() {}
+    public MessageClientRequest() {}
 
-    public MessageClientUpdate(Type type) {
+    public MessageClientRequest(Type type) {
         this.type = type;
     }
 
@@ -36,16 +36,16 @@ public class MessageClientUpdate implements IMessage {
         private static final Type[] TYPES = values();
     }
 
-    public static class Handler implements IMessageHandler<MessageClientUpdate, IMessage> {
+    public static class Handler implements IMessageHandler<MessageClientRequest, IMessage> {
 
         @Override
-        public IMessage onMessage(MessageClientUpdate message, MessageContext ctx) {
+        public IMessage onMessage(MessageClientRequest message, MessageContext ctx) {
             EntityPlayerMP player = ctx.getServerHandler().player;
             if (message.type == Type.TUTORIAL_COMPLETE) {
                 CapProvider.tutorialDone.add(player.getName());
                 Objects.requireNonNull(player.getServer()).addScheduledTask(() -> Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).hasTutorial = true);
             } else if (message.type == Type.REQUEST_REFRESH) {
-                FirstAid.NETWORKING.sendTo(new MessageResync(Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), player);
+                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), player);
             }
             return null;
         }

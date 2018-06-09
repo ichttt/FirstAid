@@ -11,7 +11,7 @@ import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
-import ichttt.mods.firstaid.common.network.MessageClientUpdate;
+import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -227,7 +227,7 @@ public class GuiHealthScreen extends GuiScreen {
             AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
             part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(mc.player.getHeldItem(this.activeHand));
         } else if (button.id == 10) {
-            FirstAid.NETWORKING.sendToServer(new MessageClientUpdate(MessageClientUpdate.Type.REQUEST_REFRESH));
+            FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.REQUEST_REFRESH));
             FirstAid.LOGGER.info("Requesting refresh");
             mc.player.sendStatusMessage(new TextComponentString("Re-downloading health data from server..."), true);
         }

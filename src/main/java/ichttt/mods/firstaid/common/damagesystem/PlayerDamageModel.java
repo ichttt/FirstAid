@@ -16,7 +16,7 @@ import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
-import ichttt.mods.firstaid.common.network.MessageResync;
+import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -223,7 +223,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                 }
                 //make sure to resync the client health
                 if (!player.world.isRemote && player instanceof EntityPlayerMP)
-                    FirstAid.NETWORKING.sendTo(new MessageResync(this), (EntityPlayerMP) player); //Upload changes to the client
+                    FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this), (EntityPlayerMP) player); //Upload changes to the client
                 return false;
             }
         }

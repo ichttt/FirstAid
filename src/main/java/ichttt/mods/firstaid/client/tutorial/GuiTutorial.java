@@ -8,7 +8,7 @@ import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
-import ichttt.mods.firstaid.common.network.MessageClientUpdate;
+import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -59,13 +59,13 @@ public class GuiTutorial extends GuiScreen {
     @Override
     protected void actionPerformed(GuiButton button) {
         if (button.id == 9) {
-            FirstAid.NETWORKING.sendToServer(new MessageClientUpdate(MessageClientUpdate.Type.TUTORIAL_COMPLETE));
+            FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
             mc.displayGuiScreen(null);
         } else if (button.id == 0) {
             if (action.hasNext())
                 this.action.next();
             else {
-                FirstAid.NETWORKING.sendToServer(new MessageClientUpdate(MessageClientUpdate.Type.TUTORIAL_COMPLETE));
+                FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
                 mc.displayGuiScreen(new GuiHealthScreen(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)));
             }
         }

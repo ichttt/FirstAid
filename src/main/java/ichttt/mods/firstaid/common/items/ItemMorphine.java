@@ -46,8 +46,7 @@ public class ItemMorphine extends Item {
 
     @Override
     @Nonnull
-    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand)
-    {
+    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
         player.setActiveHand(hand);
         return new ActionResult<>(EnumActionResult.SUCCESS, itemstack);

@@ -22,11 +22,6 @@ public class CapProvider implements ICapabilitySerializable<NBTTagCompound> {
     public CapProvider(AbstractPlayerDamageModel damageModel) {
         this.damageModel = damageModel;
     }
-
-    public static void clear() {
-        tutorialDone.clear();
-    }
-
     @Override
     public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
         return capability == CapabilityExtendedHealthSystem.INSTANCE;

@@ -15,11 +15,11 @@ import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.MessageAddHealth;
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
-import ichttt.mods.firstaid.common.network.MessageClientUpdate;
+import ichttt.mods.firstaid.common.network.MessageClientRequest;
+import ichttt.mods.firstaid.common.network.MessageConfiguration;
 import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
-import ichttt.mods.firstaid.common.network.MessageReceiveConfiguration;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
-import ichttt.mods.firstaid.common.network.MessageResync;
+import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.MorpheusHelper;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
@@ -126,12 +126,12 @@ public class FirstAid {
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
         NETWORKING.registerMessage(MessageReceiveDamage.Handler.class, MessageReceiveDamage.class, ++i, Side.CLIENT);
         NETWORKING.registerMessage(MessageApplyHealingItem.Handler.class, MessageApplyHealingItem.class, ++i , Side.SERVER);
-        NETWORKING.registerMessage(MessageReceiveConfiguration.Handler.class, MessageReceiveConfiguration.class, ++i, Side.CLIENT);
+        NETWORKING.registerMessage(MessageConfiguration.Handler.class, MessageConfiguration.class, ++i, Side.CLIENT);
         NETWORKING.registerMessage(MessageApplyAbsorption.Handler.class, MessageApplyAbsorption.class, ++i, Side.CLIENT);
         NETWORKING.registerMessage(MessageAddHealth.Handler.class, MessageAddHealth.class, ++i, Side.CLIENT);
         NETWORKING.registerMessage(MessagePlayHurtSound.Handler.class, MessagePlayHurtSound.class, ++i, Side.CLIENT);
-        NETWORKING.registerMessage(MessageClientUpdate.Handler.class, MessageClientUpdate.class, ++i, Side.SERVER);
-        NETWORKING.registerMessage(MessageResync.Handler.class, MessageResync.class, ++i, Side.CLIENT);
+        NETWORKING.registerMessage(MessageClientRequest.Handler.class, MessageClientRequest.class, ++i, Side.SERVER);
+        NETWORKING.registerMessage(MessageSyncDamageModel.Handler.class, MessageSyncDamageModel.class, ++i, Side.CLIENT);
 
         proxy.init();
 
@@ -179,7 +179,7 @@ public class FirstAid {
     @Mod.EventHandler
     public void onServerStop(FMLServerStoppedEvent event) {
         LOGGER.debug("Cleaning up");
-        CapProvider.clear();
+        CapProvider.tutorialDone.clear();
         EventHandler.hitList.clear();
     }
 }

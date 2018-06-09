@@ -22,40 +22,48 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Objects;
 
-public class MessageReceiveConfiguration implements IMessage {
+public class MessageConfiguration implements IMessage {
 
     private NBTTagCompound playerDamageModel;
+    private boolean syncConfig;
 
-    public MessageReceiveConfiguration() {}
+    public MessageConfiguration() {}
 
-    public MessageReceiveConfiguration(AbstractPlayerDamageModel model) {
+    public MessageConfiguration(AbstractPlayerDamageModel model, boolean syncConfig) {
         this.playerDamageModel = model.serializeNBT();
+        this.syncConfig = syncConfig;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        for (ConfigEntry<ExtraConfig.Sync> entry : FirstAid.syncedConfigOptions)
-            entry.readFromBuf(buf);
-
         playerDamageModel = ByteBufUtils.readTag(buf);
+
+        syncConfig = buf.readBoolean();
+        if (syncConfig) {
+            for (ConfigEntry<ExtraConfig.Sync> entry : FirstAid.syncedConfigOptions)
+                entry.readFromBuf(buf);
+        }
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-        for (ConfigEntry<ExtraConfig.Sync> entry : FirstAid.syncedConfigOptions)
-            entry.writeToBuf(buf);
-
         ByteBufUtils.writeTag(buf, playerDamageModel);
+
+        buf.writeBoolean(syncConfig);
+        if (syncConfig) {
+            for (ConfigEntry<ExtraConfig.Sync> entry : FirstAid.syncedConfigOptions)
+                entry.writeToBuf(buf);
+        }
     }
 
-    public static class Handler implements IMessageHandler<MessageReceiveConfiguration, IMessage> {
+    public static class Handler implements IMessageHandler<MessageConfiguration, IMessage> {
 
         @Override
         @SideOnly(Side.CLIENT)
-        public IMessage onMessage(MessageReceiveConfiguration message, MessageContext ctx) {
+        public IMessage onMessage(MessageConfiguration message, MessageContext ctx) {
             Minecraft mc = Minecraft.getMinecraft();
 
-            FirstAid.LOGGER.info("Received configuration");
+            FirstAid.LOGGER.info(message.syncConfig ? "Received remote damage model and config" : "Received remote damage model");
             mc.addScheduledTask(() -> {
                 AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
                 damageModel.deserializeNBT(message.playerDamageModel);

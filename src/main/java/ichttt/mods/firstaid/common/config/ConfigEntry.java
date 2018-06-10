@@ -2,6 +2,7 @@ package ichttt.mods.firstaid.common.config;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import net.minecraftforge.common.config.Config;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import javax.annotation.Nonnull;
@@ -97,13 +98,20 @@ public class ConfigEntry<T extends Annotation> {
         }
     }
 
+    private static boolean noSync(Field f, boolean isStatic) {
+        if (!Modifier.isPublic(f.getModifiers()))
+            return true;
+        if (Modifier.isStatic(f.getModifiers()) != isStatic)
+            return true;
+        return f.isAnnotationPresent(Config.Ignore.class);
+    }
+
     //Ugly stuff down here...
 
     private static void readFromByteBuf(Field f, Object fieldAccessor, ByteBuf buf) throws IllegalAccessException {
-        if (!Modifier.isPublic(f.getModifiers()))
+        if (noSync(f, fieldAccessor == null))
             return;
-        if (Modifier.isStatic(f.getModifiers()) != (fieldAccessor == null))
-            return;
+
         Class<?> type = f.getType();
         if (type == boolean.class || type == Boolean.class) {
             f.setBoolean(fieldAccessor, buf.readBoolean());
@@ -145,11 +153,8 @@ public class ConfigEntry<T extends Annotation> {
     }
 
     private static void writeToByteBuf(Field f, Object fieldAccessor, ByteBuf buf) throws IllegalAccessException {
-        if (!Modifier.isPublic(f.getModifiers()))
+        if (noSync(f, fieldAccessor == null))
             return;
-        if (Modifier.isStatic(f.getModifiers()) != (fieldAccessor == null))
-            return;
-        //TODO ignore support
 
         Class<?> type = f.getType();
         if (type == boolean.class || type == Boolean.class) {

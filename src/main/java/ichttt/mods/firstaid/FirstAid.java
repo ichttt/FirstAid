@@ -1,6 +1,5 @@
 package ichttt.mods.firstaid;
 
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.DebugDamageCommand;
@@ -105,13 +104,7 @@ public class FirstAid {
                     }
                 }
                 , () -> {
-                    try {
-                        throw new UnsupportedOperationException("No default implementation");
-                    } catch (UnsupportedOperationException e) { //TODO remove catch
-                        FirstAid.LOGGER.warn("A mod still uses the default implementation of the capability. This is deprecated and will be removed in feature releases", e);
-                    }
-                    //noinspection deprecation
-                    return new CapabilityExtendedHealthSystem.DefaultImpl();
+                    throw new UnsupportedOperationException("No default implementation");
                 });
         syncedConfigOptions = ExtraConfigManager.getAnnotatedFields(ExtraConfig.Sync.class, FirstAidConfig.class);
         ExtraConfigManager.scheduleDelete("Overlay.hudScale");

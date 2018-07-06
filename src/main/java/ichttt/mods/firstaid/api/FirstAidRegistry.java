@@ -4,7 +4,6 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
@@ -57,12 +56,6 @@ public abstract class FirstAidRegistry {
     public abstract void bindDamageSourceStandard(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable);
 
     /**
-     * @deprecated Use {@link #bindDamageSourceRandom(String, boolean, boolean)}
-     */
-    @Deprecated
-    public abstract void bindDamageSourceRandom(@Nonnull String damageType, boolean nearestFirst);
-
-    /**
      * Binds the damage source to a distribution.
      * The distribution will be a RandomDamageDistribution
      * This (with nearestFirst = true) is the default setting when nothing else is specified
@@ -101,18 +94,6 @@ public abstract class FirstAidRegistry {
     public abstract void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull IDebuff debuff);
 
     /**
-     * @deprecated Use {@link #registerHealingType(Item, Function, int)} instead
-     */
-    @Deprecated
-    public abstract void bindHealingType(@Nonnull EnumHealingType type, @Nonnull Function<EnumHealingType, AbstractPartHealer> factory);
-
-    /**
-     * @deprecated Use {@link #registerHealingType(Item, Function, int)} instead
-     */
-    @Deprecated
-    public abstract void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory);
-
-    /**
      * Registers a healing type, so it can be used by the damage system when the user applies it.
      *
      * @param item      The item to bind to
@@ -127,14 +108,6 @@ public abstract class FirstAidRegistry {
 
     @Nullable
     public abstract Integer getPartHealingTime(@Nonnull Item item);
-
-    /**
-     * @deprecated Use {@link #getPartHealer(ItemStack)} instead
-     */
-    @Deprecated
-    @Nonnull
-    public abstract AbstractPartHealer getPartHealer(@Nonnull EnumHealingType type);
-
     @Nonnull
     public abstract IDamageDistribution getDamageDistribution(@Nonnull DamageSource source);
 

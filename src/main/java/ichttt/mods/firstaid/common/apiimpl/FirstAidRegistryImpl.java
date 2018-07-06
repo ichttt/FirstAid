@@ -11,14 +11,12 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import ichttt.mods.firstaid.api.enums.EnumHealingType;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.damagesystem.debuff.ConstantDebuff;
 import ichttt.mods.firstaid.common.damagesystem.debuff.OnHitDebuff;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistribution;
-import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
@@ -31,7 +29,6 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
@@ -79,12 +76,6 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         DISTRIBUTION_MAP.put(damageType, new StandardDamageDistribution(priorityTable));
     }
 
-    @Deprecated
-    @Override
-    public void bindDamageSourceRandom(@Nonnull String damageType, boolean nearestFirst) {
-        bindDamageSourceRandom(damageType, nearestFirst, false);
-    }
-
     @Override
     public void bindDamageSourceRandom(@Nonnull String damageType, boolean nearestFirst, boolean tryNoKill) {
         if (nearestFirst) {
@@ -102,24 +93,11 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         DISTRIBUTION_MAP.put(damageType, distributionTable);
     }
 
-    @Deprecated
-    @Override
-    public void bindHealingType(@Nonnull EnumHealingType type, @Nonnull Function<EnumHealingType, AbstractPartHealer> healer) {
-        FirstAid.LOGGER.warn("Deprecated method \"bindHealingType\" is still being used by mod {} for type {}", CommonUtils.getActiveModidSafe(), type);
-        Function<ItemStack, AbstractPartHealer> newFunction = stack -> healer.apply(type);
-        registerHealingType(type == EnumHealingType.BANDAGE ? FirstAidItems.BANDAGE : FirstAidItems.PLASTER, newFunction);
-    }
-
     @Override
     public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, int applyTime) {
         if (this.HEALER_MAP.containsKey(item))
             FirstAid.LOGGER.info("Healing type override detected for item " + item);
         this.HEALER_MAP.put(item, Pair.of(factory, applyTime));
-    }
-
-    @Override
-    public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory) {
-        registerHealingType(item, factory, 3000);
     }
 
     @Nullable
@@ -138,14 +116,6 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         if (pair != null)
             return pair.getRight();
         return null;
-    }
-
-    @Deprecated
-    @Nonnull
-    @Override
-    public AbstractPartHealer getPartHealer(@Nonnull EnumHealingType type) {
-        FirstAid.LOGGER.warn("Deprecated method \"getPartHealer\" is still being used by mod {} for type {}", CommonUtils.getActiveModidSafe(), type);
-        return Objects.requireNonNull(getPartHealer(new ItemStack(type == EnumHealingType.BANDAGE ? FirstAidItems.BANDAGE : FirstAidItems.PLASTER)));
     }
 
     @Override

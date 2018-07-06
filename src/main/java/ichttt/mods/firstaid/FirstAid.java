@@ -52,13 +52,13 @@ import java.util.List;
      name = FirstAid.NAME,
      version = FirstAid.VERSION,
      acceptedMinecraftVersions = "[1.12.2,1.13)",
-     dependencies = "required-after:forge@[14.23.1.2602,);",
+     dependencies = "required-after:forge@[14.23.4.2724,);",
      guiFactory = "ichttt.mods.firstaid.client.config.GuiFactory",
      certificateFingerprint = "7904c4e13947c8a616c5f39b26bdeba796500722")
 public class FirstAid {
     public static final String MODID = "firstaid";
     public static final String NAME = "First Aid";
-    public static final String VERSION = "1.5.5";
+    public static final String VERSION = "1.5.6";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     public static boolean isSynced = false;
@@ -71,7 +71,7 @@ public class FirstAid {
     public static SimpleNetworkWrapper NETWORKING;
 
     @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent pre) {
+    public void preInit(FMLPreInitializationEvent event) {
         LOGGER.info("FirstAid version {} starting", VERSION);
         creativeTab = new CreativeTabs(FirstAid.MODID) {
             @Nonnull

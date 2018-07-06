@@ -40,7 +40,7 @@ public class ArmorUtils {
      * Changed copy of ISpecialArmor{@link ISpecialArmor.ArmorProperties#applyArmor(EntityLivingBase, NonNullList, DamageSource, double)}
      */
     public static float applyArmor(@Nonnull EntityPlayer entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, double damage, @Nonnull EntityEquipmentSlot slot) {
-        if (source.isUnblockable() || itemStack.isEmpty()) return (float)damage;
+        if (itemStack.isEmpty()) return (float)damage;
         NonNullList<ItemStack> inventory = entity.inventory.armorInventory;
 
         double totalArmor;
@@ -48,12 +48,13 @@ public class ArmorUtils {
         Item item = itemStack.getItem();
 
         ISpecialArmor.ArmorProperties prop;
-        if (item instanceof ISpecialArmor) {
+        boolean unblockable = source.isUnblockable();
+        if (item instanceof ISpecialArmor && (!unblockable || ((ISpecialArmor) item).handleUnblockableDamage(entity, itemStack, source, damage, slot.getIndex()))) {
             ISpecialArmor armor = (ISpecialArmor)item;
             prop = armor.getProperties(entity, itemStack, source, damage, slot.getIndex()).copy();
             totalArmor = prop.Armor * 4;
             totalToughness = prop.Toughness;
-        }  else if (item instanceof ItemArmor) {
+        }  else if (item instanceof ItemArmor && !unblockable) {
             ItemArmor armor = (ItemArmor)item;
             prop = new ISpecialArmor.ArmorProperties(0, 0, Integer.MAX_VALUE);
             prop.Armor = armor.damageReduceAmount;

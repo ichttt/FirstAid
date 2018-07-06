@@ -25,7 +25,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "1.5.5"
+version = "1.5.6"
 group = "ichttt.mods.firstaid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "firstaid"
 def archiveGroup = "ichttt"
@@ -36,7 +36,7 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.3.2669"
+    version = "1.12.2-14.23.4.2729"
     runDir = "run"
     
     // the mappings can be changed at any time, and must be in the following format.
@@ -44,7 +44,7 @@ minecraft {
     // stable_#            stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not always work.
     // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings = "snapshot_20180421"
+    mappings = "snapshot_20180706"
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 

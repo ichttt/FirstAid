@@ -16,23 +16,28 @@ import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.resources.IResourceManagerReloadListener;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
-public class HUDHandler {
-    private static final Map<EnumPlayerPart, String> TRANSLATION_MAP = new HashMap<>();
+public class HUDHandler implements IResourceManagerReloadListener {
+    public static final HUDHandler INSTANCE = new HUDHandler();
     private static final int FADE_TIME = 30;
-    private static int maxLength;
-    public static int ticker = -1;
+    private final Map<EnumPlayerPart, String> TRANSLATION_MAP = new HashMap<>();
+    private int maxLength;
+    public int ticker = -1;
 
-    public static void rebuildTranslationTable() {
+    @Override
+    public void onResourceManagerReload(@Nonnull IResourceManager resourceManager) {
         FirstAid.LOGGER.debug("Building GUI translation table");
         TRANSLATION_MAP.clear();
         maxLength = 0;
@@ -43,11 +48,11 @@ public class HUDHandler {
         }
     }
 
-    public static int getMaxLength() {
+    public int getMaxLength() {
         return maxLength;
     }
 
-    public static void renderOverlay(ScaledResolution scaledResolution, float partialTicks) {
+    public void renderOverlay(ScaledResolution scaledResolution, float partialTicks) {
         Minecraft mc = Minecraft.getMinecraft();
         if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.OFF || mc.player == null || (GuiHealthScreen.isOpen && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) || !CommonUtils.isSurvivalOrAdventure(mc.player))
             return;

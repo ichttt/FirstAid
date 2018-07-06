@@ -114,7 +114,7 @@ public class GuiHealthScreen extends GuiScreen {
                 Integer holdTime = activeHand == null ? null : FirstAidRegistryImpl.INSTANCE.getPartHealingTime(mc.player.getHeldItem(activeHand).getItem());
                 if (holdTime == null)
                     holdTime = Integer.MAX_VALUE;
-                ((GuiHoldButton) button).setup(holdTime, button.width / (HUDHandler.getMaxLength()));
+                ((GuiHoldButton) button).setup(holdTime, button.width / (HUDHandler.INSTANCE.getMaxLength()));
                 holdButtons.add((GuiHoldButton) button);
             }
         }

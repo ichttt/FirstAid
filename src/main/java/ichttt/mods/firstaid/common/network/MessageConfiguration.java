@@ -71,7 +71,7 @@ public class MessageConfiguration implements IMessage {
                     CapProvider.tutorialDone.add(mc.player.getName());
                 else
                     mc.player.sendMessage(new TextComponentString("[First Aid] " + I18n.format("firstaid.tutorial.hint", ClientProxy.showWounds.getDisplayName())));
-                HUDHandler.ticker = 200;
+                HUDHandler.INSTANCE.ticker = 200;
                 FirstAid.isSynced = true;
             });
             return null;

@@ -8,7 +8,6 @@ import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.CapProvider;
-import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
@@ -62,8 +61,8 @@ public class ClientEventHandler {
                 mc.player.sendStatusMessage(new TextComponentString("[FirstAid] " + s), false);
             RegistryManager.debuffConfigErrors.clear();
         }
-        if (HUDHandler.ticker > 0)
-            HUDHandler.ticker--;
+        if (HUDHandler.INSTANCE.ticker > 0)
+            HUDHandler.INSTANCE.ticker--;
     }
 
     @SubscribeEvent
@@ -95,7 +94,7 @@ public class ClientEventHandler {
         RenderGameOverlayEvent.ElementType type = event.getType();
         if (type == RenderGameOverlayEvent.ElementType.ALL || (type == RenderGameOverlayEvent.ElementType.TEXT && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.OFF && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)) {
             GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
-            HUDHandler.renderOverlay(event.getResolution(), event.getPartialTicks());
+            HUDHandler.INSTANCE.renderOverlay(event.getResolution(), event.getPartialTicks());
         }
     }
 
@@ -120,6 +119,6 @@ public class ClientEventHandler {
             if (option.hasRemoteData())
                 option.revert();
         }
-        HUDHandler.ticker = -1;
+        HUDHandler.INSTANCE.ticker = -1;
     }
 }

@@ -10,8 +10,9 @@
  * 6: 1.4.6 (Minor changes)
  * 7: 1.5.0 (Apply time for healing items added)
  * 8: 1.5.6 (Removed deprecated methods and fields)
+ * 9: 1.5.7 (Minor changes)
  */
-@API(apiVersion = "8", provides = "FirstAid API", owner = "firstaid")
+@API(apiVersion = "9", provides = "FirstAid API", owner = "firstaid")
 package ichttt.mods.firstaid.api;
 
 import net.minecraftforge.fml.common.API;

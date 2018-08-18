@@ -23,7 +23,7 @@ public class ItemMorphine extends Item {
     ItemMorphine() {
         setMaxStackSize(16);
         setRegistryName(new ResourceLocation(FirstAid.MODID, "morphine"));
-        setUnlocalizedName("morphine");
+        setTranslationKey("morphine");
         setCreativeTab(FirstAid.creativeTab);
     }
 

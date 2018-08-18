@@ -17,7 +17,7 @@ public class ItemHealing extends Item {
     ItemHealing(String name) {
         setMaxStackSize(16);
         setRegistryName(new ResourceLocation(FirstAid.MODID, name));
-        setUnlocalizedName(name);
+        setTranslationKey(name);
         setCreativeTab(FirstAid.creativeTab);
     }
 

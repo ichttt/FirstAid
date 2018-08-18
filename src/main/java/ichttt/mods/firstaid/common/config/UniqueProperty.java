@@ -1,6 +1,5 @@
 package ichttt.mods.firstaid.common.config;
 
-import com.google.common.base.Joiner;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.client.config.ConfigGuiType;
@@ -68,10 +67,8 @@ public class UniqueProperty
         }
     }
 
-    private static final Joiner NEW_LINE = Joiner.on('\n');
     private final String name;
     private final String langKey;
-    private final String comment;
     private final Type type;
 
     public static String getLangKey(Field field, String modid, String category) {
@@ -82,14 +79,6 @@ public class UniqueProperty
             return modid + "." + (category.isEmpty() ? "" : category + ".") + field.getName().toLowerCase(Locale.ENGLISH);
     }
 
-    public static String getComment(Field field) {
-        Config.Comment ca = field.getAnnotation(Config.Comment.class);
-        if (ca != null)
-            return NEW_LINE.join(ca.value());
-        else
-            return null;
-    }
-
     public static UniqueProperty fromProperty(Field field, String modid, String category, UniqueProperty.Type type) {
         String name;
         if (field.isAnnotationPresent(Config.Name.class))
@@ -98,15 +87,12 @@ public class UniqueProperty
             name = field.getName();
 
         String langKey = getLangKey(field, modid, category);
-
-        String comment = getComment(field);
-        return new UniqueProperty(name, langKey, comment, type);
+        return new UniqueProperty(name, langKey, type);
     }
 
-    public UniqueProperty(String name, String langKey, String comment, Type type) {
+    public UniqueProperty(String name, String langKey, Type type) {
         this.name = name;
         this.langKey = langKey;
-        this.comment = comment;
         this.type = type;
     }
 

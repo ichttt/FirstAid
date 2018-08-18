@@ -54,7 +54,7 @@ public class MessageApplyHealingItem implements IMessage {
                 Item item = stack.getItem();
                 AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
                 if (healer == null) {
-                    FirstAid.LOGGER.warn("Player {} has invalid item in hand {} while it should be an healing item", player.getName(), item.getUnlocalizedName());
+                    FirstAid.LOGGER.warn("Player {} has invalid item in hand {} while it should be an healing item", player.getName(), item.getRegistryName());
                     player.sendMessage(new TextComponentString("Unable to apply healing item!"));
                     return;
                 }

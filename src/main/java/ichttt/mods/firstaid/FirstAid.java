@@ -72,11 +72,11 @@ public class FirstAid {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        LOGGER.info("FirstAid version {} starting", VERSION);
+        LOGGER.info("{} version {} starting", NAME, VERSION);
         creativeTab = new CreativeTabs(FirstAid.MODID) {
             @Nonnull
             @Override
-            public ItemStack getTabIconItem() {
+            public ItemStack createIcon() {
                 return new ItemStack(FirstAidItems.BANDAGE);
             }
         };

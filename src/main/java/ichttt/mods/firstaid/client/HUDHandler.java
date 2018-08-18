@@ -23,7 +23,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -32,7 +32,7 @@ import java.util.Objects;
 public class HUDHandler implements IResourceManagerReloadListener {
     public static final HUDHandler INSTANCE = new HUDHandler();
     private static final int FADE_TIME = 30;
-    private final Map<EnumPlayerPart, String> TRANSLATION_MAP = new HashMap<>();
+    private final Map<EnumPlayerPart, String> TRANSLATION_MAP = new EnumMap<>(EnumPlayerPart.class);
     private int maxLength;
     public int ticker = -1;
 

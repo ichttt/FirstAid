@@ -118,7 +118,7 @@ public class ExtraConfigManager {
             if (!FieldWrapper.hasWrapperFor(f) && f.getType().getSuperclass() != null && f.getType().getSuperclass().equals(Object.class)) { //next object
                 String sub = (category.isEmpty() ? "" : category + ".") + getName(f).toLowerCase(Locale.ENGLISH);
                 if (annotation != null) {
-                    listBuilder.add(new ConfigEntry<>(f, instance, annotation, annotationClass == ExtraConfig.Sync.class, new UniqueProperty(getName(f), UniqueProperty.getLangKey(f, FirstAid.MODID, category), UniqueProperty.getComment(f), UniqueProperty.Type.CATEGORY)));
+                    listBuilder.add(new ConfigEntry<>(f, instance, annotation, annotationClass == ExtraConfig.Sync.class, new UniqueProperty(getName(f), UniqueProperty.getLangKey(f, FirstAid.MODID, category), UniqueProperty.Type.CATEGORY)));
                 }
                 try {
                     Object newInstance = f.get(instance);

@@ -7,7 +7,7 @@ import ichttt.mods.firstaid.common.IProxy;
 public class ServerProxy implements IProxy {
 
     @Override
-    public void init() {
+    public void preInit() {
         FirstAid.LOGGER.debug("Loading ServerProxy");
     }
 }

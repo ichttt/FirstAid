@@ -114,7 +114,7 @@ public class GuiHealthScreen extends GuiScreen {
                 Integer holdTime = activeHand == null ? null : FirstAidRegistryImpl.INSTANCE.getPartHealingTime(mc.player.getHeldItem(activeHand).getItem());
                 if (holdTime == null)
                     holdTime = Integer.MAX_VALUE;
-                ((GuiHoldButton) button).setup(holdTime, button.width / (HUDHandler.INSTANCE.getMaxLength()));
+                ((GuiHoldButton) button).setup(holdTime, button.width / ((float) HUDHandler.INSTANCE.getMaxLength()));
                 holdButtons.add((GuiHoldButton) button);
             }
         }
@@ -200,8 +200,8 @@ public class GuiHealthScreen extends GuiScreen {
 
     private void tooltipButton(GuiButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
-        if (!enabled && button.hovered)
-            drawHoveringText(I18n.format("gui.active_item") + ": " + I18n.format(part.activeHealer.stack.getUnlocalizedName() + ".name"), mouseX, mouseY);
+        if (!enabled && button.isMouseOver())
+            drawHoveringText(I18n.format("gui.active_item") + ": " + I18n.format(part.activeHealer.stack.getTranslationKey() + ".name"), mouseX, mouseY);
         if (!disableButtons)
             button.enabled = enabled;
     }

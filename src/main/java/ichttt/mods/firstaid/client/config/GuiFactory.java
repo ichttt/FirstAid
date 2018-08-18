@@ -8,6 +8,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Set;
 
+@SuppressWarnings("unused")
 @SideOnly(Side.CLIENT)
 public class GuiFactory implements IModGuiFactory {
 

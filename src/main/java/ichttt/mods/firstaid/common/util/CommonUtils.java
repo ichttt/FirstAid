@@ -3,9 +3,12 @@ package ichttt.mods.firstaid.common.util;
 import com.creativemd.playerrevive.api.IRevival;
 import com.creativemd.playerrevive.api.capability.CapaRevive;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.primitives.Ints;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.FirstAidConfig;
+import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.server.MinecraftServer;
@@ -18,6 +21,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class CommonUtils {
     @Nonnull
@@ -79,5 +83,11 @@ public class CommonUtils {
     public static String getActiveModidSafe() {
         ModContainer activeModContainer = Loader.instance().activeModContainer();
         return activeModContainer == null ? "UNKNOWN-NULL" : activeModContainer.getModId();
+    }
+
+    public static void healPlayerByPercentage(double percentage, AbstractPlayerDamageModel damageModel, EntityPlayer player) {
+        Objects.requireNonNull(damageModel);
+        int healValue = Ints.checkedCast(Math.round(damageModel.getCurrentMaxHealth() * percentage));
+        HealthDistribution.manageHealth(healValue, damageModel, player, true, false);
     }
 }

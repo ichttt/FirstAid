@@ -15,7 +15,7 @@ gui.apply_hint=Wähle die Stelle, wo das Item angebracht werden soll
 gui.morphine_left=Morphium aktiv(%s verbleibend)
 gui.active_item=Gerade aktiv
 gui.no_sleep_heal=Schlafen stellt kein Leben wieder her
-gui.sleep_heal_amount=Schlafen stellt %s Herzen wieder her
+gui.sleep_heal_amount=Schlafen stellt %s%% des maximalen Lebens wieder her
 
 firstaid.tooltip.morphine=Undrückt negative Effekte von fehlendem Leben für %s
 firstaid.tooltip.healer=Stellt %s Herzen wieder her, braucht %s pro halbes Herz
@@ -51,8 +51,8 @@ firstaid.config.allownaturalregeneration=Natürliche Regeneration erlauben
 firstaid.config.allownaturalregeneration.tooltip=Falls aktiv, greift die normale natürliche Regeneration\n**WARNUNG** Dies setzt intern die Spielregel "naturalRegeneration" für alle Welten, sodass die Einstellung auch nach dem Entfernen der Mod aktiv bleibt
 firstaid.config.allowotherhealingitems=Andere Heilungsgegenstände aktivieren
 firstaid.config.allowotherhealingitems.tooltip=Wenn deaktiviert haben z.B. Heilungstränke keinen Effekt
-firstaid.config.sleephealing=Heilung durch Schlafen
-firstaid.config.sleephealing.tooltip=Das Leben, welches durch Schlafen in einem Bett geheilt wird(1 = ein halbes Herz)
+firstaid.config.sleephealpercentage=Heilung durch Schlafen
+firstaid.config.sleephealpercentage.tooltip=Legt fest, wie viel Prozent des maximalen Lebens beim Schlafen wiederhergestellt werden sollen
 firstaid.config.otherregenmultiplier=Multiplikator anderer Regeneration
 firstaid.config.otherregenmultiplier.tooltip=Der Wert, mit dem die externe Heilung verrechnet wird. Kein Effekt, falls andere Heilungsgegenstände deaktiviert sind.
 firstaid.config.naturalregenmultiplier=Multiplikator natürlicher Regeneration

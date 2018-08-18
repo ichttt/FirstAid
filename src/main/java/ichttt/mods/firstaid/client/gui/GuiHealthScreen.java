@@ -175,7 +175,7 @@ public class GuiHealthScreen extends GuiScreen {
         GlStateManager.popMatrix();
 
         //Sleep info setup
-        float sleepHealing = FirstAidConfig.externalHealing.sleepHealing;
+        double sleepHealing = FirstAidConfig.externalHealing.sleepHealPercentage;
         int renderBedX = Math.round(guiLeft / bedScaleFactor) + 2;
         int renderBedY = Math.round((guiTop + ySize) / bedScaleFactor) - 18;
         int bedX = (int) (renderBedX * bedScaleFactor);
@@ -183,14 +183,14 @@ public class GuiHealthScreen extends GuiScreen {
 
         //Sleep info icon
         GlStateManager.pushMatrix();
-        if (sleepHealing > 0F) RenderHelper.enableGUIStandardItemLighting();
+        if (sleepHealing > 0D) RenderHelper.enableGUIStandardItemLighting();
         GlStateManager.scale(bedScaleFactor, bedScaleFactor, bedScaleFactor);
         mc.getRenderItem().renderItemAndEffectIntoGUI(null, BED_ITEMSTACK, renderBedX, renderBedY);
         GlStateManager.popMatrix();
 
         //Sleep info tooltip
         if (mouseX >= bedX && mouseY >= bedY && mouseX < bedX + (16 * bedScaleFactor) && mouseY < bedY + (16 * bedScaleFactor)) {
-            String s = sleepHealing == 0F ? I18n.format("gui.no_sleep_heal") : I18n.format("gui.sleep_heal_amount", FORMAT.format(sleepHealing / 2));
+            String s = sleepHealing == 0D ? I18n.format("gui.no_sleep_heal") : I18n.format("gui.sleep_heal_amount", FORMAT.format(sleepHealing * 100));
             drawHoveringText(s, mouseX, mouseY);
         }
 

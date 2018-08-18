@@ -15,7 +15,6 @@ import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
-import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
@@ -153,10 +152,10 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             prevScaleFactor = globalFactor;
         }
 
-        if (!world.isRemote && world instanceof WorldServer && FirstAidConfig.externalHealing.sleepHealing != 0) {
+        if (!world.isRemote && world instanceof WorldServer && FirstAidConfig.externalHealing.sleepHealPercentage != 0D) {
             WorldServer worldServer = (WorldServer) player.world;
             if (worldServer.areAllPlayersAsleep()) { // We are going to wake up on the next tick, add health
-                HealthDistribution.manageHealth(FirstAidConfig.externalHealing.sleepHealing, this, player, true, false);
+                CommonUtils.healPlayerByPercentage(FirstAidConfig.externalHealing.sleepHealPercentage, this, player);
             }
         }
 
@@ -268,7 +267,8 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         return max;
     }
 
-    private int getCurrentMaxHealth() {
+    @Override
+    public int getCurrentMaxHealth() {
         int maxHealth = 0;
         for (AbstractDamageablePart part : this) {
             maxHealth += part.getMaxHealth();

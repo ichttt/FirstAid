@@ -83,6 +83,8 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
 
     public abstract void setAbsorption(float absorption);
 
+    public abstract int getCurrentMaxHealth();
+
     @SideOnly(Side.CLIENT)
     public abstract int getMaxRenderSize();
 }

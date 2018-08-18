@@ -58,10 +58,10 @@ public class FirstAidConfig {
         @Config.LangKey("firstaid.config.allowotherhealingitems")
         public boolean allowOtherHealingItems = true;
 
-        @Config.Comment("The total amount of health that will be distributed to all body parts after sleeping")
-        @Config.LangKey("firstaid.config.sleephealing")
-        @Config.RangeDouble(min = 0D, max = 20D)
-        public float sleepHealing = 1F;
+        @Config.Comment("Specifies how much percent of the max health should be restored when sleeping")
+        @Config.LangKey("firstaid.config.sleephealpercentage")
+        @Config.RangeDouble(min = 0D, max = 1D)
+        public double sleepHealPercentage = 0.07D;
 
         @Config.Comment("The value external regen will be multiplied with. Has no effect if \"allowOtherHealingItems\" is disabled")
         @Config.LangKey("firstaid.config.otherregenmultiplier")

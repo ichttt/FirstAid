@@ -15,7 +15,6 @@ gui.apply_hint=选择治疗的位置
 gui.morphine_left=吗啡治疗（左%s）
 gui.active_item=相当有效
 gui.no_sleep_heal=睡觉并不使你恢复健康
-gui.sleep_heal_amount=睡觉恢复了 %s 点健康值
 
 firstaid.tutorial.hint=按%s观看教程
 firstaid.tutorial.welcome=欢迎使用‘医疗护理’模组！本教程将引导你了解这个模组不同的机制。
@@ -46,8 +45,6 @@ firstaid.config.allownaturalregeneration=自我修补
 firstaid.config.allownaturalregeneration.tooltip=允许原版的自然恢复健康值，需要"allowOtherHealingItems"设置为true。
 firstaid.config.allowotherhealingitems=其他治疗
 firstaid.config.allowotherhealingitems.tooltip=设置为false，治疗药水以及其他Buff效果将不起任何作用。
-firstaid.config.sleephealing=睡觉治愈
-firstaid.config.sleephealing.tooltip=设置睡觉所恢复的身体各部分健康值（1 = 半颗心）
 firstaid.config.otherregenmultiplier=成倍治疗
 firstaid.config.otherregenmultiplier.tooltip=外部治疗健康值将成倍增长，如果"Allow other healing items" 被禁用，则不起作用。
 firstaid.config.naturalregenmultiplier=成倍自我修补

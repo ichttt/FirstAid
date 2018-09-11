@@ -72,9 +72,9 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
-        float amountToDamage = event.getAmount();
         if (entity.world.isRemote || !(entity instanceof EntityPlayer) || entity instanceof FakePlayer)
             return;
+        float amountToDamage = event.getAmount();
         EntityPlayer player = (EntityPlayer) entity;
         AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
         DamageSource source = event.getSource();

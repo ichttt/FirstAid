@@ -1,5 +1,6 @@
 package ichttt.mods.firstaid.common.util;
 
+import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.FirstAidConfig;
@@ -18,6 +19,7 @@ public class MorpheusHelper implements INewDayHandler {
     public static void register() {
         if (INSTANCE.oldHandler != null) throw new IllegalStateException("MorpheusHelper did already init!");
         INSTANCE.oldHandler = MorpheusRegistry.registry.get(0);
+        FirstAid.LOGGER.info("Morpheus present - enabling compatibility module. Parent: " + INSTANCE.oldHandler.getClass());
         Morpheus.register.registerHandler(INSTANCE, 0);
     }
 

@@ -30,7 +30,7 @@ public interface IDebuffBuilder {
      * If OnHit damage: value = absolute damage taken for this multiplier to apply;
      * If Constant: value = percentage of health left for this multiplier
      *
-     * @param value      absolute damage (onHit) or percentage of the health left
+     * @param value      absolute damage (onHit) or percentage of the health left (constant)
      * @param multiplier the potion effect multiplier
      * @return this
      */

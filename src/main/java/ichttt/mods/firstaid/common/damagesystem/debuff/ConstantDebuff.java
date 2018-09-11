@@ -58,10 +58,10 @@ public class ConstantDebuff extends AbstractDebuff {
                 if (healthPerMax != -1)
                     syncMultiplier(healthPerMax); //There are apparently some cases where the multiplier does not sync up right... fix this
                 if (activeMultiplier != 0)
-                    player.addPotionEffect(new PotionEffect(effect, 240, activeMultiplier - 1, false, false));
+                    player.addPotionEffect(new PotionEffect(effect, 169, activeMultiplier - 1, false, false));
             }
             ticks++;
-            if (ticks >= 200) ticks = 0;
+            if (ticks >= 79) ticks = 0;
         }
     }
 }

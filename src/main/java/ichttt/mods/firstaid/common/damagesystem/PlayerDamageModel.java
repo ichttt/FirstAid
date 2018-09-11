@@ -108,16 +108,14 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             return;
         }
 
-        if (FirstAid.isSynced) {
-            float newCurrentHealth = (currentHealth / getCurrentMaxHealth()) * player.getMaxHealth();
+        float newCurrentHealth = (currentHealth / getCurrentMaxHealth()) * player.getMaxHealth();
 
-            if (Float.isInfinite(newCurrentHealth)) {
-                FirstAid.LOGGER.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe
-            } else {
-                if (newCurrentHealth != prevHealthCurrent)
-                    ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
-                prevHealthCurrent = newCurrentHealth;
-            }
+        if (Float.isInfinite(newCurrentHealth)) {
+            FirstAid.LOGGER.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe
+        } else {
+            if (newCurrentHealth != prevHealthCurrent)
+                ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
+            prevHealthCurrent = newCurrentHealth;
         }
 
         if (!this.hasTutorial)

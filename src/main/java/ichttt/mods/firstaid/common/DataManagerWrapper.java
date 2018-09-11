@@ -56,7 +56,7 @@ public class DataManagerWrapper extends EntityDataManager {
             }
             Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).setAbsorption(floatValue);
         } else if (key == EntityLivingBase.HEALTH) {
-             if (!player.world.isRemote && (Float) value > player.getMaxHealth())
+             if (!player.world.isRemote && (Float) value > player.getMaxHealth()) //I don't know why only if !world.isRemote... maybe double check this
                 Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
         }
         set_impl(key, value);

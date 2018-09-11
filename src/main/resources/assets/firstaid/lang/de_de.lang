@@ -20,6 +20,7 @@ gui.sleep_heal_amount=Schlafen stellt %s%% des maximalen Lebens wieder her
 firstaid.tooltip.morphine=Undrückt negative Effekte von fehlendem Leben für %s
 firstaid.tooltip.healer=Stellt %s Herzen wieder her, braucht %s pro halbes Herz
 
+firstaid.tutorial.notice=TUTORIAL - NICHT TATSÄCHLICHE WERTE
 firstaid.tutorial.hint=Drücke %s für das Tutorial
 firstaid.tutorial.welcome=Willkommen zum FirstAid Mod! Dieses Tutorial wird dich durch den Mod und seine Mechaniken führen.
 firstaid.tutorial.line1=Wie du vielleicht schon gemerkt hast, ist die normale Lebensleiste weg. Sie wurde duch dieses System ersetzt.

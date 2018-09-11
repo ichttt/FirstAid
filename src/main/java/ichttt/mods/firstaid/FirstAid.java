@@ -54,11 +54,12 @@ import java.util.List;
      acceptedMinecraftVersions = "[1.12.2,1.13)",
      dependencies = "required-after:forge@[14.23.4.2724,);",
      guiFactory = "ichttt.mods.firstaid.client.config.GuiFactory",
-     certificateFingerprint = "7904c4e13947c8a616c5f39b26bdeba796500722")
+     certificateFingerprint = FirstAid.FINGERPRINT)
 public class FirstAid {
     public static final String MODID = "firstaid";
     public static final String NAME = "First Aid";
     public static final String VERSION = "1.5.6";
+    public static final String FINGERPRINT = "7904c4e13947c8a616c5f39b26bdeba796500722";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     public static boolean isSynced = false;
@@ -130,7 +131,6 @@ public class FirstAid {
         proxy.init();
 
         if (Loader.isModLoaded("morpheus")) {
-            LOGGER.info("Morpheus present - enabling compatibility module");
             MorpheusHelper.register();
         }
 
@@ -146,6 +146,7 @@ public class FirstAid {
 
     @Mod.EventHandler
     public void wrongFingerprint(FMLFingerprintViolationEvent event) {
+        if (!event.getExpectedFingerprint().equals(FINGERPRINT)) return;
         if (event.getFingerprints().isEmpty()) {
             LOGGER.error("NO VALID FINGERPRINT FOR FIRST AID! EXPECTED " + event.getExpectedFingerprint() + " BUT FOUND NONE!");
         } else {

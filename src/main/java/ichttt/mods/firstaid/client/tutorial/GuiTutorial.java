@@ -12,6 +12,7 @@ import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -85,6 +86,7 @@ public class GuiTutorial extends GuiScreen {
         GlStateManager.pushMatrix();
         this.action.draw();
         GlStateManager.popMatrix();
+        drawCenteredString(mc.fontRenderer, I18n.format("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 140, 0xFFFFFF);
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 

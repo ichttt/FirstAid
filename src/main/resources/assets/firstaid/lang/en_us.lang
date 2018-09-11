@@ -20,6 +20,7 @@ gui.sleep_heal_amount=Sleeping restores %s%% of max health
 firstaid.tooltip.morphine=Suppresses health debuffs for %s
 firstaid.tooltip.healer=Restores %s hearts total, requires %s per half heart
 
+firstaid.tutorial.notice=TUTORIAL - NO REAL VALUES
 firstaid.tutorial.hint=Press %s for the tutorial
 firstaid.tutorial.welcome=Welcome to the FirstAid mod! This tutorial will guide you through this mod and explain the different mechanics.
 firstaid.tutorial.line1=As you may already have noticed, the vanilla health bar is gone. It has been replaced by this system.

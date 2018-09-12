@@ -2,7 +2,6 @@ package ichttt.mods.firstaid.common.util;
 
 import com.creativemd.playerrevive.api.IRevival;
 import com.creativemd.playerrevive.api.capability.CapaRevive;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
@@ -19,6 +18,7 @@ import net.minecraftforge.fml.common.ModContainer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,10 +35,10 @@ public class CommonUtils {
         ARMOR_SLOTS[1] = EntityEquipmentSlot.LEGS;
         ARMOR_SLOTS[0] = EntityEquipmentSlot.FEET;
         slotToParts = ImmutableMap.<EntityEquipmentSlot, List<EnumPlayerPart>>builder().
-        put(EntityEquipmentSlot.HEAD, ImmutableList.of(EnumPlayerPart.HEAD)).
-        put(EntityEquipmentSlot.CHEST, ImmutableList.of(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY)).
-        put(EntityEquipmentSlot.LEGS, ImmutableList.of(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)).
-        put(EntityEquipmentSlot.FEET, ImmutableList.of(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)).build();
+        put(EntityEquipmentSlot.HEAD, Arrays.asList(EnumPlayerPart.HEAD)).
+        put(EntityEquipmentSlot.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY)).
+        put(EntityEquipmentSlot.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)).
+        put(EntityEquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)).build();
     }
 
     public static void killPlayer(@Nonnull EntityPlayer player, @Nullable DamageSource source) {

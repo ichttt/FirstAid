@@ -35,10 +35,10 @@ public class PlayerModelRenderer {
     private static void drawPart(Gui gui, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
         int rawTexX = texX;
         int maxHealth = part.getMaxHealth();
-        if (part.currentHealth == 0) {
+        if (part.currentHealth <= 0.001) {
             texX += SIZE * 3;
         }
-        else if (part.currentHealth != maxHealth) {
+        else if (Math.abs(part.currentHealth - maxHealth) > 0.001) {
             float healthPercentage = part.currentHealth / maxHealth;
             if (healthPercentage >= 1 || healthPercentage <= 0)
                 throw new RuntimeException(String.format("Calculated invalid health for part %s with current health %s and max health %d. Got value %s", part.part, part.currentHealth, maxHealth, healthPercentage));

@@ -2,6 +2,7 @@ package com.creativemd.playerrevive.api;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public interface IRevival extends INBTSerializable<NBTTagCompound> {
 
     void stopBleeding();
 
-    void startBleeding();
+    void startBleeding(EntityPlayer player, DamageSource source);
 
     float getProgress();
 
@@ -25,6 +26,10 @@ public interface IRevival extends INBTSerializable<NBTTagCompound> {
     int getTimeLeft();
 
     void kill();
+    
+    DamageSource getSource();
+    
+    CombatTrackerClone getTrackerClone();
 
     List<EntityPlayer> getRevivingPlayers();
 }

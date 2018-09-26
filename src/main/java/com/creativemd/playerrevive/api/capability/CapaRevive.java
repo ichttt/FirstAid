@@ -1,8 +1,10 @@
 package com.creativemd.playerrevive.api.capability;
 
+import com.creativemd.playerrevive.api.CombatTrackerClone;
 import com.creativemd.playerrevive.api.IRevival;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -11,7 +13,6 @@ import java.util.List;
 
 public class CapaRevive {
 
-    @SuppressWarnings("CanBeFinal")
     @CapabilityInject(IRevival.class)
     public static Capability<IRevival> reviveCapa = null;
 
@@ -33,7 +34,7 @@ public class CapaRevive {
         public void stopBleeding() {}
 
         @Override
-        public void startBleeding() {}
+        public void startBleeding(EntityPlayer player, DamageSource source) {}
 
         @Override
         public float getProgress() {
@@ -70,5 +71,15 @@ public class CapaRevive {
 
         @Override
         public void deserializeNBT(NBTTagCompound nbt) {}
+
+		@Override
+		public DamageSource getSource() {
+			return null;
+		}
+		
+		@Override
+		public CombatTrackerClone getTrackerClone() {
+			return null;
+		}
     }
 }

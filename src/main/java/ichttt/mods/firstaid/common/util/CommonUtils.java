@@ -47,7 +47,7 @@ public class CommonUtils {
 
         IRevival revival = getRevivalIfPossible(player);
         if (revival != null)
-            revival.startBleeding();
+            revival.startBleeding(player, source);
         else
             ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
     }

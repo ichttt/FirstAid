@@ -57,12 +57,7 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
-import java.util.WeakHashMap;
+import java.util.*;
 
 public class EventHandler {
     public static final Random rand = new Random();
@@ -133,7 +128,7 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().registerAll(FirstAidItems.BANDAGE, FirstAidItems.PLASTER, FirstAidItems.MORPHINE);
+        FirstAidItems.registerItems(event.getRegistry());
     }
 
     @SubscribeEvent

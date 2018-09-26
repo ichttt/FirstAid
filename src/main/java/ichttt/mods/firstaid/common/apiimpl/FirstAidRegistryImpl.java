@@ -96,7 +96,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Override
     public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, int applyTime) {
         if (this.HEALER_MAP.containsKey(item))
-            FirstAid.LOGGER.info("Healing type override detected for item " + item);
+            FirstAid.LOGGER.warn("Healing type override detected for item " + item);
         this.HEALER_MAP.put(item, Pair.of(factory, applyTime));
     }
 

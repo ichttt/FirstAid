@@ -1,24 +1,14 @@
 package ichttt.mods.firstaid;
 
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.common.CapProvider;
-import ichttt.mods.firstaid.common.DebugDamageCommand;
-import ichttt.mods.firstaid.common.EventHandler;
-import ichttt.mods.firstaid.common.FirstAidConfig;
-import ichttt.mods.firstaid.common.IProxy;
+import ichttt.mods.firstaid.common.*;
+import ichttt.mods.firstaid.common.apiimpl.HealingItemApiHelperImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.config.ExtraConfigManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
-import ichttt.mods.firstaid.common.network.MessageAddHealth;
-import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
-import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
-import ichttt.mods.firstaid.common.network.MessageClientRequest;
-import ichttt.mods.firstaid.common.network.MessageConfiguration;
-import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
-import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
-import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
+import ichttt.mods.firstaid.common.network.*;
 import ichttt.mods.firstaid.common.util.MorpheusHelper;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
@@ -32,19 +22,13 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
+import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
@@ -58,7 +42,7 @@ import java.util.List;
 public class FirstAid {
     public static final String MODID = "firstaid";
     public static final String NAME = "First Aid";
-    public static final String VERSION = "1.5.8";
+    public static final String VERSION = "1.5.9";
     public static final String FINGERPRINT = "7904c4e13947c8a616c5f39b26bdeba796500722";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
@@ -68,24 +52,22 @@ public class FirstAid {
     @SidedProxy(clientSide = "ichttt.mods.firstaid.client.ClientProxy", serverSide = "ichttt.mods.firstaid.server.ServerProxy")
     public static IProxy proxy;
 
-    public static CreativeTabs creativeTab;
+    public static final CreativeTabs CREATIVE_TAB = new CreativeTabs(FirstAid.MODID) {
+        @Override
+        public ItemStack createIcon() {
+            return new ItemStack(FirstAidItems.BANDAGE);
+        }
+    };
     public static SimpleNetworkWrapper NETWORKING;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         LOGGER.info("{} version {} starting", NAME, VERSION);
-        creativeTab = new CreativeTabs(FirstAid.MODID) {
-            @Nonnull
-            @Override
-            public ItemStack createIcon() {
-                return new ItemStack(FirstAidItems.BANDAGE);
-            }
-        };
 
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
-        FirstAidItems.init();
         proxy.preInit();
         //Setup API
+        HealingItemApiHelperImpl.init();
         RegistryManager.setupRegistries();
         checkEarlyExit();
     }

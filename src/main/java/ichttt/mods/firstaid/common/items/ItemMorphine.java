@@ -20,11 +20,11 @@ import java.util.Objects;
 
 public class ItemMorphine extends Item {
 
-    ItemMorphine() {
+    public ItemMorphine() {
         setMaxStackSize(16);
         setRegistryName(new ResourceLocation(FirstAid.MODID, "morphine"));
         setTranslationKey("morphine");
-        setCreativeTab(FirstAid.creativeTab);
+        setCreativeTab(FirstAid.CREATIVE_TAB);
     }
 
     @Override

@@ -8,8 +8,6 @@ import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.FirstAidConfig;
-import ichttt.mods.firstaid.common.damagesystem.PartHealer;
-import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.SoundEvent;
 import org.apache.commons.lang3.ArrayUtils;
@@ -32,10 +30,6 @@ public class RegistryManager {
     public static void registerDefaults() {
         FirstAid.LOGGER.debug("Registering defaults registry values");
         FirstAidRegistry registry = Objects.requireNonNull(FirstAidRegistry.getImpl());
-
-        //---HEALING TYPES---
-        registry.registerHealingType(FirstAidItems.BANDAGE, stack -> new PartHealer(18 * 20, 4, stack), 2500);
-        registry.registerHealingType(FirstAidItems.PLASTER, stack -> new PartHealer(22 * 20, 2, stack), 3000);
 
         //---DAMAGE SOURCES---
         List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> feetList = new ArrayList<>(2);

@@ -28,11 +28,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private int morphineTicksLeft = 0;
@@ -153,6 +149,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         if (!world.isRemote && world instanceof WorldServer && FirstAidConfig.externalHealing.sleepHealPercentage != 0D) {
             WorldServer worldServer = (WorldServer) player.world;
             if (worldServer.areAllPlayersAsleep()) { // We are going to wake up on the next tick, add health
+                System.out.println("Healing" + player);
                 CommonUtils.healPlayerByPercentage(FirstAidConfig.externalHealing.sleepHealPercentage, this, player);
             }
         }

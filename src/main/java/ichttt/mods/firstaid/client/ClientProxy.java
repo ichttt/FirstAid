@@ -10,13 +10,21 @@ import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.config.ExtraConfigManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiErrorScreen;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.CustomModLoadingErrorDisplayException;
+import net.minecraftforge.fml.client.GuiModsMissing;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.MissingModsException;
+import net.minecraftforge.fml.common.versioning.ArtifactVersion;
+import net.minecraftforge.fml.common.versioning.VersionParser;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
@@ -49,5 +57,51 @@ public class ClientProxy implements IProxy {
         Minecraft mc = Minecraft.getMinecraft();
         GuiHealthScreen.INSTANCE = new GuiHealthScreen(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null), activeHand);
         mc.displayGuiScreen(GuiHealthScreen.INSTANCE);
+    }
+
+    @Override
+    public void throwWrongPlayerRevivalException() {
+        throw new CustomModLoadingErrorDisplayException() {
+            private final MissingModsException wrappedEx = new MissingModsException(FirstAid.MODID, FirstAid.NAME);
+            private final GuiModsMissing base = new GuiModsMissing(wrappedEx);
+            @Override
+            public void initGui(GuiErrorScreen errorScreen, FontRenderer fontRenderer) {
+                wrappedEx.addMissingMod(VersionParser.parseVersionReference("playerrevive@[1.2.19,)"), new ArtifactVersion() {
+                    @Override
+                    public String getLabel() {
+                        return null;
+                    }
+
+                    @Override
+                    public String getVersionString() {
+                        return "an old version";
+                    }
+
+                    @Override
+                    public boolean containsVersion(ArtifactVersion source) {
+                        return false;
+                    }
+
+                    @Override
+                    public String getRangeString() {
+                        return "any";
+                    }
+
+                    @Override
+                    public int compareTo(ArtifactVersion o) {
+                        return 0;
+                    }
+                }, false);
+                ScaledResolution scaledresolution = new ScaledResolution(Minecraft.getMinecraft());
+                int i = scaledresolution.getScaledWidth();
+                int j = scaledresolution.getScaledHeight();
+                base.setWorldAndResolution(Minecraft.getMinecraft(), i, j);
+            }
+
+            @Override
+            public void drawScreen(GuiErrorScreen errorScreen, FontRenderer fontRenderer, int mouseRelX, int mouseRelY, float tickTime) {
+                base.drawScreen(mouseRelX, mouseRelY, 0);
+            }
+        };
     }
 }

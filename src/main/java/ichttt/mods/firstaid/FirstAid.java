@@ -11,9 +11,12 @@ import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.*;
 import ichttt.mods.firstaid.common.util.MorpheusHelper;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
@@ -63,6 +66,23 @@ public class FirstAid {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         LOGGER.info("{} version {} starting", NAME, VERSION);
+        if (Loader.isModLoaded("playerrevive")) { //Player revive does not have proper versioning...
+            try {
+                Class<?> revivalCls = Class.forName("com.creativemd.playerrevive.Revival", true, Launch.classLoader);
+                revivalCls.getDeclaredMethod("startBleeding");
+                boolean newMethod;
+                try {
+                    revivalCls.getDeclaredMethod("startBleeding", EntityPlayer.class, DamageSource.class);
+                    newMethod = true;
+                } catch (LinkageError | ReflectiveOperationException e) {
+                    newMethod = false;
+                }
+                if (!newMethod)
+                    proxy.throwWrongPlayerRevivalException();
+            } catch (LinkageError | ReflectiveOperationException e) {
+                //good. We didn't find old the method
+            }
+        }
 
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
         proxy.preInit();

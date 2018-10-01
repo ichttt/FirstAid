@@ -2,7 +2,6 @@ package ichttt.mods.firstaid.common.apiimpl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
@@ -31,13 +30,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class FirstAidRegistryImpl extends FirstAidRegistry {
     public static final FirstAidRegistryImpl INSTANCE = new FirstAidRegistryImpl();
     private final Map<String, IDamageDistribution> DISTRIBUTION_MAP = new HashMap<>();
     private final Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Integer>> HEALER_MAP = new HashMap<>();
-    private final Multimap<EnumDebuffSlot, IDebuff> RAW_DEBUFF_MAP = HashMultimap.create();
-    private ImmutableMap<EnumDebuffSlot, IDebuff[]> BAKED_DEBUFF_MAP;
+    private final Multimap<EnumDebuffSlot, Supplier<IDebuff>> DEBUFFS = HashMultimap.create();
     private boolean registrationAllowed = true;
 
     public static void finish() {
@@ -47,26 +46,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         if (registryImpl != INSTANCE)
             throw new IllegalStateException("A mod has registered a custom apiimpl for the registry. THIS IS NOT ALLOWED!" +
             "It should be " + INSTANCE.getClass().getName() + " but it actually is " + registryImpl.getClass().getName());
-
-        INSTANCE.buildDebuffs(true);
-    }
-
-    private void buildDebuffs(boolean finalize) {
-        if (!registrationAllowed) throw new IllegalStateException("Registry is closed");
-
-        if (finalize) {
-            FirstAid.LOGGER.info("Finalizing registry");
-            registrationAllowed = false;
-        }
-        this.BAKED_DEBUFF_MAP = ImmutableMap.<EnumDebuffSlot, IDebuff[]>builder()
-                .put(EnumDebuffSlot.HEAD, RAW_DEBUFF_MAP.get(EnumDebuffSlot.HEAD).toArray(new IDebuff[0]))
-                .put(EnumDebuffSlot.ARMS, RAW_DEBUFF_MAP.get(EnumDebuffSlot.ARMS).toArray(new IDebuff[0]))
-                .put(EnumDebuffSlot.BODY, RAW_DEBUFF_MAP.get(EnumDebuffSlot.BODY).toArray(new IDebuff[0]))
-                .put(EnumDebuffSlot.LEGS_AND_FEET, RAW_DEBUFF_MAP.get(EnumDebuffSlot.LEGS_AND_FEET).toArray(new IDebuff[0]))
-                .build();
-
-        if (finalize)
-            RAW_DEBUFF_MAP.clear();
+        INSTANCE.registrationAllowed = false;
     }
 
     @Override
@@ -128,30 +108,34 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         }
         //Build the finished debuff
         FirstAid.LOGGER.debug("Building debuff from mod {} for slot {} with potion effect {}, type = {}", CommonUtils.getActiveModidSafe(), slot, builder.potionName, builder.isOnHit ? "OnHit" : "Constant");
-        BooleanSupplier isEnabled = builder.isEnabledSupplier;
-        if (isEnabled == null)
+        BooleanSupplier isEnabled;
+        if (builder.isEnabledSupplier == null)
             isEnabled = () -> true;
+        else
+            isEnabled = builder.isEnabledSupplier;
 
         Preconditions.checkArgument(!builder.map.isEmpty(), "Failed to register debuff with condition has set");
-        IDebuff debuff;
+        Supplier<IDebuff> debuff;
         if (builder.isOnHit) {
-            debuff = new OnHitDebuff(builder.potionName, builder.map, isEnabled, builder.sound);
+            debuff = () -> new OnHitDebuff(builder.potionName, builder.map, isEnabled, builder.sound);
         } else {
             Preconditions.checkArgument(builder.sound == null, "Tried to register constant debuff with sound effect.");
-            debuff = new ConstantDebuff(builder.potionName, builder.map, isEnabled);
+            debuff = () -> new ConstantDebuff(builder.potionName, builder.map, isEnabled);
         }
         registerDebuff(slot, debuff);
     }
 
     @Override
-    public void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull IDebuff debuff) {
+    public void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull Supplier<IDebuff> debuff) {
         if (!registrationAllowed)
             throw new IllegalStateException("Registration must take place before FMLLoadCompleteEvent");
 
-        if (slot.playerParts.length > 1 && !(debuff instanceof SharedDebuff))
-            debuff = new SharedDebuff(debuff, slot);
+        if (slot.playerParts.length > 1 && !(debuff instanceof SharedDebuff)) {
+            this.DEBUFFS.put(slot, () -> new SharedDebuff(debuff.get(), slot));
+            return;
+        }
 
-        this.RAW_DEBUFF_MAP.put(slot, debuff);
+        this.DEBUFFS.put(slot, debuff);
     }
 
     @Nonnull
@@ -166,10 +150,6 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Nonnull
     @Override
     public IDebuff[] getDebuffs(@Nonnull EnumDebuffSlot slot) {
-        if (registrationAllowed) {
-            FirstAid.LOGGER.warn("getDebuffs called early - building temp list snapshot");
-            buildDebuffs(false);
-        }
-        return BAKED_DEBUFF_MAP.get(slot);
+        return DEBUFFS.get(slot).stream().map(Supplier::get).toArray(IDebuff[]::new);
     }
 }

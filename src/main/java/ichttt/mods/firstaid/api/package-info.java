@@ -12,6 +12,7 @@
  * 8:  1.5.6 (Removed deprecated methods and fields)
  * 9:  1.5.7 (Minor changes)
  * 10: 1.5.9 (ItemHealing addition)
+ * 11: 1.5.10 (BREAKING CHANGE - Changed debuffs registration to supplier based)
  */
 @API(apiVersion = "10", provides = "FirstAid API", owner = "firstaid")
 package ichttt.mods.firstaid.api;

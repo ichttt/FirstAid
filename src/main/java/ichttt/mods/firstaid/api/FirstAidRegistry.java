@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * The central registry for FirstAid.
@@ -91,7 +92,7 @@ public abstract class FirstAidRegistry {
      * @param slot   The slot this debuff should be active on
      * @param debuff Your custom implementation of a debuff
      */
-    public abstract void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull IDebuff debuff);
+    public abstract void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull Supplier<IDebuff> debuff);
 
     /**
      * Registers a healing type, so it can be used by the damage system when the user applies it.

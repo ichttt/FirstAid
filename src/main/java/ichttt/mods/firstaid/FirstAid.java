@@ -1,14 +1,25 @@
 package ichttt.mods.firstaid;
 
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.common.*;
+import ichttt.mods.firstaid.common.CapProvider;
+import ichttt.mods.firstaid.common.DebugDamageCommand;
+import ichttt.mods.firstaid.common.EventHandler;
+import ichttt.mods.firstaid.common.FirstAidConfig;
+import ichttt.mods.firstaid.common.IProxy;
 import ichttt.mods.firstaid.common.apiimpl.HealingItemApiHelperImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.config.ExtraConfigManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
-import ichttt.mods.firstaid.common.network.*;
+import ichttt.mods.firstaid.common.network.MessageAddHealth;
+import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
+import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
+import ichttt.mods.firstaid.common.network.MessageClientRequest;
+import ichttt.mods.firstaid.common.network.MessageConfiguration;
+import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
+import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
+import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.MorpheusHelper;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,7 +36,12 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.*;
+import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -62,6 +78,7 @@ public class FirstAid {
         }
     };
     public static SimpleNetworkWrapper NETWORKING;
+    public static boolean morpheusLoaded = false;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -134,6 +151,7 @@ public class FirstAid {
 
         if (Loader.isModLoaded("morpheus")) {
             MorpheusHelper.register();
+            morpheusLoaded = true;
         }
 
         RegistryManager.registerDefaults();

@@ -22,13 +22,16 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Set;
 
 public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private int morphineTicksLeft = 0;
@@ -144,14 +147,6 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                 }
             }
             prevScaleFactor = globalFactor;
-        }
-
-        if (!world.isRemote && world instanceof WorldServer && FirstAidConfig.externalHealing.sleepHealPercentage != 0D) {
-            WorldServer worldServer = (WorldServer) player.world;
-            if (worldServer.areAllPlayersAsleep()) { // We are going to wake up on the next tick, add health
-                System.out.println("Healing" + player);
-                CommonUtils.healPlayerByPercentage(FirstAidConfig.externalHealing.sleepHealPercentage, this, player);
-            }
         }
 
         forEach(part -> part.tick(world, player, morphineTicksLeft == 0));

@@ -33,6 +33,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.loot.LootEntryItem;
 import net.minecraft.world.storage.loot.LootPool;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -57,7 +58,12 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.WeakHashMap;
 
 public class EventHandler {
     public static final Random rand = new Random();
@@ -137,10 +143,22 @@ public class EventHandler {
     }
 
     @SubscribeEvent
-    public static void tick(TickEvent.PlayerTickEvent event) {
+    public static void tickPlayers(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END && CommonUtils.isSurvivalOrAdventure(event.player)) {
             Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).tick(event.player.world, event.player);
             hitList.remove(event.player); //Damage should be done in the same tick as the hit was noted, otherwise we got a false-positive
+        }
+    }
+
+    @SubscribeEvent
+    public static void tickWorld(TickEvent.WorldTickEvent event) {
+        if (event.phase == TickEvent.Phase.END || FirstAid.morpheusLoaded) return;
+        World world = event.world;
+        if (!world.isRemote && world instanceof WorldServer && ((WorldServer) world).areAllPlayersAsleep()) {
+            for (EntityPlayer player : world.playerEntities) {
+                AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                CommonUtils.healPlayerByPercentage(FirstAidConfig.externalHealing.sleepHealPercentage, damageModel, player);
+            }
         }
     }
 

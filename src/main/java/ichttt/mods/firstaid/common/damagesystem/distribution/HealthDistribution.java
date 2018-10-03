@@ -55,7 +55,6 @@ public class HealthDistribution {
                 if (i < 7)
                     toHeal = health / (7F - i);
             } else {
-                System.out.println(String.format("Healed %s for %s", part.part, diff));
                 toHeal -= diff;
                 if (toHeal <= 0)
                     break;

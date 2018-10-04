@@ -25,7 +25,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "1.5.9"
+version = "1.5.10" + project.hasProperty('betaBuild') ? "-BETA" : ""
 group = "ichttt.mods.firstaid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "firstaid"
 def archiveGroup = "ichttt"
@@ -53,7 +53,7 @@ dependencies {
 }
 
 //Check if signing is enabled when building
-if (project.gradle.startParameter.taskNames.contains("build") && (!project.hasProperty('keyStore') || !project.hasProperty('storeAlias'))) {
+if (project.gradle.startParameter.taskNames.contains("build") && !project.hasProperty('betaBuild') && (!project.hasProperty('keyStore') || !project.hasProperty('storeAlias'))) {
     throw new IllegalArgumentException("Building without signing is not allowed. Please specify the keyStore and storeAlias property!")
 }
 

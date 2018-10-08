@@ -7,6 +7,12 @@ Armor is only taken into consideration for the part that is currently being dama
 the armor in the foot slot will be damage.
 It also introduces debuffs to make your life harder. These can be constant (as long as you don't heal your body) or on hit.
 
+# Licensing
+First Aid is primary licensed under the GPL version 3 as in LICENSE.
+
+However, there is one exception:
+The API package is licensed under the LGPLv2.1 as in API_LICENSE
+
 # Third Party
 
 This project currently uses the heartbeat sound from <href>http://soundbible.com/2162-Human-Heartbeat.html</href>.

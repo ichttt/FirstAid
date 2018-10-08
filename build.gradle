@@ -21,11 +21,14 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
+plugins {
+    id 'net.minecrell.licenser' version '0.4.1'
+}
 apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "1.5.10" + project.hasProperty('betaBuild') ? "-BETA" : ""
+version = "1.5.10" + (project.hasProperty('betaBuild') ? "-BETA" : "")
 group = "ichttt.mods.firstaid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "firstaid"
 def archiveGroup = "ichttt"
@@ -36,7 +39,7 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.4.2739"
+    version = "1.12.2-14.23.5.2769"
     runDir = "run"
     
     // the mappings can be changed at any time, and must be in the following format.
@@ -52,9 +55,20 @@ dependencies {
     runtime files ('lib/FGLW.jar')
 }
 
+license {
+    matching('ichttt/mods/firstaid/api/**') {
+        header = file('API_LICENSE_HEADER')
+    }
+    include '**/ichttt/mods/**/*.java'
+    header = file('LICENSE_HEADER')
+}
+
 //Check if signing is enabled when building
 if (project.gradle.startParameter.taskNames.contains("build") && !project.hasProperty('betaBuild') && (!project.hasProperty('keyStore') || !project.hasProperty('storeAlias'))) {
     throw new IllegalArgumentException("Building without signing is not allowed. Please specify the keyStore and storeAlias property!")
+} else if (project.hasProperty('betaBuild')) {
+    for (int i = 0; i < 5; i++)
+    project.getLogger().log(LogLevel.WARN, "!!!Building beta version - Not suited for distribution!!!")
 }
 
 def signPass

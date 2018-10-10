@@ -72,7 +72,7 @@ import java.util.List;
      name = FirstAid.NAME,
      version = FirstAid.VERSION,
      acceptedMinecraftVersions = "[1.12.2,1.13)",
-     dependencies = "required-after:forge@[14.23.4.2724,);",
+     dependencies = "required-after:forge@[14.23.4.2742,);",
      guiFactory = "ichttt.mods.firstaid.client.config.GuiFactory",
      certificateFingerprint = FirstAid.FINGERPRINT)
 public class FirstAid {

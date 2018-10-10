@@ -37,6 +37,7 @@ import net.minecraftforge.fml.common.ModContainer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,7 +54,7 @@ public class CommonUtils {
         ARMOR_SLOTS[1] = EntityEquipmentSlot.LEGS;
         ARMOR_SLOTS[0] = EntityEquipmentSlot.FEET;
         slotToParts = ImmutableMap.<EntityEquipmentSlot, List<EnumPlayerPart>>builder().
-        put(EntityEquipmentSlot.HEAD, Arrays.asList(EnumPlayerPart.HEAD)).
+        put(EntityEquipmentSlot.HEAD, Collections.singletonList(EnumPlayerPart.HEAD)).
         put(EntityEquipmentSlot.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY)).
         put(EntityEquipmentSlot.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)).
         put(EntityEquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)).build();

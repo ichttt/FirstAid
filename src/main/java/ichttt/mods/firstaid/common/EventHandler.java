@@ -24,7 +24,10 @@ import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.registry.DamageSourceEntry;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
+import ichttt.mods.firstaid.common.apiimpl.ForgeFirstAid;
+import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
@@ -159,6 +162,16 @@ public class EventHandler {
     @SubscribeEvent
     public static void registerSound(RegistryEvent.Register<SoundEvent> event) {
         event.getRegistry().register(HEARTBEAT);
+    }
+
+    @SubscribeEvent
+    public static void registerDamageSource(RegistryEvent.Register<DamageSourceEntry> event) {
+        RegistryManager.registerDefaults(event.getRegistry());
+    }
+
+    @SubscribeEvent
+    public static void registerRegistries(RegistryEvent.NewRegistry event) {
+        ForgeFirstAid.createRegistries();
     }
 
     @SubscribeEvent

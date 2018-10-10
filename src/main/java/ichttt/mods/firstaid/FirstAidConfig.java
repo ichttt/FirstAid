@@ -93,6 +93,26 @@ public class FirstAidConfig {
         public double naturalRegenMultiplier = 0.5D;
     }
 
+    public static class InternalHealing {
+
+        public static class ItemEntry {
+            public ItemEntry(int defaultApplyTime, int defaultHealthRestored) {
+                this.applyTime = defaultApplyTime;
+                this.healthRestored = defaultHealthRestored;
+            }
+
+            @Config.Comment("")
+            @Config.LangKey("")
+            @Config.RangeInt(min = 0)
+            public int applyTime;
+
+            @Config.Comment("")
+            @Config.LangKey("")
+            @Config.RangeInt(min = 0)
+            public int healthRestored;
+        }
+    }
+
     public static class Overlay {
 
         public enum OverlayMode {

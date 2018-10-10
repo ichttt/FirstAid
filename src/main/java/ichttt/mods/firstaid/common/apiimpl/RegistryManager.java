@@ -21,13 +21,18 @@ package ichttt.mods.firstaid.common.apiimpl;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
+import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.debuff.builder.DebuffBuilderFactory;
 import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.registry.DamageDistributionBuilder;
+import ichttt.mods.firstaid.api.registry.DamageSourceEntry;
 import ichttt.mods.firstaid.common.EventHandler;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraftforge.registries.IForgeRegistry;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -50,23 +55,6 @@ public class RegistryManager {
         FirstAidRegistry registry = Objects.requireNonNull(FirstAidRegistry.getImpl());
 
         //---DAMAGE SOURCES---
-        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> feetList = new ArrayList<>(2);
-        feetList.add(Pair.of(EntityEquipmentSlot.FEET, new EnumPlayerPart[]{EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT}));
-        feetList.add(Pair.of(EntityEquipmentSlot.LEGS, new EnumPlayerPart[]{EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG}));
-        registry.bindDamageSourceStandard("fall", feetList);
-        registry.bindDamageSourceStandard("hotFloor", feetList);
-
-        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> headList = new ArrayList<>(1);
-        headList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumPlayerPart[]{EnumPlayerPart.HEAD}));
-        registry.bindDamageSourceStandard("anvil", headList);
-
-        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> bodyList = new ArrayList<>(1);
-        bodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.BODY}));
-        registry.bindDamageSourceStandard("starve", bodyList);
-
-        registry.bindDamageSourceRandom("magic", false, false);
-        registry.bindDamageSourceRandom("drown", false, true);
-        registry.bindDamageSourceRandom("inWall", false, true);
 
         //---DEBUFFS---
         DebuffBuilderFactory factory = DebuffBuilderFactory.getInstance();
@@ -142,5 +130,31 @@ public class RegistryManager {
     public static void finalizeRegistries() {
         FirstAidRegistryImpl.finish();
         DebuffBuilderFactoryImpl.verify();
+    }
+
+    public static void registerDefaults(IForgeRegistry<DamageSourceEntry> registry) {
+        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> feetList = new ArrayList<>(2);
+        feetList.add(Pair.of(EntityEquipmentSlot.FEET, new EnumPlayerPart[]{EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT}));
+        feetList.add(Pair.of(EntityEquipmentSlot.LEGS, new EnumPlayerPart[]{EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG}));
+        register(registry, "fall", DamageDistributionBuilder.getImpl().createDamageDist()feetList);
+        registry.bindDamageSourceStandard("hotFloor", feetList);
+
+        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> headList = new ArrayList<>(1);
+        headList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumPlayerPart[]{EnumPlayerPart.HEAD}));
+        registry.bindDamageSourceStandard("anvil", headList);
+
+        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> bodyList = new ArrayList<>(1);
+        bodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.BODY}));
+        registry.bindDamageSourceStandard("starve", bodyList);
+
+        registry.bindDamageSourceRandom("magic", false, false);
+        registry.bindDamageSourceRandom("drown", false, true);
+        registry.bindDamageSourceRandom("inWall", false, true);
+    }
+
+    private static void register(IForgeRegistry<DamageSourceEntry> registry, String damageType, IDamageDistribution distribution) {
+        DamageSourceEntry entry = new DamageSourceEntry(damageType, distribution);
+        entry.setRegistryName(new ResourceLocation(damageType));
+        registry.register(entry);
     }
 }

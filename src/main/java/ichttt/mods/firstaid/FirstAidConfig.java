@@ -16,9 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ichttt.mods.firstaid.common;
+package ichttt.mods.firstaid;
 
-import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
 import net.minecraftforge.common.config.Config;
 

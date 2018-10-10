@@ -19,7 +19,7 @@
 package ichttt.mods.firstaid.client;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.common.FirstAidConfig;
+import ichttt.mods.firstaid.FirstAidConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ITickableSound;
 import net.minecraft.client.audio.Sound;

@@ -18,10 +18,10 @@
 
 package ichttt.mods.firstaid.common.config;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.common.FirstAidConfig;
-import joptsimple.internal.Strings;
+import ichttt.mods.firstaid.FirstAidConfig;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.ConfigManager;

@@ -12,13 +12,28 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 public class DamageDistributionBuilderImpl extends DamageDistributionBuilder {
+    private static final DamageDistributionBuilderImpl INSTANCE = new DamageDistributionBuilderImpl();
+
+    static void init() {
+        DamageDistributionBuilder.setImpl(INSTANCE);
+    }
+
+    static void verify() {
+        DamageDistributionBuilder registryImpl = DamageDistributionBuilder.getImpl();
+        if (registryImpl == null)
+            throw new IllegalStateException("The apiimpl has not been set! Something went seriously wrong!");
+        if (registryImpl != INSTANCE)
+            throw new IllegalStateException("A mod has registered a custom apiimpl for the registry. THIS IS NOT ALLOWED!" +
+                    "It should be " + INSTANCE.getClass().getName() + " but it actually is " + registryImpl.getClass().getName());
+    }
+
     @Override
-    public IDamageDistribution createDamageDist(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable) {
+    public IDamageDistribution standardDist(@Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable) {
         return new StandardDamageDistribution(priorityTable);
     }
 
     @Override
-    public IDamageDistribution createDamageDist(@Nonnull String damageType, boolean nearestFirst, boolean tryNoKill) {
+    public IDamageDistribution randomDist(boolean nearestFirst, boolean tryNoKill) {
         if (nearestFirst) {
             if (!tryNoKill)
                 return RandomDamageDistribution.NEAREST_KILL;

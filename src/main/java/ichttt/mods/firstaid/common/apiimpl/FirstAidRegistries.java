@@ -4,14 +4,18 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.registry.DamageSourceEntry;
 import ichttt.mods.firstaid.api.registry.DebuffEntry;
 import ichttt.mods.firstaid.api.registry.HealingEntry;
+import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 
-public class ForgeFirstAid {
-    private static IForgeRegistry<HealingEntry> HEALING;
-    private static IForgeRegistry<DamageSourceEntry> DAMAGE_SOURCE;
-    private static IForgeRegistry<DebuffEntry> DEBUFF;
+import javax.annotation.Nonnull;
+import java.util.Objects;
+
+public class FirstAidRegistries {
+    public static IForgeRegistry<HealingEntry> HEALING;
+    public static IForgeRegistry<DamageSourceEntry> DAMAGE_SOURCE;
+    public static IForgeRegistry<DebuffEntry> DEBUFF;
 
     public static void createRegistries() {
         HEALING = new RegistryBuilder<HealingEntry>()
@@ -35,5 +39,10 @@ public class ForgeFirstAid {
                 .setMaxID(Short.MAX_VALUE)
                 .setName(new ResourceLocation(FirstAid.MODID, "debuff"))
                 .create();
+    }
+
+    @Nonnull
+    public static HealingEntry getHealingEntry(Item item) {
+        return Objects.requireNonNull(HEALING.getValue(item.getRegistryName()), "Did not find item " + item.getRegistryName());
     }
 }

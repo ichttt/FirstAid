@@ -24,9 +24,13 @@ import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
 import javax.annotation.Nonnull;
 
 public class DebuffBuilderFactoryImpl extends DebuffBuilderFactory {
-    public static final DebuffBuilderFactoryImpl INSTANCE = new DebuffBuilderFactoryImpl();
+    private static final DebuffBuilderFactoryImpl INSTANCE = new DebuffBuilderFactoryImpl();
 
-    public static void verify() {
+    static void init() {
+        DebuffBuilderFactory.setInstance(INSTANCE);
+    }
+
+    static void verify() {
         DebuffBuilderFactory registryImpl = DebuffBuilderFactory.getInstance();
         if (registryImpl == null)
             throw new IllegalStateException("The apiimpl has not been set! Something went seriously wrong!");

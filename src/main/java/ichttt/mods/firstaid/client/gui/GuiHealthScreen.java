@@ -27,7 +27,7 @@ import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
-import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
+import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistries;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import net.minecraft.client.gui.Gui;
@@ -129,7 +129,7 @@ public class GuiHealthScreen extends GuiScreen {
         holdButtons.clear();
         for (GuiButton button : this.buttonList) {
             if (button instanceof GuiHoldButton) {
-                Integer holdTime = activeHand == null ? null : FirstAidRegistryImpl.INSTANCE.getPartHealingTime(mc.player.getHeldItem(activeHand).getItem());
+                Integer holdTime = activeHand == null ? null : FirstAidRegistries.getHealingEntry(mc.player.getHeldItem(activeHand).getItem()).applyTime;
                 if (holdTime == null)
                     holdTime = Integer.MAX_VALUE;
                 ((GuiHoldButton) button).setup(holdTime, button.width / ((float) HUDHandler.INSTANCE.getMaxLength()));
@@ -243,7 +243,8 @@ public class GuiHealthScreen extends GuiScreen {
             FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, activeHand));
             //TODO notify the user somehow (sound?)
             AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
-            part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(mc.player.getHeldItem(this.activeHand));
+            ItemStack heldItemStack = mc.player.getHeldItem(this.activeHand);
+            part.activeHealer = FirstAidRegistries.getHealingEntry(heldItemStack.getItem()).factory.apply(heldItemStack);
         } else if (button.id == 10) {
             FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.REQUEST_REFRESH));
             FirstAid.LOGGER.info("Requesting refresh");

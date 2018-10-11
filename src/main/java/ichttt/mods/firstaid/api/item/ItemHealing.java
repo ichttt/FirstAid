@@ -19,8 +19,6 @@
 
 package ichttt.mods.firstaid.api.item;
 
-import ichttt.mods.firstaid.api.FirstAidRegistry;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -29,8 +27,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
-import java.util.function.Function;
 
 /**
  * Base class for custom healing items. Handles the logic for healing automatically.
@@ -44,9 +40,8 @@ public class ItemHealing extends Item {
      * @param time The time it takes in the GUI in ms
      * @param healerFunction The function to create a new healer from the GUI
      */
-    public ItemHealing(Function<ItemStack, AbstractPartHealer> healerFunction, int time) {
+    public ItemHealing() {
         setCreativeTab(HealingItemApiHelper.INSTANCE.getFirstAidTab());
-        Objects.requireNonNull(FirstAidRegistry.getImpl(), "FirstAid not loaded or not present!").registerHealingType(this, healerFunction, time);
     }
 
     @Nonnull

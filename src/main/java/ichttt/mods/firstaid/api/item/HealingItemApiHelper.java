@@ -34,6 +34,10 @@ import javax.annotation.Nonnull;
 public abstract class HealingItemApiHelper {
     static HealingItemApiHelper INSTANCE;
 
+    public static HealingItemApiHelper getImpl() {
+        return INSTANCE;
+    }
+
     /**
      * DO NOT USE! ONLY FOR INTERNAL THINGS
      */

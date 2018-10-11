@@ -34,8 +34,17 @@ import javax.annotation.Nonnull;
 public class HealingItemApiHelperImpl extends HealingItemApiHelper {
     private static final HealingItemApiHelperImpl INSTANCE = new HealingItemApiHelperImpl();
 
-    public static void init() {
+    static void init() {
         HealingItemApiHelper.setImpl(INSTANCE);
+    }
+
+    static void verify() {
+        HealingItemApiHelper registryImpl = HealingItemApiHelper.getImpl();
+        if (registryImpl == null)
+            throw new IllegalStateException("The apiimpl has not been set! Something went seriously wrong!");
+        if (registryImpl != INSTANCE)
+            throw new IllegalStateException("A mod has registered a custom apiimpl for the registry. THIS IS NOT ALLOWED!" +
+                    "It should be " + INSTANCE.getClass().getName() + " but it actually is " + registryImpl.getClass().getName());
     }
 
     @Nonnull

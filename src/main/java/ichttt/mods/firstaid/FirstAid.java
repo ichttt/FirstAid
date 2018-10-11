@@ -23,8 +23,7 @@ import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.DebugDamageCommand;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.IProxy;
-import ichttt.mods.firstaid.common.apiimpl.HealingItemApiHelperImpl;
-import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
+import ichttt.mods.firstaid.common.apiimpl.APIManager;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.config.ExtraConfigManager;
@@ -121,8 +120,7 @@ public class FirstAid {
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
         proxy.preInit();
         //Setup API
-        HealingItemApiHelperImpl.init();
-        RegistryManager.setupRegistries();
+        APIManager.setupAPI();
         checkEarlyExit();
     }
 
@@ -170,14 +168,12 @@ public class FirstAid {
             MorpheusHelper.register();
             morpheusLoaded = true;
         }
-
-        RegistryManager.registerDefaults();
         checkEarlyExit();
     }
 
     @Mod.EventHandler
     public void loadComplete(FMLLoadCompleteEvent event) {
-        RegistryManager.finalizeRegistries();
+        APIManager.validateAPI();
         checkEarlyExit();
     }
 

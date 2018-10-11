@@ -25,9 +25,8 @@ import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.api.registry.DamageSourceEntry;
-import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
-import ichttt.mods.firstaid.common.apiimpl.ForgeFirstAid;
-import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
+import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistries;
+import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryInfo;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
@@ -112,7 +111,7 @@ public class EventHandler {
         }
 
         boolean addStat = amountToDamage < 3.4028235E37F;
-        IDamageDistribution damageDistribution = FirstAidRegistryImpl.INSTANCE.getDamageDistribution(source);
+        IDamageDistribution damageDistribution = FirstAidRegistries.DAMAGE_SOURCE.getValue(new ResourceLocation(FirstAid.MODID, source.toString())).distributionTable;
 
         if (source.isProjectile()) {
             Pair<Entity, RayTraceResult> rayTraceResult = hitList.remove(player);
@@ -166,12 +165,12 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void registerDamageSource(RegistryEvent.Register<DamageSourceEntry> event) {
-        RegistryManager.registerDefaults(event.getRegistry());
+        FirstAidRegistryInfo.registerDebuffs(event.getRegistry());
     }
 
     @SubscribeEvent
     public static void registerRegistries(RegistryEvent.NewRegistry event) {
-        ForgeFirstAid.createRegistries();
+        FirstAidRegistries.createRegistries();
     }
 
     @SubscribeEvent

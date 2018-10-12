@@ -38,6 +38,8 @@ firstaid.config.damagesystem=Schadenssystem
 firstaid.config.damagesystem.tooltip=Einstellungen, die das maximale Leben der Körperteile beeinflussen. 2 = 1 Herz
 firstaid.config.overlay=Overlay
 firstaid.config.overlay.tooltip=Einstellungen, die das Overlay im Spiel regeln.
+firstaid.config.internalhealing=Internal Heilung
+firstaid.config.internalhealing.tooltip=Einstellungen, die das interne Heilungssystem regeln
 firstaid.config.externalhealing=Externe Heilung
 firstaid.config.externalhealing.tooltip=Einstellungen, die externe Heilungssysteme regeln (z.B. Potions oder natürliche Regeneration)
 firstaid.config.debuffs=Negative Effekte
@@ -48,6 +50,14 @@ firstaid.config.scalemaxhealth=Maximales Leben skalieren
 firstaid.config.scalemaxhealth.tooltip=Falls aktiv wird dein maximales Leben, welches du z.B. von anderen Mods bekommst, auf deine Körperteile aufgespilltet.
 firstaid.config.capmaxhealth=Begrenze maximales Leben
 firstaid.config.capmaxhealth.tooltip=Falls aktiv wird das maximale Leben auf 6 normale Herzen und zwei 6 hearts and absorption at 2 hearts per limb. If false, the health cap will be much higher (64 hearts normal and 16 absorption)
+firstaid.config.bandage=Bandage
+firstaid.config.bandage.tooltip=Einstellungen der Bandage
+firstaid.config.plaster=Plaster
+firstaid.config.plaster.tooltip=Einstellungen des Plasters
+firstaid.config.totalheals=Gesammtheilung
+firstaid.config.totalheals.tooltip=Gibt den Wert, der über die gesammte Zeit verteilt geheilt werden soll. Eine Heilung = halbes Herz
+firstaid.config.secondsperheal=Sekunden pro Heilung
+firstaid.config.secondsperheal.tooltip=Die Zeit, die es benötigt, um eine Heilung auszulösen. Gesammtzeit = dieser Wert * Gesammtheilung
 firstaid.config.allownaturalregeneration=Natürliche Regeneration erlauben
 firstaid.config.allownaturalregeneration.tooltip=Falls aktiv, greift die normale natürliche Regeneration\n**WARNUNG** Dies setzt intern die Spielregel "naturalRegeneration" für alle Welten, sodass die Einstellung auch nach dem Entfernen der Mod aktiv bleibt
 firstaid.config.allowotherhealingitems=Andere Heilungsgegenstände aktivieren

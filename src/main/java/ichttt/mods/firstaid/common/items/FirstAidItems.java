@@ -19,6 +19,7 @@
 package ichttt.mods.firstaid.common.items;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.common.damagesystem.PartHealer;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -39,8 +40,9 @@ public class FirstAidItems {
     }
 
     public static void registerItems(IForgeRegistry<Item> registry) {
-        registry.register(new DefaultItemHealing("bandage", stack -> new PartHealer(18 * 20, 4, stack), 2500));
-        registry.register(new DefaultItemHealing("plaster", stack -> new PartHealer(22 * 20, 2, stack), 3000));
+        FirstAidConfig.InternalHealing healing = FirstAidConfig.internalHealing;
+        registry.register(new DefaultItemHealing("bandage", stack -> new PartHealer(healing.bandage.secondsPerHeal * 20, healing.bandage.totalHeals, stack), 2500));
+        registry.register(new DefaultItemHealing("plaster", stack -> new PartHealer(healing.plaster.secondsPerHeal * 20, healing.plaster.totalHeals, stack), 3000));
         registry.register(new ItemMorphine());
     }
 }

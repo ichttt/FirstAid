@@ -36,6 +36,12 @@ public class FirstAidConfig {
     @Config.LangKey("firstaid.config.overlay")
     public static final Overlay overlay = new Overlay();
 
+    @Config.Comment("Settings regarding the internal healing system")
+    @Config.LangKey("firstaid.config.internalhealing")
+    @Config.RequiresWorldRestart
+    @ExtraConfig.Sync
+    public static final InternalHealing internalHealing = new InternalHealing();
+
     @Config.Comment("Settings regarding external healing system(like vanilla potions or natural regeneration")
     @Config.LangKey("firstaid.config.externalhealing")
     @Config.RequiresWorldRestart
@@ -63,6 +69,34 @@ public class FirstAidConfig {
     @Config.RequiresWorldRestart
     @ExtraConfig.Sync
     public static boolean capMaxHealth = true;
+
+    public static class InternalHealing {
+
+        @Config.Comment("Settings for the bandage item")
+        @Config.LangKey("firstaid.config.bandage")
+        public final Entry bandage = new Entry(4, 18);
+
+        @Config.Comment("Settings for the plaster item")
+        @Config.LangKey("firstaid.config.plaster")
+        public final Entry plaster = new Entry(2, 22);
+
+        public static class Entry {
+            @Config.Comment("The total heals this item does when applied. 1 heal = half a heart")
+            @Config.LangKey("firstaid.config.totalheals")
+            @Config.RangeInt(min = 1, max = Byte.MAX_VALUE)
+            public int totalHeals;
+
+            @Config.Comment("The time it takes for a single heal to trigger. Total time this item is active = this * totalHeals")
+            @Config.LangKey("firstaid.config.secondsperheal")
+            @Config.RangeInt(min = 1, max = Short.MAX_VALUE)
+            public int secondsPerHeal;
+
+            public Entry(int initialTotalHeals, int initialSecondsPerHeal) {
+                this.totalHeals = initialTotalHeals;
+                this.secondsPerHeal = initialSecondsPerHeal;
+            }
+        }
+    }
 
     public static class ExternalHealing {
 

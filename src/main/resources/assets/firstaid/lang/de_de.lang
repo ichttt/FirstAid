@@ -84,3 +84,5 @@ firstaid.config.yoffset.tooltip=Der Offset auf der Y-Achse
 keybinds.show_wounds=Wunden anzeigen
 
 subtitles.debuff.heartbeat=Herzklopfen
+
+gui.next_heal=Nächste Heilung: %s Sekunden

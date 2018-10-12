@@ -48,6 +48,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
@@ -218,8 +219,9 @@ public class GuiHealthScreen extends GuiScreen {
 
     private void tooltipButton(GuiButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
-        if (!enabled && button.isMouseOver())
-            drawHoveringText(I18n.format("gui.active_item") + ": " + I18n.format(part.activeHealer.stack.getTranslationKey() + ".name"), mouseX, mouseY);
+        if (!enabled && button.isMouseOver()) {
+            drawHoveringText(Arrays.asList(I18n.format("gui.active_item") + ": " + I18n.format(part.activeHealer.stack.getTranslationKey() + ".name"), I18n.format("gui.next_heal", Math.round((part.activeHealer.ticksPerHeal - part.activeHealer.getTicksPassed()) / 20F))), mouseX, mouseY);
+        }
         if (!disableButtons)
             button.enabled = enabled;
     }

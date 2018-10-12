@@ -59,7 +59,7 @@ public class PotionTransformer extends AbstractMethodTransformer {
                     nodeIterator.remove();
                     InsnList list = new InsnList();
                     list.add(new VarInsnNode(ALOAD, 1));
-                    list.add(new MethodInsnNode(INVOKESTATIC, "ichttt/mods/firstaid/common/asm/ASMHooks", "onPoisonEffect", "(Lnet/minecraft/entity/EntityLivingBase;)V", false));
+                    list.add(new MethodInsnNode(INVOKESTATIC, "ichttt/mods/firstaid/common/ASMHooks", "onPoisonEffect", "(Lnet/minecraft/entity/EntityLivingBase;)V", false));
                     methodNode.instructions.insertBefore(addBefore, list);
                     return true;
                 }

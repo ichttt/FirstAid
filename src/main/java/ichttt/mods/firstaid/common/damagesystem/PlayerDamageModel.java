@@ -48,7 +48,6 @@ import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Set;
 
 public class PlayerDamageModel extends AbstractPlayerDamageModel {
@@ -57,30 +56,31 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private float prevScaleFactor;
     private final Set<SharedDebuff> sharedDebuffs = new HashSet<>();
     private boolean waitingForHelp = false;
+    private final boolean noCritical;
 
     public static PlayerDamageModel create() {
-        FirstAidConfig.DamageSystem config = Objects.requireNonNull(FirstAidConfig.damageSystem);
         FirstAidRegistry registry = FirstAidRegistryImpl.INSTANCE;
         IDebuff[] headDebuffs = registry.getDebuffs(EnumDebuffSlot.HEAD);
         IDebuff[] bodyDebuffs = registry.getDebuffs(EnumDebuffSlot.BODY);
         IDebuff[] armsDebuffs = registry.getDebuffs(EnumDebuffSlot.ARMS);
         IDebuff[] legFootDebuffs = registry.getDebuffs(EnumDebuffSlot.LEGS_AND_FEET);
-        return new PlayerDamageModel(config, headDebuffs, bodyDebuffs, armsDebuffs, legFootDebuffs);
+        return new PlayerDamageModel(headDebuffs, bodyDebuffs, armsDebuffs, legFootDebuffs);
     }
 
-    protected PlayerDamageModel(FirstAidConfig.DamageSystem config, IDebuff[] headDebuffs, IDebuff[] bodyDebuffs, IDebuff[] armDebuffs, IDebuff[] legFootDebuffs) {
-        super(new DamageablePart(config.maxHealthHead,      true,  EnumPlayerPart.HEAD,       headDebuffs   ),
-              new DamageablePart(config.maxHealthLeftArm,   false, EnumPlayerPart.LEFT_ARM,   armDebuffs    ),
-              new DamageablePart(config.maxHealthLeftLeg,   false, EnumPlayerPart.LEFT_LEG,   legFootDebuffs),
-              new DamageablePart(config.maxHealthLeftFoot,  false, EnumPlayerPart.LEFT_FOOT,  legFootDebuffs),
-              new DamageablePart(config.maxHealthBody,      true,  EnumPlayerPart.BODY,       bodyDebuffs   ),
-              new DamageablePart(config.maxHealthRightArm,  false, EnumPlayerPart.RIGHT_ARM,  armDebuffs    ),
-              new DamageablePart(config.maxHealthRightLeg,  false, EnumPlayerPart.RIGHT_LEG,  legFootDebuffs),
-              new DamageablePart(config.maxHealthRightFoot, false, EnumPlayerPart.RIGHT_FOOT, legFootDebuffs));
+    protected PlayerDamageModel(IDebuff[] headDebuffs, IDebuff[] bodyDebuffs, IDebuff[] armDebuffs, IDebuff[] legFootDebuffs) {
+        super(new DamageablePart(FirstAidConfig.damageSystem.maxHealthHead,      FirstAidConfig.damageSystem.causeDeathHead,  EnumPlayerPart.HEAD,       headDebuffs   ),
+              new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftArm,   false,                         EnumPlayerPart.LEFT_ARM,   armDebuffs    ),
+              new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftLeg,   false,                         EnumPlayerPart.LEFT_LEG,   legFootDebuffs),
+              new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftFoot,  false,                         EnumPlayerPart.LEFT_FOOT,  legFootDebuffs),
+              new DamageablePart(FirstAidConfig.damageSystem.maxHealthBody,      FirstAidConfig.damageSystem.causeDeathBody,  EnumPlayerPart.BODY,       bodyDebuffs   ),
+              new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightArm,  false,                         EnumPlayerPart.RIGHT_ARM,  armDebuffs    ),
+              new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightLeg,  false,                         EnumPlayerPart.RIGHT_LEG,  legFootDebuffs),
+              new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightFoot, false,                         EnumPlayerPart.RIGHT_FOOT, legFootDebuffs));
         for (IDebuff debuff : armDebuffs)
             this.sharedDebuffs.add((SharedDebuff) debuff);
         for (IDebuff debuff : legFootDebuffs)
             this.sharedDebuffs.add((SharedDebuff) debuff);
+        noCritical = !FirstAidConfig.damageSystem.causeDeathBody && !FirstAidConfig.damageSystem.causeDeathHead;
     }
 
     @Override
@@ -224,7 +224,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                 this.waitingForHelp = false;
                 player.isDead = false;
                 for (AbstractDamageablePart part : this) {
-                    if (part.canCauseDeath && part.currentHealth <= 0F) {
+                    if ((part.canCauseDeath || this.noCritical) && part.currentHealth <= 0F) {
                         part.currentHealth = 1F; // Set the critical health to a non-zero value
                     }
                 }
@@ -238,12 +238,23 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         if (player != null && (player.isDead || player.getHealth() <= 0F))
             return true;
 
-        for (AbstractDamageablePart part : this) {
-            if (part.canCauseDeath && part.currentHealth <= 0) {
-                return true;
+        if (this.noCritical) {
+            boolean dead = true;
+            for (AbstractDamageablePart part : this) {
+                if (part.currentHealth > 0) {
+                    dead = false;
+                    break;
+                }
             }
+            return dead;
+        } else {
+            for (AbstractDamageablePart part : this) {
+                if (part.canCauseDeath && part.currentHealth <= 0) {
+                    return true;
+                }
+            }
+            return false;
         }
-        return false;
     }
 
     @Override

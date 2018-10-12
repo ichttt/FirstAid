@@ -173,6 +173,9 @@ public class FirstAidConfig {
         @Config.RangeInt(min = 2, max = 12)
         public int maxHealthHead = 4;
 
+        @Config.RequiresWorldRestart
+        public boolean causeDeathHead = true;
+
         @Config.RangeInt(min = 2, max = 12)
         public int maxHealthLeftArm = 4;
 
@@ -184,6 +187,9 @@ public class FirstAidConfig {
 
         @Config.RangeInt(min = 2, max = 12)
         public int maxHealthBody = 6;
+
+        @Config.RequiresWorldRestart
+        public boolean causeDeathBody = true;
 
         @Config.RangeInt(min = 2, max = 12)
         public int maxHealthRightArm = 4;

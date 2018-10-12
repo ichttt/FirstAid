@@ -44,7 +44,7 @@ public class ItemHealing extends Item {
      * @param time The time it takes in the GUI in ms
      * @param healerFunction The function to create a new healer from the GUI
      */
-    public ItemHealing(Function<ItemStack, AbstractPartHealer> healerFunction, int time) {
+    public ItemHealing(Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
         setCreativeTab(HealingItemApiHelper.INSTANCE.getFirstAidTab());
         Objects.requireNonNull(FirstAidRegistry.getImpl(), "FirstAid not loaded or not present!").registerHealingType(this, healerFunction, time);
     }

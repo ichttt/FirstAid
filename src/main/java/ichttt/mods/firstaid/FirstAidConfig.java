@@ -70,15 +70,20 @@ public class FirstAidConfig {
     @ExtraConfig.Sync
     public static boolean capMaxHealth = true;
 
+    @Config.Comment("If true, all usages of setHealth from other mods will be captured. Should not cause any problems, but allow mods like scaling health bandages to apply")
+    @Config.LangKey("firstaid.config.experimental")
+    @ExtraConfig.Advanced
+    public static boolean experimentalSetHealth = false;
+
     public static class InternalHealing {
 
         @Config.Comment("Settings for the bandage item")
         @Config.LangKey("firstaid.config.bandage")
-        public final Entry bandage = new Entry(4, 18);
+        public final Entry bandage = new Entry(4, 18, 2500);
 
         @Config.Comment("Settings for the plaster item")
         @Config.LangKey("firstaid.config.plaster")
-        public final Entry plaster = new Entry(2, 22);
+        public final Entry plaster = new Entry(2, 22, 3000);
 
         public static class Entry {
             @Config.Comment("The total heals this item does when applied. 1 heal = half a heart")
@@ -91,9 +96,15 @@ public class FirstAidConfig {
             @Config.RangeInt(min = 1, max = Short.MAX_VALUE)
             public int secondsPerHeal;
 
-            public Entry(int initialTotalHeals, int initialSecondsPerHeal) {
+            @Config.Comment("The time it takes in the GUI to apply the item in milliseconds")
+            @Config.LangKey("firstaid.config.applytime")
+            @Config.RangeInt(min = 0, max = 16000)
+            public int applyTime;
+
+            public Entry(int initialTotalHeals, int initialSecondsPerHeal, int initialApplyTime) {
                 this.totalHeals = initialTotalHeals;
                 this.secondsPerHeal = initialSecondsPerHeal;
+                this.applyTime = initialApplyTime;
             }
         }
     }

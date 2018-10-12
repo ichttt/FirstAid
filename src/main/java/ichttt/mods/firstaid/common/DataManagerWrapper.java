@@ -19,6 +19,7 @@
 package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
@@ -37,6 +38,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -83,19 +85,25 @@ public class DataManagerWrapper extends EntityDataManager {
                 if (aFloat > player.getMaxHealth()) {
                     if (player.world.isRemote) //I don't know why only if !world.isRemote... maybe double check this
                         Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
-                } else if (!aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && player.world.isRemote && player instanceof EntityPlayerMP) {
+                } else if (FirstAidConfig.experimentalSetHealth && !aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && !player.world.isRemote && player instanceof EntityPlayerMP) {
                     //calculate diff
-                    float healed = get(EntityLivingBase.HEALTH) - aFloat;
-                    if (Math.abs(healed) > 0.001) {
-                        if (healed < 0) {
-                            DamageDistribution.handleDamageTaken(RandomDamageDistribution.NEAREST_KILL, player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null), healed, player, DamageSource.MAGIC, true, true);
-                        } else {
-                            HealthDistribution.addRandomHealth(aFloat, player, true);
+                    Float orig = get(EntityLivingBase.HEALTH);
+                    if (orig > 0 && !orig.isNaN() && !orig.isInfinite()) {
+                        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+                        if (Arrays.stream(elements).noneMatch(stackTraceElement -> stackTraceElement.toString().startsWith("net.minecraft.entity.player.EntityPlayerMP.<init>"))) {
+                            float healed = orig - aFloat;
+                            if (Math.abs(healed) > 0.001) {
+                                if (healed < 0) {
+                                    DamageDistribution.handleDamageTaken(RandomDamageDistribution.NEAREST_KILL, player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null), healed, player, DamageSource.MAGIC, true, true);
+                                } else {
+                                    HealthDistribution.addRandomHealth(aFloat, player, true);
+                                }
+                            }
                         }
+                        return;
                     }
                 }
             }
-            return;
         }
         set_impl(key, value);
     }

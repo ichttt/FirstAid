@@ -41,8 +41,8 @@ public class FirstAidItems {
 
     public static void registerItems(IForgeRegistry<Item> registry) {
         FirstAidConfig.InternalHealing healing = FirstAidConfig.internalHealing;
-        registry.register(new DefaultItemHealing("bandage", stack -> new PartHealer(healing.bandage.secondsPerHeal * 20, healing.bandage.totalHeals, stack), 2500));
-        registry.register(new DefaultItemHealing("plaster", stack -> new PartHealer(healing.plaster.secondsPerHeal * 20, healing.plaster.totalHeals, stack), 3000));
+        registry.register(new DefaultItemHealing("bandage", stack -> new PartHealer(healing.bandage.secondsPerHeal * 20, healing.bandage.totalHeals, stack), stack -> healing.bandage.applyTime));
+        registry.register(new DefaultItemHealing("plaster", stack -> new PartHealer(healing.plaster.secondsPerHeal * 20, healing.plaster.totalHeals, stack), stack -> healing.plaster.applyTime));
         registry.register(new ItemMorphine());
     }
 }

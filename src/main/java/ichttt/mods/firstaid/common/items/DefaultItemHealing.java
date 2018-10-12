@@ -28,7 +28,7 @@ import java.util.function.Function;
 
 public class DefaultItemHealing extends ItemHealing {
 
-    DefaultItemHealing(String name, Function<ItemStack, AbstractPartHealer> healerFunction, int applyTime) {
+    DefaultItemHealing(String name, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> applyTime) {
         super(healerFunction, applyTime);
         setMaxStackSize(16);
         setRegistryName(new ResourceLocation(FirstAid.MODID, name));

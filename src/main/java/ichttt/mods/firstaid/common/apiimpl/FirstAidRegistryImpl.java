@@ -53,7 +53,7 @@ import java.util.function.Supplier;
 public class FirstAidRegistryImpl extends FirstAidRegistry {
     public static final FirstAidRegistryImpl INSTANCE = new FirstAidRegistryImpl();
     private final Map<String, IDamageDistribution> DISTRIBUTION_MAP = new HashMap<>();
-    private final Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Integer>> HEALER_MAP = new HashMap<>();
+    private final Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> HEALER_MAP = new HashMap<>();
     private final Multimap<EnumDebuffSlot, Supplier<IDebuff>> DEBUFFS = HashMultimap.create();
     private boolean registrationAllowed = true;
 
@@ -91,8 +91,14 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         DISTRIBUTION_MAP.put(damageType, distributionTable);
     }
 
+    @Deprecated
     @Override
     public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, int applyTime) {
+        registerHealingType(item, factory, stack -> applyTime);
+    }
+
+    @Override
+    public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, Function<ItemStack, Integer> applyTime) {
         if (this.HEALER_MAP.containsKey(item))
             FirstAid.LOGGER.warn("Healing type override detected for item " + item);
         this.HEALER_MAP.put(item, Pair.of(factory, applyTime));
@@ -101,18 +107,24 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Nullable
     @Override
     public AbstractPartHealer getPartHealer(@Nonnull ItemStack type) {
-        Pair<Function<ItemStack, AbstractPartHealer>, Integer> pair = this.HEALER_MAP.get(type.getItem());
+        Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>> pair = this.HEALER_MAP.get(type.getItem());
         if (pair != null)
             return pair.getLeft().apply(type);
         return null;
     }
 
+    @Deprecated
     @Nullable
     @Override
     public Integer getPartHealingTime(@Nonnull Item item) {
-        Pair<Function<ItemStack, AbstractPartHealer>, Integer> pair = this.HEALER_MAP.get(item);
+        return getPartHealingTime(new ItemStack(item));
+    }
+
+    @Override
+    public Integer getPartHealingTime(@Nonnull ItemStack stack) {
+        Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>> pair = this.HEALER_MAP.get(stack.getItem());
         if (pair != null)
-            return pair.getRight();
+            return pair.getRight().apply(stack);
         return null;
     }
 

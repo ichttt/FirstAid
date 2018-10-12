@@ -58,6 +58,8 @@ firstaid.config.totalheals=Gesammtheilung
 firstaid.config.totalheals.tooltip=Gibt den Wert, der über die gesammte Zeit verteilt geheilt werden soll. Eine Heilung = halbes Herz
 firstaid.config.secondsperheal=Sekunden pro Heilung
 firstaid.config.secondsperheal.tooltip=Die Zeit, die es benötigt, um eine Heilung auszulösen. Gesammtzeit = dieser Wert * Gesammtheilung
+firstaid.config.applytime=Anwendungszeit
+firstaid.config.applytime.tooltip=Die Zeit, die es braucht, um das Item anzuwenden
 firstaid.config.allownaturalregeneration=Natürliche Regeneration erlauben
 firstaid.config.allownaturalregeneration.tooltip=Falls aktiv, greift die normale natürliche Regeneration\n**WARNUNG** Dies setzt intern die Spielregel "naturalRegeneration" für alle Welten, sodass die Einstellung auch nach dem Entfernen der Mod aktiv bleibt
 firstaid.config.allowotherhealingitems=Andere Heilungsgegenstände aktivieren
@@ -84,5 +86,4 @@ firstaid.config.yoffset.tooltip=Der Offset auf der Y-Achse
 keybinds.show_wounds=Wunden anzeigen
 
 subtitles.debuff.heartbeat=Herzklopfen
-
 gui.next_heal=Nächste Heilung: %s Sekunden

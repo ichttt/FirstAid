@@ -35,6 +35,7 @@ import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.MessageConfiguration;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
+import ichttt.mods.firstaid.common.potion.FirstAidPotion;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.ProjectileHelper;
 import io.netty.buffer.ByteBuf;
@@ -46,6 +47,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.ResourceLocation;
@@ -87,6 +89,8 @@ import java.util.WeakHashMap;
 public class EventHandler {
     public static final Random rand = new Random();
     public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")).setRegistryName(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
+    public static final Potion MORPHINE = new FirstAidPotion(false, 0xDDD, "morphine").setBeneficial();
+
     public static final Map<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
 
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
@@ -154,6 +158,11 @@ public class EventHandler {
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
         FirstAidItems.registerItems(event.getRegistry());
+    }
+
+    @SubscribeEvent
+    public static void registerPotion(RegistryEvent.Register<Potion> event) {
+        event.getRegistry().register(MORPHINE);
     }
 
     @SubscribeEvent

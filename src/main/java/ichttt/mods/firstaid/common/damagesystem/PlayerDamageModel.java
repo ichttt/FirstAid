@@ -39,6 +39,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -57,6 +58,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private final Set<SharedDebuff> sharedDebuffs = new HashSet<>();
     private boolean waitingForHelp = false;
     private final boolean noCritical;
+    private boolean needsMorphineUpdate = false;
 
     public static PlayerDamageModel create() {
         FirstAidRegistry registry = FirstAidRegistryImpl.INSTANCE;
@@ -94,7 +96,6 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         tagCompound.setTag("rightArm", RIGHT_ARM.serializeNBT());
         tagCompound.setTag("rightLeg", RIGHT_LEG.serializeNBT());
         tagCompound.setTag("rightFoot", RIGHT_FOOT.serializeNBT());
-        tagCompound.setInteger("morphineTicks", morphineTicksLeft);
         tagCompound.setBoolean("hasTutorial", hasTutorial);
         return tagCompound;
     }
@@ -109,7 +110,10 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         RIGHT_ARM.deserializeNBT((NBTTagCompound) nbt.getTag("rightArm"));
         RIGHT_LEG.deserializeNBT((NBTTagCompound) nbt.getTag("rightLeg"));
         RIGHT_FOOT.deserializeNBT((NBTTagCompound) nbt.getTag("rightFoot"));
-        morphineTicksLeft = nbt.getInteger("morphineTicks");
+        if (nbt.hasKey("morphineTicks")) { //legacy - we still have to write it
+            morphineTicksLeft = nbt.getInteger("morphineTicks");
+            needsMorphineUpdate = true;
+        }
         if (nbt.hasKey("hasTutorial"))
             hasTutorial = nbt.getBoolean("hasTutorial");
     }
@@ -118,10 +122,12 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     public void tick(World world, EntityPlayer player) {
         if (isDead(player))
             return;
+        world.profiler.startSection("FirstAidPlayerModel");
 
         float currentHealth = getCurrentHealth();
         if (currentHealth <= 0F) {
             FirstAid.LOGGER.error("Got {} health left, but isn't marked as dead!", currentHealth);
+            world.profiler.endSection();
             return;
         }
 
@@ -139,6 +145,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             this.hasTutorial = CapProvider.tutorialDone.contains(player.getName());
 
         if (FirstAidConfig.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
+            world.profiler.startSection("healthscaling");
             float globalFactor = player.getMaxHealth() / 20F;
             if (prevScaleFactor != globalFactor) {
                 int reduced = 0;
@@ -165,20 +172,45 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                 }
             }
             prevScaleFactor = globalFactor;
+            world.profiler.endSection();
         }
 
-        forEach(part -> part.tick(world, player, morphineTicksLeft == 0));
-        if (morphineTicksLeft <= 0)
+        //morphine update
+        if (this.needsMorphineUpdate) {
+            player.addPotionEffect(new PotionEffect(EventHandler.MORPHINE, this.morphineTicksLeft, 0, false, false));
+        }
+        PotionEffect morphine = player.getActivePotionEffect(EventHandler.MORPHINE);
+        if (!this.needsMorphineUpdate) {
+            this.morphineTicksLeft = morphine == null ? 0 : morphine.getDuration();
+        }
+        this.needsMorphineUpdate = false;
+
+        //Debuff and part ticking
+        world.profiler.startSection("PartDebuffs");
+        forEach(part -> part.tick(world, player, morphine == null));
+        if (morphine == null)
             sharedDebuffs.forEach(sharedDebuff -> sharedDebuff.tick(player));
-        else
-            morphineTicksLeft--;
+        world.profiler.endSection();
+        world.profiler.endSection();
+    }
+
+    public static int getRandMorphineDuration() { //Tweak tooltip event when changing as well
+        return ((EventHandler.rand.nextInt(5) * 20 * 15) + 20 * 210);
+    }
+
+    @Deprecated
+    @Override
+    public void applyMorphine() {
+        morphineTicksLeft = getRandMorphineDuration();
+        needsMorphineUpdate = true;
     }
 
     @Override
-    public void applyMorphine() { //Tweak tooltip event when changing as well
-        morphineTicksLeft = ((EventHandler.rand.nextInt(5) * 20 * 15) + 20 * 210);
+    public void applyMorphine(EntityPlayer player) {
+        player.addPotionEffect(new PotionEffect(EventHandler.MORPHINE, getRandMorphineDuration(), 0, false, false));
     }
 
+    @Deprecated
     @Override
     public int getMorphineTicks() {
         return morphineTicksLeft;

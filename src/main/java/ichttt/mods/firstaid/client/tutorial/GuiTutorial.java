@@ -51,6 +51,8 @@ public class GuiTutorial extends GuiScreen {
         this.action.addTextWrapper("firstaid.tutorial.line2");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_FOOT.damage(4F, null, false));
         this.action.addTextWrapper("firstaid.tutorial.line3");
+        //We need the deprecated version
+        //noinspection deprecation
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.applyMorphine());
         this.action.addTextWrapper("firstaid.tutorial.line4");
         this.action.addTextWrapper("firstaid.tutorial.line5");

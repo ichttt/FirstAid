@@ -50,7 +50,7 @@ public class ItemMorphine extends Item {
     public ItemStack onItemUseFinish(@Nonnull ItemStack stack, World world, EntityLivingBase entityLiving) {
         if (entityLiving instanceof EntityPlayer && !(entityLiving instanceof FakePlayer)) {
             AbstractPlayerDamageModel damageModel = entityLiving.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
-            Objects.requireNonNull(damageModel).applyMorphine();
+            Objects.requireNonNull(damageModel).applyMorphine((EntityPlayer) entityLiving);
         }
         stack.shrink(1);
         return stack;

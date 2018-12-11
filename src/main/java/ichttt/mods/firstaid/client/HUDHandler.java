@@ -76,6 +76,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
 
     public void renderOverlay(ScaledResolution scaledResolution, float partialTicks) {
         Minecraft mc = Minecraft.getMinecraft();
+        mc.profiler.startSection("prepare");
         if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.OFF || mc.player == null || (GuiHealthScreen.isOpen && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) || !CommonUtils.isSurvivalOrAdventure(mc.player))
             return;
 
@@ -135,10 +136,10 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
             GlStateManager.enableBlend();
             GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         }
+        mc.profiler.endStartSection("render");
         if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) {
             PlayerModelRenderer.renderPlayerHealth(damageModel, gui, alpha);
         } else {
-
             int xTranslation = maxLength;
             for (AbstractDamageablePart part : damageModel) {
                 mc.fontRenderer.drawStringWithShadow(TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF - (alpha << 24 & -0xFFFFFF));
@@ -150,6 +151,8 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 GlStateManager.translate(0, 10F, 0F);
             }
         }
+        mc.profiler.endSection();
+        mc.profiler.startSection("cleanup");
         if (enableAlphaBlend)
             GlStateManager.disableBlend();
         GlStateManager.popMatrix();

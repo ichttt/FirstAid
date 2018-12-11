@@ -81,9 +81,12 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
     public abstract void tick(World world, EntityPlayer player);
 
     /**
-     * Applies morphine effects
+     * @deprecated Migrated to a potion effect, pass it in to directly apply
      */
+    @Deprecated
     public abstract void applyMorphine();
+
+    public abstract void applyMorphine(EntityPlayer player);
 
     public abstract int getMorphineTicks();
 

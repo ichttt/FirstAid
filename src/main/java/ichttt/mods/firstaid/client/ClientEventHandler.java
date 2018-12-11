@@ -111,8 +111,12 @@ public class ClientEventHandler {
     public static void renderOverlay(RenderGameOverlayEvent.Post event) {
         RenderGameOverlayEvent.ElementType type = event.getType();
         if (type == RenderGameOverlayEvent.ElementType.ALL || (type == RenderGameOverlayEvent.ElementType.TEXT && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.OFF && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)) {
+            Minecraft mc = Minecraft.getMinecraft();
+            mc.profiler.startSection("FirstAidOverlay");
             GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
             HUDHandler.INSTANCE.renderOverlay(event.getResolution(), event.getPartialTicks());
+            mc.profiler.endSection();
+            mc.profiler.endSection();
         }
     }
 

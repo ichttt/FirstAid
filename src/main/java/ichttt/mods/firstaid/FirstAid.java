@@ -78,7 +78,7 @@ import java.util.List;
 public class FirstAid {
     public static final String MODID = "firstaid";
     public static final String NAME = "First Aid";
-    public static final String VERSION = "1.6.1";
+    public static final String VERSION = "1.6.2";
     public static final String FINGERPRINT = "7904c4e13947c8a616c5f39b26bdeba796500722";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 

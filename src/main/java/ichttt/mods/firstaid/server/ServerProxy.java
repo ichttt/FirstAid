@@ -28,9 +28,4 @@ public class ServerProxy implements IProxy {
     public void preInit() {
         FirstAid.LOGGER.debug("Loading ServerProxy");
     }
-
-    @Override
-    public void throwWrongPlayerRevivalException() {
-        throw new RuntimeException("Old PlayerRevive version. Please update PlayerRevive to 1.2.19+");
-    }
 }

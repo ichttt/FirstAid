@@ -30,6 +30,8 @@ import net.quetzi.morpheus.MorpheusRegistry;
 import net.quetzi.morpheus.api.INewDayHandler;
 import net.quetzi.morpheus.world.WorldSleepState;
 
+import java.util.Objects;
+
 public class MorpheusHelper implements INewDayHandler {
     private static final MorpheusHelper INSTANCE = new MorpheusHelper();
     private INewDayHandler oldHandler;
@@ -46,7 +48,7 @@ public class MorpheusHelper implements INewDayHandler {
         if (oldHandler != null)
             oldHandler.startNewDay(); //Start the new day
 
-        if (FirstAidConfig.externalHealing.sleepHealPercentage == 0D)
+        if (FirstAidConfig.externalHealing.sleepHealPercentage <= 0D)
             return;
 
         WorldSleepState sleepState = Morpheus.playerSleepStatus.get(0);
@@ -58,7 +60,7 @@ public class MorpheusHelper implements INewDayHandler {
             for (EntityPlayer player : world.playerEntities) {
                 if (player.isPlayerFullyAsleep()) {
                     AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
-                    CommonUtils.healPlayerByPercentage(FirstAidConfig.externalHealing.sleepHealPercentage, damageModel, player); //heal the player who did sleep
+                    Objects.requireNonNull(damageModel, "damage model").sleepHeal(player);
                 }
             }
         }

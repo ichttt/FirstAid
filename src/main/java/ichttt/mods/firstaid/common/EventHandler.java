@@ -46,7 +46,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
@@ -180,23 +179,14 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void tickWorld(TickEvent.WorldTickEvent event) {
-        if (event.phase == TickEvent.Phase.END || FirstAid.morpheusLoaded) return;
+        if (event.phase == TickEvent.Phase.END) return;
+        if (FirstAidConfig.externalHealing.sleepHealPercentage <= 0D) return;
         World world = event.world;
         if (!world.isRemote && world instanceof WorldServer && ((WorldServer) world).areAllPlayersAsleep()) {
             for (EntityPlayer player : world.playerEntities) {
                 AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
-                CommonUtils.healPlayerByPercentage(FirstAidConfig.externalHealing.sleepHealPercentage, damageModel, player);
+                Objects.requireNonNull(damageModel, "damage model").sleepHeal(player);
             }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onItemCraft(PlayerEvent.ItemCraftedEvent event) {
-        ItemStack stack = event.crafting;
-        if (stack.getItem() == FirstAidItems.BANDAGE) {
-            String username = event.player.getName();
-            if (username.equalsIgnoreCase("ichun"))
-                stack.setStackDisplayName("MediChun's Healthkit"); //Yup, I *had* to do this
         }
     }
 

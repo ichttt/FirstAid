@@ -109,4 +109,6 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
 
     @SideOnly(Side.CLIENT)
     public abstract int getMaxRenderSize();
+
+    public abstract void sleepHeal(EntityPlayer player);
 }

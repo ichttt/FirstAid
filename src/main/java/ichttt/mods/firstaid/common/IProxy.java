@@ -26,6 +26,4 @@ public interface IProxy {
     default void init() {}
 
     default void showGuiApplyHealth(EnumHand activeHand) {}
-
-    void throwWrongPlayerRevivalException();
 }

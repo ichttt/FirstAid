@@ -52,10 +52,11 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 public class PlayerDamageModel extends AbstractPlayerDamageModel {
+    private final Set<SharedDebuff> sharedDebuffs = new HashSet<>();
     private int morphineTicksLeft = 0;
+    private int sleepBlockTicks = 0;
     private float prevHealthCurrent = -1F;
     private float prevScaleFactor;
-    private final Set<SharedDebuff> sharedDebuffs = new HashSet<>();
     private boolean waitingForHelp = false;
     private final boolean noCritical;
     private boolean needsMorphineUpdate = false;
@@ -123,6 +124,10 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         if (isDead(player))
             return;
         world.profiler.startSection("FirstAidPlayerModel");
+        if (sleepBlockTicks > 0)
+            sleepBlockTicks--;
+        else if (sleepBlockTicks < 0)
+            throw new RuntimeException("Negative sleepBlockTicks " + sleepBlockTicks);
 
         float currentHealth = getCurrentHealth();
         if (currentHealth <= 0F) {
@@ -316,6 +321,14 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             max = Math.max(max, newMax);
         }
         return max;
+    }
+
+    @Override
+    public void sleepHeal(EntityPlayer player) {
+        if (sleepBlockTicks > 0)
+            return;
+        CommonUtils.healPlayerByPercentage(FirstAidConfig.externalHealing.sleepHealPercentage, this, player);
+        sleepBlockTicks = 20;
     }
 
     @Override

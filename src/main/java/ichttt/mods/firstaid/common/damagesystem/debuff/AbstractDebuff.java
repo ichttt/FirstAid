@@ -22,7 +22,7 @@ import ichttt.mods.firstaid.api.debuff.IDebuff;
 import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;

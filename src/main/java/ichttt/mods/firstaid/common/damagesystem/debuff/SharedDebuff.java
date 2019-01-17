@@ -27,8 +27,6 @@ import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
-import java.util.Objects;
-
 public class SharedDebuff implements IDebuff {
     private final IDebuff debuff;
     private final EnumPlayerPart[] parts;
@@ -64,7 +62,7 @@ public class SharedDebuff implements IDebuff {
         if (!debuff.isEnabled() || player.world.isRemote || !(player instanceof EntityPlayerMP))
             return;
 
-        AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null).orElseThrow(() -> new RuntimeException("Could not find damage model for " + player));
         float healthPerMax = 0;
         for (EnumPlayerPart part : parts) {
             AbstractDamageablePart damageablePart = damageModel.getFromEnum(part);

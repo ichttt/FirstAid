@@ -18,8 +18,6 @@
 
 package ichttt.mods.firstaid.common.damagesystem.debuff;
 
-import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
 import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.floats.Float2IntMap;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -50,8 +48,8 @@ public class OnHitDebuff extends AbstractDebuff {
                 player.addPotionEffect(new PotionEffect(effect, entry.getIntValue(), 0, false, false));
             }
         }
-        if (value != -1 && sound != null)
-            FirstAid.NETWORKING.sendTo(new MessagePlayHurtSound(sound, value), player);
+//        if (value != -1 && sound != null) TODO Networking
+//            FirstAid.NETWORKING.sendTo(new MessagePlayHurtSound(sound, value), player);
     }
 
     @Override

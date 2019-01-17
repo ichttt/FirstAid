@@ -19,20 +19,19 @@
 package ichttt.mods.firstaid.common.util;
 
 import com.creativemd.playerrevive.api.IRevival;
-import com.creativemd.playerrevive.api.capability.CapaRevive;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
-import ichttt.mods.firstaid.FirstAidConfig;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModThreadContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -61,14 +60,14 @@ public class CommonUtils {
     }
 
     public static void killPlayer(@Nonnull EntityPlayer player, @Nullable DamageSource source) {
-        if (source != null && FirstAidConfig.externalHealing.allowOtherHealingItems && player.checkTotemDeathProtection(source))
+        if (false)//source != null && FirstAidConfig.externalHealing.allowOtherHealingItems && player.checkTotemDeathProtection(source)) TODO AccessTransformer
             return;
 
         IRevival revival = getRevivalIfPossible(player);
         if (revival != null)
             revival.startBleeding(player, source);
-        else
-            ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
+//        else
+//            ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, 0F); // TODO AccessTransformer
     }
 
     /**
@@ -78,15 +77,15 @@ public class CommonUtils {
      */
     @Nullable
     public static IRevival getRevivalIfPossible(@Nullable EntityPlayer player) {
-        if (player == null || CapaRevive.reviveCapa == null)
-            return null;
-        MinecraftServer server = player.getServer();
-        if (server == null)
-            return null;
-        IRevival revival = player.getCapability(CapaRevive.reviveCapa, null);
-        if (revival != null && server.getPlayerList().getCurrentPlayerCount() > 1)
-            return revival;
-        else
+//        if (player == null || CapaRevive.reviveCapa == null) TODO PlayerRevival Comapt
+//            return null;
+//        MinecraftServer server = player.getServer();
+//        if (server == null)
+//            return null;
+//        IRevival revival = player.getCapability(CapaRevive.reviveCapa, null);
+//        if (revival != null && server.getPlayerList().getCurrentPlayerCount() > 1)
+//            return revival;
+//        else
             return null;
     }
 
@@ -99,7 +98,7 @@ public class CommonUtils {
     }
 
     public static String getActiveModidSafe() {
-        ModContainer activeModContainer = Loader.instance().activeModContainer();
+        ModContainer activeModContainer = ModThreadContext.get().getActiveContainer();
         return activeModContainer == null ? "UNKNOWN-NULL" : activeModContainer.getModId();
     }
 
@@ -107,5 +106,14 @@ public class CommonUtils {
         Objects.requireNonNull(damageModel);
         int healValue = Ints.checkedCast(Math.round(damageModel.getCurrentMaxHealth() * percentage));
         HealthDistribution.manageHealth(healValue, damageModel, player, true, false);
+    }
+
+    @Nonnull
+    public static AbstractPlayerDamageModel getDamageModel(EntityPlayer player) {
+        return player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null).orElseThrow(() -> new IllegalArgumentException("Missing Damage Model!"));
+    }
+
+    public static boolean hasDamageModel(Entity entity) {
+        return entity instanceof EntityPlayer && !(entity instanceof FakePlayer);
     }
 }

@@ -40,12 +40,27 @@ import java.util.function.Function;
 public class ItemHealing extends Item {
 
     /**
-     * Creates a new healing item and registers it to the registry.
+     * Creates a new healing item, sets its tab to the first aid tab, and registers it to the registry.
      * @param time The time it takes in the GUI in ms
      * @param healerFunction The function to create a new healer from the GUI
      */
-    public ItemHealing(Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
-        setCreativeTab(HealingItemApiHelper.INSTANCE.getFirstAidTab());
+    public static ItemHealing createWithTab(Item.Builder builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
+        builder.group(HealingItemApiHelper.INSTANCE.getFirstAidTab());
+        return new ItemHealing(builder, healerFunction, time);
+    }
+
+    /**
+     * Creates a new healing item, and registers it to the registry.
+     * @param time The time it takes in the GUI in ms
+     * @param healerFunction The function to create a new healer from the GUI
+     */
+    public static ItemHealing create(Item.Builder builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
+        return new ItemHealing(builder, healerFunction, time);
+    }
+
+
+    private ItemHealing(Item.Builder builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
+        super(builder);
         Objects.requireNonNull(FirstAidRegistry.getImpl(), "FirstAid not loaded or not present!").registerHealingType(this, healerFunction, time);
     }
 

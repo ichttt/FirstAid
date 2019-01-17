@@ -22,13 +22,10 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
-import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
@@ -42,20 +39,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@SideOnly(Side.CLIENT)
 public class GuiHealthScreen extends GuiScreen {
     public static final int xSize = 256;
     public static final int ySize = 137;
-    public static final ItemStack BED_ITEMSTACK = new ItemStack(Items.BED);
+    public static final ItemStack BED_ITEMSTACK = new ItemStack(Items.RED_BED);
     private static final DecimalFormat FORMAT = new DecimalFormat("##.#");
 
     public static GuiHealthScreen INSTANCE;
@@ -89,24 +82,24 @@ public class GuiHealthScreen extends GuiScreen {
         this.guiTop = (this.height - ySize) / 2;
 
         head = new GuiHoldButton(1, this.guiLeft + 4, this.guiTop + 8, 52, 20, I18n.format("gui.head"), false);
-        this.buttonList.add(head);
+        addButton(head);
 
         leftArm = new GuiHoldButton(2, this.guiLeft + 4, this.guiTop + 33, 52, 20, I18n.format("gui.left_arm"), false);
-        this.buttonList.add(leftArm);
+        addButton(leftArm);
         leftLeg = new GuiHoldButton(3, this.guiLeft + 4, this.guiTop + 58, 52, 20, I18n.format("gui.left_leg"), false);
-        this.buttonList.add(leftLeg);
+        addButton(leftLeg);
         leftFoot = new GuiHoldButton(4, this.guiLeft + 4, this.guiTop + 83, 52, 20, I18n.format("gui.left_foot"), false);
-        this.buttonList.add(leftFoot);
+        addButton(leftFoot);
 
         body = new GuiHoldButton(5, this.guiLeft + 199, this.guiTop + 8, 52, 20, I18n.format("gui.body"), true);
-        this.buttonList.add(body);
+        addButton(body);
 
         rightArm = new GuiHoldButton(6, this.guiLeft + 199, this.guiTop + 33, 52, 20, I18n.format("gui.right_arm"), true);
-        this.buttonList.add(rightArm);
+        addButton(rightArm);
         rightLeg = new GuiHoldButton(7, this.guiLeft + 199, this.guiTop + 58, 52, 20, I18n.format("gui.right_leg"), true);
-        this.buttonList.add(rightLeg);
+        addButton(rightLeg);
         rightFoot = new GuiHoldButton(8, this.guiLeft + 199, this.guiTop + 83, 52, 20, I18n.format("gui.right_foot"), true);
-        this.buttonList.add(rightFoot);
+        addButton(rightFoot);
 
         if (disableButtons) {
             head.enabled = false;
@@ -119,16 +112,29 @@ public class GuiHealthScreen extends GuiScreen {
             rightFoot.enabled = false;
         }
 
-        GuiButton buttonCancel = new GuiButton(9, this.width / 2 - 100, this.height - 50, I18n.format("gui.cancel"));
-        this.buttonList.add(buttonCancel);
+        GuiButton buttonCancel = new GuiButton(9, this.width / 2 - 100, this.height - 50, I18n.format("gui.cancel")) {
+            @Override
+            public void onClick(double mouseX, double mouseY) {
+                mc.displayGuiScreen(null);
+            }
+        };
+        addButton(buttonCancel);
 
         if (this.mc.gameSettings.showDebugInfo) {
-            GuiButton refresh = new GuiButton(10, this.guiLeft + 218, this.guiTop + 115, 36, 20, "resync");
-            this.buttonList.add(refresh);
+            GuiButton refresh = new GuiButton(10, this.guiLeft + 218, this.guiTop + 115, 36, 20, "resync") {
+                @Override
+                public void onClick(double mouseX, double mouseY) {
+                    FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.REQUEST_REFRESH));
+                    FirstAid.LOGGER.info("Requesting refresh");
+                    mc.player.sendStatusMessage(new TextComponentString("Re-downloading health data from server..."), true);
+                    mc.displayGuiScreen(null);
+                }
+            };
+            addButton(refresh);
         }
 
         holdButtons.clear();
-        for (GuiButton button : this.buttonList) {
+        for (GuiButton button : this.buttons) {
             if (button instanceof GuiHoldButton) {
                 Integer holdTime = activeHand == null ? null : FirstAidRegistryImpl.INSTANCE.getPartHealingTime(mc.player.getHeldItem(activeHand));
                 if (holdTime == null)
@@ -142,7 +148,7 @@ public class GuiHealthScreen extends GuiScreen {
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float partialTicks) {
         //Setup background
         this.drawDefaultBackground();
         this.drawGradientRect(this.guiLeft, this.guiTop, this.guiLeft + xSize, this.guiTop + ySize, -16777216, -16777216);
@@ -158,7 +164,7 @@ public class GuiHealthScreen extends GuiScreen {
         GuiInventory.drawEntityOnScreen(this.width / 2, this.height / 2 + 30, 45, entityLookX, entityLookY, mc.player);
 
         //Button
-        super.drawScreen(mouseX, mouseY, partialTicks);
+        super.render(mouseX, mouseY, partialTicks);
 
         //Text info
         int morphineTicks = damageModel.getMorphineTicks();
@@ -169,17 +175,15 @@ public class GuiHealthScreen extends GuiScreen {
 
         //Health
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
-        GlStateManager.color(1F, 1F, 1F, 1F);
-        if (FirstAid.isSynced) {
-            drawHealth(damageModel.HEAD, false, 14);
-            drawHealth(damageModel.LEFT_ARM, false, 39);
-            drawHealth(damageModel.LEFT_LEG, false, 64);
-            drawHealth(damageModel.LEFT_FOOT, false, 89);
-            drawHealth(damageModel.BODY, true, 14);
-            drawHealth(damageModel.RIGHT_ARM, true, 39);
-            drawHealth(damageModel.RIGHT_LEG, true, 64);
-            drawHealth(damageModel.RIGHT_FOOT, true, 89);
-        }
+        GlStateManager.color4f(1F, 1F, 1F, 1F);
+        drawHealth(damageModel.HEAD, false, 14);
+        drawHealth(damageModel.LEFT_ARM, false, 39);
+        drawHealth(damageModel.LEFT_LEG, false, 64);
+        drawHealth(damageModel.LEFT_FOOT, false, 89);
+        drawHealth(damageModel.BODY, true, 14);
+        drawHealth(damageModel.RIGHT_ARM, true, 39);
+        drawHealth(damageModel.RIGHT_LEG, true, 64);
+        drawHealth(damageModel.RIGHT_FOOT, true, 89);
 
         //Tooltip
         GlStateManager.pushMatrix();
@@ -203,8 +207,8 @@ public class GuiHealthScreen extends GuiScreen {
         //Sleep info icon
         GlStateManager.pushMatrix();
         if (sleepHealing > 0D) RenderHelper.enableGUIStandardItemLighting();
-        GlStateManager.scale(bedScaleFactor, bedScaleFactor, bedScaleFactor);
-        mc.getRenderItem().renderItemAndEffectIntoGUI(null, BED_ITEMSTACK, renderBedX, renderBedY);
+        GlStateManager.scalef(bedScaleFactor, bedScaleFactor, bedScaleFactor);
+        mc.getItemRenderer().renderItemAndEffectIntoGUI(null, BED_ITEMSTACK, renderBedX, renderBedY);
         GlStateManager.popMatrix();
 
         //Sleep info tooltip
@@ -232,35 +236,28 @@ public class GuiHealthScreen extends GuiScreen {
     }
 
     @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        if (keyCode == ClientProxy.showWounds.getKeyCode())
-            mc.displayGuiScreen(null);
-        super.keyTyped(typedChar, keyCode);
+    public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
+//        if (keyCode == ClientProxy.showWounds.getKeyCode()) TODO keypress
+//            mc.displayGuiScreen(null);
+        return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
     }
 
-    @Override
-    protected void actionPerformed(GuiButton button) {
-        if (button.id < 9) {
-            EnumPlayerPart playerPart = EnumPlayerPart.fromID((button.id));
-            FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, activeHand));
-            //TODO notify the user somehow (sound?)
-            AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
-            part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(mc.player.getHeldItem(this.activeHand));
-        } else if (button.id == 10) {
-            FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.REQUEST_REFRESH));
-            FirstAid.LOGGER.info("Requesting refresh");
-            mc.player.sendStatusMessage(new TextComponentString("Re-downloading health data from server..."), true);
-        }
-        mc.displayGuiScreen(null);
-    }
+//    @Override TODO ap
+//    protected void actionPerformed(GuiButton button) {
+//        if (button.id < 9) {
+//            EnumPlayerPart playerPart = EnumPlayerPart.fromID((button.id));
+//            FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, activeHand));
+//            //TODO notify the user somehow (sound?)
+//            AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
+//            part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(mc.player.getHeldItem(this.activeHand));
+//        }
+//        mc.displayGuiScreen(null);
+//    }
 
     protected void holdButtonMouseCallback(int mouseX, int mouseY, boolean renderPass) {
         for (GuiHoldButton button : this.holdButtons) {
-            if (button.mousePressed(mc, mouseX, mouseY)) {
-                //VANILLA COPY: GuiScreen#mouseClicked(without forge events)
-                this.selectedButton = button;
+            if (button.mouseClicked(mouseX, mouseY, 0)) {
                 button.playPressSound(this.mc.getSoundHandler());
-                this.actionPerformed(button);
             } else if (renderPass) {
                 int timeLeft = button.getTimeLeft();
                 if (timeLeft != -1) {
@@ -276,9 +273,9 @@ public class GuiHealthScreen extends GuiScreen {
     }
 
     @Override
-    protected void mouseReleased(int mouseX, int mouseY, int state) {
-        super.mouseReleased(mouseX, mouseY, state);
-        holdButtonMouseCallback(mouseX, mouseY, false);
+    public boolean mouseReleased(double mouseX, double mouseY, int state) {
+        holdButtonMouseCallback((int) mouseX, (int) mouseY, false);
+        return super.mouseReleased(mouseX, mouseY, state);
     }
 
     @Override
@@ -293,6 +290,6 @@ public class GuiHealthScreen extends GuiScreen {
     }
 
     public List<GuiButton> getButtons() {
-        return buttonList;
+        return this.buttons;
     }
 }

@@ -46,7 +46,7 @@ public class ProjectileHelper {
     }
 
     private static boolean testAABB(Entity hittingObject, EntityPlayer toTest, AxisAlignedBB aabb) {
-        AxisAlignedBB toTestAABB = hittingObject.getEntityBoundingBox();
+        AxisAlignedBB toTestAABB = hittingObject.getBoundingBox();
         return (toTestAABB.minY - toTest.posY) < aabb.maxY && (toTestAABB.maxY - toTest.posY) > aabb.minY;
     }
 }

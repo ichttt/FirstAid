@@ -26,6 +26,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
+import net.minecraftforge.common.capabilities.OptionalCapabilityInstance;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,18 +41,14 @@ public class CapProvider implements ICapabilitySerializable<NBTTagCompound> {
     public CapProvider(AbstractPlayerDamageModel damageModel) {
         this.damageModel = damageModel;
     }
-    @Override
-    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
-        return capability == CapabilityExtendedHealthSystem.INSTANCE;
-    }
 
-    @Nullable
+    @Nonnull
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
+    public <T> OptionalCapabilityInstance<T> getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
         if (capability == CapabilityExtendedHealthSystem.INSTANCE)
-            return CapabilityExtendedHealthSystem.INSTANCE.cast(damageModel);
-        return null;
+            return OptionalCapabilityInstance.of(() -> (T) damageModel);
+        return OptionalCapabilityInstance.empty();
     }
 
     @Override

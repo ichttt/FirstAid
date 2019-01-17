@@ -21,8 +21,8 @@ package ichttt.mods.firstaid.common.apiimpl;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.item.HealingItemApiHelper;
 import ichttt.mods.firstaid.api.item.ItemHealing;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
@@ -48,7 +48,7 @@ public class HealingItemApiHelperImpl extends HealingItemApiHelper {
 
     @Nonnull
     @Override
-    public CreativeTabs getFirstAidTab() {
-        return FirstAid.CREATIVE_TAB;
+    public ItemGroup getFirstAidTab() {
+        return FirstAid.ITEM_GROUP;
     }
 }

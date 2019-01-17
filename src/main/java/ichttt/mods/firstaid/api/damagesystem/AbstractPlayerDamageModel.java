@@ -24,8 +24,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
@@ -107,7 +105,6 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
 
     public abstract int getCurrentMaxHealth();
 
-    @SideOnly(Side.CLIENT)
     public abstract int getMaxRenderSize();
 
     public abstract void sleepHeal(EntityPlayer player);

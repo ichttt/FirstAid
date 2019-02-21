@@ -19,48 +19,36 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.client.DebuffTimedSound;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.SoundEvent;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 
-public class MessagePlayHurtSound implements IMessage {
-    private SoundEvent sound;
-    private int duration;
+import java.util.function.Supplier;
 
-    public MessagePlayHurtSound () {}
+public class MessagePlayHurtSound {
+    private final SoundEvent sound;
+    private final int duration;
+
+    public MessagePlayHurtSound(PacketBuffer buffer) {
+        this(ForgeRegistries.SOUND_EVENTS.getValue(buffer.readResourceLocation()), buffer.readInt());
+    }
 
     public MessagePlayHurtSound(SoundEvent sound, int duration) {
         this.sound = sound;
         this.duration = duration;
     }
 
-
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        sound = ByteBufUtils.readRegistryEntry(buf, ForgeRegistries.SOUND_EVENTS);
-        duration = buf.readInt();
-    }
-
-    @Override
-    public void toBytes(ByteBuf buf) {
-        ByteBufUtils.writeRegistryEntry(buf, sound);
+    public void encode(PacketBuffer buf) {
+        buf.writeResourceLocation(sound.getName());
         buf.writeInt(duration);
     }
 
-    public static class Handler implements IMessageHandler<MessagePlayHurtSound, IMessage> {
+    public static class Handler {
 
-        @SideOnly(Side.CLIENT)
-        @Override
-        public IMessage onMessage(MessagePlayHurtSound message, MessageContext ctx) {
-            Minecraft.getMinecraft().addScheduledTask(() -> DebuffTimedSound.playHurtSound(message.sound, message.duration));
-            return null;
+        public static void onMessage(MessagePlayHurtSound message, Supplier<NetworkEvent.Context> supplier) {
+            Minecraft.getInstance().addScheduledTask(() -> DebuffTimedSound.playHurtSound(message.sound, message.duration));
         }
     }
 }

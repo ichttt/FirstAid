@@ -18,45 +18,33 @@
 
 package ichttt.mods.firstaid.common.network;
 
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import io.netty.buffer.ByteBuf;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.util.Objects;
+import java.util.function.Supplier;
 
-public class MessageApplyAbsorption implements IMessage {
-    private float amount;
+public class MessageApplyAbsorption {
+    private final float amount;
 
-    public MessageApplyAbsorption() {}
+    public MessageApplyAbsorption(PacketBuffer buffer) {
+        amount = buffer.readFloat();
+    }
 
     public MessageApplyAbsorption(float amount) {
         this.amount = amount;
     }
 
-
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        amount = buf.readFloat();
-    }
-
-    @Override
-    public void toBytes(ByteBuf buf) {
+    public void encode(PacketBuffer buf) {
         buf.writeFloat(amount);
     }
 
-    public static class Handler implements IMessageHandler<MessageApplyAbsorption, IMessage> {
+    public static class Handler {
 
-        @SideOnly(Side.CLIENT)
-        @Override
-        public IMessage onMessage(MessageApplyAbsorption message, MessageContext ctx) {
-            Minecraft mc = Minecraft.getMinecraft();
-            mc.addScheduledTask(() -> Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).setAbsorption(message.amount));
-            return null;
+        public static void onMessage(MessageApplyAbsorption message, Supplier<NetworkEvent.Context> supplier) {
+            Minecraft mc = Minecraft.getInstance();
+            mc.addScheduledTask(() -> CommonUtils.getDamageModel(mc.player).setAbsorption(message.amount));
         }
     }
 }

@@ -19,80 +19,52 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.common.CapProvider;
-import ichttt.mods.firstaid.common.config.ConfigEntry;
-import ichttt.mods.firstaid.common.config.ExtraConfig;
-import io.netty.buffer.ByteBuf;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.util.Objects;
+import java.util.function.Supplier;
 
-public class MessageConfiguration implements IMessage {
+public class MessageConfiguration {
 
     private NBTTagCompound playerDamageModel;
-    private boolean syncConfig;
 
-    public MessageConfiguration() {}
-
-    public MessageConfiguration(AbstractPlayerDamageModel model, boolean syncConfig) {
-        this.playerDamageModel = model.serializeNBT();
-        this.syncConfig = syncConfig;
+    public MessageConfiguration(NBTTagCompound model) {
+        this.playerDamageModel = model;
     }
 
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        playerDamageModel = ByteBufUtils.readTag(buf);
-
-        syncConfig = buf.readBoolean();
-        if (syncConfig) {
-            for (ConfigEntry<ExtraConfig.Sync> entry : FirstAid.syncedConfigOptions)
-                entry.readFromBuf(buf);
-        }
+    public MessageConfiguration(PacketBuffer buffer) {
+        this(buffer.readCompoundTag());
     }
 
-    @Override
-    public void toBytes(ByteBuf buf) {
-        ByteBufUtils.writeTag(buf, playerDamageModel);
-
-        buf.writeBoolean(syncConfig);
-        if (syncConfig) {
-            for (ConfigEntry<ExtraConfig.Sync> entry : FirstAid.syncedConfigOptions)
-                entry.writeToBuf(buf);
-        }
+    public void encode(PacketBuffer buf) {
+        buf.writeCompoundTag(playerDamageModel);
     }
 
-    public static class Handler implements IMessageHandler<MessageConfiguration, IMessage> {
+    public static class Handler {
 
-        @Override
-        @SideOnly(Side.CLIENT)
-        public IMessage onMessage(MessageConfiguration message, MessageContext ctx) {
-            Minecraft mc = Minecraft.getMinecraft();
+        public static void onMessage(MessageConfiguration message, Supplier<NetworkEvent.Context> supplier) {
+            Minecraft mc = Minecraft.getInstance();
 
-            FirstAid.LOGGER.info(message.syncConfig ? "Received remote damage model and config" : "Received remote damage model");
+            FirstAid.LOGGER.info("Received remote damage model");
             mc.addScheduledTask(() -> {
-                AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
                 damageModel.deserializeNBT(message.playerDamageModel);
                 if (damageModel.hasTutorial)
-                    CapProvider.tutorialDone.add(mc.player.getName());
+                    CapProvider.tutorialDone.add(mc.player.getName().getString());
                 else
-                    mc.player.sendMessage(new TextComponentString("[First Aid] " + I18n.format("firstaid.tutorial.hint", ClientProxy.showWounds.getDisplayName())));
+                    mc.player.sendMessage(new TextComponentString("[First Aid] " + I18n.format("firstaid.tutorial.hint", ClientProxy.showWounds.getKey().getName())));
                 HUDHandler.INSTANCE.ticker = 200;
                 FirstAid.isSynced = true;
             });
-            return null;
         }
     }
 }

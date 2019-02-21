@@ -54,25 +54,7 @@ public enum EnumPlayerPart {
     }
 
     public static EnumPlayerPart fromID(int id) {
-        switch (id) {
-            case 1:
-                return HEAD;
-            case 2:
-                return LEFT_ARM;
-            case 3:
-                return LEFT_LEG;
-            case 4:
-                return LEFT_FOOT;
-            case 5:
-                return BODY;
-            case 6:
-                return RIGHT_ARM;
-            case 7:
-                return RIGHT_LEG;
-            case 8:
-                return RIGHT_FOOT;
-        }
-        throw new IndexOutOfBoundsException("Invalid id " + id);
+        return VALUES[id - 1];
     }
 
     public EnumPlayerPart getUp() {

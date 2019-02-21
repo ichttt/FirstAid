@@ -20,7 +20,6 @@ package ichttt.mods.firstaid.client.util;
 
 import com.google.common.collect.ImmutableMap;
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.gui.FlashStateManager;
@@ -32,15 +31,12 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.init.MobEffects;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.util.Util;
 
 import java.text.DecimalFormat;
 import java.util.Objects;
 
-@SideOnly(Side.CLIENT)
 public class HealthRenderUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
     public static final DecimalFormat TEXT_FORMAT = new DecimalFormat("0.0");
@@ -61,13 +57,13 @@ public class HealthRenderUtils {
         if (absorption > 0) {
             String line2 = "+ " + TEXT_FORMAT.format(absorption);
             if (allowSecondLine) {
-                Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(line2, xTranslation + 3, yTranslation, 0xFFFFFF);
-                GlStateManager.translate(-5, 0, 0);
+                Minecraft.getInstance().fontRenderer.drawStringWithShadow(line2, xTranslation + 3, yTranslation, 0xFFFFFF);
+                GlStateManager.translatef(-5, 0, 0);
             } else {
                 text += " " + line2;
             }
         }
-        Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(text, xTranslation, yTranslation, 0xFFFFFF);
+        Minecraft.getInstance().fontRenderer.drawStringWithShadow(text, xTranslation, yTranslation, 0xFFFFFF);
     }
 
     private static void updatePrev(EnumPlayerPart part, int current, boolean playerDead) {
@@ -97,7 +93,7 @@ public class HealthRenderUtils {
         if (prevHealth.containsKey(damageablePart.part)) {
             int prev = prevHealth.getInt(damageablePart.part);
             if (prev != current)
-                activeFlashState.setActive(Minecraft.getSystemTime());
+                activeFlashState.setActive(Util.milliTime());
         }
 
         if ((maxHealth + maxExtraHealth > 8 && allowSecondLine) || ((maxHealth + maxExtraHealth) > 12)) {
@@ -107,17 +103,17 @@ public class HealthRenderUtils {
 
         int yTexture = damageablePart.canCauseDeath ? 45 : 0;
         int absorption = (int) Math.ceil(damageablePart.getAbsorption());
-        boolean highlight = activeFlashState.update(Minecraft.getSystemTime());
+        boolean highlight = activeFlashState.update(Util.milliTime());
 
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
         int regen = -1;
-        if (FirstAidConfig.externalHealing.allowOtherHealingItems && mc.player.isPotionActive(MobEffects.REGENERATION))
-            regen = (mc.ingameGUI.updateCounter / 2) % 15;
+//        if (FirstAidConfig.externalHealing.allowOtherHealingItems && mc.player.isPotionActive(MobEffects.REGENERATION))
+//            regen = (mc.ingameGUI.healthupdatecounter / 2) % 15; TODO
         boolean low = (current + absorption) < 1.25F;
 
         mc.getTextureManager().bindTexture(Gui.ICONS);
         GlStateManager.pushMatrix();
-        GlStateManager.translate(xTranslation, yTranslation, 0);
+        GlStateManager.translatef(xTranslation, yTranslation, 0);
         boolean drawSecondLine = allowSecondLine;
         if (allowSecondLine) drawSecondLine = (maxHealth + maxExtraHealth) > 4;
 
@@ -140,12 +136,12 @@ public class HealthRenderUtils {
             int absorption2 = absorption - maxExtraHealth * 2;
             absorption -= absorption2;
 
-            GlStateManager.translate(0F, 5F, 0F);
+            GlStateManager.translatef(0F, 5F, 0F);
             GlStateManager.pushMatrix();
             renderLine(regen, low, yTexture, maxHealth2, maxExtraHealth2, current2, absorption2, gui, highlight);
             regen -= (maxHealth2 + maxExtraHealth);
             GlStateManager.popMatrix();
-            GlStateManager.translate(0F, -10F, 0F);
+            GlStateManager.translatef(0F, -10F, 0F);
         }
         renderLine(regen, low, yTexture, maxHealth, maxExtraHealth, current, absorption, gui, highlight);
 
@@ -163,18 +159,18 @@ public class HealthRenderUtils {
         renderMax(regen, map, maxHealth, yTexture, gui, highlight);
         if (maxExtraHearts > 0) { //for absorption
             if (maxHealth != 0) {
-                GlStateManager.translate(2 + 9 * maxHealth, 0, 0);
+                GlStateManager.translatef(2 + 9 * maxHealth, 0, 0);
             }
             renderMax(regen - maxHealth, map, maxExtraHearts, yTexture, gui, false); //Do not highlight absorption
         }
         GlStateManager.popMatrix();
-        GlStateManager.translate(0, 0, 1);
+        GlStateManager.translatef(0, 0, 1);
 
         renderCurrentHealth(regen, map, current, yTexture, gui);
 
         if (absorption > 0) {
             int offset = maxHealth * 9 + (maxHealth == 0 ? 0 : 2);
-            GlStateManager.translate(offset, 0, 0);
+            GlStateManager.translatef(offset, 0, 0);
             renderAbsorption(regen - maxHealth, map, absorption, yTexture, gui);
         }
     }

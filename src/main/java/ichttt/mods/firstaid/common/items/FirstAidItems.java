@@ -22,12 +22,12 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.common.damagesystem.PartHealer;
 import net.minecraft.item.Item;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.ObjectHolder;
 
 import javax.annotation.Nonnull;
 
-@GameRegistry.ObjectHolder(FirstAid.MODID)
+@ObjectHolder(FirstAid.MODID)
 public class FirstAidItems {
     public static final Item BANDAGE = getNull();
     public static final Item PLASTER = getNull();

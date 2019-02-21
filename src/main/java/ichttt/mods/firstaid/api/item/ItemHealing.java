@@ -44,7 +44,7 @@ public class ItemHealing extends Item {
      * @param time The time it takes in the GUI in ms
      * @param healerFunction The function to create a new healer from the GUI
      */
-    public static ItemHealing createWithTab(Item.Builder builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
+    public static ItemHealing createWithTab(Item.Properties builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
         builder.group(HealingItemApiHelper.INSTANCE.getFirstAidTab());
         return new ItemHealing(builder, healerFunction, time);
     }
@@ -54,12 +54,12 @@ public class ItemHealing extends Item {
      * @param time The time it takes in the GUI in ms
      * @param healerFunction The function to create a new healer from the GUI
      */
-    public static ItemHealing create(Item.Builder builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
+    public static ItemHealing create(Item.Properties builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
         return new ItemHealing(builder, healerFunction, time);
     }
 
 
-    private ItemHealing(Item.Builder builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
+    private ItemHealing(Item.Properties builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
         super(builder);
         Objects.requireNonNull(FirstAidRegistry.getImpl(), "FirstAid not loaded or not present!").registerHealingType(this, healerFunction, time);
     }

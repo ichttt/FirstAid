@@ -31,10 +31,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.CLIENT)
 public class GuiTutorial extends GuiScreen {
     private final GuiHealthScreen parent;
     private final AbstractPlayerDamageModel demoModel;
@@ -62,7 +59,7 @@ public class GuiTutorial extends GuiScreen {
         this.action.addTextWrapper("firstaid.tutorial.line6");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.HEAD.damage(16F, null, false));
         this.action.addTextWrapper("firstaid.tutorial.line7");
-        this.action.addTextWrapper("firstaid.tutorial.line8", ClientProxy.showWounds.getDisplayName());
+        this.action.addTextWrapper("firstaid.tutorial.line8", I18n.format(ClientProxy.showWounds.func_197978_k());
         this.action.addTextWrapper("firstaid.tutorial.end");
 
         this.action.next();

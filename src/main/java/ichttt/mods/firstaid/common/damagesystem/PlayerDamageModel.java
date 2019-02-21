@@ -18,7 +18,6 @@
 
 package ichttt.mods.firstaid.common.damagesystem;
 
-import com.creativemd.playerrevive.api.IRevival;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
@@ -29,20 +28,17 @@ import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.CapProvider;
-import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
-import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -112,7 +108,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         RIGHT_LEG.deserializeNBT((NBTTagCompound) nbt.getTag("rightLeg"));
         RIGHT_FOOT.deserializeNBT((NBTTagCompound) nbt.getTag("rightFoot"));
         if (nbt.hasKey("morphineTicks")) { //legacy - we still have to write it
-            morphineTicksLeft = nbt.getInteger("morphineTicks");
+            morphineTicksLeft = nbt.getInt("morphineTicks");
             needsMorphineUpdate = true;
         }
         if (nbt.hasKey("hasTutorial"))
@@ -141,8 +137,8 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         if (Float.isInfinite(newCurrentHealth)) {
             FirstAid.LOGGER.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe
         } else {
-            if (newCurrentHealth != prevHealthCurrent)
-                ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
+//            if (newCurrentHealth != prevHealthCurrent) TODO AT
+//                ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
             prevHealthCurrent = newCurrentHealth;
         }
 
@@ -252,27 +248,27 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public boolean isDead(@Nullable EntityPlayer player) {
-        IRevival revival = CommonUtils.getRevivalIfPossible(player);
-        if (revival != null) {
-            if (!revival.isHealty() && !revival.isDead()) {
-                this.waitingForHelp = true; //Technically not dead yet, but we should still return true
-                return true;
-            } else if (this.waitingForHelp && revival.isRevived()) { //We just got revived
-                this.waitingForHelp = false;
-                player.isDead = false;
-                for (AbstractDamageablePart part : this) {
-                    if ((part.canCauseDeath || this.noCritical) && part.currentHealth <= 0F) {
-                        part.currentHealth = 1F; // Set the critical health to a non-zero value
-                    }
-                }
-                //make sure to resync the client health
-                if (!player.world.isRemote && player instanceof EntityPlayerMP)
-                    FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this), (EntityPlayerMP) player); //Upload changes to the client
-                return false;
-            }
-        }
+//        IRevival revival = CommonUtils.getRevivalIfPossible(player); TODO playerrevival compat
+//        if (revival != null) {
+//            if (!revival.isHealty() && !revival.isDead()) {
+//                this.waitingForHelp = true; //Technically not dead yet, but we should still return true
+//                return true;
+//            } else if (this.waitingForHelp && revival.isRevived()) { //We just got revived
+//                this.waitingForHelp = false;
+//                player.isDead = false;
+//                for (AbstractDamageablePart part : this) {
+//                    if ((part.canCauseDeath || this.noCritical) && part.currentHealth <= 0F) {
+//                        part.currentHealth = 1F; // Set the critical health to a non-zero value
+//                    }
+//                }
+///                //make sure to resync the client health
+//                if (!player.world.isRemote && player instanceof EntityPlayerMP)
+//                    FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this), (EntityPlayerMP) player); //Upload changes to the client
+//                return false;
+//            }
+//        }
 
-        if (player != null && (player.isDead || player.getHealth() <= 0F))
+        if (player != null && (player.removed || player.getHealth() <= 0F))
             return true;
 
         if (this.noCritical) {
@@ -309,13 +305,13 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public int getMaxRenderSize() {
         int max = 0;
         for (AbstractDamageablePart part : this) {
             int newMax;
             if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.NUMBERS)
-                newMax = Minecraft.getMinecraft().fontRenderer.getStringWidth(HealthRenderUtils.TEXT_FORMAT.format(part.currentHealth) + "/" + part.getMaxHealth()) + 1;
+                newMax = Minecraft.getInstance().fontRenderer.getStringWidth(HealthRenderUtils.TEXT_FORMAT.format(part.currentHealth) + "/" + part.getMaxHealth()) + 1;
             else
                 newMax = (int) (((((int) (part.getMaxHealth() + part.getAbsorption() + 0.9999F)) + 1) / 2F) * 9F);
             max = Math.max(max, newMax);

@@ -23,6 +23,8 @@ import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
@@ -105,6 +107,7 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
 
     public abstract int getCurrentMaxHealth();
 
+    @OnlyIn(Dist.CLIENT)
     public abstract int getMaxRenderSize();
 
     public abstract void sleepHeal(EntityPlayer player);

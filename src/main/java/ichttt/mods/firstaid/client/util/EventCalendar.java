@@ -18,9 +18,6 @@
 
 package ichttt.mods.firstaid.client.util;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.util.Calendar;
 
 import static java.util.Calendar.*;
@@ -29,7 +26,6 @@ import static java.util.Calendar.*;
  * Stolen from iChunUtil (https://github.com/iChun/iChunUtil)
  * Modified to fit code style and removed PG birthday (I don't need that :D)
  */
-@SideOnly(Side.CLIENT)
 public class EventCalendar {
     public static final boolean disableEasterEggs = Boolean.parseBoolean(System.getProperty("firstaid.disableEasterEgg", "false"));
 

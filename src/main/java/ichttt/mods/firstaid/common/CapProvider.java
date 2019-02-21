@@ -26,7 +26,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
-import net.minecraftforge.common.capabilities.OptionalCapabilityInstance;
+import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -37,18 +37,19 @@ public class CapProvider implements ICapabilitySerializable<NBTTagCompound> {
     public static final ResourceLocation IDENTIFIER = new ResourceLocation(FirstAid.MODID, "capExtendedHealthSystem");
     public static final Set<String> tutorialDone = new HashSet<>();
     private final AbstractPlayerDamageModel damageModel;
+    private final LazyOptional<AbstractPlayerDamageModel> optional;
 
     public CapProvider(AbstractPlayerDamageModel damageModel) {
         this.damageModel = damageModel;
+        this.optional = LazyOptional.of(() -> damageModel);
     }
 
     @Nonnull
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> OptionalCapabilityInstance<T> getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
         if (capability == CapabilityExtendedHealthSystem.INSTANCE)
-            return OptionalCapabilityInstance.of(() -> (T) damageModel);
-        return OptionalCapabilityInstance.empty();
+            return optional.cast();
+        return LazyOptional.empty();
     }
 
     @Override

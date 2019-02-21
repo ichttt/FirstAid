@@ -29,8 +29,6 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,7 +36,6 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-@SideOnly(Side.CLIENT)
 public class DebuffTimedSound implements ITickableSound {
     private static final float volumeMultiplier = 1.25F;
     private final float minusPerTick;
@@ -54,22 +51,22 @@ public class DebuffTimedSound implements ITickableSound {
     public static void playHurtSound(SoundEvent event, int duration) {
         if (!FirstAidConfig.enableSoundSystem)
             return;
-        SoundHandler soundHandler = Minecraft.getMinecraft().getSoundHandler();
+        SoundHandler soundHandler = Minecraft.getInstance().getSoundHandler();
         DebuffTimedSound matchingSound = activeSounds.get(event);
         if (matchingSound != null) {
             if (!matchingSound.isDonePlaying())
-                soundHandler.stopSound(matchingSound);
+                soundHandler.stop(matchingSound);
             activeSounds.remove(event);
         }
         DebuffTimedSound newSound = new DebuffTimedSound(event, duration);
-        soundHandler.playSound(newSound);
+        soundHandler.play(newSound);
         activeSounds.put(event, newSound);
     }
 
     public DebuffTimedSound(SoundEvent event, int debuffDuration) {
         this.event = event;
-        this.soundLocation = event.getSoundName();
-        this.player = new WeakReference<>(Minecraft.getMinecraft().player);
+        this.soundLocation = event.getName();
+        this.player = new WeakReference<>(Minecraft.getInstance().player);
         this.debuffDuration = Integer.min(15 * 20, debuffDuration);
         this.minusPerTick = (1F / this.debuffDuration) * volumeMultiplier;
     }
@@ -125,6 +122,11 @@ public class DebuffTimedSound implements ITickableSound {
     }
 
     @Override
+    public boolean isPriority() {
+        return true;
+    }
+
+    @Override
     public int getRepeatDelay() {
         return 0;
     }
@@ -140,7 +142,7 @@ public class DebuffTimedSound implements ITickableSound {
     }
 
     @Override
-    public float getXPosF() {
+    public float getX() {
         EntityPlayerSP player = this.player.get();
         if (player == null)
             return 0F;
@@ -148,7 +150,7 @@ public class DebuffTimedSound implements ITickableSound {
     }
 
     @Override
-    public float getYPosF() {
+    public float getY() {
         EntityPlayerSP player = this.player.get();
         if (player == null)
             return 0F;
@@ -156,7 +158,7 @@ public class DebuffTimedSound implements ITickableSound {
     }
 
     @Override
-    public float getZPosF() {
+    public float getZ() {
         EntityPlayerSP player = this.player.get();
         if (player == null)
             return 0F;
@@ -170,7 +172,7 @@ public class DebuffTimedSound implements ITickableSound {
     }
 
     @Override
-    public void update() {
+    public void tick() {
         ticks++;
         volume = Math.max(0.15F, volume - minusPerTick);
     }

@@ -24,7 +24,14 @@ import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.HealingItemApiHelperImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
-import ichttt.mods.firstaid.common.util.MorpheusHelper;
+import ichttt.mods.firstaid.common.network.MessageAddHealth;
+import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
+import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
+import ichttt.mods.firstaid.common.network.MessageClientRequest;
+import ichttt.mods.firstaid.common.network.MessageConfiguration;
+import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
+import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
+import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.INBTBase;
@@ -35,14 +42,12 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
-import net.minecraftforge.fml.javafmlmod.FMLModLoadingContext;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import org.apache.logging.log4j.LogManager;
@@ -72,27 +77,24 @@ public class FirstAid {
             s -> s.startsWith(NETWORKING_MAJOR),
             s -> s.equals(NETWORKING_VERSION));
     public static boolean morpheusLoaded = false;
+    public static boolean isSynced = false;
 
 
     public FirstAid() {
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
-        IEventBus bus = FMLModLoadingContext.get().getModEventBus();
-        bus.addListener(this::preInit);
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::init);
         bus.addListener(this::loadComplete);
         bus.addListener(this::beforeServerStart);
         bus.addListener(this::onServerStop);
-    }
-
-    public void preInit(FMLPreInitializationEvent event) {
-        LOGGER.info("{} starting...", MODID);
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
         //Setup API
         HealingItemApiHelperImpl.init();
         RegistryManager.setupRegistries();
     }
 
-    public void init(FMLInitializationEvent event) {
+    public void init(FMLCommonSetupEvent event) {
+        LOGGER.info("{} starting...", MODID);
         CapabilityManager.INSTANCE.register(AbstractPlayerDamageModel.class, new Capability.IStorage<AbstractPlayerDamageModel>() {
                     @Nullable
                     @Override
@@ -109,21 +111,21 @@ public class FirstAid {
                     throw new UnsupportedOperationException("No default implementation");
                 });
 
-//        int i = 0;
-//        NETWORKING.registerMessage(MessageReceiveDamage.Handler.class, MessageReceiveDamage.class, ++i, Side.CLIENT);
-//        NETWORKING.registerMessage(MessageApplyHealingItem.Handler.class, MessageApplyHealingItem.class, ++i , Side.SERVER);
-//        NETWORKING.registerMessage(MessageConfiguration.Handler.class, MessageConfiguration.class, ++i, Side.CLIENT);
-//        NETWORKING.registerMessage(MessageApplyAbsorption.Handler.class, MessageApplyAbsorption.class, ++i, Side.CLIENT);
-//        NETWORKING.registerMessage(MessageAddHealth.Handler.class, MessageAddHealth.class, ++i, Side.CLIENT);
-//        NETWORKING.registerMessage(MessagePlayHurtSound.Handler.class, MessagePlayHurtSound.class, ++i, Side.CLIENT);
-//        NETWORKING.registerMessage(MessageClientRequest.Handler.class, MessageClientRequest.class, ++i, Side.SERVER);
-//        NETWORKING.registerMessage(MessageSyncDamageModel.Handler.class, MessageSyncDamageModel.class, ++i, Side.CLIENT);
+        int i = 0;
+        NETWORKING.registerMessage(++i, MessageReceiveDamage.class, MessageReceiveDamage::encode, MessageReceiveDamage::new, MessageReceiveDamage.Handler::onMessage);
+        NETWORKING.registerMessage(++i, MessageApplyHealingItem.class, MessageApplyHealingItem::encode, MessageApplyHealingItem::new, MessageApplyHealingItem.Handler::onMessage);
+        NETWORKING.registerMessage(++i, MessageConfiguration.class, MessageConfiguration::encode, MessageConfiguration::new, MessageConfiguration.Handler::onMessage);
+        NETWORKING.registerMessage(++i, MessageApplyAbsorption.class, MessageApplyAbsorption::encode, MessageApplyAbsorption::new, MessageApplyAbsorption.Handler::onMessage);
+        NETWORKING.registerMessage(++i, MessageAddHealth.class, MessageAddHealth::encode, MessageAddHealth::new, MessageAddHealth.Handler::onMessage);
+        NETWORKING.registerMessage(++i, MessagePlayHurtSound.class, MessagePlayHurtSound::encode, MessagePlayHurtSound::new, MessagePlayHurtSound.Handler::onMessage);
+        NETWORKING.registerMessage(++i, MessageClientRequest.class, MessageClientRequest::encode, MessageClientRequest::new, MessageClientRequest.Handler::onMessage);
+        NETWORKING.registerMessage(++i, MessageSyncDamageModel.class, MessageSyncDamageModel::encode, MessageSyncDamageModel::new, MessageSyncDamageModel.Handler::onMessage);
 
 
-        if (ModList.get().isLoaded("morpheus")) {
-            MorpheusHelper.register();
-            morpheusLoaded = true;
-        }
+//        if (ModList.get().isLoaded("morpheus")) { TODO morpheus helper
+//            MorpheusHelper.register();
+//            morpheusLoaded = true;
+//        }
 
         RegistryManager.registerDefaults();
     }
@@ -137,7 +139,6 @@ public class FirstAid {
 //        event.registerServerCommand(new DebugDamageCommand());
     }
 
-    @Mod.EventHandler
     public void onServerStop(FMLServerStoppedEvent event) {
         LOGGER.debug("Cleaning up");
         CapProvider.tutorialDone.clear();

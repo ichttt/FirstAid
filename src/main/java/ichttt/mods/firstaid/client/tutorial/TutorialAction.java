@@ -19,14 +19,11 @@
 package ichttt.mods.firstaid.client.tutorial;
 
 import net.minecraft.client.resources.I18n;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-@SideOnly(Side.CLIENT)
 public class TutorialAction {
     private final List<Object> queue = new ArrayList<>();
     private final GuiTutorial guiContext;

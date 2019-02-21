@@ -19,32 +19,27 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.common.CapProvider;
-import io.netty.buffer.ByteBuf;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.util.Objects;
+import java.util.function.Supplier;
 
-public class MessageClientRequest implements IMessage {
-    private Type type;
+public class MessageClientRequest {
+    private final Type type;
 
-    public MessageClientRequest() {}
+    public MessageClientRequest(PacketBuffer buffer) {
+        this.type = Type.TYPES[buffer.readByte()];
+    }
 
     public MessageClientRequest(Type type) {
         this.type = type;
     }
 
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        this.type = Type.TYPES[buf.readByte()];
-    }
-
-    @Override
-    public void toBytes(ByteBuf buf) {
+    public void encode(PacketBuffer buf) {
         buf.writeByte(type.ordinal());
     }
 
@@ -54,18 +49,17 @@ public class MessageClientRequest implements IMessage {
         private static final Type[] TYPES = values();
     }
 
-    public static class Handler implements IMessageHandler<MessageClientRequest, IMessage> {
+    public static class Handler {
 
-        @Override
-        public IMessage onMessage(MessageClientRequest message, MessageContext ctx) {
-            EntityPlayerMP player = ctx.getServerHandler().player;
+        @SuppressWarnings("ConstantConditions")
+        public static void onMessage(MessageClientRequest message, Supplier<NetworkEvent.Context> supplier) {
+            EntityPlayerMP player = supplier.get().getSender();
             if (message.type == Type.TUTORIAL_COMPLETE) {
-                CapProvider.tutorialDone.add(player.getName());
-                Objects.requireNonNull(player.getServer()).addScheduledTask(() -> Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).hasTutorial = true);
+                CapProvider.tutorialDone.add(player.getName().getString());
+                player.getServer().addScheduledTask(() -> CommonUtils.getDamageModel(player).hasTutorial = true);
             } else if (message.type == Type.REQUEST_REFRESH) {
-                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), player);
+                player.getServer().addScheduledTask(() -> FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(CommonUtils.getDamageModel(player)), player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT));
             }
-            return null;
         }
     }
 }

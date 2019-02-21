@@ -18,9 +18,7 @@
 
 package ichttt.mods.firstaid.client;
 
-import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
@@ -29,51 +27,42 @@ import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
-import ichttt.mods.firstaid.common.config.ConfigEntry;
-import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.Objects;
-
-@SideOnly(Side.CLIENT)
 public class ClientEventHandler {
     private static int id;
 
     @SubscribeEvent
     public static void registerModels(ModelRegistryEvent event) {
-        ModelLoader.setCustomModelResourceLocation(FirstAidItems.BANDAGE, 0, new ModelResourceLocation("firstaid:bandage"));
-        ModelLoader.setCustomModelResourceLocation(FirstAidItems.PLASTER, 0, new ModelResourceLocation("firstaid:plaster"));
-        ModelLoader.setCustomModelResourceLocation(FirstAidItems.MORPHINE, 0, new ModelResourceLocation("firstaid:morphine"));
+//        ModelLoader.setCustomModelResourceLocation(FirstAidItems.BANDAGE, 0, new ModelResourceLocation("firstaid:bandage"));
+//        ModelLoader.setCustomModelResourceLocation(FirstAidItems.PLASTER, 0, new ModelResourceLocation("firstaid:plaster"));
+//        ModelLoader.setCustomModelResourceLocation(FirstAidItems.MORPHINE, 0, new ModelResourceLocation("firstaid:morphine"));
     }
 
     @SubscribeEvent
     public static void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
         if (mc.world == null || mc.player == null || mc.player.connection == null || mc.isGamePaused()) return;
         if (EventCalendar.isGuiFun()) {
-            GuiHealthScreen.BED_ITEMSTACK.setItemDamage(id);
-            if (mc.world != null && mc.world.getWorldTime() % 3 == 0) id++;
+            GuiHealthScreen.BED_ITEMSTACK.setDamage(id);
+            if (mc.world != null && mc.world.getGameTime() % 3 == 0) id++;
             if (id > 15) id = 0;
         }
-        if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.world.isRemote) {
+        if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.world != null && mc.world.isRemote) {
             mc.player.sendStatusMessage(new TextComponentString("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
             for (String s : RegistryManager.debuffConfigErrors)
                 mc.player.sendStatusMessage(new TextComponentString("[FirstAid] " + s), false);
@@ -86,12 +75,12 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void onKeyPress(InputEvent.KeyInputEvent event) {
         if (ClientProxy.showWounds.isPressed()) {
-            Minecraft mc = Minecraft.getMinecraft();
-            AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+            Minecraft mc = Minecraft.getInstance();
+            AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
             if (!damageModel.hasTutorial) {
                 damageModel.hasTutorial = true;
-                CapProvider.tutorialDone.add(mc.player.getName());
-                Minecraft.getMinecraft().displayGuiScreen(new GuiTutorial());
+                CapProvider.tutorialDone.add(mc.player.getName().getString());
+                Minecraft.getInstance().displayGuiScreen(new GuiTutorial());
             }
             else {
                 mc.displayGuiScreen(new GuiHealthScreen(damageModel));
@@ -111,10 +100,10 @@ public class ClientEventHandler {
     public static void renderOverlay(RenderGameOverlayEvent.Post event) {
         RenderGameOverlayEvent.ElementType type = event.getType();
         if (type == RenderGameOverlayEvent.ElementType.ALL || (type == RenderGameOverlayEvent.ElementType.TEXT && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.OFF && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)) {
-            Minecraft mc = Minecraft.getMinecraft();
+            Minecraft mc = Minecraft.getInstance();
             mc.profiler.startSection("FirstAidOverlay");
             GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
-            HUDHandler.INSTANCE.renderOverlay(event.getResolution(), event.getPartialTicks());
+            HUDHandler.INSTANCE.renderOverlay(mc, event.getPartialTicks());
             mc.profiler.endSection();
             mc.profiler.endSection();
         }
@@ -124,23 +113,23 @@ public class ClientEventHandler {
     public static void tooltipItems(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
         if (stack.getItem() == FirstAidItems.MORPHINE) {
-            event.getToolTip().add(I18n.format("firstaid.tooltip.morphine", "3:30-4:30"));
+            event.getToolTip().add(new TextComponentTranslation("firstaid.tooltip.morphine", "3:30-4:30"));
             return;
         }
 
         AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
         if (healer != null) {
-            event.getToolTip().add(I18n.format("firstaid.tooltip.healer", healer.maxHeal / 2, StringUtils.ticksToElapsedTime(healer.ticksPerHeal)));
+            event.getToolTip().add(new TextComponentTranslation("firstaid.tooltip.healer", healer.maxHeal / 2, StringUtils.ticksToElapsedTime(healer.ticksPerHeal)));
         }
     }
 
-    @SubscribeEvent
-    public static void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
-        FirstAid.isSynced = false;
-        for (ConfigEntry<ExtraConfig.Sync> option : FirstAid.syncedConfigOptions) {
-            if (option.hasRemoteData())
-                option.revert();
-        }
-        HUDHandler.INSTANCE.ticker = -1;
-    }
+//    @SubscribeEvent TODO on disconnect
+//    public static void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
+//        FirstAid.isSynced = false;
+//        for (ConfigEntry<ExtraConfig.Sync> option : FirstAid.syncedConfigOptions) {
+//            if (option.hasRemoteData())
+//                option.revert();
+//        }
+//        HUDHandler.INSTANCE.ticker = -1;
+//    }
 }

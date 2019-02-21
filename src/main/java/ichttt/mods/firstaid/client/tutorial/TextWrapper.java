@@ -18,13 +18,9 @@
 
 package ichttt.mods.firstaid.client.tutorial;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.util.ArrayList;
 import java.util.List;
 
-@SideOnly(Side.CLIENT)
 public class TextWrapper {
     private static final int maxChars = 35;
     private static final int minimumChars = 29;

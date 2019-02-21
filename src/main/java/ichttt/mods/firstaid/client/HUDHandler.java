@@ -20,7 +20,6 @@ package ichttt.mods.firstaid.client;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
@@ -31,25 +30,20 @@ import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiChat;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.client.resource.IResourceType;
-import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
-import net.minecraftforge.client.resource.VanillaResourceType;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.resource.IResourceType;
+import net.minecraftforge.resource.ISelectiveResourceReloadListener;
+import net.minecraftforge.resource.VanillaResourceType;
 
 import javax.annotation.Nonnull;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Predicate;
 
-@SideOnly(Side.CLIENT)
 public class HUDHandler implements ISelectiveResourceReloadListener {
     public static final HUDHandler INSTANCE = new HUDHandler();
     private static final int FADE_TIME = 30;
@@ -65,7 +59,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         maxLength = 0;
         for (EnumPlayerPart part : EnumPlayerPart.VALUES) {
             String translated = I18n.format("gui." + part.toString().toLowerCase(Locale.ENGLISH));
-            maxLength = Math.max(maxLength, Minecraft.getMinecraft().fontRenderer.getStringWidth(translated));
+            maxLength = Math.max(maxLength, Minecraft.getInstance().fontRenderer.getStringWidth(translated));
             TRANSLATION_MAP.put(part, translated);
         }
     }
@@ -74,13 +68,12 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         return maxLength;
     }
 
-    public void renderOverlay(ScaledResolution scaledResolution, float partialTicks) {
-        Minecraft mc = Minecraft.getMinecraft();
+    public void renderOverlay(Minecraft mc, float partialTicks) {
         mc.profiler.startSection("prepare");
         if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.OFF || mc.player == null || (GuiHealthScreen.isOpen && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) || !CommonUtils.isSurvivalOrAdventure(mc.player))
             return;
 
-        AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+        AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
         if (!FirstAid.isSynced) //Wait until we receive the remote model
             return;
 
@@ -107,16 +100,16 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                     xOffset += 1;
                 break;
             case TOP_RIGHT:
-                xOffset = scaledResolution.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() - (maxLength));
+                xOffset = mc.mainWindow.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() - (maxLength));
                 break;
             case BOTTOM_LEFT:
                 if (playerModel)
                     xOffset += 1;
-                yOffset = scaledResolution.getScaledHeight() - yOffset - (playerModel ? 66 : 80);
+                yOffset = mc.mainWindow.getScaledHeight() - yOffset - (playerModel ? 66 : 80);
                 break;
             case BOTTOM_RIGHT:
-                xOffset = scaledResolution.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() - (maxLength));
-                yOffset = scaledResolution.getScaledHeight() - yOffset - (playerModel ? 62 : 80);
+                xOffset = mc.mainWindow.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() - (maxLength));
+                yOffset = mc.mainWindow.getScaledHeight() - yOffset - (playerModel ? 62 : 80);
                 break;
             default:
                 throw new RuntimeException("Invalid config option for position: " + FirstAidConfig.overlay.pos);
@@ -131,10 +124,10 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), FirstAidConfig.overlay.alpha, 250) : FirstAidConfig.overlay.alpha;
 
         GlStateManager.pushMatrix();
-        GlStateManager.translate(xOffset, yOffset, 0F);
+        GlStateManager.translatef(xOffset, yOffset, 0F);
         if (enableAlphaBlend) {
             GlStateManager.enableBlend();
-            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         }
         mc.profiler.endStartSection("render");
         if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) {
@@ -148,7 +141,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 } else {
                     HealthRenderUtils.drawHealth(part, xTranslation, 0, gui, false);
                 }
-                GlStateManager.translate(0, 10F, 0F);
+                GlStateManager.translatef(0, 10F, 0F);
             }
         }
         mc.profiler.endSection();

@@ -18,27 +18,25 @@
 
 package ichttt.mods.firstaid.common.network;
 
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import io.netty.buffer.ByteBuf;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.util.Objects;
+import java.util.function.Supplier;
 
-public class MessageReceiveDamage implements IMessage {
+public class MessageReceiveDamage {
 
-    private EnumPlayerPart part;
-    private float damageAmount;
-    private float minHealth;
+    private final EnumPlayerPart part;
+    private final float damageAmount;
+    private final float minHealth;
 
-    public MessageReceiveDamage() {}
+    public MessageReceiveDamage(PacketBuffer buffer) {
+        this(EnumPlayerPart.fromID(buffer.readByte()), buffer.readFloat(), buffer.readFloat());
+    }
 
     public MessageReceiveDamage(EnumPlayerPart part, float damageAmount, float minHealth) {
         this.part = part;
@@ -46,35 +44,24 @@ public class MessageReceiveDamage implements IMessage {
         this.minHealth = minHealth;
     }
 
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        part = EnumPlayerPart.fromID(buf.readByte());
-        damageAmount = buf.readFloat();
-        minHealth = buf.readFloat();
-    }
-
-    @Override
-    public void toBytes(ByteBuf buf) {
+    public void encode(PacketBuffer buf) {
         buf.writeByte(part.id);
         buf.writeFloat(damageAmount);
         buf.writeFloat(minHealth);
     }
 
-    public static class Handler implements IMessageHandler<MessageReceiveDamage, IMessage> {
+    public static class Handler {
 
-        @Override
-        @SideOnly(Side.CLIENT)
-        public IMessage onMessage(MessageReceiveDamage message, MessageContext ctx) {
-            Minecraft mc = Minecraft.getMinecraft();
+        public static void onMessage(MessageReceiveDamage message, Supplier<NetworkEvent.Context> supplier) {
+            Minecraft mc = Minecraft.getInstance();
             mc.addScheduledTask(() -> {
-               AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+               AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
                AbstractDamageablePart part = damageModel.getFromEnum(message.part);
                if (message.damageAmount > 0F)
                    part.damage(message.damageAmount, null, false, message.minHealth);
                else if (message.damageAmount < 0F)
                    part.heal(-message.damageAmount, null, false);
             });
-            return null;
         }
     }
 }

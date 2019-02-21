@@ -18,7 +18,6 @@
 
 package ichttt.mods.firstaid.common.util;
 
-import com.creativemd.playerrevive.api.IRevival;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
@@ -63,9 +62,9 @@ public class CommonUtils {
         if (false)//source != null && FirstAidConfig.externalHealing.allowOtherHealingItems && player.checkTotemDeathProtection(source)) TODO AccessTransformer
             return;
 
-        IRevival revival = getRevivalIfPossible(player);
-        if (revival != null)
-            revival.startBleeding(player, source);
+//        IRevival revival = getRevivalIfPossible(player);
+//        if (revival != null)
+//            revival.startBleeding(player, source);
 //        else
 //            ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, 0F); // TODO AccessTransformer
     }
@@ -75,8 +74,8 @@ public class CommonUtils {
      * @param player The player to check
      * @return The cap or null if the player cannot be revived
      */
-    @Nullable
-    public static IRevival getRevivalIfPossible(@Nullable EntityPlayer player) {
+//    @Nullable
+//    public static IRevival getRevivalIfPossible(@Nullable EntityPlayer player) {
 //        if (player == null || CapaRevive.reviveCapa == null) TODO PlayerRevival Comapt
 //            return null;
 //        MinecraftServer server = player.getServer();
@@ -86,8 +85,8 @@ public class CommonUtils {
 //        if (revival != null && server.getPlayerList().getCurrentPlayerCount() > 1)
 //            return revival;
 //        else
-            return null;
-    }
+//            return null;
+//    }
 
     public static boolean isValidArmorSlot(EntityEquipmentSlot slot) {
         return slot.getSlotType() == EntityEquipmentSlot.Type.ARMOR;

@@ -74,7 +74,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public static void onKeyPress(InputEvent.KeyInputEvent event) {
-        if (ClientProxy.showWounds.isPressed()) {
+        if (ClientHooks.showWounds.isPressed()) {
             Minecraft mc = Minecraft.getInstance();
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
             if (!damageModel.hasTutorial) {

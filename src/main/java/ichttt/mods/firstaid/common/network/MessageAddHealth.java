@@ -50,9 +50,10 @@ public class MessageAddHealth {
     public static class Handler {
 
         public static void onMessage(MessageAddHealth message, Supplier<NetworkEvent.Context> supplier) {
-            Minecraft mc = Minecraft.getInstance();
-            mc.addScheduledTask(() -> {
-                EntityPlayerSP playerSP = mc.player;
+            NetworkEvent.Context ctx = supplier.get();
+            CommonUtils.checkClient(ctx);
+            ctx.enqueueWork(() -> {
+                EntityPlayerSP playerSP = Minecraft.getInstance().player;
                 AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(playerSP);
                 for (int i = 0; i < message.table.length; i++) {
                     float f = message.table[i];

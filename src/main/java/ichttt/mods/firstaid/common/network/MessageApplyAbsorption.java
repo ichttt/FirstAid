@@ -43,8 +43,9 @@ public class MessageApplyAbsorption {
     public static class Handler {
 
         public static void onMessage(MessageApplyAbsorption message, Supplier<NetworkEvent.Context> supplier) {
-            Minecraft mc = Minecraft.getInstance();
-            mc.addScheduledTask(() -> CommonUtils.getDamageModel(mc.player).setAbsorption(message.amount));
+            NetworkEvent.Context ctx = supplier.get();
+            CommonUtils.checkClient(ctx);
+            ctx.enqueueWork(() -> CommonUtils.getDamageModel(Minecraft.getInstance().player).setAbsorption(message.amount));
         }
     }
 }

@@ -20,13 +20,13 @@ package ichttt.mods.firstaid.client.tutorial;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.client.ClientProxy;
+import ichttt.mods.firstaid.client.ClientHooks;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -59,7 +59,7 @@ public class GuiTutorial extends GuiScreen {
         this.action.addTextWrapper("firstaid.tutorial.line6");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.HEAD.damage(16F, null, false));
         this.action.addTextWrapper("firstaid.tutorial.line7");
-        this.action.addTextWrapper("firstaid.tutorial.line8", I18n.format(ClientProxy.showWounds.func_197978_k());
+        this.action.addTextWrapper("firstaid.tutorial.line8", I18n.format(ClientHooks.showWounds.func_197978_k()));
         this.action.addTextWrapper("firstaid.tutorial.end");
 
         this.action.next();
@@ -69,24 +69,31 @@ public class GuiTutorial extends GuiScreen {
     public void initGui() {
         parent.setWorldAndResolution(mc, this.width, this.height);
         guiTop = parent.guiTop - 30;
-        this.buttonList.add(new GuiButton(0, parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, ">"));
-        this.buttonList.addAll(parent.getButtons());
-        parent.getButtons().clear();
-    }
-
-    @Override
-    protected void actionPerformed(GuiButton button) {
-        if (button.id == 9) {
-            FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
-            mc.displayGuiScreen(null);
-        } else if (button.id == 0) {
-            if (action.hasNext())
-                this.action.next();
-            else {
-                FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
-                mc.displayGuiScreen(new GuiHealthScreen(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)));
+        addButton(new GuiButton(0, parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, ">"){
+            @Override
+            public void onClick(double mouseX, double mouseY) {
+                if (action.hasNext())
+                    GuiTutorial.this.action.next();
+                else {
+                    FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
+                    mc.displayGuiScreen(new GuiHealthScreen(CommonUtils.getDamageModel(mc.player)));
+                }
             }
+        });
+        for (GuiButton button : parent.getButtons()) {
+            if (button.id == 9) {
+                addButton(new GuiButton(9, button.x, button.y, button.width, button.height, button.displayString) {
+                    @Override
+                    public void onClick(double mouseX, double mouseY) {
+                        FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
+                        mc.displayGuiScreen(null);
+                    }
+                });
+                continue;
+            }
+            addButton(button);
         }
+        parent.getButtons().clear();
     }
 
     public void drawOffsetString(String s, int yOffset) {
@@ -94,9 +101,9 @@ public class GuiTutorial extends GuiScreen {
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float partialTicks) {
         GlStateManager.pushMatrix();
-        parent.drawScreen(mouseX, mouseY, partialTicks);
+        parent.render(mouseX, mouseY, partialTicks);
         GlStateManager.popMatrix();
         mc.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
         drawTexturedModalRect(parent.guiLeft, guiTop ,0, 139, GuiHealthScreen.xSize, 28);
@@ -104,7 +111,7 @@ public class GuiTutorial extends GuiScreen {
         this.action.draw();
         GlStateManager.popMatrix();
         drawCenteredString(mc.fontRenderer, I18n.format("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 140, 0xFFFFFF);
-        super.drawScreen(mouseX, mouseY, partialTicks);
+        super.render(mouseX, mouseY, partialTicks);
     }
 
     @Override

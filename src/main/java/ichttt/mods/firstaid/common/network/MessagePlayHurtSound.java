@@ -19,7 +19,7 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.client.DebuffTimedSound;
-import net.minecraft.client.Minecraft;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -48,7 +48,9 @@ public class MessagePlayHurtSound {
     public static class Handler {
 
         public static void onMessage(MessagePlayHurtSound message, Supplier<NetworkEvent.Context> supplier) {
-            Minecraft.getInstance().addScheduledTask(() -> DebuffTimedSound.playHurtSound(message.sound, message.duration));
+            NetworkEvent.Context ctx = supplier.get();
+            CommonUtils.checkClient(ctx);
+            ctx.enqueueWork(() -> DebuffTimedSound.playHurtSound(message.sound, message.duration));
         }
     }
 }

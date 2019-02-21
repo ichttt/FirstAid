@@ -20,8 +20,10 @@ package ichttt.mods.firstaid.common.items;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
+import ichttt.mods.firstaid.api.item.ItemHealing;
 import ichttt.mods.firstaid.common.damagesystem.PartHealer;
 import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.ObjectHolder;
 
@@ -35,14 +37,14 @@ public class FirstAidItems {
 
     @SuppressWarnings("ConstantConditions")
     @Nonnull
-    private static <T> T getNull() {
+    public static <T> T getNull() {
         return null;
     }
 
     public static void registerItems(IForgeRegistry<Item> registry) {
         FirstAidConfig.InternalHealing healing = FirstAidConfig.internalHealing;
-        registry.register(new DefaultItemHealing("bandage", stack -> new PartHealer(healing.bandage.secondsPerHeal * 20, healing.bandage.totalHeals, stack), stack -> healing.bandage.applyTime));
-        registry.register(new DefaultItemHealing("plaster", stack -> new PartHealer(healing.plaster.secondsPerHeal * 20, healing.plaster.totalHeals, stack), stack -> healing.plaster.applyTime));
+        registry.register(ItemHealing.create(new Item.Properties().maxStackSize(16), new ResourceLocation(FirstAid.MODID, "bandage"), stack -> new PartHealer(healing.bandage.secondsPerHeal * 20, healing.bandage.totalHeals, stack), stack -> healing.bandage.applyTime));
+        registry.register(ItemHealing.create(new Item.Properties().maxStackSize(16), new ResourceLocation(FirstAid.MODID, "plaster"), stack -> new PartHealer(healing.plaster.secondsPerHeal * 20, healing.plaster.totalHeals, stack), stack -> healing.plaster.applyTime));
         registry.register(new ItemMorphine());
     }
 }

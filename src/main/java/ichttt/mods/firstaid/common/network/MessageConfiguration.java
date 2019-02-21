@@ -20,7 +20,7 @@ package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.client.ClientProxy;
+import ichttt.mods.firstaid.client.ClientHooks;
 import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.util.CommonUtils;
@@ -52,16 +52,17 @@ public class MessageConfiguration {
     public static class Handler {
 
         public static void onMessage(MessageConfiguration message, Supplier<NetworkEvent.Context> supplier) {
-            Minecraft mc = Minecraft.getInstance();
+            NetworkEvent.Context ctx = supplier.get();
+            CommonUtils.checkClient(ctx);
 
             FirstAid.LOGGER.info("Received remote damage model");
-            mc.addScheduledTask(() -> {
-                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
+            ctx.enqueueWork(() -> {
+                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(Minecraft.getInstance().player);
                 damageModel.deserializeNBT(message.playerDamageModel);
                 if (damageModel.hasTutorial)
-                    CapProvider.tutorialDone.add(mc.player.getName().getString());
+                    CapProvider.tutorialDone.add(Minecraft.getInstance().player.getName().getString());
                 else
-                    mc.player.sendMessage(new TextComponentString("[First Aid] " + I18n.format("firstaid.tutorial.hint", ClientProxy.showWounds.getKey().getName())));
+                    Minecraft.getInstance().player.sendMessage(new TextComponentString("[First Aid] " + I18n.format("firstaid.tutorial.hint", ClientHooks.showWounds.getKey().getName())));
                 HUDHandler.INSTANCE.ticker = 200;
                 FirstAid.isSynced = true;
             });

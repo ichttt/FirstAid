@@ -26,11 +26,14 @@ import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModThreadContext;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -97,7 +100,7 @@ public class CommonUtils {
     }
 
     public static String getActiveModidSafe() {
-        ModContainer activeModContainer = ModThreadContext.get().getActiveContainer();
+        ModContainer activeModContainer = ModLoadingContext.get().getActiveContainer();
         return activeModContainer == null ? "UNKNOWN-NULL" : activeModContainer.getModId();
     }
 
@@ -114,5 +117,19 @@ public class CommonUtils {
 
     public static boolean hasDamageModel(Entity entity) {
         return entity instanceof EntityPlayer && !(entity instanceof FakePlayer);
+    }
+
+    @Nonnull
+    public static EntityPlayerMP checkServer(NetworkEvent.Context context) {
+        if (context.getDirection() != NetworkDirection.PLAY_TO_SERVER)
+            throw new IllegalArgumentException("Wrong side for server packet handler " + context.getDirection());
+        context.setPacketHandled(true);
+        return Objects.requireNonNull(context.getSender());
+    }
+
+    public static void checkClient(NetworkEvent.Context context) {
+        if (context.getDirection() != NetworkDirection.PLAY_TO_CLIENT)
+            throw new IllegalArgumentException("Wrong side for client packet handler: " + context.getDirection());
+        context.setPacketHandled(true);
     }
 }

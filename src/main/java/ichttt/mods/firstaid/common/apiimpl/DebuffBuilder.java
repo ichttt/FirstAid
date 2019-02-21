@@ -28,6 +28,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 public class DebuffBuilder implements IDebuffBuilder {
     @Nonnull
@@ -36,7 +37,7 @@ public class DebuffBuilder implements IDebuffBuilder {
     public final Float2IntLinkedOpenHashMap map = new Float2IntLinkedOpenHashMap();
     public final boolean isOnHit;
     @Nullable
-    public SoundEvent sound;
+    public Supplier<SoundEvent> sound;
     @Nullable
     public BooleanSupplier isEnabledSupplier;
 
@@ -47,7 +48,7 @@ public class DebuffBuilder implements IDebuffBuilder {
 
     @Override
     @Nonnull
-    public DebuffBuilder addSoundEffect(@Nullable SoundEvent event) {
+    public DebuffBuilder addSoundEffect(@Nullable Supplier<SoundEvent> event) {
         this.sound = event;
         return this;
     }

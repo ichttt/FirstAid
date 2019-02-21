@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 public class RegistryManager {
     public static final List<String> debuffConfigErrors = new ArrayList<>();
@@ -70,7 +71,7 @@ public class RegistryManager {
 
         //---DEBUFFS---
         DebuffBuilderFactory factory = DebuffBuilderFactory.getInstance();
-        loadValuesFromConfig(factory, "blindness", () -> FirstAidConfig.debuffs.head.blindness, EventHandler.HEARTBEAT, FirstAidConfig.debuffs.head.blindnessConditions, EnumDebuffSlot.HEAD);
+        loadValuesFromConfig(factory, "blindness", () -> FirstAidConfig.debuffs.head.blindness, () -> EventHandler.HEARTBEAT, FirstAidConfig.debuffs.head.blindnessConditions, EnumDebuffSlot.HEAD);
 
         loadValuesFromConfig(factory, "nausea", () -> FirstAidConfig.debuffs.head.nausea, null, FirstAidConfig.debuffs.head.nauseaConditions, EnumDebuffSlot.HEAD);
 
@@ -83,7 +84,7 @@ public class RegistryManager {
         loadValuesFromConfig(factory, "slowness", () -> FirstAidConfig.debuffs.legsAndFeet.slowness, FirstAidConfig.debuffs.legsAndFeet.slownessConditions, EnumDebuffSlot.LEGS_AND_FEET);
     }
 
-    private static void loadValuesFromConfig(DebuffBuilderFactory factory, String potionName, BooleanSupplier enableCondition, SoundEvent event, FirstAidConfig.Debuffs.ConditionOnHit config, EnumDebuffSlot slot) {
+    private static void loadValuesFromConfig(DebuffBuilderFactory factory, String potionName, BooleanSupplier enableCondition, Supplier<SoundEvent> event, FirstAidConfig.Debuffs.ConditionOnHit config, EnumDebuffSlot slot) {
         if (config.debuffLength.length != config.damageTaken.length) {
             logError("The fields to not have the same amount of values!", potionName, slot);
             return;

@@ -52,7 +52,6 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraft.world.storage.loot.RandomValueRange;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.functions.SetCount;
-import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegistryEvent;
@@ -73,8 +72,8 @@ import java.util.WeakHashMap;
 
 public class EventHandler {
     public static final Random rand = new Random();
-    public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")).setRegistryName(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
-    public static final Potion MORPHINE = new FirstAidPotion(false, 0xDDD, "morphine").setBeneficial();
+    public static final SoundEvent HEARTBEAT = FirstAidItems.getNull();
+    public static final Potion MORPHINE = FirstAidItems.getNull();
 
     public static final Map<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
 
@@ -131,7 +130,7 @@ public class EventHandler {
     @SubscribeEvent
     public static void registerCapability(AttachCapabilitiesEvent<Entity> event) {
         Entity obj = event.getObject();
-        if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer)) {
+        if (CommonUtils.hasDamageModel(obj)) {
             EntityPlayer player = (EntityPlayer) obj;
             AbstractPlayerDamageModel damageModel = PlayerDamageModel.create();
             event.addCapability(CapProvider.IDENTIFIER, new CapProvider(damageModel));
@@ -147,12 +146,12 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void registerPotion(RegistryEvent.Register<Potion> event) {
-        event.getRegistry().register(MORPHINE);
+        event.getRegistry().register(new FirstAidPotion(false, 0xDDD, FirstAidItems.MORPHINE).setBeneficial());
     }
 
     @SubscribeEvent
     public static void registerSound(RegistryEvent.Register<SoundEvent> event) {
-        event.getRegistry().register(HEARTBEAT);
+        event.getRegistry().register(new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")).setRegistryName(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")));
     }
 
     @SubscribeEvent
@@ -220,19 +219,19 @@ public class EventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (!event.player.world.isRemote) {
-            FirstAid.LOGGER.debug("Sending damage model to " + event.player.getName());
-            AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(event.player);
+        if (!event.getPlayer().world.isRemote) {
+            FirstAid.LOGGER.debug("Sending damage model to " + event.getPlayer().getName());
+            AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(event.getPlayer());
             if (damageModel.hasTutorial)
-                CapProvider.tutorialDone.add(event.player.getName().getUnformattedComponentText());
-            EntityPlayerMP playerMP = (EntityPlayerMP) event.player;
+                CapProvider.tutorialDone.add(event.getPlayer().getName().getUnformattedComponentText());
+            EntityPlayerMP playerMP = (EntityPlayerMP) event.getPlayer();
 //            FirstAid.NETWORKING.sendTo(new MessageConfiguration(damageModel, !playerMP.connection.netManager.isLocalChannel()), playerMP); TODO networking
         }
     }
 
     @SubscribeEvent(priority =  EventPriority.LOW)
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        hitList.remove(event.player);
+        hitList.remove(event.getPlayer());
     }
 
     @SubscribeEvent

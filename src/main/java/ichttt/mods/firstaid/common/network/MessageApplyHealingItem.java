@@ -56,10 +56,10 @@ public class MessageApplyHealingItem {
 
     public static class Handler {
 
-        @SuppressWarnings("ConstantConditions")
         public static void onMessage(final MessageApplyHealingItem message, Supplier<NetworkEvent.Context> supplier) {
-            EntityPlayerMP player = supplier.get().getSender();
-            player.getServer().addScheduledTask(() -> {
+            NetworkEvent.Context ctx = supplier.get();
+            EntityPlayerMP player = CommonUtils.checkServer(ctx);
+            ctx.enqueueWork(() -> {
                 AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
                 ItemStack stack = player.getHeldItem(message.hand);
                 Item item = stack.getItem();

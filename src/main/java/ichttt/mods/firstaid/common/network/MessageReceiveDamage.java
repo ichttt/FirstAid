@@ -53,9 +53,10 @@ public class MessageReceiveDamage {
     public static class Handler {
 
         public static void onMessage(MessageReceiveDamage message, Supplier<NetworkEvent.Context> supplier) {
-            Minecraft mc = Minecraft.getInstance();
-            mc.addScheduledTask(() -> {
-               AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
+            NetworkEvent.Context ctx = supplier.get();
+            CommonUtils.checkClient(ctx);
+            ctx.enqueueWork(() -> {
+               AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(Minecraft.getInstance().player);
                AbstractDamageablePart part = damageModel.getFromEnum(message.part);
                if (message.damageAmount > 0F)
                    part.damage(message.damageAmount, null, false, message.minHealth);

@@ -19,11 +19,10 @@
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.network.MessageAddHealth;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -79,17 +78,17 @@ public class HealthDistribution {
             }
         }
 
-        if (sendChanges)
-            FirstAid.NETWORKING.sendTo(new MessageAddHealth(healingDone), (EntityPlayerMP) player);
+//        if (sendChanges) TODO
+//            FirstAid.NETWORKING.sendTo(new MessageAddHealth(healingDone), (EntityPlayerMP) player);
     }
 
     public static void distributeHealth(float health, EntityPlayer player, boolean sendChanges) {
-        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+        AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
         manageHealth(health, damageModel, player, sendChanges, true);
     }
 
     public static void addRandomHealth(float health, EntityPlayer player, boolean sendChanges) {
-        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+        AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
         manageHealth(health, damageModel, player, sendChanges, false);
     }
 }

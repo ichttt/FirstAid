@@ -26,6 +26,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
@@ -44,9 +45,9 @@ public class ItemHealing extends Item {
      * @param time The time it takes in the GUI in ms
      * @param healerFunction The function to create a new healer from the GUI
      */
-    public static ItemHealing createWithTab(Item.Properties builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
+    public static ItemHealing create(Item.Properties builder, ResourceLocation registryName, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
         builder.group(HealingItemApiHelper.INSTANCE.getFirstAidTab());
-        return new ItemHealing(builder, healerFunction, time);
+        return createNoTab(builder, registryName, healerFunction, time);
     }
 
     /**
@@ -54,12 +55,14 @@ public class ItemHealing extends Item {
      * @param time The time it takes in the GUI in ms
      * @param healerFunction The function to create a new healer from the GUI
      */
-    public static ItemHealing create(Item.Properties builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
-        return new ItemHealing(builder, healerFunction, time);
+    public static ItemHealing createNoTab(Item.Properties builder, ResourceLocation registryName, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
+         ItemHealing itemHealing = new ItemHealing(builder, healerFunction, time);
+         itemHealing.setRegistryName(registryName);
+         return itemHealing;
     }
 
 
-    private ItemHealing(Item.Properties builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
+    protected ItemHealing(Item.Properties builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
         super(builder);
         Objects.requireNonNull(FirstAidRegistry.getImpl(), "FirstAid not loaded or not present!").registerHealingType(this, healerFunction, time);
     }

@@ -51,14 +51,14 @@ public class MessageClientRequest {
 
     public static class Handler {
 
-        @SuppressWarnings("ConstantConditions")
         public static void onMessage(MessageClientRequest message, Supplier<NetworkEvent.Context> supplier) {
-            EntityPlayerMP player = supplier.get().getSender();
+            NetworkEvent.Context ctx = supplier.get();
+            EntityPlayerMP player = CommonUtils.checkServer(ctx);
             if (message.type == Type.TUTORIAL_COMPLETE) {
                 CapProvider.tutorialDone.add(player.getName().getString());
-                player.getServer().addScheduledTask(() -> CommonUtils.getDamageModel(player).hasTutorial = true);
+                ctx.enqueueWork(() -> CommonUtils.getDamageModel(player).hasTutorial = true);
             } else if (message.type == Type.REQUEST_REFRESH) {
-                player.getServer().addScheduledTask(() -> FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(CommonUtils.getDamageModel(player)), player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT));
+                ctx.enqueueWork(() -> FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(CommonUtils.getDamageModel(player)), player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT));
             }
         }
     }

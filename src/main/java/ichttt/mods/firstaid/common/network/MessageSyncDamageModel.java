@@ -45,8 +45,9 @@ public class MessageSyncDamageModel {
     public static final class Handler {
 
         public static void onMessage(MessageSyncDamageModel message, Supplier<NetworkEvent.Context> supplier) {
-            Minecraft mc = Minecraft.getInstance();
-            mc.addScheduledTask(() -> CommonUtils.getDamageModel(mc.player).deserializeNBT(message.playerDamageModel));
+            NetworkEvent.Context ctx = supplier.get();
+            CommonUtils.checkClient(ctx);
+            ctx.enqueueWork(() -> CommonUtils.getDamageModel(Minecraft.getInstance().player).deserializeNBT(message.playerDamageModel));
         }
     }
 }

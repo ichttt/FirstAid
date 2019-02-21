@@ -27,12 +27,13 @@ import net.minecraft.util.SoundEvent;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 public class OnHitDebuff extends AbstractDebuff {
     @Nullable
-    private final SoundEvent sound;
+    private final Supplier<SoundEvent> sound;
 
-    public OnHitDebuff(@Nonnull String potionName, @Nonnull Float2IntLinkedOpenHashMap map, @Nonnull BooleanSupplier isEnabled, @Nullable SoundEvent sound) {
+    public OnHitDebuff(@Nonnull String potionName, @Nonnull Float2IntLinkedOpenHashMap map, @Nonnull BooleanSupplier isEnabled, @Nullable Supplier<SoundEvent> sound) {
         super(potionName, map, isEnabled);
         this.sound = sound;
     }
@@ -49,7 +50,7 @@ public class OnHitDebuff extends AbstractDebuff {
             }
         }
 //        if (value != -1 && sound != null) TODO Networking
-//            FirstAid.NETWORKING.sendTo(new MessagePlayHurtSound(sound, value), player);
+//            FirstAid.NETWORKING.sendTo(new MessagePlayHurtSound(sound.get(), value), player);
     }
 
     @Override

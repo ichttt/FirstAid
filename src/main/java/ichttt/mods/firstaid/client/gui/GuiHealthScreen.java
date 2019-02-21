@@ -218,7 +218,6 @@ public class GuiHealthScreen extends GuiScreen {
         }
 
         holdButtonMouseCallback(mouseX, mouseY, true); //callback: check if buttons are finish
-        //TODO color the critical parts of the player red?
     }
 
     private void tooltipButton(GuiButton button, AbstractDamageablePart part, int mouseX, int mouseY) {

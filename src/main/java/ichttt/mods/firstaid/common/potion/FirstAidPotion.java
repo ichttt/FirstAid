@@ -19,9 +19,9 @@
 package ichttt.mods.firstaid.common.potion;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -32,11 +32,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class FirstAidPotion extends Potion {
-    public FirstAidPotion(boolean isBadEffectIn, int liquidColorIn, String name) {
+    private final ItemStack stack;
+    public FirstAidPotion(boolean isBadEffectIn, int liquidColorIn, Item item) {
         super(isBadEffectIn, liquidColorIn);
-        setRegistryName(new ResourceLocation(FirstAid.MODID, name));
+        setRegistryName(new ResourceLocation(FirstAid.MODID, Objects.requireNonNull(item.getRegistryName()).getPath()));
+        this.stack = new ItemStack(item);
     }
 
     @Nonnull
@@ -50,7 +53,7 @@ public class FirstAidPotion extends Potion {
     public void renderInventoryEffect(int x, int y, PotionEffect effect, Minecraft mc) {
         GlStateManager.pushMatrix();
         GlStateManager.scalef(1.2F, 1.2F, 1.2F);
-        mc.getItemRenderer().renderItemAndEffectIntoGUI(new ItemStack(FirstAidItems.MORPHINE), Math.round(x / 1.2F) + 4, Math.round(y / 1.2F) + 5);
+        mc.getItemRenderer().renderItemAndEffectIntoGUI(stack, Math.round(x / 1.2F) + 4, Math.round(y / 1.2F) + 5);
         GlStateManager.popMatrix();
     }
 }

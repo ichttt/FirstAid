@@ -112,13 +112,13 @@ public class DamageablePart extends AbstractDamageablePart {
         NBTTagCompound compound = new NBTTagCompound();
         compound.setFloat("health", currentHealth);
         if (FirstAidConfig.scaleMaxHealth)
-            compound.setInteger("maxHealth", maxHealth);
+            compound.setInt("maxHealth", maxHealth);
         if (absorption > 0F)
             compound.setFloat("absorption", absorption);
         if (activeHealer != null) {
             compound.setTag("healer", activeHealer.stack.serializeNBT());
-            compound.setInteger("itemTicks", activeHealer.getTicksPassed());
-            compound.setInteger("itemHeals", activeHealer.getHealsDone());
+            compound.setInt("itemTicks", activeHealer.getTicksPassed());
+            compound.setInt("itemHeals", activeHealer.getHealsDone());
         }
         return compound;
     }
@@ -128,17 +128,17 @@ public class DamageablePart extends AbstractDamageablePart {
         if (nbt == null)
             return;
         if (nbt.hasKey("maxHealth") && FirstAidConfig.scaleMaxHealth)
-            maxHealth = nbt.getInteger("maxHealth");
+            maxHealth = nbt.getInt("maxHealth");
         currentHealth = Math.min(maxHealth, nbt.getFloat("health"));
         ItemStack stack = null;
         if (nbt.hasKey("healingItem"))
             stack = new ItemStack(nbt.getByte("healingItem") == 1 ? FirstAidItems.PLASTER : FirstAidItems.BANDAGE);
-        else if (nbt.hasKey("healer")) stack = new ItemStack((NBTTagCompound) nbt.getTag("healer"));
+        else if (nbt.hasKey("healer")) stack = ItemStack.read((NBTTagCompound) nbt.getTag("healer"));
 
         if (stack != null) {
             AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
             if (healer == null) FirstAid.LOGGER.warn("Failed to lookup healer for item {}", stack.getItem());
-            else activeHealer = healer.loadNBT(nbt.getInteger("itemTicks"), nbt.getInteger("itemHeals"));
+            else activeHealer = healer.loadNBT(nbt.getInt("itemTicks"), nbt.getInt("itemHeals"));
         }
         if (nbt.hasKey("absorption"))
             absorption = nbt.getFloat("absorption");

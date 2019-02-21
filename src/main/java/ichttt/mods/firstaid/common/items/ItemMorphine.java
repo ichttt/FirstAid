@@ -19,8 +19,8 @@
 package ichttt.mods.firstaid.common.items;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
@@ -31,7 +31,6 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.FakePlayer;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -39,17 +38,15 @@ import java.util.Objects;
 public class ItemMorphine extends Item {
 
     public ItemMorphine() {
-        setMaxStackSize(16);
+        super(new Item.Properties().group(FirstAid.ITEM_GROUP).maxStackSize(16));
         setRegistryName(new ResourceLocation(FirstAid.MODID, "morphine"));
-        setTranslationKey("morphine");
-        setCreativeTab(FirstAid.CREATIVE_TAB);
     }
 
     @Override
     @Nonnull
     public ItemStack onItemUseFinish(@Nonnull ItemStack stack, World world, EntityLivingBase entityLiving) {
-        if (entityLiving instanceof EntityPlayer && !(entityLiving instanceof FakePlayer)) {
-            AbstractPlayerDamageModel damageModel = entityLiving.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+        if (CommonUtils.hasDamageModel(entityLiving)) {
+            AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel((EntityPlayer) entityLiving);
             Objects.requireNonNull(damageModel).applyMorphine((EntityPlayer) entityLiving);
         }
         stack.shrink(1);
@@ -58,7 +55,7 @@ public class ItemMorphine extends Item {
 
     @Override
     @Nonnull
-    public EnumAction getItemUseAction(ItemStack stack) {
+    public EnumAction getUseAction(ItemStack stack) {
         return EnumAction.EAT;
     }
 
@@ -71,7 +68,7 @@ public class ItemMorphine extends Item {
     }
 
     @Override
-    public int getMaxItemUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack) {
         return 40;
     }
 }

@@ -20,6 +20,7 @@ package ichttt.mods.firstaid.client.util;
 
 import com.google.common.collect.ImmutableMap;
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.gui.FlashStateManager;
@@ -31,6 +32,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.init.MobEffects;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 
@@ -107,8 +109,8 @@ public class HealthRenderUtils {
 
         Minecraft mc = Minecraft.getInstance();
         int regen = -1;
-//        if (FirstAidConfig.externalHealing.allowOtherHealingItems && mc.player.isPotionActive(MobEffects.REGENERATION))
-//            regen = (mc.ingameGUI.healthupdatecounter / 2) % 15; TODO
+        if (FirstAidConfig.externalHealing.allowOtherHealingItems && mc.player.isPotionActive(MobEffects.REGENERATION))
+            regen = (int) ((mc.ingameGUI.healthUpdateCounter / 2) % 15);
         boolean low = (current + absorption) < 1.25F;
 
         mc.getTextureManager().bindTexture(Gui.ICONS);

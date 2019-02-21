@@ -28,6 +28,7 @@ import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.CapProvider;
+import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
@@ -137,13 +138,13 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         if (Float.isInfinite(newCurrentHealth)) {
             FirstAid.LOGGER.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe
         } else {
-//            if (newCurrentHealth != prevHealthCurrent) TODO AT
-//                ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
+            if (newCurrentHealth != prevHealthCurrent)
+                ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, newCurrentHealth);
             prevHealthCurrent = newCurrentHealth;
         }
 
         if (!this.hasTutorial)
-            this.hasTutorial = CapProvider.tutorialDone.contains(player.getName());
+            this.hasTutorial = CapProvider.tutorialDone.contains(player.getName().getString());
 
         if (FirstAidConfig.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
             world.profiler.startSection("healthscaling");

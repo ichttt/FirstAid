@@ -20,9 +20,11 @@ package ichttt.mods.firstaid.common.util;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
+import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -62,14 +64,14 @@ public class CommonUtils {
     }
 
     public static void killPlayer(@Nonnull EntityPlayer player, @Nullable DamageSource source) {
-        if (false)//source != null && FirstAidConfig.externalHealing.allowOtherHealingItems && player.checkTotemDeathProtection(source)) TODO AccessTransformer
+        if (source != null && FirstAidConfig.externalHealing.allowOtherHealingItems && player.checkTotemDeathProtection(source))
             return;
 
 //        IRevival revival = getRevivalIfPossible(player);
 //        if (revival != null)
 //            revival.startBleeding(player, source);
 //        else
-//            ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, 0F); // TODO AccessTransformer
+            ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
     }
 
     /**

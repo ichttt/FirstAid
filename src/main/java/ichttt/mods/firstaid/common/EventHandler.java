@@ -22,13 +22,16 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.PreferredDamageDistribution;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
-import ichttt.mods.firstaid.common.potion.FirstAidPotion;
+import ichttt.mods.firstaid.common.network.MessageConfiguration;
+import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
+import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.ProjectileHelper;
 import net.minecraft.entity.Entity;
@@ -36,7 +39,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.Item;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
@@ -54,7 +56,6 @@ import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.functions.SetCount;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -63,6 +64,10 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
+import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.registries.ObjectHolder;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
@@ -72,7 +77,9 @@ import java.util.WeakHashMap;
 
 public class EventHandler {
     public static final Random rand = new Random();
+    @ObjectHolder("firstaid:debuff.heartbeat")
     public static final SoundEvent HEARTBEAT = FirstAidItems.getNull();
+    @ObjectHolder("firstaid:morphine")
     public static final Potion MORPHINE = FirstAidItems.getNull();
 
     public static final Map<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
@@ -89,8 +96,8 @@ public class EventHandler {
 
         if (amountToDamage == Float.MAX_VALUE) {
             damageModel.forEach(damageablePart -> damageablePart.currentHealth = 0F);
-//            if (player instanceof EntityPlayerMP) TODO networking
-//                Arrays.stream(EnumPlayerPart.VALUES).forEach(part -> FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, Float.MAX_VALUE, 0F), (EntityPlayerMP) player));
+            if (player instanceof EntityPlayerMP)
+                Arrays.stream(EnumPlayerPart.VALUES).forEach(part -> FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (EntityPlayerMP) player), new MessageReceiveDamage(part, Float.MAX_VALUE, 0F)));
             event.setCanceled(true);
             CommonUtils.killPlayer(player, source);
             return;
@@ -135,28 +142,14 @@ public class EventHandler {
             AbstractPlayerDamageModel damageModel = PlayerDamageModel.create();
             event.addCapability(CapProvider.IDENTIFIER, new CapProvider(damageModel));
             //replace the data manager with our wrapper to grab absorption
-//            player.dataManager = new DataManagerWrapper(player, player.dataManager); TODO AT
+            player.dataManager = new DataManagerWrapper(player, player.dataManager);
         }
-    }
-
-    @SubscribeEvent
-    public static void registerItems(RegistryEvent.Register<Item> event) {
-        FirstAidItems.registerItems(event.getRegistry());
-    }
-
-    @SubscribeEvent
-    public static void registerPotion(RegistryEvent.Register<Potion> event) {
-        event.getRegistry().register(new FirstAidPotion(false, 0xDDD, FirstAidItems.MORPHINE).setBeneficial());
-    }
-
-    @SubscribeEvent
-    public static void registerSound(RegistryEvent.Register<SoundEvent> event) {
-        event.getRegistry().register(new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")).setRegistryName(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")));
     }
 
     @SubscribeEvent
     public static void tickPlayers(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END && CommonUtils.isSurvivalOrAdventure(event.player)) {
+            if (event.player.removed) return;
             CommonUtils.getDamageModel(event.player).tick(event.player.world, event.player);
             hitList.remove(event.player); //Damage should be done in the same tick as the hit was noted, otherwise we got a false-positive
         }
@@ -223,9 +216,9 @@ public class EventHandler {
             FirstAid.LOGGER.debug("Sending damage model to " + event.getPlayer().getName());
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(event.getPlayer());
             if (damageModel.hasTutorial)
-                CapProvider.tutorialDone.add(event.getPlayer().getName().getUnformattedComponentText());
+                CapProvider.tutorialDone.add(event.getPlayer().getName().getString());
             EntityPlayerMP playerMP = (EntityPlayerMP) event.getPlayer();
-//            FirstAid.NETWORKING.sendTo(new MessageConfiguration(damageModel, !playerMP.connection.netManager.isLocalChannel()), playerMP); TODO networking
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> playerMP), new MessageConfiguration(damageModel.serializeNBT()));
         }
     }
 
@@ -243,7 +236,19 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
-//        if (!event.player.world.isRemote && event.player instanceof EntityPlayerMP) //Mojang seems to wipe all caps on teleport
-//            FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(CommonUtils.getDamageModel(event.player)), (EntityPlayerMP) event.player); TODO networking
+        if (!event.getPlayer().world.isRemote && event.getPlayer() instanceof EntityPlayerMP) //Mojang seems to wipe all caps on teleport
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (EntityPlayerMP) event.getPlayer()), new MessageSyncDamageModel(CommonUtils.getDamageModel(event.getPlayer())));
+    }
+
+    @SubscribeEvent
+    public static void beforeServerStart(FMLServerStartingEvent event) {
+        DebugDamageCommand.register(event.getCommandDispatcher());
+    }
+
+    @SubscribeEvent
+    public static void onServerStop(FMLServerStoppedEvent event) {
+        FirstAid.LOGGER.debug("Cleaning up");
+        CapProvider.tutorialDone.clear();
+        EventHandler.hitList.clear();
     }
 }

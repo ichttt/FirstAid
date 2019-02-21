@@ -29,7 +29,6 @@ public class GuiHoldButton extends GuiButton {
     private float textScaleFactor;
     public final boolean isRightSide;
     private long pressStart = -1;
-    private boolean pressed = false;
 
     public GuiHoldButton(int buttonId, int x, int y, int widthIn, int heightIn, String buttonText, boolean isRightSide) {
         super(buttonId, x, y, widthIn, heightIn, buttonText);
@@ -96,9 +95,8 @@ public class GuiHoldButton extends GuiButton {
         boolean result = super.isPressable(mouseX, mouseY);
         if (result) {
             pressStart = Util.milliTime();
-            pressed = true;
         }
-        return result || super.mouseClicked(mouseX, mouseY, button); //TODO check if this is called every tick. We need a method that fires every tick so we can check if sufficient time passed
+        return result || super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
@@ -107,7 +105,6 @@ public class GuiHoldButton extends GuiButton {
         boolean result = pressStart != -1 && (super.mouseReleased(mouseX, mouseY, button));
         if (result) {
             pressStart = -1;
-            pressed = false;
         }
         return result;
     }
@@ -119,5 +116,9 @@ public class GuiHoldButton extends GuiButton {
         if (pressStart == -1)
             return -1;
         return (int) Math.max(0L, holdTime - (Util.milliTime() - pressStart));
+    }
+
+    public void reset() {
+        pressStart = -1;
     }
 }

@@ -101,6 +101,7 @@ public class ClientEventHandler {
         RenderGameOverlayEvent.ElementType type = event.getType();
         if (type == RenderGameOverlayEvent.ElementType.ALL || (type == RenderGameOverlayEvent.ElementType.TEXT && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.OFF && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)) {
             Minecraft mc = Minecraft.getInstance();
+            if (mc.player.removed) return;
             mc.profiler.startSection("FirstAidOverlay");
             GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
             HUDHandler.INSTANCE.renderOverlay(mc, event.getPartialTicks());

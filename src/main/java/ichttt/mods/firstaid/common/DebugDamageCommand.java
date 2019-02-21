@@ -1,121 +1,50 @@
-///*
-// * FirstAid
-// * Copyright (C) 2017-2018
-// *
-// * This program is free software: you can redistribute it and/or modify
-// * it under the terms of the GNU General Public License as published by
-// * the Free Software Foundation, either version 3 of the License, or
-// * (at your option) any later version.
-// *
-// * This program is distributed in the hope that it will be useful,
-// * but WITHOUT ANY WARRANTY; without even the implied warranty of
-// * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// * GNU General Public License for more details.
-// *
-// * You should have received a copy of the GNU General Public License
-// * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// */
-//
-//package ichttt.mods.firstaid.common;
-//
-//import ichttt.mods.firstaid.FirstAid;
-//import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-//import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-//import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-//import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
-//import ichttt.mods.firstaid.common.util.CommonUtils;
-//import net.minecraft.command.CommandBase;
-//import net.minecraft.command.CommandException;
-//import net.minecraft.command.ICommandSender;
-//import net.minecraft.entity.player.EntityPlayer;
-//import net.minecraft.entity.player.EntityPlayerMP;
-//import net.minecraft.server.MinecraftServer;
-//import net.minecraft.util.math.BlockPos;
-//import net.minecraft.util.text.TextComponentTranslation;
-//
-//import javax.annotation.Nonnull;
-//import javax.annotation.Nullable;
-//import java.util.ArrayList;
-//import java.util.Collections;
-//import java.util.List;
-//import java.util.Locale;
-//import java.util.Objects;
-//
-//public class DebugDamageCommand extends CommandBase {
-//
-//    @Nonnull
-//    @Override
-//    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-//        if (!(sender instanceof EntityPlayer))
-//            return Collections.emptyList();
-//        if (args.length == 1) {
-//            EnumPlayerPart[] parts = EnumPlayerPart.values();
-//            List<String> values = new ArrayList<>(parts.length);
-//            for (EnumPlayerPart part : parts)
-//                values.add(part.toString());
-//            values.add("ALL");
-//            return getListOfStringsMatchingLastWord(args, values);
-//        } else if (args.length == 3) {
-//            List<String> values = new ArrayList<>(2);
-//            values.add("true");
-//            values.add("false");
-//            return values;
-//        }
-//        return Collections.emptyList();
-//    }
-//
-//    @Nonnull
-//    @Override
-//    public String getName() {
-//        return "damagePlayerPart";
-//    }
-//
-//    @Nonnull
-//    @Override
-//    public String getUsage(@Nonnull ICommandSender sender) {
-//        if (sender instanceof EntityPlayer)
-//            return "/damage [part] [damage] (invoke debuffs)";
-//        else
-//            return "Only usable by players";
-//    }
-//
-//    @Override
-//    public void execute(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args) throws CommandException {
-//        if (!(sender instanceof EntityPlayer))
-//            throw new CommandException(getUsage(sender));
-//        if (args.length != 2 && args.length != 3)
-//            throw new CommandException("Missing arguments. Usage: " + getUsage(sender));
-//        try {
-//            float damage = Float.parseFloat(args[1]);
-//            boolean debuff = true;
-//            if (args.length == 3)
-//                debuff = Boolean.parseBoolean(args[2]);
-//
-//            if (args[0].equalsIgnoreCase("ALL")) {
-//                for (EnumPlayerPart part : EnumPlayerPart.VALUES)
-//                    damage(part, damage, debuff, (EntityPlayer) sender);
-//            } else {
-//                EnumPlayerPart part = EnumPlayerPart.valueOf(args[0].toUpperCase(Locale.ENGLISH));
-//                damage(part, damage, debuff, (EntityPlayer) sender);
-//            }
-//        } catch (RuntimeException e) {
-//            throw new CommandException(e.toString());
-//        }
-//    }
-//
-//    private static void damage(EnumPlayerPart part, float damage, boolean debuff, EntityPlayer player) {
-//        if (damage == 0F)
-//            return;
-//        AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
-//        if (damage > 0F) {
-//            damageModel.getFromEnum(part).damage(damage, player, debuff);
-//        } else {
-//            damageModel.getFromEnum(part).heal(-damage, player, debuff);
-//        }
-//        FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, damage, 0F), (EntityPlayerMP) player);
-//        if (damageModel.isDead(player)) {
-//            player.sendMessage(new TextComponentTranslation("death.attack.generic", player.getDisplayName()));
-//            CommonUtils.killPlayer(player, null);
-//        }
-//    }
-//}
+package ichttt.mods.firstaid.common;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
+import ichttt.mods.firstaid.common.util.CommonUtils;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.network.PacketDistributor;
+
+public class DebugDamageCommand {
+    private static final SimpleCommandExceptionType TYPE = new SimpleCommandExceptionType(new TextComponentString("0 is invalid as damage"));
+
+    public static void register(CommandDispatcher<CommandSource> dispatcher) {
+        LiteralArgumentBuilder<CommandSource> builder = Commands.literal("damagePart").requires((source) -> source.hasPermissionLevel(2));
+
+        for(EnumPlayerPart part : EnumPlayerPart.VALUES) {
+            builder.then(Commands.literal(part.name())
+                   .then(Commands.argument("damage", FloatArgumentType.floatArg())
+                   .executes(context -> damage(part, FloatArgumentType.getFloat(context, "damage"), true, context.getSource().asPlayer()))));
+        }
+        dispatcher.register(builder);
+    }
+
+    private static int damage(EnumPlayerPart part, float damage, boolean debuff, EntityPlayerMP player) throws CommandSyntaxException {
+        if (damage == 0F)
+            throw TYPE.create();
+        AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+        if (damage > 0F) {
+            damageModel.getFromEnum(part).damage(damage, player, debuff);
+        } else {
+            damageModel.getFromEnum(part).heal(-damage, player, debuff);
+        }
+        FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageReceiveDamage(part, damage, 0F));
+        if (damageModel.isDead(player)) {
+            player.sendMessage(new TextComponentTranslation("death.attack.generic", player.getDisplayName()));
+            CommonUtils.killPlayer(player, null);
+        }
+        return 1;
+    }
+}

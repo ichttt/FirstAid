@@ -33,6 +33,7 @@ import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import org.lwjgl.glfw.GLFW;
 
 
@@ -45,6 +46,9 @@ public class ClientHooks {
         ClientRegistry.registerKeyBinding(showWounds);
         GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
         EventCalendar.checkDate();
+    }
+
+    public static void lateSetup(FMLLoadCompleteEvent event) { //register after the reload listener for language has registered
         ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(HUDHandler.INSTANCE);
     }
 

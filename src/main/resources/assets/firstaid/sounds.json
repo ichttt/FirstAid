@@ -1,7 +1,10 @@
 {
   "debuff.heartbeat": {
     "sounds": [
-      "firstaid:heartbeat"
+      {
+        "name": "firstaid:heartbeat",
+        "preload": "true"
+      }
     ],
     "subtitle": "subtitles.debuff.heartbeat"
   }

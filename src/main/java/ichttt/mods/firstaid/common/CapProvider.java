@@ -34,7 +34,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CapProvider implements ICapabilitySerializable<NBTTagCompound> {
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(FirstAid.MODID, "capExtendedHealthSystem");
+    public static final ResourceLocation IDENTIFIER = new ResourceLocation(FirstAid.MODID, "cap_adv_dmg_mdl");
     public static final Set<String> tutorialDone = new HashSet<>();
     private final AbstractPlayerDamageModel damageModel;
     private final LazyOptional<AbstractPlayerDamageModel> optional;

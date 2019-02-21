@@ -22,10 +22,13 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.client.ClientHooks;
 import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
+import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
@@ -34,6 +37,7 @@ import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
@@ -217,7 +221,7 @@ public class GuiHealthScreen extends GuiScreen {
             drawHoveringText(s, mouseX, mouseY);
         }
 
-        holdButtonMouseCallback(mouseX, mouseY, true); //callback: check if buttons are finish
+        holdButtonMouseCallback(true); //callback: check if buttons are finish
     }
 
     private void tooltipButton(GuiButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
@@ -236,45 +240,39 @@ public class GuiHealthScreen extends GuiScreen {
 
     @Override
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-//        if (keyCode == ClientProxy.showWounds.getKeyCode()) TODO keypress
-//            mc.displayGuiScreen(null);
+        if (ClientHooks.showWounds.isActiveAndMatches(InputMappings.getInputByCode(p_keyPressed_1_, p_keyPressed_2_)))
+            mc.displayGuiScreen(null);
         return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
     }
 
-//    @Override TODO ap
-//    protected void actionPerformed(GuiButton button) {
-//        if (button.id < 9) {
-//            EnumPlayerPart playerPart = EnumPlayerPart.fromID((button.id));
-//            FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, activeHand));
-//            //TODO notify the user somehow (sound?)
-//            AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
-//            part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(mc.player.getHeldItem(this.activeHand));
-//        }
-//        mc.displayGuiScreen(null);
-//    }
-
-    protected void holdButtonMouseCallback(int mouseX, int mouseY, boolean renderPass) {
-        for (GuiHoldButton button : this.holdButtons) {
-            if (button.mouseClicked(mouseX, mouseY, 0)) {
-                button.playPressSound(this.mc.getSoundHandler());
-            } else if (renderPass) {
-                int timeLeft = button.getTimeLeft();
-                if (timeLeft != -1) {
-                    float timeInSecs = (timeLeft / 1000F);
-                    if (timeInSecs < 0)
-                        timeInSecs = 0;
-                    this.mc.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
-                    this.drawTexturedModalRect(button.x + (button.isRightSide ? 56 : - 25), button.y - 2, button.isRightSide ? 2 : 0, 169, 22, 24);
-                    this.mc.fontRenderer.drawString(HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), button.x  + (button.isRightSide ? 60 : -20), button.y + 6, 0xFFFFFF);
-                }
-            }
-        }
+    @Override
+    public boolean mouseReleased(double p_mouseReleased_1_, double p_mouseReleased_3_, int p_mouseReleased_5_) {
+        holdButtonMouseCallback(false);
+        return super.mouseReleased(p_mouseReleased_1_, p_mouseReleased_3_, p_mouseReleased_5_);
     }
 
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int state) {
-        holdButtonMouseCallback((int) mouseX, (int) mouseY, false);
-        return super.mouseReleased(mouseX, mouseY, state);
+    protected void holdButtonMouseCallback(boolean renderPass) {
+        for (GuiHoldButton button : this.holdButtons) {
+            int timeLeft = button.getTimeLeft();
+            if (timeLeft == 0) {
+                //We are officially done
+                button.reset();
+                EnumPlayerPart playerPart = EnumPlayerPart.fromID(button.id);
+                FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, activeHand));
+                AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
+                part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(mc.player.getHeldItem(this.activeHand));
+                mc.displayGuiScreen(null);
+            } else if (!renderPass) {
+                button.reset();
+            } else if (timeLeft != -1) {
+                float timeInSecs = (timeLeft / 1000F);
+                if (timeInSecs < 0F)
+                    timeInSecs = 0F;
+                this.mc.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
+                this.drawTexturedModalRect(button.x + (button.isRightSide ? 56 : - 25), button.y - 2, button.isRightSide ? 2 : 0, 169, 22, 24);
+                this.mc.fontRenderer.drawString(HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), button.x  + (button.isRightSide ? 60 : -20), button.y + 6, 0xFFFFFF);
+            }
+        }
     }
 
     @Override

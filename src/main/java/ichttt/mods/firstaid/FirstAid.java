@@ -20,7 +20,6 @@ package ichttt.mods.firstaid;
 
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientHooks;
-import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.HealingItemApiHelperImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
@@ -33,23 +32,26 @@ import ichttt.mods.firstaid.common.network.MessageConfiguration;
 import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
+import ichttt.mods.firstaid.common.potion.FirstAidPotion;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.INBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
@@ -88,10 +90,12 @@ public class FirstAid {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::init);
         bus.addListener(this::loadComplete);
-        bus.addListener(this::beforeServerStart);
-        bus.addListener(this::onServerStop);
+        bus.addGenericListener(Item.class, this::registerItems);
+        bus.addGenericListener(Potion.class, this::registerPotion);
+        bus.addGenericListener(SoundEvent.class, this::registerSound);
+
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> bus.addListener(ClientHooks::setup));
-        MinecraftForge.EVENT_BUS.register(EventHandler.class);
+        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> bus.addListener(ClientHooks::lateSetup));
         //Setup API
         HealingItemApiHelperImpl.init();
         RegistryManager.setupRegistries();
@@ -138,14 +142,15 @@ public class FirstAid {
         RegistryManager.finalizeRegistries();
     }
 
-    public void beforeServerStart(FMLServerStartingEvent event) {
-        //TODO commands
-//        event.registerServerCommand(new DebugDamageCommand());
+    public void registerItems(RegistryEvent.Register<Item> event) {
+        FirstAidItems.registerItems(event.getRegistry());
     }
 
-    public void onServerStop(FMLServerStoppedEvent event) {
-        LOGGER.debug("Cleaning up");
-        CapProvider.tutorialDone.clear();
-        EventHandler.hitList.clear();
+    public void registerPotion(RegistryEvent.Register<Potion> event) {
+        event.getRegistry().register(new FirstAidPotion(false, 0xDDD, FirstAidItems.MORPHINE).setBeneficial());
+    }
+
+    public void registerSound(RegistryEvent.Register<SoundEvent> event) {
+        event.getRegistry().register(new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")).setRegistryName(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")));
     }
 }

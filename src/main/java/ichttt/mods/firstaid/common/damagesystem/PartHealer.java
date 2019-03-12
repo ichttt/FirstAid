@@ -21,11 +21,13 @@ package ichttt.mods.firstaid.common.damagesystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import net.minecraft.item.ItemStack;
 
+import java.util.function.IntSupplier;
+
 public class PartHealer extends AbstractPartHealer {
     private int ticksPassed = 0;
     private int heals = 0;
 
-    public PartHealer(int ticksPerHeal, int maxHeal, ItemStack stack) {
+    public PartHealer(IntSupplier ticksPerHeal, IntSupplier maxHeal, ItemStack stack) {
         super(maxHeal, stack, ticksPerHeal);
     }
 
@@ -38,7 +40,7 @@ public class PartHealer extends AbstractPartHealer {
 
     @Override
     public boolean hasFinished() {
-        return heals >= maxHeal;
+        return heals >= maxHeal.getAsInt();
     }
 
     @Override
@@ -46,7 +48,7 @@ public class PartHealer extends AbstractPartHealer {
         if (hasFinished())
             return false;
         ticksPassed++;
-        boolean nextHeal = ticksPassed >= ticksPerHeal;
+        boolean nextHeal = ticksPassed >= ticksPerHeal.getAsInt();
         if (nextHeal) {
             ticksPassed = 0;
             heals++;

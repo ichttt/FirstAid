@@ -54,7 +54,7 @@ public class GuiTutorial extends GuiScreen {
         this.action.addTextWrapper("firstaid.tutorial.line4");
         this.action.addTextWrapper("firstaid.tutorial.line5");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_FOOT.heal(3F, null, false));
-        if (FirstAidConfig.externalHealing.sleepHealPercentage != 0D)
+        if (FirstAidConfig.SERVER.sleepHealPercentage.get() != 0D)
             this.action.addTextWrapper("firstaid.tutorial.sleephint");
         this.action.addTextWrapper("firstaid.tutorial.line6");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.HEAD.damage(16F, null, false));

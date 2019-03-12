@@ -18,42 +18,145 @@
 
 package ichttt.mods.firstaid;
 
+import net.minecraftforge.common.ForgeConfigSpec;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.Locale;
+
 @SuppressWarnings("CanBeFinal")
 //@Config(modid = FirstAid.MODID, name = FirstAid.NAME)
 //@ExtraConfig
 public class FirstAidConfig {
 
-//    @Config.Comment("Settings regarding the max health of the body's parts. 2 = 1 heart")
-//    @Config.LangKey("firstaid.config.damagesystem")
-//    @Config.RequiresWorldRestart
-//    @ExtraConfig.Sync
-    public static final DamageSystem damageSystem = new DamageSystem();
+    static final ForgeConfigSpec serverSpec;
+    public static final FirstAidConfig.Server SERVER;
+    static {
+        final Pair<FirstAidConfig.Server, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(FirstAidConfig.Server::new);
+        serverSpec = specPair.getRight();
+        SERVER = specPair.getLeft();
+    }
+
+    public static class Server {
+
+        Server(ForgeConfigSpec.Builder builder) {
+            builder.comment("Server configuration settings").push("Damage System");
+
+            maxHealthHead = healthEntry(builder, "Head", 4);
+            maxHealthLeftArm = healthEntry(builder, "Left Arm", 4);
+            maxHealthLeftLeg = healthEntry(builder, "Left Leg", 4);
+            maxHealthLeftFoot = healthEntry(builder, "Left Foot", 4);
+            maxHealthBody = healthEntry(builder, "Body", 6);
+            maxHealthRightArm = healthEntry(builder, "Right Arm", 4);
+            maxHealthRightLeg = healthEntry(builder, "Right Leg", 4);
+            maxHealthRightFoot = healthEntry(builder, "Right Foot", 4);
+            causeDeathHead = builder
+                    .comment("True if the head can cause death if health drops to 0")
+                    .translation("firstaid.config.causedeath.head")
+                    .define("causeDeathHead", true);
+            causeDeathBody = builder
+                    .comment("True if the body can cause death if health drops to 0")
+                    .translation("firstaid.config.causedeath.body")
+                    .define("causeDeathBody", true);
+
+            builder.pop().push("Internal Healing");
+
+            bandage = new IEEntry(builder, "bandage", 4, 18, 2500);
+            plaster = new IEEntry(builder, "plaster", 2, 22, 3000);
+
+            builder.pop().push("External Healing");
+
+            allowNaturalRegeneration = builder
+                    .comment("Allow vanilla's natural regeneration. Requires \"allowOtherHealingItems\" to be true", "**WARNING** This sets the gamerule \"naturalRegeneration\" for all of your worlds internally, so it persists even if you remove the mod")
+                    .translation("firstaid.config.allownaturalregeneration")
+                    .worldRestart()
+                    .define("allowNaturalRegeneration", false);
+
+            allowOtherHealingItems = builder
+                    .comment("If false, healing potions and other healing items will have no effect")
+                    .translation("firstaid.config.allowotherhealingitems")
+                    .define("allowOtherHealingItems", true);
+
+            sleepHealPercentage = builder
+                    .comment("Specifies how much percent of the max health should be restored when sleeping")
+                    .translation("firstaid.config.sleephealpercentage")
+                    .defineInRange("sleepHealPercentage", 0.07D, 0D, 1D);
+            otherRegenMultiplier = builder
+                    .comment("The value external regen will be multiplied with. Has no effect if \"allowOtherHealingItems\" is disabled")
+                    .translation("firstaid.config.otherregenmultiplier")
+                    .defineInRange("otherRegenMultiplier", 0.75D, 0D, 20D);
+            naturalRegenMultiplier = builder
+                    .comment("The value vanilla's natural regeneration will be multiplied with. Has no effect if \"allowNaturalRegeneration\" is disabled")
+                    .translation("firstaid.config.naturalregenmultiplier")
+                    .defineInRange("naturalRegenMultiplier", 0.5D, 0D, 20D);
+
+            builder.pop();
+        }
+
+        private static ForgeConfigSpec.IntValue healthEntry(ForgeConfigSpec.Builder builder, String name, int defaultVal) {
+            String noSpaceName = name.replace(' ', '_');
+            return builder.comment("Max health of the " + name)
+                    .translation("firstaid.config.maxhealth." + noSpaceName.toLowerCase(Locale.ENGLISH))
+                    .defineInRange("maxHealth" + noSpaceName, defaultVal, 2, 12);
+        }
+
+        public final ForgeConfigSpec.IntValue maxHealthHead;
+        public final ForgeConfigSpec.BooleanValue causeDeathHead;
+        public final ForgeConfigSpec.IntValue maxHealthLeftArm;
+        public final ForgeConfigSpec.IntValue maxHealthLeftLeg;
+        public final ForgeConfigSpec.IntValue maxHealthLeftFoot;
+        public final ForgeConfigSpec.IntValue maxHealthBody;
+        public final ForgeConfigSpec.BooleanValue causeDeathBody;
+        public final ForgeConfigSpec.IntValue maxHealthRightArm;
+        public final ForgeConfigSpec.IntValue maxHealthRightLeg;
+        public final ForgeConfigSpec.IntValue maxHealthRightFoot;
+
+        public final IEEntry bandage;
+        public final IEEntry plaster;
+
+        public final ForgeConfigSpec.BooleanValue allowNaturalRegeneration;
+        public final ForgeConfigSpec.BooleanValue allowOtherHealingItems;
+        public final ForgeConfigSpec.DoubleValue sleepHealPercentage;
+        public final ForgeConfigSpec.DoubleValue otherRegenMultiplier;
+        public final ForgeConfigSpec.DoubleValue naturalRegenMultiplier;
+
+        public static class IEEntry {
+
+            public final ForgeConfigSpec.IntValue totalHeals;
+            public final ForgeConfigSpec.IntValue secondsPerHeal;
+            public final ForgeConfigSpec.IntValue applyTime;
+
+            public IEEntry(ForgeConfigSpec.Builder builder, String name, int initialTotalHeals, int initialSecondsPerHeal, int initialApplyTime) {
+                builder.push(name);
+                totalHeals = builder
+                        .comment("The total heals this item does when applied. 1 heal = half a heart")
+                        .translation("firstaid.config.totalheals")
+                        .defineInRange("totalsHeals", initialTotalHeals, 1, Byte.MAX_VALUE);
+                secondsPerHeal = builder
+                        .comment("The time it takes for a single heal to trigger. Total time this item is active = this * totalHeals")
+                        .translation("firstaid.config.secondsperheal")
+                        .defineInRange("secondsPerHeal", initialSecondsPerHeal, 1, Short.MAX_VALUE);
+                applyTime = builder
+                        .comment("The time it takes in the GUI to apply the item in milliseconds")
+                        .translation("firstaid.config.applytime")
+                        .defineInRange("applyTime", initialApplyTime, 0, 16000);
+                builder.pop();
+            }
+        }
+    }
 
 //    @Config.Comment("Settings regarding the health overlay when ingame")
 //    @Config.LangKey("firstaid.config.overlay")
-    public static final Overlay overlay = new Overlay();
-
-//    @Config.Comment("Settings regarding the internal healing system")
-//    @Config.LangKey("firstaid.config.internalhealing")
-//    @Config.RequiresWorldRestart
-//    @ExtraConfig.Sync
-    public static final InternalHealing internalHealing = new InternalHealing();
-
-//    @Config.Comment("Settings regarding external healing system(like vanilla potions or natural regeneration")
-//    @Config.LangKey("firstaid.config.externalhealing")
-//    @Config.RequiresWorldRestart
-//    @ExtraConfig.Sync
-    public static final ExternalHealing externalHealing = new ExternalHealing();
+    public static final Overlay overlay = new Overlay(); //TODO client
 
 //    @Config.Comment("Enable/Disable specify debuffs on specific body parts")
 //    @Config.LangKey("firstaid.config.debuffs")
 //    @ExtraConfig.Advanced
-    public static final Debuffs debuffs = new Debuffs();
+    public static final Debuffs debuffs = new Debuffs(); //TODO server as well
 
 //    @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
 //    @Config.LangKey("firstaid.config.enablesoundsystem")
 //    @ExtraConfig.Advanced
-    public static boolean enableSoundSystem = true;
+    public static boolean enableSoundSystem = true; //TODO client
 
 //    @Config.Comment("If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health")
 //    @Config.LangKey("firstaid.config.scalemaxhealth")
@@ -70,70 +173,7 @@ public class FirstAidConfig {
 //    @Config.Comment("If true, all usages of setHealth from other mods will be captured. Should not cause any problems, but allow mods like scaling health bandages to apply")
 //    @Config.LangKey("firstaid.config.experimental")
 //    @ExtraConfig.Advanced
-    public static boolean experimentalSetHealth = false;
-
-    public static class InternalHealing {
-
-//        @Config.Comment("Settings for the bandage item")
-//        @Config.LangKey("firstaid.config.bandage")
-        public final Entry bandage = new Entry(4, 18, 2500);
-
-//        @Config.Comment("Settings for the plaster item")
-//        @Config.LangKey("firstaid.config.plaster")
-        public final Entry plaster = new Entry(2, 22, 3000);
-
-        public static class Entry {
-//            @Config.Comment("The total heals this item does when applied. 1 heal = half a heart")
-//            @Config.LangKey("firstaid.config.totalheals")
-//            @Config.RangeInt(min = 1, max = Byte.MAX_VALUE)
-            public int totalHeals;
-
-//            @Config.Comment("The time it takes for a single heal to trigger. Total time this item is active = this * totalHeals")
-//            @Config.LangKey("firstaid.config.secondsperheal")
-//            @Config.RangeInt(min = 1, max = Short.MAX_VALUE)
-            public int secondsPerHeal;
-
-//            @Config.Comment("The time it takes in the GUI to apply the item in milliseconds")
-//            @Config.LangKey("firstaid.config.applytime")
-//            @Config.RangeInt(min = 0, max = 16000)
-            public int applyTime;
-
-            public Entry(int initialTotalHeals, int initialSecondsPerHeal, int initialApplyTime) {
-                this.totalHeals = initialTotalHeals;
-                this.secondsPerHeal = initialSecondsPerHeal;
-                this.applyTime = initialApplyTime;
-            }
-        }
-    }
-
-    public static class ExternalHealing {
-
-//        @Config.Comment("Allow vanilla's natural regeneration. Requires \"allowOtherHealingItems\" to be true" + "\n**WARNING** This sets the gamerule \"naturalRegeneration\" for all of your worlds internally, so it persists even if you remove the mod")
-//        @Config.LangKey("firstaid.config.allownaturalregeneration")
-//        @Config.RequiresWorldRestart
-        public boolean allowNaturalRegeneration = false;
-
-//        @Config.Comment("If false, healing potions and other healing items will have no effect")
-//        @Config.LangKey("firstaid.config.allowotherhealingitems")
-        public boolean allowOtherHealingItems = true;
-
-//        @Config.Comment("Specifies how much percent of the max health should be restored when sleeping")
-//        @Config.LangKey("firstaid.config.sleephealpercentage")
-//        @Config.RangeDouble(min = 0D, max = 1D)
-        public double sleepHealPercentage = 0.07D;
-
-//        @Config.Comment("The value external regen will be multiplied with. Has no effect if \"allowOtherHealingItems\" is disabled")
-//        @Config.LangKey("firstaid.config.otherregenmultiplier")
-//        @Config.RangeDouble(min = 0D, max = 20D)
-//        @ExtraConfig.Advanced
-        public double otherRegenMultiplier = 0.75D;
-
-//        @Config.Comment("The value vanilla's natural regeneration will be multiplied with. Has no effect if \"allowNaturalRegeneration\" is disabled")
-//        @Config.LangKey("firstaid.config.naturalregenmultiplier")
-//        @Config.RangeDouble(min = 0D, max = 20D)
-//        @ExtraConfig.Advanced
-        public double naturalRegenMultiplier = 0.5D;
-    }
+    public static boolean experimentalSetHealth = false; //TODO server as well
 
     public static class Overlay {
 
@@ -174,39 +214,6 @@ public class FirstAidConfig {
 //        @Config.RangeInt(min = 0, max = 200)
 //        @ExtraConfig.Advanced
         public int alpha = 50;
-    }
-
-    public static class DamageSystem {
-
-//        @Config.RangeInt(min = 2, max = 12)
-        public int maxHealthHead = 4;
-
-//        @Config.RequiresWorldRestart
-        public boolean causeDeathHead = true;
-
-//        @Config.RangeInt(min = 2, max = 12)
-        public int maxHealthLeftArm = 4;
-
-//        @Config.RangeInt(min = 2, max = 12)
-        public int maxHealthLeftLeg = 4;
-
-//        @Config.RangeInt(min = 2, max = 12)
-        public int maxHealthLeftFoot = 4;
-
-//        @Config.RangeInt(min = 2, max = 12)
-        public int maxHealthBody = 6;
-
-//        @Config.RequiresWorldRestart
-        public boolean causeDeathBody = true;
-
-//        @Config.RangeInt(min = 2, max = 12)
-        public int maxHealthRightArm = 4;
-
-//        @Config.RangeInt(min = 2, max = 12)
-        public int maxHealthRightLeg = 4;
-
-//        @Config.RangeInt(min = 2, max = 12)
-        public int maxHealthRightFoot = 4;
     }
 
     public static class Debuffs {

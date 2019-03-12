@@ -21,12 +21,14 @@ package ichttt.mods.firstaid.api.damagesystem;
 
 import net.minecraft.item.ItemStack;
 
-public abstract class AbstractPartHealer {
-    public final int maxHeal;
-    public final ItemStack stack;
-    public final int ticksPerHeal;
+import java.util.function.IntSupplier;
 
-    public AbstractPartHealer(int maxHeal, ItemStack stack, int ticksPerHeal) {
+public abstract class AbstractPartHealer {
+    public final IntSupplier maxHeal;
+    public final ItemStack stack;
+    public final IntSupplier ticksPerHeal;
+
+    public AbstractPartHealer(IntSupplier maxHeal, ItemStack stack, IntSupplier ticksPerHeal) {
         this.maxHeal = maxHeal;
         this.stack = stack;
         this.ticksPerHeal = ticksPerHeal;

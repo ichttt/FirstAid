@@ -41,7 +41,7 @@ public class ClientHooks {
     public static final KeyBinding showWounds = new KeyBinding("keybinds.show_wounds", KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrMakeInput(GLFW.GLFW_KEY_H), "First Aid");
 
     public static void setup(FMLClientSetupEvent event) {
-        FirstAid.LOGGER.debug("Loading ClientProxy");
+        FirstAid.LOGGER.debug("Loading ClientHooks");
         MinecraftForge.EVENT_BUS.register(ClientEventHandler.class);
         ClientRegistry.registerKeyBinding(showWounds);
         GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;

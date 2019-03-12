@@ -202,7 +202,7 @@ public class GuiHealthScreen extends GuiScreen {
         GlStateManager.popMatrix();
 
         //Sleep info setup
-        double sleepHealing = FirstAidConfig.externalHealing.sleepHealPercentage;
+        double sleepHealing = FirstAidConfig.SERVER.sleepHealPercentage.get();
         int renderBedX = Math.round(guiLeft / bedScaleFactor) + 2;
         int renderBedY = Math.round((guiTop + ySize) / bedScaleFactor) - 18;
         int bedX = (int) (renderBedX * bedScaleFactor);
@@ -227,7 +227,7 @@ public class GuiHealthScreen extends GuiScreen {
     private void tooltipButton(GuiButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
         if (!enabled && button.isMouseOver()) {
-            drawHoveringText(Arrays.asList(I18n.format("gui.active_item") + ": " + I18n.format(part.activeHealer.stack.getTranslationKey() + ".name"), I18n.format("gui.next_heal", Math.round((part.activeHealer.ticksPerHeal - part.activeHealer.getTicksPassed()) / 20F))), mouseX, mouseY);
+            drawHoveringText(Arrays.asList(I18n.format("gui.active_item") + ": " + I18n.format(part.activeHealer.stack.getTranslationKey() + ".name"), I18n.format("gui.next_heal", Math.round((part.activeHealer.ticksPerHeal.getAsInt() - part.activeHealer.getTicksPassed()) / 20F))), mouseX, mouseY);
         }
         if (!disableButtons)
             button.enabled = enabled;

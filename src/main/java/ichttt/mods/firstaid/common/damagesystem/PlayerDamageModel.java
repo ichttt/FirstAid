@@ -68,19 +68,19 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     protected PlayerDamageModel(IDebuff[] headDebuffs, IDebuff[] bodyDebuffs, IDebuff[] armDebuffs, IDebuff[] legFootDebuffs) {
-        super(new DamageablePart(FirstAidConfig.damageSystem.maxHealthHead,      FirstAidConfig.damageSystem.causeDeathHead,  EnumPlayerPart.HEAD,       headDebuffs   ),
-              new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftArm,   false,                         EnumPlayerPart.LEFT_ARM,   armDebuffs    ),
-              new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftLeg,   false,                         EnumPlayerPart.LEFT_LEG,   legFootDebuffs),
-              new DamageablePart(FirstAidConfig.damageSystem.maxHealthLeftFoot,  false,                         EnumPlayerPart.LEFT_FOOT,  legFootDebuffs),
-              new DamageablePart(FirstAidConfig.damageSystem.maxHealthBody,      FirstAidConfig.damageSystem.causeDeathBody,  EnumPlayerPart.BODY,       bodyDebuffs   ),
-              new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightArm,  false,                         EnumPlayerPart.RIGHT_ARM,  armDebuffs    ),
-              new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightLeg,  false,                         EnumPlayerPart.RIGHT_LEG,  legFootDebuffs),
-              new DamageablePart(FirstAidConfig.damageSystem.maxHealthRightFoot, false,                         EnumPlayerPart.RIGHT_FOOT, legFootDebuffs));
+        super(new DamageablePart(FirstAidConfig.SERVER.maxHealthHead.get(),      FirstAidConfig.SERVER.causeDeathHead.get(),  EnumPlayerPart.HEAD,       headDebuffs   ),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthLeftArm.get(),   false,                         EnumPlayerPart.LEFT_ARM,   armDebuffs    ),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthLeftLeg.get(),   false,                         EnumPlayerPart.LEFT_LEG,   legFootDebuffs),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthLeftFoot.get(),  false,                         EnumPlayerPart.LEFT_FOOT,  legFootDebuffs),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthBody.get(),      FirstAidConfig.SERVER.causeDeathBody.get(),  EnumPlayerPart.BODY,       bodyDebuffs   ),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthRightArm.get(),  false,                         EnumPlayerPart.RIGHT_ARM,  armDebuffs    ),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthRightLeg.get(),  false,                         EnumPlayerPart.RIGHT_LEG,  legFootDebuffs),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthRightFoot.get(), false,                         EnumPlayerPart.RIGHT_FOOT, legFootDebuffs));
         for (IDebuff debuff : armDebuffs)
             this.sharedDebuffs.add((SharedDebuff) debuff);
         for (IDebuff debuff : legFootDebuffs)
             this.sharedDebuffs.add((SharedDebuff) debuff);
-        noCritical = !FirstAidConfig.damageSystem.causeDeathBody && !FirstAidConfig.damageSystem.causeDeathHead;
+        noCritical = !FirstAidConfig.SERVER.causeDeathBody.get() && !FirstAidConfig.SERVER.causeDeathHead.get();
     }
 
     @Override
@@ -324,7 +324,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     public void sleepHeal(EntityPlayer player) {
         if (sleepBlockTicks > 0)
             return;
-        CommonUtils.healPlayerByPercentage(FirstAidConfig.externalHealing.sleepHealPercentage, this, player);
+        CommonUtils.healPlayerByPercentage(FirstAidConfig.SERVER.sleepHealPercentage.get(), this, player);
         sleepBlockTicks = 20;
     }
 

@@ -158,7 +158,7 @@ public class EventHandler {
     @SubscribeEvent
     public static void tickWorld(TickEvent.WorldTickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
-        if (FirstAidConfig.externalHealing.sleepHealPercentage <= 0D) return;
+        if (FirstAidConfig.SERVER.sleepHealPercentage.get() <= 0D) return;
         World world = event.world;
         if (!world.isRemote && world instanceof WorldServer && ((WorldServer) world).areAllPlayersAsleep()) {
             for (EntityPlayer player : world.playerEntities) {
@@ -197,15 +197,15 @@ public class EventHandler {
         if (!CommonUtils.hasDamageModel(entity))
             return;
         event.setCanceled(true);
-        if (!FirstAidConfig.externalHealing.allowOtherHealingItems)
+        if (!FirstAidConfig.SERVER.allowOtherHealingItems.get())
             return;
         float amount = event.getAmount();
         //Hacky shit to reduce vanilla regen
         if (Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch(stackTraceElement -> stackTraceElement.getClassName().equals(FoodStats.class.getName()))) {
-            if (FirstAidConfig.externalHealing.allowNaturalRegeneration)
-                amount = amount * (float) FirstAidConfig.externalHealing.naturalRegenMultiplier;
+            if (FirstAidConfig.SERVER.allowNaturalRegeneration.get())
+                amount = amount * (float) (double) FirstAidConfig.SERVER.naturalRegenMultiplier.get();
         } else {
-            amount = amount * (float) FirstAidConfig.externalHealing.otherRegenMultiplier;
+            amount = amount * (float) (double) FirstAidConfig.SERVER.otherRegenMultiplier.get();
         }
         HealthDistribution.distributeHealth(amount, (EntityPlayer) entity, true);
     }
@@ -231,7 +231,7 @@ public class EventHandler {
     public static void onWorldLoad(WorldEvent.Load event) {
         IWorld world = event.getWorld();
         if (!world.isRemote() && world instanceof World)
-            ((World) world).getGameRules().setOrCreateGameRule("naturalRegeneration", Boolean.toString(FirstAidConfig.externalHealing.allowNaturalRegeneration), ((World) world).getServer());
+            ((World) world).getGameRules().setOrCreateGameRule("naturalRegeneration", Boolean.toString(FirstAidConfig.SERVER.allowNaturalRegeneration.get()), ((World) world).getServer());
     }
 
     @SubscribeEvent

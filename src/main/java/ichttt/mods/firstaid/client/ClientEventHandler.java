@@ -119,8 +119,8 @@ public class ClientEventHandler {
         }
 
         AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
-        if (healer != null) {
-            event.getToolTip().add(new TextComponentTranslation("firstaid.tooltip.healer", healer.maxHeal / 2, StringUtils.ticksToElapsedTime(healer.ticksPerHeal)));
+        if (healer != null && event.getEntityPlayer() != null) {
+            event.getToolTip().add(new TextComponentTranslation("firstaid.tooltip.healer", healer.maxHeal.getAsInt() / 2, StringUtils.ticksToElapsedTime(healer.ticksPerHeal.getAsInt())));
         }
     }
 

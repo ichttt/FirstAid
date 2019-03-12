@@ -64,7 +64,7 @@ public class CommonUtils {
     }
 
     public static void killPlayer(@Nonnull EntityPlayer player, @Nullable DamageSource source) {
-        if (source != null && FirstAidConfig.externalHealing.allowOtherHealingItems && player.checkTotemDeathProtection(source))
+        if (source != null && FirstAidConfig.SERVER.allowOtherHealingItems.get() && player.checkTotemDeathProtection(source))
             return;
 
 //        IRevival revival = getRevivalIfPossible(player);

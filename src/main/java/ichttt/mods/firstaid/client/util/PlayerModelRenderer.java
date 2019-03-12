@@ -32,6 +32,7 @@ public class PlayerModelRenderer {
 
     public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, Gui gui, float alpha) {
         GlStateManager.enableAlphaTest();
+        GlStateManager.enableBlend();
         GlStateManager.color4f(1F, 1F, 1F, 1 - (alpha / 255));
         Minecraft.getInstance().getTextureManager().bindTexture(HEALTH_RENDER_LOCATION);
         GlStateManager.scalef(0.5F, 0.5F, 0.5F);

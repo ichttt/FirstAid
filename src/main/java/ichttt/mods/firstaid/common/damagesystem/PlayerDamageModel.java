@@ -86,33 +86,33 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     @Override
     public NBTTagCompound serializeNBT() {
         NBTTagCompound tagCompound = new NBTTagCompound();
-        tagCompound.setTag("head", HEAD.serializeNBT());
-        tagCompound.setTag("leftArm", LEFT_ARM.serializeNBT());
-        tagCompound.setTag("leftLeg", LEFT_LEG.serializeNBT());
-        tagCompound.setTag("leftFoot", LEFT_FOOT.serializeNBT());
-        tagCompound.setTag("body", BODY.serializeNBT());
-        tagCompound.setTag("rightArm", RIGHT_ARM.serializeNBT());
-        tagCompound.setTag("rightLeg", RIGHT_LEG.serializeNBT());
-        tagCompound.setTag("rightFoot", RIGHT_FOOT.serializeNBT());
-        tagCompound.setBoolean("hasTutorial", hasTutorial);
+        tagCompound.put("head", HEAD.serializeNBT());
+        tagCompound.put("leftArm", LEFT_ARM.serializeNBT());
+        tagCompound.put("leftLeg", LEFT_LEG.serializeNBT());
+        tagCompound.put("leftFoot", LEFT_FOOT.serializeNBT());
+        tagCompound.put("body", BODY.serializeNBT());
+        tagCompound.put("rightArm", RIGHT_ARM.serializeNBT());
+        tagCompound.put("rightLeg", RIGHT_LEG.serializeNBT());
+        tagCompound.put("rightFoot", RIGHT_FOOT.serializeNBT());
+        tagCompound.putBoolean("hasTutorial", hasTutorial);
         return tagCompound;
     }
 
     @Override
     public void deserializeNBT(NBTTagCompound nbt) {
-        HEAD.deserializeNBT((NBTTagCompound) nbt.getTag("head"));
-        LEFT_ARM.deserializeNBT((NBTTagCompound) nbt.getTag("leftArm"));
-        LEFT_LEG.deserializeNBT((NBTTagCompound) nbt.getTag("leftLeg"));
-        LEFT_FOOT.deserializeNBT((NBTTagCompound) nbt.getTag("leftFoot"));
-        BODY.deserializeNBT((NBTTagCompound) nbt.getTag("body"));
-        RIGHT_ARM.deserializeNBT((NBTTagCompound) nbt.getTag("rightArm"));
-        RIGHT_LEG.deserializeNBT((NBTTagCompound) nbt.getTag("rightLeg"));
-        RIGHT_FOOT.deserializeNBT((NBTTagCompound) nbt.getTag("rightFoot"));
-        if (nbt.hasKey("morphineTicks")) { //legacy - we still have to write it
+        HEAD.deserializeNBT((NBTTagCompound) nbt.get("head"));
+        LEFT_ARM.deserializeNBT((NBTTagCompound) nbt.get("leftArm"));
+        LEFT_LEG.deserializeNBT((NBTTagCompound) nbt.get("leftLeg"));
+        LEFT_FOOT.deserializeNBT((NBTTagCompound) nbt.get("leftFoot"));
+        BODY.deserializeNBT((NBTTagCompound) nbt.get("body"));
+        RIGHT_ARM.deserializeNBT((NBTTagCompound) nbt.get("rightArm"));
+        RIGHT_LEG.deserializeNBT((NBTTagCompound) nbt.get("rightLeg"));
+        RIGHT_FOOT.deserializeNBT((NBTTagCompound) nbt.get("rightFoot"));
+        if (nbt.contains("morphineTicks")) { //legacy - we still have to write it
             morphineTicksLeft = nbt.getInt("morphineTicks");
             needsMorphineUpdate = true;
         }
-        if (nbt.hasKey("hasTutorial"))
+        if (nbt.contains("hasTutorial"))
             hasTutorial = nbt.getBoolean("hasTutorial");
     }
 

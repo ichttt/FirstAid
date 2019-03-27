@@ -18,6 +18,8 @@
 
 package ichttt.mods.firstaid.common.apiimpl;
 
+import com.google.common.primitives.Floats;
+import com.google.common.primitives.Ints;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
@@ -25,7 +27,6 @@ import ichttt.mods.firstaid.api.debuff.builder.DebuffBuilderFactory;
 import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.EventHandler;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.SoundEvent;
 import org.apache.commons.lang3.ArrayUtils;
@@ -35,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 public class RegistryManager {
@@ -71,65 +71,69 @@ public class RegistryManager {
 
         //---DEBUFFS---
         DebuffBuilderFactory factory = DebuffBuilderFactory.getInstance();
-        loadValuesFromConfig(factory, "blindness", () -> FirstAidConfig.debuffs.head.blindness, () -> EventHandler.HEARTBEAT, FirstAidConfig.debuffs.head.blindnessConditions, EnumDebuffSlot.HEAD);
-
-        loadValuesFromConfig(factory, "nausea", () -> FirstAidConfig.debuffs.head.nausea, null, FirstAidConfig.debuffs.head.nauseaConditions, EnumDebuffSlot.HEAD);
-
-        loadValuesFromConfig(factory, "nausea", () -> FirstAidConfig.debuffs.body.nausea, null, FirstAidConfig.debuffs.body.nauseaConditions, EnumDebuffSlot.BODY);
-
-        loadValuesFromConfig(factory, "weakness", () -> FirstAidConfig.debuffs.body.weakness, FirstAidConfig.debuffs.body.weaknessConditions, EnumDebuffSlot.BODY);
-
-        loadValuesFromConfig(factory, "mining_fatigue", () -> FirstAidConfig.debuffs.arms.mining_fatigue, FirstAidConfig.debuffs.arms.miningFatigueConditions, EnumDebuffSlot.ARMS);
-
-        loadValuesFromConfig(factory, "slowness", () -> FirstAidConfig.debuffs.legsAndFeet.slowness, FirstAidConfig.debuffs.legsAndFeet.slownessConditions, EnumDebuffSlot.LEGS_AND_FEET);
+//        loadValuesFromConfig(factory, "blindness", () -> EventHandler.HEARTBEAT, FirstAidConfig.GENERAL.head.blindnessConditions, EnumDebuffSlot.HEAD);
+//
+//        loadValuesFromConfig(factory, "nausea", null, FirstAidConfig.GENERAL.head.nauseaConditions, EnumDebuffSlot.HEAD);
+//
+//        loadValuesFromConfig(factory, "nausea", null, FirstAidConfig.GENERAL.body.nauseaConditions, EnumDebuffSlot.BODY);
+//
+//        loadValuesFromConfig(factory, "weakness", FirstAidConfig.GENERAL.body.weaknessConditions, EnumDebuffSlot.BODY);
+//
+//        loadValuesFromConfig(factory, "mining_fatigue", FirstAidConfig.GENERAL.arms.miningFatigueConditions, EnumDebuffSlot.ARMS);
+//
+//        loadValuesFromConfig(factory, "slowness", FirstAidConfig.GENERAL.legsAndFeet.slownessConditions, EnumDebuffSlot.LEGS_AND_FEET);
     }
 
-    private static void loadValuesFromConfig(DebuffBuilderFactory factory, String potionName, BooleanSupplier enableCondition, Supplier<SoundEvent> event, FirstAidConfig.Debuffs.ConditionOnHit config, EnumDebuffSlot slot) {
-        if (config.debuffLength.length != config.damageTaken.length) {
+    private static void loadValuesFromConfig(DebuffBuilderFactory factory, String potionName, Supplier<SoundEvent> event, FirstAidConfig.General.ConditionOnHit config, EnumDebuffSlot slot) {
+        float[] damageTaken = Floats.toArray(config.damageTaken.get());
+        int[] debuffLength = Ints.toArray(config.debuffLength.get());
+        if (debuffLength.length != damageTaken.length) {
             logError("The fields to not have the same amount of values!", potionName, slot);
             return;
         }
-        if (config.debuffLength.length == 0) {
+        if (debuffLength.length == 0) {
             logError("The fields are empty!", potionName, slot);
             return;
         }
 
-        float[] healthPercentageLeft = new float[config.damageTaken.length];
-        System.arraycopy(config.damageTaken, 0, healthPercentageLeft, 0, config.damageTaken.length);
+        float[] healthPercentageLeft = new float[damageTaken.length];
+        System.arraycopy(damageTaken, 0, healthPercentageLeft, 0, damageTaken.length);
         Arrays.sort(healthPercentageLeft);
         ArrayUtils.reverse(healthPercentageLeft);
-        if (!Arrays.equals(healthPercentageLeft, config.damageTaken)) {
+        if (!Arrays.equals(healthPercentageLeft, damageTaken)) {
             logError("The damageTaken field is not sorted right!", potionName, slot);
             return;
         }
 
         IDebuffBuilder builder = factory.newOnHitDebuffBuilder(potionName);
-        builder.addEnableCondition(enableCondition);
-        for (int i = 0; i < config.damageTaken.length; i++)
-            builder.addBound(config.damageTaken[i], config.debuffLength[i]);
+        builder.addEnableCondition(config.enabled::get);
+        for (int i = 0; i < damageTaken.length; i++)
+            builder.addBound(damageTaken[i], debuffLength[i]);
 
         if (event != null) builder.addSoundEffect(event);
         builder.register(slot);
     }
 
-    private static void loadValuesFromConfig(DebuffBuilderFactory factory, String potionName, BooleanSupplier enableCondition, FirstAidConfig.Debuffs.ConditionConstant config, EnumDebuffSlot slot) {
-        if (config.debuffStrength.length != config.healthPercentageLeft.length) {
+    private static void loadValuesFromConfig(DebuffBuilderFactory factory, String potionName, FirstAidConfig.General.ConditionConstant config, EnumDebuffSlot slot) {
+        int[] debuffStrength = Ints.toArray(config.debuffStrength.get());
+        float[] healthPercentageLeft = Floats.toArray(config.healthPercentageLeft.get());
+        if (debuffStrength.length != healthPercentageLeft.length) {
             logError("The fields to not have the same amount of values!", potionName, slot);
             return;
         }
-        if (config.healthPercentageLeft.length == 0) {
+        if (healthPercentageLeft.length == 0) {
             logError("The fields are empty!", potionName, slot);
             return;
         }
 
-        if (!ArrayUtils.isSorted(config.healthPercentageLeft)) {
+        if (!ArrayUtils.isSorted(healthPercentageLeft)) {
             logError("The healthPercentageLeft field is not sorted right!", potionName, slot);
             return;
         }
         IDebuffBuilder builder = factory.newConstantDebuffBuilder(potionName);
-        builder.addEnableCondition(enableCondition);
-        for (int i = 0; i < config.healthPercentageLeft.length; i++)
-            builder.addBound(config.healthPercentageLeft[i], config.debuffStrength[i]);
+        builder.addEnableCondition(config.enabled::get);
+        for (int i = 0; i < healthPercentageLeft.length; i++)
+            builder.addBound(healthPercentageLeft[i], debuffStrength[i]);
 
         builder.register(slot);
     }

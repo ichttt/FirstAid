@@ -59,7 +59,7 @@ public class SharedDebuff implements IDebuff {
     }
 
     public void tick(EntityPlayer player) {
-        if (!debuff.isEnabled() || player.world.isRemote || !(player instanceof EntityPlayerMP))
+        if (!debuff.isEnabled() || !(player instanceof EntityPlayerMP))
             return;
 
         AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null).orElseThrow(() -> new RuntimeException("Could not find damage model for " + player));

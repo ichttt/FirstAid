@@ -21,25 +21,33 @@ package ichttt.mods.firstaid;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
-@SuppressWarnings("CanBeFinal")
-//@Config(modid = FirstAid.MODID, name = FirstAid.NAME)
-//@ExtraConfig
 public class FirstAidConfig {
 
     static final ForgeConfigSpec serverSpec;
+    static final ForgeConfigSpec generalSpec;
     public static final FirstAidConfig.Server SERVER;
+    public static final FirstAidConfig.General GENERAL;
+
     static {
         final Pair<FirstAidConfig.Server, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(FirstAidConfig.Server::new);
         serverSpec = specPair.getRight();
         SERVER = specPair.getLeft();
     }
 
+    static {
+        final Pair<FirstAidConfig.General, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(FirstAidConfig.General::new);
+        generalSpec = specPair.getRight();
+        GENERAL = specPair.getLeft();
+    }
+
     public static class Server {
 
         Server(ForgeConfigSpec.Builder builder) {
-            builder.comment("Server configuration settings").push("Damage System");
+            builder.comment("Server to Client synced configuration settings").push("Damage System");
 
             maxHealthHead = healthEntry(builder, "Head", 4);
             maxHealthLeftArm = healthEntry(builder, "Left Arm", 4);
@@ -92,13 +100,6 @@ public class FirstAidConfig {
             builder.pop();
         }
 
-        private static ForgeConfigSpec.IntValue healthEntry(ForgeConfigSpec.Builder builder, String name, int defaultVal) {
-            String noSpaceName = name.replace(' ', '_');
-            return builder.comment("Max health of the " + name)
-                    .translation("firstaid.config.maxhealth." + noSpaceName.toLowerCase(Locale.ENGLISH))
-                    .defineInRange("maxHealth" + noSpaceName, defaultVal, 2, 12);
-        }
-
         public final ForgeConfigSpec.IntValue maxHealthHead;
         public final ForgeConfigSpec.BooleanValue causeDeathHead;
         public final ForgeConfigSpec.IntValue maxHealthLeftArm;
@@ -119,13 +120,19 @@ public class FirstAidConfig {
         public final ForgeConfigSpec.DoubleValue otherRegenMultiplier;
         public final ForgeConfigSpec.DoubleValue naturalRegenMultiplier;
 
+
+        private static ForgeConfigSpec.IntValue healthEntry(ForgeConfigSpec.Builder builder, String name, int defaultVal) {
+            String noSpaceName = name.replace(' ', '_');
+            return builder.comment("Max health of the " + name).translation("firstaid.config.maxhealth." + noSpaceName.toLowerCase(Locale.ENGLISH)).defineInRange("maxHealth" + noSpaceName, defaultVal, 2, 12);
+        }
+
         public static class IEEntry {
 
             public final ForgeConfigSpec.IntValue totalHeals;
             public final ForgeConfigSpec.IntValue secondsPerHeal;
             public final ForgeConfigSpec.IntValue applyTime;
 
-            public IEEntry(ForgeConfigSpec.Builder builder, String name, int initialTotalHeals, int initialSecondsPerHeal, int initialApplyTime) {
+            IEEntry(ForgeConfigSpec.Builder builder, String name, int initialTotalHeals, int initialSecondsPerHeal, int initialApplyTime) {
                 builder.push(name);
                 totalHeals = builder
                         .comment("The total heals this item does when applied. 1 heal = half a heart")
@@ -144,33 +151,163 @@ public class FirstAidConfig {
         }
     }
 
-//    @Config.Comment("Settings regarding the health overlay when ingame")
+    public static class General {
+
+        public General(ForgeConfigSpec.Builder builder) {
+            builder.comment("Server only configuration settings").push("Debuffs");
+            head = new General.Head(builder);
+            body = new General.Body(builder);
+            arms = new General.Arms(builder);
+            legsAndFeet = new General.LegsAndFeet(builder);
+            builder.pop();
+        }
+
+        public final Head head;
+        public final Body body;
+        public final Arms arms;
+        public final LegsAndFeet legsAndFeet;
+
+        public static class Head {
+
+            Head(ForgeConfigSpec.Builder builder) {
+                builder.push("Head");
+                this.blindnessConditions = new ConditionOnHit(builder, "blindness", Arrays.asList(2F, 1F), Arrays.asList(8 * 20, 4 * 20));
+                this.nauseaConditions = new ConditionOnHit(builder, "nausea", Arrays.asList(3F, 2F), Arrays.asList(16 * 20, 12 * 20));
+                builder.pop();
+            }
+
+            public final ConditionOnHit blindnessConditions;
+            public final ConditionOnHit nauseaConditions;
+        }
+
+        public static class Body {
+
+            Body(ForgeConfigSpec.Builder builder) {
+                builder.push("Body");
+                this.nauseaConditions = new ConditionOnHit(builder, "nausea", Arrays.asList(4F, 2F), Arrays.asList(16 * 20, 8 * 20));
+                this.weaknessConditions = new ConditionConstant(builder, "weakness", Arrays.asList(0.25F, 0.50F), Arrays.asList(2, 1));
+                builder.pop();
+            }
+            public final ConditionOnHit nauseaConditions;
+            public final ConditionConstant weaknessConditions;
+        }
+
+        public static class Arms {
+
+            Arms(ForgeConfigSpec.Builder builder) {
+                builder.push("Arms");
+                this.miningFatigueConditions = new ConditionConstant(builder, "miningFatigue", Arrays.asList(0.25F, 0.50F, 0.75F), Arrays.asList(3, 2, 1));
+                builder.pop();
+            }
+            public final ConditionConstant miningFatigueConditions;
+        }
+
+        public static class LegsAndFeet {
+
+            LegsAndFeet(ForgeConfigSpec.Builder builder) {
+                builder.push("Legs and Feet");
+                this.slownessConditions = new ConditionConstant(builder, "slowness", Arrays.asList(0.35F, 0.6F, 0.8F), Arrays.asList(3, 2, 1));
+                builder.pop();
+            }
+            public final ConditionConstant slownessConditions;
+        }
+
+        public static class ConditionOnHit {
+            public ConditionOnHit(ForgeConfigSpec.Builder builder, String name, List<Float> defaultTaken, List<Integer> defaultLength) {
+                builder.push(name);
+                this.enabled = builder
+                        .comment("Enables/Disables this debuff")
+                        .translation("firstaid.config.debuff.enabled")
+                        .define("enabled", true);
+                this.damageTaken = builder
+                        .comment("How much damage the user must have taken for the debuff to apply at the mapped length. Must be sorted so the **highest** value comes first. 2 = 1 heart")
+                        .translation("firstaid.config.debuff.damagetaken")
+                        .defineList("damageTaken", defaultTaken, o -> {
+                            try {
+                                float val = Float.parseFloat(o.toString());
+                                return val >= 0F && val <= 10F;
+                            } catch (NumberFormatException ignored) {}
+                            FirstAid.LOGGER.warn("Invalid entry " + o.toString() + " for damageTaken at " + name);
+                            return false;
+                        });
+                this.debuffLength = builder
+                        .comment("How long the debuff should stay. If the first condition from the damageTaken config is met, the first value in this list will be taken")
+                        .translation("firstaid.config.debuff.debufflength")
+                        .defineList("debuffLength", defaultLength, o -> {
+                            try {
+                                float val = Float.parseFloat(o.toString());
+                                return val >= 0F && val <= Short.MAX_VALUE;
+                            } catch (NumberFormatException ignored) {}
+                            FirstAid.LOGGER.warn("Invalid entry " + o.toString() + " for debuffLength at " + name);
+                            return false;
+                        });
+                builder.pop();
+            }
+            public final ForgeConfigSpec.BooleanValue enabled;
+            public final ForgeConfigSpec.ConfigValue<List<? extends Float>> damageTaken;
+            public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> debuffLength;
+        }
+
+        public static class ConditionConstant {
+            public ConditionConstant(ForgeConfigSpec.Builder builder, String name, List<Float> defaultPercentage, List<Integer> defaultStrength) {
+                builder.push(name);
+                this.enabled = builder
+                        .comment("Enables/Disables this debuff")
+                        .translation("firstaid.config.debuff.enabled")
+                        .define("enabled", true);
+                this.healthPercentageLeft = builder
+                        .comment("How much health the user must have left for the debuff to apply at the mapped length. Must be sorted so the **lowest** value comes first")
+                        .translation("firstaid.config.debuff.healthpercentageleft")
+                        .defineList("healthPercentageLeft", defaultPercentage, o -> {
+                            try {
+                                float val = Float.parseFloat(o.toString());
+                                return val >= 0F && val <= 1F;
+                            } catch (NumberFormatException ignored) {}
+                            FirstAid.LOGGER.warn("Invalid entry " + o.toString() + " for healthPercentageLeft at " + name);
+                            return false;
+                        });
+                this.debuffStrength = builder
+                        .comment("How strong the potion effect should stay. If the first condition from the healthPercentageLeft config is met, the first value in this list will be taken")
+                        .translation("firstaid.config.debuff.debuffstrength")
+                        .defineList("debuffStrength", defaultStrength, o -> {
+                            try {
+                                float val = Float.parseFloat(o.toString());
+                                return val >= 0F && val <= Short.MAX_VALUE;
+                            } catch (NumberFormatException ignored) {}
+                            FirstAid.LOGGER.warn("Invalid entry " + o.toString() + " for debuffStrength at " + name);
+                            return false;
+                        });
+                builder.pop();
+            }
+
+            public final ForgeConfigSpec.BooleanValue enabled;
+            public final ForgeConfigSpec.ConfigValue<List<? extends Float>> healthPercentageLeft;
+            public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> debuffStrength;
+        }
+    }
+
+    //    @Config.Comment("Settings regarding the health overlay when ingame")
 //    @Config.LangKey("firstaid.config.overlay")
     public static final Overlay overlay = new Overlay(); //TODO client
 
-//    @Config.Comment("Enable/Disable specify debuffs on specific body parts")
-//    @Config.LangKey("firstaid.config.debuffs")
-//    @ExtraConfig.Advanced
-    public static final Debuffs debuffs = new Debuffs(); //TODO server as well
-
-//    @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
+    //    @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
 //    @Config.LangKey("firstaid.config.enablesoundsystem")
 //    @ExtraConfig.Advanced
     public static boolean enableSoundSystem = true; //TODO client
 
-//    @Config.Comment("If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health")
+    //    @Config.Comment("If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health")
 //    @Config.LangKey("firstaid.config.scalemaxhealth")
 //    @Config.RequiresWorldRestart
 //    @ExtraConfig.Sync
     public static boolean scaleMaxHealth = false;
 
-//    @Config.Comment("If true, max health will be capped at 6 hearts and absorption at 2 hearts per limb. If false, the health cap will be much higher (64 hearts normal and 16 absorption)")
+    //    @Config.Comment("If true, max health will be capped at 6 hearts and absorption at 2 hearts per limb. If false, the health cap will be much higher (64 hearts normal and 16 absorption)")
 //    @Config.LangKey("firstaid.config.capmaxhealth")
 //    @Config.RequiresWorldRestart
 //    @ExtraConfig.Sync
     public static boolean capMaxHealth = true;
 
-//    @Config.Comment("If true, all usages of setHealth from other mods will be captured. Should not cause any problems, but allow mods like scaling health bandages to apply")
+    //    @Config.Comment("If true, all usages of setHealth from other mods will be captured. Should not cause any problems, but allow mods like scaling health bandages to apply")
 //    @Config.LangKey("firstaid.config.experimental")
 //    @ExtraConfig.Advanced
     public static boolean experimentalSetHealth = false; //TODO server as well
@@ -185,107 +322,34 @@ public class FirstAidConfig {
             TOP_LEFT, TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT
         }
 
-//        @Config.Comment("True if the main health bar should be rendered (Will be average health)")
+        //        @Config.Comment("True if the main health bar should be rendered (Will be average health)")
 //        @Config.LangKey("firstaid.config.showvanillahealthbar")
         public boolean showVanillaHealthBar = false;
 
-//        @Config.Comment("If true the overlay will automatically be hidden while health isn't changing. It will be shown when connecting and any health changes")
+        //        @Config.Comment("If true the overlay will automatically be hidden while health isn't changing. It will be shown when connecting and any health changes")
 //        @Config.LangKey("firstaid.config.hideonnochange")
         public boolean hideOnNoChange = false;
 
         public OverlayMode overlayMode = OverlayMode.PLAYER_MODEL;
 
-//        @Config.Comment("The relative point of the overlay")
+        //        @Config.Comment("The relative point of the overlay")
 //        @Config.LangKey("firstaid.config.position")
         public Position pos = Position.TOP_LEFT;
 
-//        @Config.Comment("The offset on the x axis")
+        //        @Config.Comment("The offset on the x axis")
 //        @Config.LangKey("firstaid.config.xoffset")
 //        @ExtraConfig.Advanced
         public int xOffset = 0;
 
-//        @Config.Comment("The offset on the y axis")
+        //        @Config.Comment("The offset on the y axis")
 //        @Config.LangKey("firstaid.config.yoffset")
 //        @ExtraConfig.Advanced
         public int yOffset = 1;
 
-//        @Config.Comment("Determines the transparency of the overlay. 200 = Maximum transparency, 0 = Fully opaque")
+        //        @Config.Comment("Determines the transparency of the overlay. 200 = Maximum transparency, 0 = Fully opaque")
 //        @Config.LangKey("firstaid.config.alpha")
 //        @Config.RangeInt(min = 0, max = 200)
 //        @ExtraConfig.Advanced
         public int alpha = 50;
-    }
-
-    public static class Debuffs {
-        public final Head head = new Head();
-        public final Body body = new Body();
-        public final Arms arms = new Arms();
-        public final LegsAndFeet legsAndFeet = new LegsAndFeet();
-
-        public static class Head {
-            public boolean blindness = true;
-//            @Config.Comment("Holds the information how the debuff should be applied at different damage taken. Only use this if you know what you are doing.")
-            public final ConditionOnHit blindnessConditions = new ConditionOnHit(new float[]{2F, 1F}, new int[]{8 * 20, 4 * 20});
-
-            public boolean nausea = true;
-//            @Config.Comment("Holds the information how the debuff should be applied at different damage taken. Only use this if you know what you are doing.")
-            public final ConditionOnHit nauseaConditions = new ConditionOnHit(new float[]{3F, 2F}, new int[]{16 * 20, 12 * 20});
-        }
-
-        public static class Body {
-            public boolean nausea = true;
-//            @Config.Comment("Holds the information how the debuff should be applied at different damage taken. Only use this if you know what you are doing.")
-            public final ConditionOnHit nauseaConditions = new ConditionOnHit(new float[]{4F, 2F}, new int[]{16 * 20, 8 * 20});
-
-            public boolean weakness = true;
-//            @Config.Comment("Holds the information how the debuff should be applied at different health left. Only use this if you know what you are doing.")
-            public final ConditionConstant weaknessConditions = new ConditionConstant(new float[]{0.25F, 0.50F}, new int[]{2, 1});
-        }
-
-        public static class Arms {
-            public boolean mining_fatigue = true;
-//            @Config.Comment("Holds the information how the debuff should be applied at different health left. Only use this if you know what you are doing.")
-            public final ConditionConstant miningFatigueConditions = new ConditionConstant(new float[]{0.25F, 0.50F, 0.75F}, new int[]{3, 2, 1});
-        }
-
-        public static class LegsAndFeet {
-            public boolean slowness = true;
-//            @Config.Comment("Holds the information how the debuff should be applied at different health left. Only use this if you know what you are doing.")
-            public final ConditionConstant slownessConditions = new ConditionConstant(new float[]{0.35F, 0.6F, 0.8F}, new int[]{3, 2, 1});
-        }
-
-        public static class ConditionOnHit {
-            public ConditionOnHit(float[] defaultTaken, int[] defaultLength) {
-                this.damageTaken = defaultTaken;
-                this.debuffLength = defaultLength;
-            }
-
-//            @Config.RequiresMcRestart
-//            @Config.Comment("How much damage the user must have taken for the debuff to apply at the mapped length. Must be sorted so the **highest** value comes first. 2 = 1 heart")
-//            @Config.RangeDouble(min = 0, max = 10)
-            public float[] damageTaken;
-
-//            @Config.RequiresMcRestart
-//            @Config.Comment("How long the debuff should stay. If the first condition from the damageTaken config is met, the first value in this list will be taken")
-//            @Config.RangeInt(min = 0, max = Short.MAX_VALUE)
-            public int[] debuffLength;
-        }
-
-        public static class ConditionConstant {
-            public ConditionConstant(float[] defaultPercentage, int[] defaultStrength) {
-                this.healthPercentageLeft = defaultPercentage;
-                this.debuffStrength = defaultStrength;
-            }
-
-//            @Config.RequiresMcRestart
-//            @Config.Comment("How much health the user must have left for the debuff to apply at the mapped length. Must be sorted so the **lowest** value comes first")
-//            @Config.RangeDouble(min = 0, max = 1)
-            public float[] healthPercentageLeft;
-
-//            @Config.RequiresMcRestart
-//            @Config.Comment("How strong the potion effect should stay. If the first condition from the healthPercentageLeft config is met, the first value in this list will be taken")
-//            @Config.RangeInt(min = 0, max = Byte.MAX_VALUE)
-            public int[] debuffStrength;
-        }
     }
 }

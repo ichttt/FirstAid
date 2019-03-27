@@ -190,7 +190,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         //Debuff and part ticking
         world.profiler.startSection("PartDebuffs");
         forEach(part -> part.tick(world, player, morphine == null));
-        if (morphine == null)
+        if (morphine == null && world.isRemote)
             sharedDebuffs.forEach(sharedDebuff -> sharedDebuff.tick(player));
         world.profiler.endSection();
         world.profiler.endSection();

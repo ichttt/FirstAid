@@ -1,8 +1,8 @@
 {
   "itemGroup.firstaid": "医疗护理",
-  "item.bandage": "绷带",
-  "item.plaster": "石膏",
-  "item.morphine": "吗啡",
+  "item.firstaid.bandage": "绷带",
+  "item.firstaid.plaster": "石膏",
+  "item.firstaid.morphine": "吗啡",
 
   "gui.head": "头",
   "gui.left_arm": "左臂",

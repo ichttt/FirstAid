@@ -1,8 +1,8 @@
 {
   "itemGroup.firstaid": "First Aid",
-  "item.bandage": "Bandage",
-  "item.plaster": "Plaster",
-  "item.morphine": "Morphine",
+  "item.firstaid.bandage": "Bandage",
+  "item.firstaid.plaster": "Plaster",
+  "item.firstaid.morphine": "Morphine",
 
   "gui.head": "Head",
   "gui.left_arm": "Left Arm",

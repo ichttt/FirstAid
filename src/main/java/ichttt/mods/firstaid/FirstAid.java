@@ -96,6 +96,7 @@ public class FirstAid {
         bus.addGenericListener(Potion.class, this::registerPotion);
         bus.addGenericListener(SoundEvent.class, this::registerSound);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FirstAidConfig.serverSpec);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FirstAidConfig.generalSpec);
 
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> bus.addListener(ClientHooks::setup));
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> bus.addListener(ClientHooks::lateSetup));

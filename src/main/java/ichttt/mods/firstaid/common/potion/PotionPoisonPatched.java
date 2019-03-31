@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ichttt.mods.firstaid.common;
+package ichttt.mods.firstaid.common.potion;
 
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
@@ -24,26 +24,37 @@ import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.FakePlayer;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
-public class ASMHooks {
+public class PotionPoisonPatched extends Potion {
+    public static final PotionPoisonPatched INSTANCE = new PotionPoisonPatched(true, 5149489);
 
-    public static void onPoisonEffect(EntityLivingBase entity) {
+    protected PotionPoisonPatched(boolean isBadEffectIn, int liquidColorIn) {
+        super(isBadEffectIn, liquidColorIn);
+        this.setPotionName("effect.poison");
+        this.setIconIndex(6, 0);
+        this.setEffectiveness(0.25D);
+        this.setRegistryName(new ResourceLocation("minecraft", "poison"));
+    }
+
+    @Override
+    public void performEffect(@Nonnull EntityLivingBase entity, int amplifier) {
         if (entity instanceof EntityPlayer && !(entity instanceof FakePlayer)) {
             if (entity.world.isRemote)
                 return;
             EntityPlayer player = (EntityPlayer) entity;
             AbstractPlayerDamageModel playerDamageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
-            if (playerDamageModel.HEAD.currentHealth + playerDamageModel.BODY.currentHealth > 2) {
-                DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false);
-            }
+            DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false);
         }
-        else if (entity.getHealth() > 1.0F) {
-            entity.attackEntityFrom(DamageSource.MAGIC, 1.0F);
+        else {
+            super.performEffect(entity, amplifier);
         }
     }
 }

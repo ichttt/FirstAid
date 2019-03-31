@@ -36,6 +36,7 @@ import ichttt.mods.firstaid.common.network.MessageConfiguration;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.potion.FirstAidPotion;
+import ichttt.mods.firstaid.common.potion.PotionPoisonPatched;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.ProjectileHelper;
 import io.netty.buffer.ByteBuf;
@@ -89,6 +90,7 @@ public class EventHandler {
     public static final Random rand = new Random();
     public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")).setRegistryName(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
     public static final Potion MORPHINE = new FirstAidPotion(false, 0xDDD, "morphine").setBeneficial();
+    public static final Potion POISEN_PATCHED = PotionPoisonPatched.INSTANCE;
 
     public static final Map<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
 
@@ -162,6 +164,7 @@ public class EventHandler {
     @SubscribeEvent
     public static void registerPotion(RegistryEvent.Register<Potion> event) {
         event.getRegistry().register(MORPHINE);
+        event.getRegistry().register(POISEN_PATCHED);
     }
 
     @SubscribeEvent

@@ -171,6 +171,7 @@ public class GuiHealthScreen extends GuiScreen {
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
         GlStateManager.color(1F, 1F, 1F, 1F);
         if (FirstAid.isSynced) {
+            GlStateManager.pushMatrix();
             drawHealth(damageModel.HEAD, false, 14);
             drawHealth(damageModel.LEFT_ARM, false, 39);
             drawHealth(damageModel.LEFT_LEG, false, 64);
@@ -179,6 +180,7 @@ public class GuiHealthScreen extends GuiScreen {
             drawHealth(damageModel.RIGHT_ARM, true, 39);
             drawHealth(damageModel.RIGHT_LEG, true, 64);
             drawHealth(damageModel.RIGHT_FOOT, true, 89);
+            GlStateManager.popMatrix();
         }
 
         //Tooltip

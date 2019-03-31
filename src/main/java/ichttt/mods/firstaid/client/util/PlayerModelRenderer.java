@@ -34,7 +34,7 @@ public class PlayerModelRenderer {
     private static final int SIZE = 64;
 
     public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, Gui gui, float alpha) {
-        GlStateManager.enableAlpha();
+        GlStateManager.enableBlend();
         GlStateManager.color(1F, 1F, 1F, 1 - (alpha / 255));
         Minecraft.getMinecraft().getTextureManager().bindTexture(HEALTH_RENDER_LOCATION);
         GlStateManager.scale(0.5F, 0.5F, 0.5F);
@@ -62,8 +62,6 @@ public class PlayerModelRenderer {
                 throw new RuntimeException(String.format("Calculated invalid health for part %s with current health %s and max health %d. Got value %s", part.part, part.currentHealth, maxHealth, healthPercentage));
             texX += SIZE * (healthPercentage > 0.5 ? 1 : 2);
         }
-//        Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
         gui.drawTexturedModalRect(rawTexX, texY, texX, texY, sizeX, sizeY);
-//        Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(Strings.repeat('-', 200), 20, 20, 0xFFFFFF);
     }
 }

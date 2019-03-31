@@ -88,6 +88,12 @@ public class HealthRenderUtils {
         return true;
     }
 
+    public static boolean drawAsString(AbstractDamageablePart damageablePart, boolean allowSecondLine) {
+        int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
+        int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
+        return (maxHealth + maxExtraHealth > 8 && allowSecondLine) || ((maxHealth + maxExtraHealth) > 12);
+    }
+
     public static void drawHealth(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean allowSecondLine) {
         int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
@@ -100,7 +106,7 @@ public class HealthRenderUtils {
                 activeFlashState.setActive(Minecraft.getSystemTime());
         }
 
-        if ((maxHealth + maxExtraHealth > 8 && allowSecondLine) || ((maxHealth + maxExtraHealth) > 12)) {
+        if (drawAsString(damageablePart, allowSecondLine)) {
             drawHealthString(damageablePart, xTranslation, yTranslation, allowSecondLine);
             return;
         }

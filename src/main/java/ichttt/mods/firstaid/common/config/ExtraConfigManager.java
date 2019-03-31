@@ -74,7 +74,7 @@ public class ExtraConfigManager {
         return null;
     }
 
-    public static void postProccessConfigs() {
+    public static void postProcessConfigs() {
         if (toDeleteEntries.isEmpty()) return;
         Config annotation = FirstAidConfig.class.getAnnotation(Config.class);
         String name = annotation.name();
@@ -88,7 +88,7 @@ public class ExtraConfigManager {
         }
 
         for (String s : toDeleteEntries) {
-            String path[] = s.split("\\.");
+            String[] path = s.split("\\.");
             String catString = Configuration.CATEGORY_GENERAL + (path.length > 1 ? "." + s.substring(0, s.length() - (path[path.length - 1].length() + 1)) : "");
             if (config.hasCategory(catString)) {
                 ConfigCategory cat = config.getCategory(catString);

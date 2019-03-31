@@ -31,7 +31,6 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 version = "1.6.3" + (project.hasProperty('betaBuild') ? "-BETA" : "")
 group = "ichttt.mods.firstaid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "firstaid"
-def archiveGroup = "ichttt"
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 compileJava {
@@ -51,6 +50,12 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
+jar {
+    manifest {
+        attributes 'FMLAT' : 'firstaid_at.cfg'
+    }
+}
+
 dependencies {
     runtime files ('lib/FGLW.jar')
 }
@@ -61,6 +66,25 @@ license {
     }
     include '**/ichttt/mods/**/*.java'
     header = file('LICENSE_HEADER')
+}
+
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        // replace version and mcversion
+        expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+
+    // copy everything else except the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
 }
 
 //Check if signing is enabled when building
@@ -83,44 +107,6 @@ task setupKeys() {
     }
 }
 
-//Everything from here til the marker is inspired from ImmersiveEngineering. Many thanks!
-reobf {
-    coreJar {mappingType = 'SEARGE'}
-}
-
-task coreJar(type: Jar) {
-    // Copy all compiled files and resources from the source set to the JAR
-    // If you have additional source sets, add the same logic here
-    from(sourceSets.main.output) {
-        // Don't include the coremod in the main mod
-        // If you have more coremod-related packages that aren't nested in the main one, add exclusions for them
-        include 'ichttt/mods/firstaid/common/asm/**'
-    }
-    manifest {
-        attributes "FMLCorePlugin": "ichttt.mods.firstaid.common.asm.FirstAidCoremod"
-        attributes 'Maven-Artifact': archiveGroup+':'+archivesBaseName+'-core:'+version
-    }
-    // Add a classifier to the JAR ('-core' at the end of the file name)
-    // Distinguishes the mod JAR from the shipped one
-    classifier 'core'
-    group = 'build'
-}
-
-task signCoreJar(type: SignJar) {
-    onlyIf { // Skip the task if our secret data isn't available
-        project.hasProperty('keyStore')
-    }
-    dependsOn reobfCoreJar
-    if (project.hasProperty('keyStore')) { // This needs to be a path to the keystore file
-        keyStore = project.keyStore
-        alias = project.storeAlias
-        storePass = signPass
-        keyPass = signPass
-        inputFile = coreJar.archivePath
-        outputFile = coreJar.archivePath
-    }
-}
-
 task signMainJar(type: SignJar) {
     onlyIf { // Skip the task if our secret data isn't available
         project.hasProperty('keyStore')
@@ -137,44 +123,7 @@ task signMainJar(type: SignJar) {
 }
 
 signMainJar.dependsOn setupKeys
-signCoreJar.dependsOn setupKeys
 build.dependsOn signMainJar
-jar.dependsOn signCoreJar
-
-def libPrefix = 'META-INF/libraries'
-jar {
-    manifest {
-        attributes 'ContainedDeps': libPrefix+'/'+coreJar.archivePath.name
-        attributes 'FMLAT' : 'firstaid_at.cfg'
-        attributes 'Maven-Artifact': archiveGroup+':'+archivesBaseName+':'+version
-    }
-    exclude 'ichttt/mods/firstaid/common/asm/**'
-    // Add the output of the mod JAR task to the main JAR for later extraction
-    from(coreJar.archivePath.absolutePath) {
-        include '*' // Due to the way Gradle's copy tasks work, we need this line for the JAR to get added
-        into libPrefix
-    }
-}
-//IE inspired stuff END
-
-processResources {
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-                
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
-    }
-        
-    // copy everything else except the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-}
 
 //Copied from FGLW. Therefor ignore all groovy warnings
 @SuppressWarnings("all")

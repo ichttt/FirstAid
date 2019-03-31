@@ -18,6 +18,7 @@
 
 package ichttt.mods.firstaid.common.potion;
 
+import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
@@ -42,6 +43,7 @@ public class PotionPoisonPatched extends Potion {
         this.setIconIndex(6, 0);
         this.setEffectiveness(0.25D);
         this.setRegistryName(new ResourceLocation("minecraft", "poison"));
+        FirstAid.LOGGER.info("Don't worry, the minecraft poison override IS intended.");
     }
 
     @Override

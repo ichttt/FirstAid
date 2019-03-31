@@ -60,14 +60,16 @@ public class MessageAddHealth implements IMessage {
         @SideOnly(Side.CLIENT)
         @Override
         public IMessage onMessage(MessageAddHealth message, MessageContext ctx) {
-            EntityPlayerSP playerSP = Minecraft.getMinecraft().player;
-            AbstractPlayerDamageModel damageModel = Objects.requireNonNull(playerSP.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
-            for (int i = 0; i < message.table.length; i++) {
-                float f = message.table[i];
-                //EnumPlayerPart is 1-indexed
-                EnumPlayerPart part = EnumPlayerPart.fromID(i + 1);
-                damageModel.getFromEnum(part).heal(f, playerSP, false);
-            }
+            Minecraft.getMinecraft().addScheduledTask(() -> {
+                EntityPlayerSP playerSP = Minecraft.getMinecraft().player;
+                AbstractPlayerDamageModel damageModel = Objects.requireNonNull(playerSP.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                for (int i = 0; i < message.table.length; i++) {
+                    float f = message.table[i];
+                    //EnumPlayerPart is 1-indexed
+                    EnumPlayerPart part = EnumPlayerPart.fromID(i + 1);
+                    damageModel.getFromEnum(part).heal(f, playerSP, false);
+                }
+            });
             return null;
         }
     }

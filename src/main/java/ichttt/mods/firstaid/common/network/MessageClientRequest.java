@@ -59,12 +59,14 @@ public class MessageClientRequest implements IMessage {
         @Override
         public IMessage onMessage(MessageClientRequest message, MessageContext ctx) {
             EntityPlayerMP player = ctx.getServerHandler().player;
-            if (message.type == Type.TUTORIAL_COMPLETE) {
-                CapProvider.tutorialDone.add(player.getName());
-                Objects.requireNonNull(player.getServer()).addScheduledTask(() -> Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).hasTutorial = true);
-            } else if (message.type == Type.REQUEST_REFRESH) {
-                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), player);
-            }
+            player.getServer().addScheduledTask(() -> {
+                if (message.type == Type.TUTORIAL_COMPLETE) {
+                    CapProvider.tutorialDone.add(player.getName());
+                    Objects.requireNonNull(player.getServer()).addScheduledTask(() -> Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).hasTutorial = true);
+                } else if (message.type == Type.REQUEST_REFRESH) {
+                    FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), player);
+                }
+            });
             return null;
         }
     }

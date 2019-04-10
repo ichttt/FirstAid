@@ -43,6 +43,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import sun.net.www.content.text.plain;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -257,18 +258,8 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             if (!revival.isHealty() && !revival.isDead()) {
                 this.waitingForHelp = true; //Technically not dead yet, but we should still return true
                 return true;
-            } else if (this.waitingForHelp && revival.isRevived()) { //We just got revived
-                this.waitingForHelp = false;
-                player.isDead = false;
-                for (AbstractDamageablePart part : this) {
-                    if ((part.canCauseDeath || this.noCritical) && part.currentHealth <= 0F) {
-                        part.currentHealth = 1F; // Set the critical health to a non-zero value
-                    }
-                }
-                //make sure to resync the client health
-                if (!player.world.isRemote && player instanceof EntityPlayerMP)
-                    FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this), (EntityPlayerMP) player); //Upload changes to the client
-                return false;
+            } else if (this.waitingForHelp) {
+                return true;
             }
         }
 
@@ -338,5 +329,27 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             maxHealth += part.getMaxHealth();
         }
         return maxHealth;
+    }
+
+    @Override
+    public void onNotHelped(EntityPlayer player) {
+        if (!this.waitingForHelp)
+            FirstAid.LOGGER.warn("Player {} not waiting for help!", player.getName());
+        this.waitingForHelp = false;
+    }
+
+    @Override
+    public void onHelpedUp(EntityPlayer player) {
+        onNotHelped(player);
+        player.isDead = false;
+        for (AbstractDamageablePart part : this) {
+            if ((part.canCauseDeath || this.noCritical) && part.currentHealth <= 0F) {
+                part.currentHealth = 1F; // Set the critical health to a non-zero value
+            }
+        }
+        //make sure to resync the client health
+        if (!player.world.isRemote && player instanceof EntityPlayerMP)
+            FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this), (EntityPlayerMP) player); //Upload changes to the client
+        this.waitingForHelp = false;
     }
 }

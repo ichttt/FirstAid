@@ -18,6 +18,8 @@
 
 package ichttt.mods.firstaid.common;
 
+import com.creativemd.playerrevive.api.event.PlayerKilledEvent;
+import com.creativemd.playerrevive.api.event.PlayerRevivedEvent;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
@@ -292,5 +294,23 @@ public class EventHandler {
     public static void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (!event.player.world.isRemote && event.player instanceof EntityPlayerMP) //Mojang seems to wipe all caps on teleport
             FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), (EntityPlayerMP) event.player);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerBleedToDeath(PlayerKilledEvent event) {
+        EntityPlayer player = event.getEntityPlayer();
+        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+        if (damageModel != null) {
+            damageModel.onNotHelped(player);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerRevived(PlayerRevivedEvent event) {
+        EntityPlayer player = event.getEntityPlayer();
+        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+        if (damageModel != null) {
+            damageModel.onHelpedUp(player);
+        }
     }
 }

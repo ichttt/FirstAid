@@ -5,11 +5,11 @@
   "description": "First Aid is a mod that expands the vanilla health system to respect the different parts of your body",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
+  "url": "https://minecraft.curseforge.com/projects/first-aid",
   "updateUrl": "",
   "authorList": ["ichttt", "TechnikforLife"],
   "credits": "",
-  "logoFile": "",
+  "logoFile": "assets/firstaid/logo.png",
   "screenshots": [],
   "dependencies": []
 }

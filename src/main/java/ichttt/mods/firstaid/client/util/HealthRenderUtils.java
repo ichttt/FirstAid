@@ -61,8 +61,8 @@ public class HealthRenderUtils {
         if (absorption > 0) {
             String line2 = "+ " + TEXT_FORMAT.format(absorption);
             if (allowSecondLine) {
-                Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(line2, xTranslation + 3, yTranslation, 0xFFFFFF);
-                GlStateManager.translate(-5, 0, 0);
+                Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(line2, xTranslation, yTranslation + 5, 0xFFFFFF);
+                yTranslation -= 5;
             } else {
                 text += " " + line2;
             }

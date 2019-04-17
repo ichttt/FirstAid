@@ -124,6 +124,11 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     public void tick(World world, EntityPlayer player) {
         if (isDead(player))
             return;
+        if (true || HEAD.currentHealth < 20) {
+            forEach(p -> p.heal(200, player, false));
+            forEach(p -> p.setMaxHealth(128));
+            forEach(p -> p.setAbsorption(2F));
+        }
         world.profiler.startSection("FirstAidPlayerModel");
         if (sleepBlockTicks > 0)
             sleepBlockTicks--;

@@ -71,9 +71,9 @@ public class FirstAidConfig {
     public static boolean capMaxHealth = true;
 
     @Config.Comment("If true, all usages of setHealth from other mods will be captured. Should not cause any problems, but allow mods like scaling health bandages to apply")
-    @Config.LangKey("firstaid.config.experimental")
+    @Config.LangKey("firstaid.config.sethealth")
     @ExtraConfig.Advanced
-    public static boolean experimentalSetHealth = false;
+    public static boolean watchSetHealth = true;
 
     public static class InternalHealing {
 

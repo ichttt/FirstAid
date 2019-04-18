@@ -313,4 +313,14 @@ public class EventHandler {
             damageModel.onHelpedUp(player);
         }
     }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (!event.isEndConquered() && !event.player.world.isRemote && event.player instanceof EntityPlayerMP) {
+            AbstractPlayerDamageModel damageModel = Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+            damageModel.runScaleLogic(event.player);
+            damageModel.forEach(damageablePart -> damageablePart.heal(damageablePart.getMaxHealth(), event.player, false));
+            FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel), (EntityPlayerMP) event.player);
+        }
+    }
 }

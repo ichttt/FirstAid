@@ -43,7 +43,6 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import sun.net.www.content.text.plain;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -150,36 +149,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         if (!this.hasTutorial)
             this.hasTutorial = CapProvider.tutorialDone.contains(player.getName());
 
-        if (FirstAidConfig.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
-            world.profiler.startSection("healthscaling");
-            float globalFactor = player.getMaxHealth() / 20F;
-            if (prevScaleFactor != globalFactor) {
-                int reduced = 0;
-                int added = 0;
-                for (AbstractDamageablePart part : this) {
-                    int result = Math.round(part.initialMaxHealth * globalFactor);
-                    if (result % 2 == 1) {
-                        int partMaxHealth = part.getMaxHealth();
-                        if (part.currentHealth < partMaxHealth && reduced < 4) {
-                            result--;
-                            reduced++;
-                        } else if (part.currentHealth > partMaxHealth && added < 4) {
-                            result++;
-                            added++;
-                        } else if (reduced > added) {
-                            result++;
-                            added++;
-                        } else {
-                            result--;
-                            reduced++;
-                        }
-                    }
-                    part.setMaxHealth(result);
-                }
-            }
-            prevScaleFactor = globalFactor;
-            world.profiler.endSection();
-        }
+        runScaleLogic(player);
 
         //morphine update
         if (this.needsMorphineUpdate) {
@@ -351,5 +321,39 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         if (!player.world.isRemote && player instanceof EntityPlayerMP)
             FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this), (EntityPlayerMP) player); //Upload changes to the client
         this.waitingForHelp = false;
+    }
+
+    @Override
+    public void runScaleLogic(EntityPlayer player) {
+        if (FirstAidConfig.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
+            player.world.profiler.startSection("healthscaling");
+            float globalFactor = player.getMaxHealth() / 20F;
+            if (prevScaleFactor != globalFactor) {
+                int reduced = 0;
+                int added = 0;
+                for (AbstractDamageablePart part : this) {
+                    int result = Math.round(part.initialMaxHealth * globalFactor);
+                    if (result % 2 == 1) {
+                        int partMaxHealth = part.getMaxHealth();
+                        if (part.currentHealth < partMaxHealth && reduced < 4) {
+                            result--;
+                            reduced++;
+                        } else if (part.currentHealth > partMaxHealth && added < 4) {
+                            result++;
+                            added++;
+                        } else if (reduced > added) {
+                            result++;
+                            added++;
+                        } else {
+                            result--;
+                            reduced++;
+                        }
+                    }
+                    part.setMaxHealth(result);
+                }
+            }
+            prevScaleFactor = globalFactor;
+            player.world.profiler.endSection();
+        }
     }
 }

@@ -115,4 +115,6 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
     public abstract void onNotHelped(EntityPlayer player);
 
     public abstract void onHelpedUp(EntityPlayer player);
+
+    public abstract void runScaleLogic(EntityPlayer player);
 }

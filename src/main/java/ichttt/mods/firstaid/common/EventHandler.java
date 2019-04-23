@@ -149,7 +149,7 @@ public class EventHandler {
     @SubscribeEvent
     public static void tickPlayers(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END && CommonUtils.isSurvivalOrAdventure(event.player)) {
-            if (event.player.removed) return;
+            if (!event.player.isAlive()) return;
             CommonUtils.getDamageModel(event.player).tick(event.player.world, event.player);
             hitList.remove(event.player); //Damage should be done in the same tick as the hit was noted, otherwise we got a false-positive
         }

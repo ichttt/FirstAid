@@ -20,6 +20,7 @@ package ichttt.mods.firstaid.common.potion;
 
 import ichttt.mods.firstaid.FirstAid;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -50,10 +51,10 @@ public class FirstAidPotion extends Potion {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void renderInventoryEffect(int x, int y, PotionEffect effect, Minecraft mc) {
+    public void renderInventoryEffect(PotionEffect effect, Gui gui, int x, int y, float z) {
         GlStateManager.pushMatrix();
         GlStateManager.scalef(1.2F, 1.2F, 1.2F);
-        mc.getItemRenderer().renderItemAndEffectIntoGUI(stack, Math.round(x / 1.2F) + 4, Math.round(y / 1.2F) + 5);
+        Minecraft.getInstance().getItemRenderer().renderItemAndEffectIntoGUI(stack, Math.round(x / 1.2F) + 4, Math.round(y / 1.2F) + 5);
         GlStateManager.popMatrix();
     }
 }

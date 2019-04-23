@@ -155,6 +155,8 @@ public class FirstAid {
     }
 
     public void registerSound(RegistryEvent.Register<SoundEvent> event) {
-        event.getRegistry().register(new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")).setRegistryName(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")));
+        System.out.println("REGISTER");
+        ResourceLocation res = new ResourceLocation(FirstAid.MODID, "debuff.heartbeat");
+        event.getRegistry().register(new SoundEvent(res).setRegistryName(res));
     }
 }

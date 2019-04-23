@@ -219,6 +219,7 @@ public class GuiHealthScreen extends GuiScreen {
         if (mouseX >= bedX && mouseY >= bedY && mouseX < bedX + (16 * bedScaleFactor) && mouseY < bedY + (16 * bedScaleFactor)) {
             String s = sleepHealing == 0D ? I18n.format("gui.no_sleep_heal") : I18n.format("gui.sleep_heal_amount", FORMAT.format(sleepHealing * 100));
             drawHoveringText(s, mouseX, mouseY);
+            GlStateManager.disableLighting();
         }
 
         holdButtonMouseCallback(true); //callback: check if buttons are finish

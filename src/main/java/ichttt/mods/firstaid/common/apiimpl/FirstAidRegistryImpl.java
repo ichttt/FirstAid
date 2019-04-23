@@ -43,17 +43,17 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class FirstAidRegistryImpl extends FirstAidRegistry {
     public static final FirstAidRegistryImpl INSTANCE = new FirstAidRegistryImpl();
-    private final Map<String, IDamageDistribution> DISTRIBUTION_MAP = new HashMap<>();
-    private final Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> HEALER_MAP = new HashMap<>();
+    private final Map<String, IDamageDistribution> DISTRIBUTION_MAP = new ConcurrentHashMap<>();
+    private final Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> HEALER_MAP = new ConcurrentHashMap<>();
     private final Multimap<EnumDebuffSlot, Supplier<IDebuff>> DEBUFFS = HashMultimap.create();
     private boolean registrationAllowed = true;
 
@@ -69,26 +69,29 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
     @Override
     public void bindDamageSourceStandard(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable) {
-        if (DISTRIBUTION_MAP.containsKey(damageType))
-            FirstAid.LOGGER.info("Damage Distribution override detected for source " + damageType);
-        DISTRIBUTION_MAP.put(damageType, new StandardDamageDistribution(priorityTable));
+        bindDamageSourceCustom(damageType, new StandardDamageDistribution(priorityTable));
     }
 
     @Override
     public void bindDamageSourceRandom(@Nonnull String damageType, boolean nearestFirst, boolean tryNoKill) {
         if (nearestFirst) {
             if (!tryNoKill)
-                DISTRIBUTION_MAP.remove(damageType);
+                bindDamageSourceCustom(damageType, RandomDamageDistribution.NEAREST_KILL);
             else
-                DISTRIBUTION_MAP.put(damageType, RandomDamageDistribution.NEAREST_NOKILL);
+                bindDamageSourceCustom(damageType, RandomDamageDistribution.NEAREST_NOKILL);
         } else {
-            DISTRIBUTION_MAP.put(damageType, tryNoKill ? RandomDamageDistribution.ANY_NOKILL : RandomDamageDistribution.ANY_KILL);
+            bindDamageSourceCustom(damageType, tryNoKill ? RandomDamageDistribution.ANY_NOKILL : RandomDamageDistribution.ANY_KILL);
         }
     }
 
     @Override
-    public void bindDamageSourceCustom(@Nonnull String damageType, @Nonnull IDamageDistribution distributionTable) {
-        DISTRIBUTION_MAP.put(damageType, distributionTable);
+    public synchronized void bindDamageSourceCustom(@Nonnull String damageType, @Nonnull IDamageDistribution distributionTable) {
+        if (DISTRIBUTION_MAP.containsKey(damageType))
+            FirstAid.LOGGER.info("Damage Distribution override detected for source " + damageType);
+        if (distributionTable == RandomDamageDistribution.NEAREST_KILL) //This is the default
+            DISTRIBUTION_MAP.remove(damageType);
+        else
+            DISTRIBUTION_MAP.put(damageType, distributionTable);
     }
 
     @Deprecated
@@ -98,7 +101,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     }
 
     @Override
-    public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, Function<ItemStack, Integer> applyTime) {
+    public synchronized void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, Function<ItemStack, Integer> applyTime) {
         if (this.HEALER_MAP.containsKey(item))
             FirstAid.LOGGER.warn("Healing type override detected for item " + item);
         this.HEALER_MAP.put(item, Pair.of(factory, applyTime));
@@ -156,7 +159,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     }
 
     @Override
-    public void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull Supplier<IDebuff> debuff) {
+    public synchronized void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull Supplier<IDebuff> debuff) {
         if (!registrationAllowed)
             throw new IllegalStateException("Registration must take place before FMLLoadCompleteEvent");
 

@@ -60,7 +60,7 @@ public class DataManagerWrapper extends EntityDataManager {
     @Override
     @Nonnull
     public <T> T get(@Nonnull DataParameter<T> key) {
-        if (key == EntityPlayer.ABSORPTION && !player.removed)
+        if (key == EntityPlayer.ABSORPTION && player.isAlive())
             parent.set(key, (T) CommonUtils.getDamageModel(player).getAbsorption());
         return parent.get(key);
     }

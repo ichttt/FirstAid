@@ -1,24 +1,30 @@
 # MC Paint mod definition file
 modLoader="javafml" #mandatory
-# A version range to match for said mod loader - for regular FML @Mod it will be the minecraft version (without the 1.)
-loaderVersion="[25,26)" #mandatory
-# A URL to refer people to when problems occur with this mod
+loaderVersion="[25,)" #mandatory
 issueTrackerURL="https://github.com/ichttt/firstaid" #optional
-# A URL for the "homepage" for this mod, displayed in the mod UI
 displayURL="https://minecraft.curseforge.com/projects/first-aid" #optional
-# A file name (in the root of the mod JAR) containing a logo for display
 logoFile="firstaid_logo.png" #optional
-# A text field displayed in the mod UI
 authors="ichttt" #optional
-# A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
-# The modid of the mod
-modId="firstaid" #mandatory
-# The version number of the mod - there's a few well known ${} variables useable here or just hardcode it
-version="1.7.0" #mandatory
- # A display name for the mod
-displayName="First Aid" #mandatory
-# The description text for the mod (multi line!) (#mandatory)
-description='''
-First Aid is a game changing mod focused around a new health system
-'''
+    # The modid of the mod
+    modId="firstaid" #mandatory
+    # The version number of the mod - there's a few well known ${} variables useable here or just hardcode it
+    version="1.7.0" #mandatory
+     # A display name for the mod
+    displayName="First Aid" #mandatory
+    # The description text for the mod (multi line!) (#mandatory)
+    description='''
+    First Aid is a game changing mod focused around a new health system
+    '''
+[[dependencies.firstaid]]
+    modId="forge"
+    mandatory=true
+    versionRange="[25.0.149,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.firstaid]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.13.2,1.14)"
+    ordering="NONE"
+    side="BOTH"

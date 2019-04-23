@@ -35,11 +35,11 @@ import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.GuiIngameForge;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public class ClientEventHandler {
@@ -73,7 +73,7 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
-    public static void onKeyPress(InputEvent.KeyInputEvent event) {
+    public static void onKeyPress(InputEvent event) {
         if (ClientHooks.showWounds.isPressed()) {
             Minecraft mc = Minecraft.getInstance();
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
@@ -101,7 +101,7 @@ public class ClientEventHandler {
         RenderGameOverlayEvent.ElementType type = event.getType();
         if (type == RenderGameOverlayEvent.ElementType.ALL || (type == RenderGameOverlayEvent.ElementType.TEXT && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.OFF && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)) {
             Minecraft mc = Minecraft.getInstance();
-            if (mc.player.removed) return;
+            if (!mc.player.isAlive()) return;
             mc.profiler.startSection("FirstAidOverlay");
             GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
             HUDHandler.INSTANCE.renderOverlay(mc, event.getPartialTicks());

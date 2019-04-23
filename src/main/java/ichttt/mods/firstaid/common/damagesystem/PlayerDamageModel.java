@@ -269,7 +269,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 //            }
 //        }
 
-        if (player != null && (player.removed || player.getHealth() <= 0F))
+        if (player != null && !player.isAlive())
             return true;
 
         if (this.noCritical) {

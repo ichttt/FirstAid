@@ -27,6 +27,7 @@ import ichttt.mods.firstaid.api.debuff.builder.DebuffBuilderFactory;
 import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.EventHandler;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.SoundEvent;
 import org.apache.commons.lang3.ArrayUtils;
@@ -71,17 +72,17 @@ public class RegistryManager {
 
         //---DEBUFFS---
         DebuffBuilderFactory factory = DebuffBuilderFactory.getInstance();
-//        loadValuesFromConfig(factory, "blindness", () -> EventHandler.HEARTBEAT, FirstAidConfig.GENERAL.head.blindnessConditions, EnumDebuffSlot.HEAD);
-//
-//        loadValuesFromConfig(factory, "nausea", null, FirstAidConfig.GENERAL.head.nauseaConditions, EnumDebuffSlot.HEAD);
-//
-//        loadValuesFromConfig(factory, "nausea", null, FirstAidConfig.GENERAL.body.nauseaConditions, EnumDebuffSlot.BODY);
-//
-//        loadValuesFromConfig(factory, "weakness", FirstAidConfig.GENERAL.body.weaknessConditions, EnumDebuffSlot.BODY);
-//
-//        loadValuesFromConfig(factory, "mining_fatigue", FirstAidConfig.GENERAL.arms.miningFatigueConditions, EnumDebuffSlot.ARMS);
-//
-//        loadValuesFromConfig(factory, "slowness", FirstAidConfig.GENERAL.legsAndFeet.slownessConditions, EnumDebuffSlot.LEGS_AND_FEET);
+        loadValuesFromConfig(factory, "blindness", () -> EventHandler.HEARTBEAT, FirstAidConfig.GENERAL.head.blindnessConditions, EnumDebuffSlot.HEAD);
+
+        loadValuesFromConfig(factory, "nausea", null, FirstAidConfig.GENERAL.head.nauseaConditions, EnumDebuffSlot.HEAD);
+
+        loadValuesFromConfig(factory, "nausea", null, FirstAidConfig.GENERAL.body.nauseaConditions, EnumDebuffSlot.BODY);
+
+        loadValuesFromConfig(factory, "weakness", FirstAidConfig.GENERAL.body.weaknessConditions, EnumDebuffSlot.BODY);
+
+        loadValuesFromConfig(factory, "mining_fatigue", FirstAidConfig.GENERAL.arms.miningFatigueConditions, EnumDebuffSlot.ARMS);
+
+        loadValuesFromConfig(factory, "slowness", FirstAidConfig.GENERAL.legsAndFeet.slownessConditions, EnumDebuffSlot.LEGS_AND_FEET);
     }
 
     private static void loadValuesFromConfig(DebuffBuilderFactory factory, String potionName, Supplier<SoundEvent> event, FirstAidConfig.General.ConditionOnHit config, EnumDebuffSlot slot) {

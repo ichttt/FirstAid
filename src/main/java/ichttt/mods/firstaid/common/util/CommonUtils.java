@@ -114,7 +114,7 @@ public class CommonUtils {
 
     @Nonnull
     public static AbstractPlayerDamageModel getDamageModel(EntityPlayer player) {
-        return player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null).orElseThrow(() -> new IllegalArgumentException("Missing Damage Model!"));
+        return player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null).orElseThrow(() -> new IllegalArgumentException("Player " + player.getName() + " is missing a damage model!"));
     }
 
     public static boolean hasDamageModel(Entity entity) {

@@ -47,7 +47,7 @@ public class PotionPoisonPatched extends Potion {
     @Override
     public void performEffect(@Nonnull EntityLivingBase entity, int amplifier) {
         if (entity instanceof EntityPlayer && !(entity instanceof FakePlayer)) {
-            if (entity.world.isRemote)
+            if (entity.world.isRemote || !entity.isAlive())
                 return;
             EntityPlayer player = (EntityPlayer) entity;
             AbstractPlayerDamageModel playerDamageModel = CommonUtils.getDamageModel(player);

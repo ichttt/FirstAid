@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2018
+ * Copyright (C) 2017-2019
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,6 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -85,19 +84,16 @@ public class DataManagerWrapper extends EntityDataManager {
                 if (aFloat > player.getMaxHealth()) {
                     if (player.world.isRemote) //I don't know why only if !world.isRemote... maybe double check this
                         CommonUtils.getDamageModel(player).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
-                } else if (FirstAidConfig.experimentalSetHealth && !aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && !player.world.isRemote && player instanceof EntityPlayerMP) {
+                } else if (FirstAidConfig.watchSetHealth && !aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && !player.world.isRemote && player instanceof EntityPlayerMP && ((EntityPlayerMP) player).connection != null) {
                     //calculate diff
                     Float orig = get(EntityLivingBase.HEALTH);
                     if (orig > 0 && !orig.isNaN() && !orig.isInfinite()) {
-                        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
-                        if (Arrays.stream(elements).noneMatch(stackTraceElement -> stackTraceElement.toString().startsWith("net.minecraft.entity.player.EntityPlayerMP.<init>"))) {
-                            float healed = orig - aFloat;
-                            if (Math.abs(healed) > 0.001) {
-                                if (healed < 0) {
-                                    DamageDistribution.handleDamageTaken(RandomDamageDistribution.NEAREST_KILL, CommonUtils.getDamageModel(player), healed, player, DamageSource.MAGIC, true, true);
-                                } else {
-                                    HealthDistribution.addRandomHealth(aFloat, player, true);
-                                }
+                        float healed = aFloat - orig;
+                        if (Math.abs(healed) > 0.001) {
+                            if (healed < 0) {
+                                DamageDistribution.handleDamageTaken(RandomDamageDistribution.NEAREST_KILL, CommonUtils.getDamageModel(player), -healed, player, DamageSource.MAGIC, true, true);
+                            } else {
+                                HealthDistribution.addRandomHealth(aFloat, player, true);
                             }
                         }
                         return;

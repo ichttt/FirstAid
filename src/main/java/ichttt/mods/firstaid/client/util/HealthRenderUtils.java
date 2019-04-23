@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2018
+ * Copyright (C) 2017-2019
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,8 +59,8 @@ public class HealthRenderUtils {
         if (absorption > 0) {
             String line2 = "+ " + TEXT_FORMAT.format(absorption);
             if (allowSecondLine) {
-                Minecraft.getInstance().fontRenderer.drawStringWithShadow(line2, xTranslation + 3, yTranslation, 0xFFFFFF);
-                GlStateManager.translatef(-5, 0, 0);
+                Minecraft.getInstance().fontRenderer.drawStringWithShadow(line2, xTranslation, yTranslation + 5, 0xFFFFFF);
+                yTranslation -= 5;
             } else {
                 text += " " + line2;
             }
@@ -86,6 +86,12 @@ public class HealthRenderUtils {
         return true;
     }
 
+    public static boolean drawAsString(AbstractDamageablePart damageablePart, boolean allowSecondLine) {
+        int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
+        int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
+        return (maxHealth + maxExtraHealth > 8 && allowSecondLine) || ((maxHealth + maxExtraHealth) > 12);
+    }
+
     public static void drawHealth(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean allowSecondLine) {
         int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
@@ -98,7 +104,7 @@ public class HealthRenderUtils {
                 activeFlashState.setActive(Util.milliTime());
         }
 
-        if ((maxHealth + maxExtraHealth > 8 && allowSecondLine) || ((maxHealth + maxExtraHealth) > 12)) {
+        if (drawAsString(damageablePart, allowSecondLine)) {
             drawHealthString(damageablePart, xTranslation, yTranslation, allowSecondLine);
             return;
         }

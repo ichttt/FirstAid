@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2018
+ * Copyright (C) 2017-2019
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,6 +81,8 @@ public class EventHandler {
     public static final SoundEvent HEARTBEAT = FirstAidItems.getNull();
     @ObjectHolder("firstaid:morphine")
     public static final Potion MORPHINE = FirstAidItems.getNull();
+    @ObjectHolder("minecraft:poisen")
+    public static final Potion POISON_PATCHED = FirstAidItems.getNull();
 
     public static final Map<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
 
@@ -250,5 +252,34 @@ public class EventHandler {
         FirstAid.LOGGER.debug("Cleaning up");
         CapProvider.tutorialDone.clear();
         EventHandler.hitList.clear();
+    }
+//
+//    @SubscribeEvent TODO PR comapt
+//    public static void onPlayerBleedToDeath(PlayerKilledEvent event) {
+//        EntityPlayer player = event.getEntityPlayer();
+//        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+//        if (damageModel != null) {
+//            damageModel.onNotHelped(player);
+//        }
+//    }
+//
+//    @SubscribeEvent
+//    public static void onPlayerRevived(PlayerRevivedEvent event) {
+//        EntityPlayer player = event.getEntityPlayer();
+//        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+//        if (damageModel != null) {
+//            damageModel.onHelpedUp(player);
+//        }
+//    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        EntityPlayer player = event.getPlayer();
+        if (!event.isEndConquered() && !player.world.isRemote && player instanceof EntityPlayerMP) {
+            AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+            damageModel.runScaleLogic(player);
+            damageModel.forEach(damageablePart -> damageablePart.heal(damageablePart.getMaxHealth(), player, false));
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (EntityPlayerMP) player), new MessageSyncDamageModel(CommonUtils.getDamageModel(player)));
+        }
     }
 }

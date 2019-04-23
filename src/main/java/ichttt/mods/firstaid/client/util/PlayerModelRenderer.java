@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2018
+ * Copyright (C) 2017-2019
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,8 +60,6 @@ public class PlayerModelRenderer {
                 throw new RuntimeException(String.format("Calculated invalid health for part %s with current health %s and max health %d. Got value %s", part.part, part.currentHealth, maxHealth, healthPercentage));
             texX += SIZE * (healthPercentage > 0.5 ? 1 : 2);
         }
-//        Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
         gui.drawTexturedModalRect(rawTexX, texY, texX, texY, sizeX, sizeY);
-//        Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(Strings.repeat('-', 200), 20, 20, 0xFFFFFF);
     }
 }

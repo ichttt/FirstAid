@@ -307,10 +307,10 @@ public class FirstAidConfig {
 //    @ExtraConfig.Sync
     public static boolean capMaxHealth = true;
 
-    //    @Config.Comment("If true, all usages of setHealth from other mods will be captured. Should not cause any problems, but allow mods like scaling health bandages to apply")
-//    @Config.LangKey("firstaid.config.experimental")
+//    @Config.Comment("If true, all usages of setHealth from other mods will be captured. Should not cause any problems, but allow mods like scaling health bandages to apply")
+//    @Config.LangKey("firstaid.config.sethealth")
 //    @ExtraConfig.Advanced
-    public static boolean experimentalSetHealth = false; //TODO server as well
+    public static boolean watchSetHealth = true; //TODO server as well
 
     public static class Overlay {
 

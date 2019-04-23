@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2018
+ * Copyright (C) 2017-2019
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -235,8 +235,16 @@ public class GuiHealthScreen extends GuiScreen {
     }
 
     public void drawHealth(AbstractDamageablePart damageablePart, boolean right, int yOffset) {
-        int xTranslation = guiLeft + (right ? 200 - Math.min(38, HealthRenderUtils.getMaxHearts(damageablePart.getMaxHealth()) * 9 + HealthRenderUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2) : 57);
+        GlStateManager.pushMatrix();
+        int xTranslation = guiLeft + (right ? getRightOffset(damageablePart) : 57);
         HealthRenderUtils.drawHealth(damageablePart, xTranslation, guiTop + yOffset, this, true);
+        GlStateManager.popMatrix();
+    }
+
+    private static int getRightOffset(AbstractDamageablePart damageablePart) {
+        if (HealthRenderUtils.drawAsString(damageablePart, true))
+            return 200 - 40;
+        return 200 - Math.min(40, HealthRenderUtils.getMaxHearts(damageablePart.getMaxHealth()) * 9 + HealthRenderUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2);
     }
 
     @Override

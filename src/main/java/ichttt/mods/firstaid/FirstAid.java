@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2018
+ * Copyright (C) 2017-2019
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.potion.FirstAidPotion;
+import ichttt.mods.firstaid.common.potion.PotionPoisonPatched;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -152,10 +153,10 @@ public class FirstAid {
 
     public void registerPotion(RegistryEvent.Register<Potion> event) {
         event.getRegistry().register(new FirstAidPotion(false, 0xDDD, FirstAidItems.MORPHINE).setBeneficial());
+        event.getRegistry().register(PotionPoisonPatched.INSTANCE);
     }
 
     public void registerSound(RegistryEvent.Register<SoundEvent> event) {
-        System.out.println("REGISTER");
         ResourceLocation res = new ResourceLocation(FirstAid.MODID, "debuff.heartbeat");
         event.getRegistry().register(new SoundEvent(res).setRegistryName(res));
     }

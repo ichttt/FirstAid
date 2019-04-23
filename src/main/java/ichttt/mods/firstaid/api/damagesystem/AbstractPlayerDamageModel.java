@@ -1,6 +1,6 @@
 /*
  * FirstAid API
- * Copyright (c) 2017-2018
+ * Copyright (c) 2017-2019
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -111,4 +111,10 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
     public abstract int getMaxRenderSize();
 
     public abstract void sleepHeal(EntityPlayer player);
+
+    public abstract void onNotHelped(EntityPlayer player);
+
+    public abstract void onHelpedUp(EntityPlayer player);
+
+    public abstract void runScaleLogic(EntityPlayer player);
 }

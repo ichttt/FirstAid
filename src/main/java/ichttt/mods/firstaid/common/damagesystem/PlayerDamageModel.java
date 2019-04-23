@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2018
+ * Copyright (C) 2017-2019
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,36 +146,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         if (!this.hasTutorial)
             this.hasTutorial = CapProvider.tutorialDone.contains(player.getName().getString());
 
-        if (FirstAidConfig.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
-            world.profiler.startSection("healthscaling");
-            float globalFactor = player.getMaxHealth() / 20F;
-            if (prevScaleFactor != globalFactor) {
-                int reduced = 0;
-                int added = 0;
-                for (AbstractDamageablePart part : this) {
-                    int result = Math.round(part.initialMaxHealth * globalFactor);
-                    if (result % 2 == 1) {
-                        int partMaxHealth = part.getMaxHealth();
-                        if (part.currentHealth < partMaxHealth && reduced < 4) {
-                            result--;
-                            reduced++;
-                        } else if (part.currentHealth > partMaxHealth && added < 4) {
-                            result++;
-                            added++;
-                        } else if (reduced > added) {
-                            result++;
-                            added++;
-                        } else {
-                            result--;
-                            reduced++;
-                        }
-                    }
-                    part.setMaxHealth(result);
-                }
-            }
-            prevScaleFactor = globalFactor;
-            world.profiler.endSection();
-        }
+        runScaleLogic(player);
 
         //morphine update
         if (this.needsMorphineUpdate) {
@@ -190,7 +161,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         //Debuff and part ticking
         world.profiler.startSection("PartDebuffs");
         forEach(part -> part.tick(world, player, morphine == null));
-        if (morphine == null && world.isRemote)
+        if (morphine == null && !world.isRemote)
             sharedDebuffs.forEach(sharedDebuff -> sharedDebuff.tick(player));
         world.profiler.endSection();
         world.profiler.endSection();
@@ -249,23 +220,13 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public boolean isDead(@Nullable EntityPlayer player) {
-//        IRevival revival = CommonUtils.getRevivalIfPossible(player); TODO playerrevival compat
+//        IRevival revival = CommonUtils.getRevivalIfPossible(player);
 //        if (revival != null) {
 //            if (!revival.isHealty() && !revival.isDead()) {
 //                this.waitingForHelp = true; //Technically not dead yet, but we should still return true
 //                return true;
-//            } else if (this.waitingForHelp && revival.isRevived()) { //We just got revived
-//                this.waitingForHelp = false;
-//                player.isDead = false;
-//                for (AbstractDamageablePart part : this) {
-//                    if ((part.canCauseDeath || this.noCritical) && part.currentHealth <= 0F) {
-//                        part.currentHealth = 1F; // Set the critical health to a non-zero value
-//                    }
-//                }
-///                //make sure to resync the client health
-//                if (!player.world.isRemote && player instanceof EntityPlayerMP)
-//                    FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this), (EntityPlayerMP) player); //Upload changes to the client
-//                return false;
+//            } else if (this.waitingForHelp) {
+//                return true;
 //            }
 //        }
 
@@ -335,5 +296,61 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             maxHealth += part.getMaxHealth();
         }
         return maxHealth;
+    }
+
+    @Override
+    public void onNotHelped(EntityPlayer player) {
+        if (!this.waitingForHelp)
+            FirstAid.LOGGER.warn("Player {} not waiting for help!", player.getName());
+        this.waitingForHelp = false;
+    }
+
+    @Override
+    public void onHelpedUp(EntityPlayer player) {
+//        onNotHelped(player); TODO PR support
+//        player.isDead = false;
+//        for (AbstractDamageablePart part : this) {
+//            if ((part.canCauseDeath || this.noCritical) && part.currentHealth <= 0F) {
+//                part.currentHealth = 1F; // Set the critical health to a non-zero value
+//            }
+//        }
+//        //make sure to resync the client health
+//        if (!player.world.isRemote && player instanceof EntityPlayerMP)
+//            FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this), (EntityPlayerMP) player); //Upload changes to the client
+//        this.waitingForHelp = false;
+    }
+
+    @Override
+    public void runScaleLogic(EntityPlayer player) {
+        if (FirstAidConfig.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
+            player.world.profiler.startSection("healthscaling");
+            float globalFactor = player.getMaxHealth() / 20F;
+            if (prevScaleFactor != globalFactor) {
+                int reduced = 0;
+                int added = 0;
+                for (AbstractDamageablePart part : this) {
+                    int result = Math.round(part.initialMaxHealth * globalFactor);
+                    if (result % 2 == 1) {
+                        int partMaxHealth = part.getMaxHealth();
+                        if (part.currentHealth < partMaxHealth && reduced < 4) {
+                            result--;
+                            reduced++;
+                        } else if (part.currentHealth > partMaxHealth && added < 4) {
+                            result++;
+                            added++;
+                        } else if (reduced > added) {
+                            result++;
+                            added++;
+                        } else {
+                            result--;
+                            reduced++;
+                        }
+                    }
+                    part.setMaxHealth(result);
+                }
+            }
+            prevScaleFactor = globalFactor;
+            player.world.profiler.endSection();
+        }
     }
 }

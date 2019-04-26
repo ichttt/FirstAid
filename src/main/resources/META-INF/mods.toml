@@ -1,21 +1,15 @@
 # MC Paint mod definition file
-modLoader="javafml" #mandatory
-loaderVersion="[25,)" #mandatory
-issueTrackerURL="https://github.com/ichttt/firstaid" #optional
-displayURL="https://minecraft.curseforge.com/projects/first-aid" #optional
-logoFile="firstaid_logo.png" #optional
-authors="ichttt" #optional
-[[mods]] #mandatory
-    # The modid of the mod
-    modId="firstaid" #mandatory
-    # The version number of the mod - there's a few well known ${} variables useable here or just hardcode it
-    version="1.7.0" #mandatory
-     # A display name for the mod
-    displayName="First Aid" #mandatory
-    # The description text for the mod (multi line!) (#mandatory)
-    description='''
-    First Aid is a game changing mod focused around a new health system
-    '''
+modLoader="javafml"
+loaderVersion="[25,)"
+issueTrackerURL="https://github.com/ichttt/firstaid"
+displayURL="https://minecraft.curseforge.com/projects/first-aid"
+logoFile="firstaid_logo.png"
+authors="ichttt"
+[[mods]]
+    modId="firstaid"
+    version="${file.jarVersion}"
+    displayName="First Aid"
+    description="First Aid is a game changing mod focused around a new health system"
 [[dependencies.firstaid]]
     modId="forge"
     mandatory=true

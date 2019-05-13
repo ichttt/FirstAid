@@ -75,6 +75,11 @@ public class FirstAidConfig {
     @ExtraConfig.Advanced
     public static boolean watchSetHealth = true;
 
+    @Config.Comment("If true, many damage distributions will be more realistic, but this will also cause them to be harder\nIf enabled, e.g. drowing will only damage your body instead of your body and head last")
+    @Config.LangKey("firstaid.config.hardmode")
+    @Config.RequiresMcRestart
+    public static boolean hardMode = false;
+
     public static class InternalHealing {
 
         @Config.Comment("Settings for the bandage item")

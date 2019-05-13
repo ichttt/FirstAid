@@ -41,6 +41,7 @@ public class GuiTutorial extends GuiScreen {
     private int guiTop;
     private final TutorialAction action;
 
+    @SuppressWarnings("deprecation") // we still need this method
     public GuiTutorial() {
         this.demoModel = PlayerDamageModel.create();
         this.parent = new GuiHealthScreen(demoModel);
@@ -52,7 +53,6 @@ public class GuiTutorial extends GuiScreen {
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.LEFT_FOOT.damage(4F, null, false));
         this.action.addTextWrapper("firstaid.tutorial.line3");
         //We need the deprecated version
-        //noinspection deprecation
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.applyMorphine());
         this.action.addTextWrapper("firstaid.tutorial.line4");
         this.action.addTextWrapper("firstaid.tutorial.line5");

@@ -73,28 +73,46 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         }
     }
 
+    @Deprecated
     @Override
     public void bindDamageSourceStandard(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable) {
-        if (DISTRIBUTION_MAP.containsKey(damageType))
-            FirstAid.LOGGER.info("Damage Distribution override detected for source " + damageType);
-        DISTRIBUTION_MAP.put(damageType, new StandardDamageDistribution(priorityTable));
+        bindDamageSourceStandard(new DamageSource(damageType), priorityTable, false);
     }
 
     @Override
+    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable) {
+        bindDamageSourceCustom(damageType, new StandardDamageDistribution(priorityTable, shufflePriorityTable));
+    }
+
+    @Deprecated
+    @Override
     public void bindDamageSourceRandom(@Nonnull String damageType, boolean nearestFirst, boolean tryNoKill) {
+        bindDamageSourceRandom(new DamageSource(damageType), nearestFirst, tryNoKill);
+    }
+
+    @Override
+    public void bindDamageSourceRandom(@Nonnull DamageSource damageType, boolean nearestFirst, boolean tryNoKill) {
         if (nearestFirst) {
             if (!tryNoKill)
-                DISTRIBUTION_MAP.remove(damageType);
+                DISTRIBUTION_MAP.remove(damageType.damageType);
             else
-                DISTRIBUTION_MAP.put(damageType, RandomDamageDistribution.NEAREST_NOKILL);
+                bindDamageSourceCustom(damageType, RandomDamageDistribution.NEAREST_NOKILL);
         } else {
-            DISTRIBUTION_MAP.put(damageType, tryNoKill ? RandomDamageDistribution.ANY_NOKILL : RandomDamageDistribution.ANY_KILL);
+            bindDamageSourceCustom(damageType, tryNoKill ? RandomDamageDistribution.ANY_NOKILL : RandomDamageDistribution.ANY_KILL);
         }
     }
 
+    @Deprecated
     @Override
     public void bindDamageSourceCustom(@Nonnull String damageType, @Nonnull IDamageDistribution distributionTable) {
-        DISTRIBUTION_MAP.put(damageType, distributionTable);
+        bindDamageSourceCustom(new DamageSource(damageType), distributionTable);
+    }
+
+    @Override
+    public void bindDamageSourceCustom(@Nonnull DamageSource damageType, @Nonnull IDamageDistribution distributionTable) {
+        if (DISTRIBUTION_MAP.containsKey(damageType.damageType))
+            FirstAid.LOGGER.info("Damage Distribution override detected for source " + damageType);
+        DISTRIBUTION_MAP.put(damageType.damageType, distributionTable);
     }
 
     @Deprecated

@@ -311,6 +311,11 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     @Override
     public void onHelpedUp(EntityPlayer player) {
         onNotHelped(player);
+        revivePlayer(player);
+    }
+
+    @Override
+    public void revivePlayer(EntityPlayer player) {
         player.isDead = false;
         for (AbstractDamageablePart part : this) {
             if ((part.canCauseDeath || this.noCritical) && part.currentHealth <= 0F) {
@@ -320,7 +325,6 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         //make sure to resync the client health
         if (!player.world.isRemote && player instanceof EntityPlayerMP)
             FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this), (EntityPlayerMP) player); //Upload changes to the client
-        this.waitingForHelp = false;
     }
 
     @Override

@@ -33,8 +33,9 @@
  * 10: 1.5.9 (ItemHealing addition)
  * 11: 1.5.10 (BREAKING CHANGE - Changed debuffs registration to supplier based)
  * 12: 1.6.5 (Minor changes)
+ * 13: 1.6.7 (Debuffs now take DamageSource instead of String)
  */
-@API(apiVersion = "12", provides = "FirstAid API", owner = "firstaid")
+@API(apiVersion = "13", provides = "FirstAid API", owner = "firstaid")
 package ichttt.mods.firstaid.api;
 
 import net.minecraftforge.fml.common.API;

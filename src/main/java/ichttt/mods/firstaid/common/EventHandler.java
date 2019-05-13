@@ -263,6 +263,9 @@ public class EventHandler {
         } else {
             amount = amount * (float) FirstAidConfig.externalHealing.otherRegenMultiplier;
         }
+        if (FirstAid.DEBUG) {
+            CommonUtils.debugLogStacktrace("External healing: : " + amount);
+        }
         HealthDistribution.distributeHealth(amount, (EntityPlayer) entity, true);
     }
 

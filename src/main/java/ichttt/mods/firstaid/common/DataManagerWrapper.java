@@ -25,6 +25,7 @@ import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -92,10 +93,14 @@ public class DataManagerWrapper extends EntityDataManager {
                         float healed = aFloat - orig;
                         if (Math.abs(healed) > 0.001) {
                             if (healed < 0) {
-                                System.out.println("DAMAGING: " + (-healed));
+                                if (FirstAid.DEBUG) {
+                                    CommonUtils.debugLogStacktrace("DAMAGING: " + (-healed));
+                                }
                                 DamageDistribution.handleDamageTaken(RandomDamageDistribution.NEAREST_KILL, player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null), -healed, player, DamageSource.MAGIC, true, true);
                             } else {
-                                System.out.println("HEALING: " + healed);
+                                if (FirstAid.DEBUG) {
+                                    CommonUtils.debugLogStacktrace("HEALING: " + healed);
+                                }
                                 HealthDistribution.addRandomHealth(aFloat, player, true);
                             }
                         }

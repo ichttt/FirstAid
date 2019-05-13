@@ -22,6 +22,7 @@ import com.creativemd.playerrevive.api.IRevival;
 import com.creativemd.playerrevive.api.capability.CapaRevive;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
+import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
@@ -107,5 +108,14 @@ public class CommonUtils {
         Objects.requireNonNull(damageModel);
         int healValue = Ints.checkedCast(Math.round(damageModel.getCurrentMaxHealth() * percentage));
         HealthDistribution.manageHealth(healValue, damageModel, player, true, false);
+    }
+
+    public static void debugLogStacktrace(String name) {
+        if (!FirstAid.DEBUG) return;
+        try {
+            throw new RuntimeException("DEBUG:" + name);
+        } catch (RuntimeException e) {
+            FirstAid.LOGGER.info("DEBUG: " + name, e);
+        }
     }
 }

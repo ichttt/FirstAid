@@ -73,9 +73,10 @@ import java.util.List;
      guiFactory = "ichttt.mods.firstaid.client.config.GuiFactory",
      certificateFingerprint = FirstAid.FINGERPRINT)
 public class FirstAid {
+    public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("firstaid.debug", "false"));
     public static final String MODID = "firstaid";
     public static final String NAME = "First Aid";
-    public static final String VERSION = "1.6.";
+    public static final String VERSION = "1.6.6";
     public static final String FINGERPRINT = "7904c4e13947c8a616c5f39b26bdeba796500722";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
@@ -97,6 +98,11 @@ public class FirstAid {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         LOGGER.info("{} version {} starting", NAME, VERSION);
+        if (DEBUG) {
+            LOGGER.warn("DEBUG MODE ENABLED");
+            LOGGER.warn("FirstAid may be slower than usual and will produce much noisier logs if debug mode is enabled");
+            LOGGER.warn("Disable debug using -Dfirstaid.debug=false");
+        }
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
         proxy.preInit();
         //Setup API

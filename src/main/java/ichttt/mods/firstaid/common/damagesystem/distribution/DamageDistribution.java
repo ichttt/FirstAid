@@ -44,6 +44,9 @@ import java.util.Objects;
 public abstract class DamageDistribution implements IDamageDistribution {
 
     public static void handleDamageTaken(IDamageDistribution damageDistribution, AbstractPlayerDamageModel damageModel, float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat, boolean redistributeIfLeft) {
+        if (FirstAid.DEBUG) {
+            CommonUtils.debugLogStacktrace(String.format("Damaging %s using %s for dmg source %s, redistribute %b, addStat %b", damage, damageDistribution.toString(), source.damageType, redistributeIfLeft, addStat));
+        }
         damage = ArmorUtils.applyGlobalPotionModifiers(player, source, damage);
         //VANILLA COPY - combat tracker and exhaustion
         if (damage != 0.0F) {

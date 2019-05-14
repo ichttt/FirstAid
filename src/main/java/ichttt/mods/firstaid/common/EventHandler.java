@@ -304,7 +304,7 @@ public class EventHandler {
         EntityPlayer player = event.getEntityPlayer();
         AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
         if (damageModel != null) {
-            damageModel.onNotHelped(player);
+            damageModel.stopWaitingForHelp(player);
         }
     }
 
@@ -313,7 +313,8 @@ public class EventHandler {
         EntityPlayer player = event.getEntityPlayer();
         AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
         if (damageModel != null) {
-            damageModel.onHelpedUp(player);
+            damageModel.revivePlayer(player);
+            damageModel.stopWaitingForHelp(player);
         }
     }
 
@@ -323,7 +324,7 @@ public class EventHandler {
             AbstractPlayerDamageModel damageModel = Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
             damageModel.runScaleLogic(event.player);
             damageModel.forEach(damageablePart -> damageablePart.heal(damageablePart.getMaxHealth(), event.player, false));
-            FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel), (EntityPlayerMP) event.player);
+            damageModel.scheduleResync();
         }
     }
 }

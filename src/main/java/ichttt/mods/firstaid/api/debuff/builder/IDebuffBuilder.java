@@ -19,19 +19,19 @@
 
 package ichttt.mods.firstaid.api.debuff.builder;
 
-import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import net.minecraft.util.SoundEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 /**
  * Use this if you want to add simple onHit or constant debuffs.
  * <br>
  * If you want to do your own, custom implementation, you can use {@link ichttt.mods.firstaid.api.debuff.IDebuff}
- * directly and register it using {@link ichttt.mods.firstaid.api.FirstAidRegistry#registerDebuff(EnumDebuffSlot, IDebuff)}.
+ * directly and register it using {@link ichttt.mods.firstaid.api.FirstAidRegistry#registerDebuff(EnumDebuffSlot, Supplier)}.
  */
 public interface IDebuffBuilder {
 

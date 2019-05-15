@@ -111,7 +111,7 @@ public class CommonUtils {
     }
 
     public static void debugLogStacktrace(String name) {
-        if (!FirstAid.DEBUG) return;
+        if (!FirstAidConfig.debug) return;
         try {
             throw new RuntimeException("DEBUG:" + name);
         } catch (RuntimeException e) {

@@ -18,20 +18,18 @@
 
 package ichttt.mods.firstaid.common;
 
-import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
-import ichttt.mods.firstaid.common.util.CommonUtils;
+import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
+import ichttt.mods.firstaid.common.damagesystem.distribution.DirectDamageDistribution;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -108,14 +106,9 @@ public class DebugDamageCommand extends CommandBase {
             return;
         AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
         if (damage > 0F) {
-            damageModel.getFromEnum(part).damage(damage, player, debuff);
+            DamageDistribution.handleDamageTaken(new DirectDamageDistribution(part, debuff), damageModel, damage, player, DamageSource.OUT_OF_WORLD, false, false);
         } else {
             damageModel.getFromEnum(part).heal(-damage, player, debuff);
-        }
-        FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, damage, 0F), (EntityPlayerMP) player);
-        if (damageModel.isDead(player)) {
-            player.sendMessage(new TextComponentTranslation("death.attack.generic", player.getDisplayName()));
-            CommonUtils.killPlayer(player, null);
         }
     }
 }

@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
@@ -65,7 +66,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             throw new IllegalStateException("A mod has registered a custom apiimpl for the registry. THIS IS NOT ALLOWED!" +
             "It should be " + INSTANCE.getClass().getName() + " but it actually is " + registryImpl.getClass().getName());
         INSTANCE.registrationAllowed = false;
-        if (FirstAid.DEBUG) {
+        if (FirstAidConfig.debug) {
             FirstAid.LOGGER.info("REG READOUT:");
             for (Map.Entry<String, IDamageDistribution> entry : INSTANCE.DISTRIBUTION_MAP.entrySet()) {
                 FirstAid.LOGGER.info("{} bound to {}", entry.getKey(), entry.getValue());

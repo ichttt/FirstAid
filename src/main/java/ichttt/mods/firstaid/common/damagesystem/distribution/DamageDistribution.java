@@ -19,6 +19,7 @@
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -48,8 +49,8 @@ import java.util.Objects;
 public abstract class DamageDistribution implements IDamageDistribution {
 
     public static void handleDamageTaken(IDamageDistribution damageDistribution, AbstractPlayerDamageModel damageModel, float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat, boolean redistributeIfLeft) {
-        if (FirstAid.DEBUG) {
-            CommonUtils.debugLogStacktrace(String.format("Damaging %s using %s for dmg source %s, redistribute %b, addStat %b", damage, damageDistribution.toString(), source.damageType, redistributeIfLeft, addStat));
+        if (FirstAidConfig.debug) {
+            FirstAid.LOGGER.info("Damaging {} using {} for dmg source {}, redistribute {}, addStat {}", damage, damageDistribution.toString(), source.damageType, redistributeIfLeft, addStat);
         }
         NBTTagCompound beforeCache = damageModel.serializeNBT();
         damage = ArmorUtils.applyGlobalPotionModifiers(player, source, damage);

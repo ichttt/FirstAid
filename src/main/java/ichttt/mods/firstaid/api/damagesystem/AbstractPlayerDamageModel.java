@@ -117,6 +117,11 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
      */
     public abstract void stopWaitingForHelp(EntityPlayer player);
 
+    /**
+     * Internal for PlayerRevive compat
+     */
+    public abstract boolean isWaitingForHelp();
+
     @Deprecated
     public abstract void onNotHelped(EntityPlayer player);
 

@@ -80,6 +80,12 @@ public class FirstAidConfig {
     @Config.RequiresMcRestart
     public static boolean hardMode = false;
 
+    @Config.Comment("Enabled additional debug logs - May slow down the game and will increase log file size\nOnly enable for special purposes")
+    @Config.LangKey("firstaid.config.debug")
+    @Config.RequiresMcRestart
+    @ExtraConfig.Advanced
+    public static boolean debug = false;
+
     public static class InternalHealing {
 
         @Config.Comment("Settings for the bandage item")

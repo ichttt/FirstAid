@@ -21,6 +21,7 @@ package ichttt.mods.firstaid.common;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
@@ -39,7 +40,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -83,9 +83,12 @@ public class DataManagerWrapper extends EntityDataManager {
         } else if (key == EntityLivingBase.HEALTH) {
             if (value instanceof Float) {
                 Float aFloat = (Float) value;
+                AbstractPlayerDamageModel damageModel;
                 if (aFloat > player.getMaxHealth()) {
-                    if (player.world.isRemote) //I don't know why only if !world.isRemote... maybe double check this
-                        Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
+                    Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
+                } else if ((damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)) != null && damageModel.isWaitingForHelp()) {
+                    if (FirstAidConfig.debug)
+                        CommonUtils.debugLogStacktrace("SetHealth falltrough");
                 } else if (FirstAidConfig.watchSetHealth && !aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && !player.world.isRemote && player instanceof EntityPlayerMP && ((EntityPlayerMP) player).connection != null) {
                     //calculate diff
                     Float orig = get(EntityLivingBase.HEALTH);
@@ -93,12 +96,12 @@ public class DataManagerWrapper extends EntityDataManager {
                         float healed = aFloat - orig;
                         if (Math.abs(healed) > 0.001) {
                             if (healed < 0) {
-                                if (FirstAid.DEBUG) {
+                                if (FirstAidConfig.debug) {
                                     CommonUtils.debugLogStacktrace("DAMAGING: " + (-healed));
                                 }
                                 DamageDistribution.handleDamageTaken(RandomDamageDistribution.NEAREST_KILL, player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null), -healed, player, DamageSource.MAGIC, true, true);
                             } else {
-                                if (FirstAid.DEBUG) {
+                                if (FirstAidConfig.debug) {
                                     CommonUtils.debugLogStacktrace("HEALING: " + healed);
                                 }
                                 HealthDistribution.addRandomHealth(aFloat, player, true);

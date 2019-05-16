@@ -20,6 +20,7 @@ package ichttt.mods.firstaid.common.util;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
+import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
@@ -74,11 +75,11 @@ public class CommonUtils {
             ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
     }
 
-    /**
-     * Gets the cap, or null if not applicable
-     * @param player The player to check
-     * @return The cap or null if the player cannot be revived
-     */
+//    /**
+//     * Gets the cap, or null if not applicable
+//     * @param player The player to check
+//     * @return The cap or null if the player cannot be revived
+//     */
 //    @Nullable
 //    public static IRevival getRevivalIfPossible(@Nullable EntityPlayer player) {
 //        if (player == null || CapaRevive.reviveCapa == null) TODO PlayerRevival Comapt
@@ -110,6 +111,15 @@ public class CommonUtils {
         Objects.requireNonNull(damageModel);
         int healValue = Ints.checkedCast(Math.round(damageModel.getCurrentMaxHealth() * percentage));
         HealthDistribution.manageHealth(healValue, damageModel, player, true, false);
+    }
+
+    public static void debugLogStacktrace(String name) {
+        if (!FirstAidConfig.debug) return;
+        try {
+            throw new RuntimeException("DEBUG:" + name);
+        } catch (RuntimeException e) {
+            FirstAid.LOGGER.info("DEBUG: " + name, e);
+        }
     }
 
     @Nonnull

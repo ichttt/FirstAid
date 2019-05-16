@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
@@ -65,15 +66,21 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             throw new IllegalStateException("A mod has registered a custom apiimpl for the registry. THIS IS NOT ALLOWED!" +
             "It should be " + INSTANCE.getClass().getName() + " but it actually is " + registryImpl.getClass().getName());
         INSTANCE.registrationAllowed = false;
+        if (FirstAidConfig.debug) {
+            FirstAid.LOGGER.info("REG READOUT:");
+            for (Map.Entry<String, IDamageDistribution> entry : INSTANCE.DISTRIBUTION_MAP.entrySet()) {
+                FirstAid.LOGGER.info("{} bound to {}", entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     @Override
-    public void bindDamageSourceStandard(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable) {
-        bindDamageSourceCustom(damageType, new StandardDamageDistribution(priorityTable));
+    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable) {
+        bindDamageSourceCustom(damageType, new StandardDamageDistribution(priorityTable, shufflePriorityTable));
     }
 
     @Override
-    public void bindDamageSourceRandom(@Nonnull String damageType, boolean nearestFirst, boolean tryNoKill) {
+    public void bindDamageSourceRandom(@Nonnull DamageSource damageType, boolean nearestFirst, boolean tryNoKill) {
         if (nearestFirst) {
             if (!tryNoKill)
                 bindDamageSourceCustom(damageType, RandomDamageDistribution.NEAREST_KILL);
@@ -85,19 +92,14 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     }
 
     @Override
-    public synchronized void bindDamageSourceCustom(@Nonnull String damageType, @Nonnull IDamageDistribution distributionTable) {
-        if (DISTRIBUTION_MAP.containsKey(damageType))
+    public synchronized void bindDamageSourceCustom(@Nonnull DamageSource damageType, @Nonnull IDamageDistribution distributionTable) {
+        String type = damageType.damageType;
+        if (DISTRIBUTION_MAP.containsKey(type))
             FirstAid.LOGGER.info("Damage Distribution override detected for source " + damageType);
         if (distributionTable == RandomDamageDistribution.NEAREST_KILL) //This is the default
-            DISTRIBUTION_MAP.remove(damageType);
+            DISTRIBUTION_MAP.remove(type);
         else
-            DISTRIBUTION_MAP.put(damageType, distributionTable);
-    }
-
-    @Deprecated
-    @Override
-    public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, int applyTime) {
-        registerHealingType(item, factory, stack -> applyTime);
+            DISTRIBUTION_MAP.put(type, distributionTable);
     }
 
     @Override
@@ -114,13 +116,6 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         if (pair != null)
             return pair.getLeft().apply(type);
         return null;
-    }
-
-    @Deprecated
-    @Nullable
-    @Override
-    public Integer getPartHealingTime(@Nonnull Item item) {
-        return getPartHealingTime(new ItemStack(item));
     }
 
     @Override

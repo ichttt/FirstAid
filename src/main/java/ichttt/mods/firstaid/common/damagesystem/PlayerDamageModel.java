@@ -32,19 +32,25 @@ import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
+import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -57,6 +63,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private boolean waitingForHelp = false;
     private final boolean noCritical;
     private boolean needsMorphineUpdate = false;
+    private int resyncTimer = -1;
 
     public static PlayerDamageModel create() {
         FirstAidRegistry registry = FirstAidRegistryImpl.INSTANCE;
@@ -131,6 +138,13 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             FirstAid.LOGGER.error("Got {} health left, but isn't marked as dead!", currentHealth);
             world.profiler.endSection();
             return;
+        }
+        if (!world.isRemote && resyncTimer != -1) {
+            resyncTimer--;
+            if (resyncTimer == 0) {
+                resyncTimer = -1;
+                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (EntityPlayerMP) player), new MessageSyncDamageModel(this));
+            }
         }
 
         float newCurrentHealth = (currentHealth / getCurrentMaxHealth()) * player.getMaxHealth();
@@ -220,9 +234,11 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public boolean isDead(@Nullable EntityPlayer player) {
-//        IRevival revival = CommonUtils.getRevivalIfPossible(player);
+//        IRevival revival = CommonUtils.getRevivalIfPossible(player); TODO PR COMPAT
 //        if (revival != null) {
 //            if (!revival.isHealty() && !revival.isDead()) {
+//                if (FirstAidConfig.debug && !waitingForHelp)
+//                    FirstAid.LOGGER.info("Player start waiting for help");
 //                this.waitingForHelp = true; //Technically not dead yet, but we should still return true
 //                return true;
 //            } else if (this.waitingForHelp) {
@@ -299,25 +315,47 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     @Override
-    public void onNotHelped(EntityPlayer player) {
+    public void stopWaitingForHelp(EntityPlayer player) {
+        if (FirstAidConfig.debug) {
+            FirstAid.LOGGER.info("Help waiting done!");
+        }
         if (!this.waitingForHelp)
             FirstAid.LOGGER.warn("Player {} not waiting for help!", player.getName());
         this.waitingForHelp = false;
     }
 
     @Override
+    public boolean isWaitingForHelp() {
+        return this.waitingForHelp;
+    }
+
+    @Deprecated
+    @Override
+    public void onNotHelped(EntityPlayer player) {
+        stopWaitingForHelp(player);
+    }
+
+    @Deprecated
+    @Override
     public void onHelpedUp(EntityPlayer player) {
-//        onNotHelped(player); TODO PR support
-//        player.isDead = false;
-//        for (AbstractDamageablePart part : this) {
-//            if ((part.canCauseDeath || this.noCritical) && part.currentHealth <= 0F) {
-//                part.currentHealth = 1F; // Set the critical health to a non-zero value
-//            }
-//        }
-//        //make sure to resync the client health
-//        if (!player.world.isRemote && player instanceof EntityPlayerMP)
-//            FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this), (EntityPlayerMP) player); //Upload changes to the client
-//        this.waitingForHelp = false;
+        stopWaitingForHelp(player);
+        revivePlayer(player);
+    }
+
+    @Override
+    public void revivePlayer(EntityPlayer player) {
+        if (FirstAidConfig.debug) {
+            CommonUtils.debugLogStacktrace("Reviving player");
+        }
+        player.revive();
+        for (AbstractDamageablePart part : this) {
+            if ((part.canCauseDeath || this.noCritical) && part.currentHealth <= 0F) {
+                part.currentHealth = 1F; // Set the critical health to a non-zero value
+            }
+        }
+        //make sure to resync the client health
+        if (!player.world.isRemote && player instanceof EntityPlayerMP)
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (EntityPlayerMP) player), new MessageSyncDamageModel(this)); //Upload changes to the client
     }
 
     @Override
@@ -326,10 +364,18 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             player.world.profiler.startSection("healthscaling");
             float globalFactor = player.getMaxHealth() / 20F;
             if (prevScaleFactor != globalFactor) {
+                if (FirstAidConfig.debug) {
+                    FirstAid.LOGGER.info("Starting health scaling factor {} -> {} (max health {})", prevScaleFactor, globalFactor, player.getMaxHealth());
+                }
+                player.world.profiler.startSection("distribution");
                 int reduced = 0;
                 int added = 0;
+                float expectedNewMaxHealth = 0F;
+                int newMaxHealth = 0;
                 for (AbstractDamageablePart part : this) {
-                    int result = Math.round(part.initialMaxHealth * globalFactor);
+                    float floatResult = ((float) part.initialMaxHealth) * globalFactor;
+                    expectedNewMaxHealth += floatResult;
+                    int result = (int) floatResult;
                     if (result % 2 == 1) {
                         int partMaxHealth = part.getMaxHealth();
                         if (part.currentHealth < partMaxHealth && reduced < 4) {
@@ -346,11 +392,57 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                             reduced++;
                         }
                     }
+                    newMaxHealth += result;
+                    if (FirstAidConfig.debug) {
+                        FirstAid.LOGGER.info("Part {} max health: {} initial; {} old; {} new", part.part.name(), part.initialMaxHealth, part.getMaxHealth(), result);
+                    }
                     part.setMaxHealth(result);
                 }
+                player.world.profiler.endStartSection("correcting");
+                if (Math.abs(expectedNewMaxHealth - newMaxHealth) >= 2F) {
+                    if (FirstAidConfig.debug) {
+                        FirstAid.LOGGER.info("Entering second stage - diff {}", Math.abs(expectedNewMaxHealth - newMaxHealth));
+                    }
+                    List<AbstractDamageablePart> prioList = new ArrayList<>();
+                    for (AbstractDamageablePart part : this) {
+                        prioList.add(part);
+                    }
+                    prioList.sort(Comparator.comparingInt(AbstractDamageablePart::getMaxHealth));
+                    for (AbstractDamageablePart part : prioList) {
+                        int maxHealth = part.getMaxHealth();
+                        if (FirstAidConfig.debug) {
+                            FirstAid.LOGGER.info("Part {}: Second stage with total diff {}", part.part.name(), Math.abs(expectedNewMaxHealth - newMaxHealth));
+                        }
+                        if (expectedNewMaxHealth > newMaxHealth) {
+                            part.setMaxHealth(maxHealth + 2);
+                            newMaxHealth += (part.getMaxHealth() - maxHealth);
+                        } else if (expectedNewMaxHealth < newMaxHealth) {
+                            part.setMaxHealth(maxHealth - 2);
+                            newMaxHealth -= (maxHealth - part.getMaxHealth());
+                        }
+                        if (Math.abs(expectedNewMaxHealth - newMaxHealth) < 2F) {
+                            break;
+                        }
+                    }
+                }
+                player.world.profiler.endSection();
             }
             prevScaleFactor = globalFactor;
             player.world.profiler.endSection();
         }
+    }
+
+    @Override
+    public void scheduleResync() {
+        if (this.resyncTimer == -1) {
+            this.resyncTimer = 2;
+        } else {
+            FirstAid.LOGGER.warn("resync already scheduled!");
+        }
+    }
+
+    @Override
+    public boolean hasNoCritical() {
+        return this.noCritical;
     }
 }

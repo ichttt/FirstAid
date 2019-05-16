@@ -31,7 +31,7 @@ import java.util.function.Supplier;
  * Use this if you want to add simple onHit or constant debuffs.
  * <br>
  * If you want to do your own, custom implementation, you can use {@link ichttt.mods.firstaid.api.debuff.IDebuff}
- * directly and register it using {@link ichttt.mods.firstaid.api.FirstAidRegistry#registerDebuff(EnumDebuffSlot, IDebuffBuilder)}.
+ * directly and register it using {@link ichttt.mods.firstaid.api.FirstAidRegistry#registerDebuff(EnumDebuffSlot, Supplier)}.
  */
 public interface IDebuffBuilder {
 

@@ -26,21 +26,31 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class StandardDamageDistribution extends DamageDistribution {
     private final List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList;
+    private final boolean shuffle;
 
-    public StandardDamageDistribution(List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList) {
+    public StandardDamageDistribution(List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList, boolean shuffle) {
         this.partList = partList;
+        for (Pair<EntityEquipmentSlot, EnumPlayerPart[]> pair : partList) {
+            for (EnumPlayerPart part : pair.getRight()) {
+                if (part.slot != pair.getLeft())
+                    throw new RuntimeException(part + " is not a member of " + pair.getLeft());
+            }
+        }
+        this.shuffle = shuffle;
     }
 
     @Override
     @Nonnull
     protected List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> getPartList() {
-        return partList;
+        if (this.shuffle) Collections.shuffle(this.partList);
+        return this.partList;
     }
 
     @Override

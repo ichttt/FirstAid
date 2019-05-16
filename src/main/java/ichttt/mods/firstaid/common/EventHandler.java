@@ -209,6 +209,9 @@ public class EventHandler {
         } else {
             amount = amount * (float) (double) FirstAidConfig.SERVER.otherRegenMultiplier.get();
         }
+        if (FirstAidConfig.debug) {
+            CommonUtils.debugLogStacktrace("External healing: : " + amount);
+        }
         HealthDistribution.distributeHealth(amount, (EntityPlayer) entity, true);
     }
 
@@ -259,7 +262,7 @@ public class EventHandler {
 //        EntityPlayer player = event.getEntityPlayer();
 //        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
 //        if (damageModel != null) {
-//            damageModel.onNotHelped(player);
+//            damageModel.stopWaitingForHelp(player);
 //        }
 //    }
 //
@@ -268,9 +271,12 @@ public class EventHandler {
 //        EntityPlayer player = event.getEntityPlayer();
 //        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
 //        if (damageModel != null) {
-//            damageModel.onHelpedUp(player);
+//            damageModel.revivePlayer(player);
+//            damageModel.stopWaitingForHelp(player);
 //        }
 //    }
+//
+
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
@@ -279,7 +285,7 @@ public class EventHandler {
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
             damageModel.runScaleLogic(player);
             damageModel.forEach(damageablePart -> damageablePart.heal(damageablePart.getMaxHealth(), player, false));
-            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (EntityPlayerMP) player), new MessageSyncDamageModel(CommonUtils.getDamageModel(player)));
+            damageModel.scheduleResync();
         }
     }
 }

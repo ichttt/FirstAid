@@ -29,6 +29,7 @@ import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.EventHandler;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -55,20 +56,33 @@ public class RegistryManager {
         List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> feetList = new ArrayList<>(2);
         feetList.add(Pair.of(EntityEquipmentSlot.FEET, new EnumPlayerPart[]{EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT}));
         feetList.add(Pair.of(EntityEquipmentSlot.LEGS, new EnumPlayerPart[]{EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG}));
-        registry.bindDamageSourceStandard("fall", feetList);
-        registry.bindDamageSourceStandard("hotFloor", feetList);
+        registry.bindDamageSourceStandard(DamageSource.FALL, feetList, false);
+        registry.bindDamageSourceStandard(DamageSource.HOT_FLOOR, feetList, false);
 
         List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> headList = new ArrayList<>(1);
         headList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumPlayerPart[]{EnumPlayerPart.HEAD}));
-        registry.bindDamageSourceStandard("anvil", headList);
+        registry.bindDamageSourceStandard(DamageSource.ANVIL, headList, false);
 
-        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> bodyList = new ArrayList<>(1);
-        bodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.BODY}));
-        registry.bindDamageSourceStandard("starve", bodyList);
+        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> headArmsList = new ArrayList<>(2);
+        headArmsList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumPlayerPart[]{EnumPlayerPart.HEAD}));
+        headArmsList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM}));
+        registry.bindDamageSourceStandard(DamageSource.LIGHTNING_BOLT, headArmsList, true);
 
-        registry.bindDamageSourceRandom("magic", false, false);
-        registry.bindDamageSourceRandom("drown", false, true);
-        registry.bindDamageSourceRandom("inWall", false, true);
+        registry.bindDamageSourceRandom(DamageSource.MAGIC, false, false);
+        if (FirstAidConfig.hardMode) {
+            List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> bodyList = new ArrayList<>(1);
+            bodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.BODY}));
+            registry.bindDamageSourceStandard(DamageSource.STARVE, bodyList, false);
+
+            List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> headBodyList = new ArrayList<>(2);
+            headBodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.BODY}));
+            headBodyList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumPlayerPart[]{EnumPlayerPart.HEAD}));
+            registry.bindDamageSourceStandard(DamageSource.DROWN, headBodyList, true);
+        } else {
+            registry.bindDamageSourceRandom(DamageSource.STARVE, false, true);
+            registry.bindDamageSourceRandom(DamageSource.DROWN, false, true);
+        }
+        registry.bindDamageSourceRandom(DamageSource.IN_WALL, false, true);
 
         //---DEBUFFS---
         DebuffBuilderFactory factory = DebuffBuilderFactory.getInstance();

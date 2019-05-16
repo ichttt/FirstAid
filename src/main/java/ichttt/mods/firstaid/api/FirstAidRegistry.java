@@ -69,11 +69,14 @@ public abstract class FirstAidRegistry {
      * Binds the damage source to a distribution.
      * The distribution will be a StandardDamageDistribution
      *
-     * @param damageType    The source
-     * @param priorityTable The distribution table. The first item on the list will be damaged first,
-     *                      if the health there drops under zero, the second will be damaged and so on
+     * @param damageType           The source - If you only have a source string, just wrap it in a {@link DamageSource(String)}
+     * @param priorityTable        The distribution table. If {@code shufflePriorityTable} is true,
+     *                             the first item on the list will be damaged first,
+     *                             if the health there drops under zero, the second will be damaged and so on.
+     *                             Otherwise, the list will be shuffled before each damage distribution
+     * @param shufflePriorityTable If the {@code priorityTable} should be shuffled before each distribution
      */
-    public abstract void bindDamageSourceStandard(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable);
+    public abstract void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable);
 
     /**
      * Binds the damage source to a distribution.
@@ -85,7 +88,7 @@ public abstract class FirstAidRegistry {
      *                     if the health there drops under zero, false if everything should be random
      * @param tryNoKill    If true, head and torso will only drop to 1 health and will only die if there is nothing else left
      */
-    public abstract void bindDamageSourceRandom(@Nonnull String damageType, boolean nearestFirst, boolean tryNoKill);
+    public abstract void bindDamageSourceRandom(@Nonnull DamageSource damageType, boolean nearestFirst, boolean tryNoKill);
 
     /**
      * Binds the damage source to a custom distribution
@@ -93,7 +96,7 @@ public abstract class FirstAidRegistry {
      * @param damageType        The source
      * @param distributionTable Your custom distribution
      */
-    public abstract void bindDamageSourceCustom(@Nonnull String damageType, @Nonnull IDamageDistribution distributionTable);
+    public abstract void bindDamageSourceCustom(@Nonnull DamageSource damageType, @Nonnull IDamageDistribution distributionTable);
 
     /**
      * Registers your debuff to the FirstAid mod.
@@ -121,25 +124,10 @@ public abstract class FirstAidRegistry {
      *                  This should always create a new healer and get the itemstack that will shrink after creating the healer
      * @param applyTime The time it takes to apply this in the UI
      */
-    @Deprecated
-    public abstract void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, int applyTime);
-
-    /**
-     * Registers a healing type, so it can be used by the damage system when the user applies it.
-     *
-     * @param item      The item to bind to
-     * @param factory   The factory to create a new healing type.
-     *                  This should always create a new healer and get the itemstack that will shrink after creating the healer
-     * @param applyTime The time it takes to apply this in the UI
-     */
     public abstract void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, Function<ItemStack, Integer> applyTime);
 
     @Nullable
     public abstract AbstractPartHealer getPartHealer(@Nonnull ItemStack type);
-
-    @Deprecated
-    @Nullable
-    public abstract Integer getPartHealingTime(@Nonnull Item item);
 
     public abstract Integer getPartHealingTime(@Nonnull ItemStack itemStack);
 

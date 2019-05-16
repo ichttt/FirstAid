@@ -312,6 +312,17 @@ public class FirstAidConfig {
 //    @ExtraConfig.Advanced
     public static boolean watchSetHealth = true; //TODO server as well
 
+//    @Config.Comment("If true, many damage distributions will be more realistic, but this will also cause them to be harder\nIf enabled, e.g. drowing will only damage your body instead of your body and head last")
+//    @Config.LangKey("firstaid.config.hardmode")
+//    @Config.RequiresMcRestart
+    public static boolean hardMode = false;
+
+//    @Config.Comment("Enabled additional debug logs - May slow down the game and will increase log file size\nOnly enable for special purposes")
+//    @Config.LangKey("firstaid.config.debug")
+//    @Config.RequiresMcRestart
+//    @ExtraConfig.Advanced
+    public static boolean debug = false;
+
     public static class Overlay {
 
         public enum OverlayMode {

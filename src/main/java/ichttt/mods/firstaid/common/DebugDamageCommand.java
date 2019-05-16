@@ -26,11 +26,14 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
+import ichttt.mods.firstaid.common.damagesystem.distribution.DirectDamageDistribution;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.network.PacketDistributor;
@@ -54,7 +57,7 @@ public class DebugDamageCommand {
             throw TYPE.create();
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
         if (damage > 0F) {
-            damageModel.getFromEnum(part).damage(damage, player, debuff);
+            DamageDistribution.handleDamageTaken(new DirectDamageDistribution(part, debuff), damageModel, damage, player, DamageSource.OUT_OF_WORLD, false, false);
         } else {
             damageModel.getFromEnum(part).heal(-damage, player, debuff);
         }

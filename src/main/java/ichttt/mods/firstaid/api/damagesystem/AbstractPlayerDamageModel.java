@@ -112,9 +112,27 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
 
     public abstract void sleepHeal(EntityPlayer player);
 
+    /**
+     * Internal for PlayerRevive compat
+     */
+    public abstract void stopWaitingForHelp(EntityPlayer player);
+
+    /**
+     * Internal for PlayerRevive compat
+     */
+    public abstract boolean isWaitingForHelp();
+
+    @Deprecated
     public abstract void onNotHelped(EntityPlayer player);
 
+    @Deprecated
     public abstract void onHelpedUp(EntityPlayer player);
 
+    public abstract void revivePlayer(EntityPlayer player);
+
     public abstract void runScaleLogic(EntityPlayer player);
+
+    public abstract void scheduleResync();
+
+    public abstract boolean hasNoCritical();
 }

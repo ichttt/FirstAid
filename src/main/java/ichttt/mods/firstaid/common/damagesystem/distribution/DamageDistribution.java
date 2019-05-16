@@ -19,19 +19,24 @@
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.event.FirstAidLivingDamageEvent;
+import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.network.PacketDistributor;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -43,6 +48,10 @@ import java.util.List;
 public abstract class DamageDistribution implements IDamageDistribution {
 
     public static void handleDamageTaken(IDamageDistribution damageDistribution, AbstractPlayerDamageModel damageModel, float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat, boolean redistributeIfLeft) {
+        if (FirstAidConfig.debug) {
+            FirstAid.LOGGER.info("Damaging {} using {} for dmg source {}, redistribute {}, addStat {}", damage, damageDistribution.toString(), source.damageType, redistributeIfLeft, addStat);
+        }
+        NBTTagCompound beforeCache = damageModel.serializeNBT();
         damage = ArmorUtils.applyGlobalPotionModifiers(player, source, damage);
         //VANILLA COPY - combat tracker and exhaustion
         if (damage != 0.0F) {
@@ -54,7 +63,13 @@ public abstract class DamageDistribution implements IDamageDistribution {
         float left = damageDistribution.distributeDamage(damage, player, source, addStat);
         if (left > 0 && redistributeIfLeft) {
             damageDistribution = RandomDamageDistribution.NEAREST_KILL;
-            damageDistribution.distributeDamage(left, player, source, addStat);
+            left = damageDistribution.distributeDamage(left, player, source, addStat);
+        }
+        PlayerDamageModel before = PlayerDamageModel.create();
+        before.deserializeNBT(beforeCache);
+        if (MinecraftForge.EVENT_BUS.post(new FirstAidLivingDamageEvent(player, damageModel, before, source, left))) {
+            damageModel.deserializeNBT(beforeCache); //restore prev state
+            return;
         }
 
         if (damageModel.isDead(player))

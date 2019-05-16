@@ -34,6 +34,7 @@ import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.potion.FirstAidPotion;
 import ichttt.mods.firstaid.common.potion.PotionPoisonPatched;
+import ichttt.mods.firstaid.common.util.MorpheusHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -49,7 +50,9 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DeferredWorkQueue;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -135,10 +138,10 @@ public class FirstAid {
         NETWORKING.registerMessage(++i, MessageSyncDamageModel.class, MessageSyncDamageModel::encode, MessageSyncDamageModel::new, MessageSyncDamageModel.Handler::onMessage);
 
 
-//        if (ModList.get().isLoaded("morpheus")) { TODO morpheus helper
-//            MorpheusHelper.register();
-//            morpheusLoaded = true;
-//        }
+        if (ModList.get().isLoaded("morpheus")) {
+            DeferredWorkQueue.runLater(MorpheusHelper::register);
+            morpheusLoaded = true;
+        }
 
         RegistryManager.registerDefaults();
     }

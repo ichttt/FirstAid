@@ -1,4 +1,4 @@
-# MC Paint mod definition file
+# First Aid mod definition file
 modLoader="javafml"
 loaderVersion="[25,)"
 issueTrackerURL="https://github.com/ichttt/firstaid"

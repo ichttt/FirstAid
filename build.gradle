@@ -15,7 +15,7 @@ apply plugin: 'net.minecraftforge.gradle'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 
-version = '1.7.1'
+version = '1.7.3'
 group = 'ichttt.mods.firstaid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'firstaid'
 
@@ -95,7 +95,7 @@ dependencies {
 jar {
     manifest {
         attributes([
-                "Specification-Title": "firstaid",
+                "Specification-Title": "$archivesBaseName",
                 "Specification-Vendor": "ichttt",
                 "Specification-Version": "1", // We are version 1 of ourselves
                 "Implementation-Title": project.name,

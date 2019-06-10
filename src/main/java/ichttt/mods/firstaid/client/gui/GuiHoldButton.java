@@ -18,20 +18,23 @@
 
 package ichttt.mods.firstaid.client.gui;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.widget.button.AbstractButton;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
 
-public class GuiHoldButton extends Button {
+public class GuiHoldButton extends AbstractButton {
+    public final int id;
     private int holdTime;
     private float textScaleFactor;
     public final boolean isRightSide;
     private long pressStart = -1;
 
-    public GuiHoldButton(int buttonId, int x, int y, int widthIn, int heightIn, String buttonText, boolean isRightSide) {
-        super(buttonId, x, y, widthIn, heightIn, buttonText);
+    public GuiHoldButton(int id, int x, int y, int widthIn, int heightIn, String buttonText, boolean isRightSide) {
+        super(x, y, widthIn, heightIn, buttonText);
+        this.id = id;
         this.isRightSide = isRightSide;
     }
 
@@ -56,48 +59,37 @@ public class GuiHoldButton extends Button {
         {
             Minecraft minecraft = Minecraft.getInstance();
             FontRenderer fontrenderer = minecraft.fontRenderer;
-            minecraft.getTextureManager().bindTexture(BUTTON_TEXTURES);
-            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
-            int i = this.getHoverState(this.hovered);
+            minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, this.alpha);
+            int i = this.getYImage(this.isHovered());
             GlStateManager.enableBlend();
             GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            this.drawTexturedModalRect(this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
-            this.drawTexturedModalRect(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
+            this.blit(this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
+            this.blit(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
             this.renderBg(minecraft, mouseX, mouseY);
-            int j = 14737632;
-            if (packedFGColor != 0)
-            {
-                j = packedFGColor;
-            }
-            else
-            if (!this.enabled) {
-                j = 10526880;
-            } else if (this.hovered) {
-                j = 16777120;
-            }
+            int j = getFGColor();
 
             //CHANGE: scale text if not fitting
             if (textScaleFactor != 1F) {
                 GlStateManager.pushMatrix();
                 GlStateManager.scalef(textScaleFactor, textScaleFactor, 1);
-                this.drawCenteredString(fontrenderer, this.displayString, Math.round((this.x + this.width / 2F) / textScaleFactor), Math.round((this.y + (this.height - 8) / 2F) / textScaleFactor), j);
+                this.drawCenteredString(fontrenderer, this.getMessage(), Math.round((this.x + this.width / 2F) / textScaleFactor), Math.round((this.y + (this.height - 8) / 2F) / textScaleFactor), j);
                 GlStateManager.popMatrix();
             } else
-                this.drawCenteredString(fontrenderer, this.displayString, this.x + this.width / 2, this.y + (this.height - 8) / 2, j);
+                this.drawCenteredString(fontrenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255.0F) << 24);
         }
     }
 
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button != 0) return false;
-        boolean result = super.isPressable(mouseX, mouseY);
-        if (result) {
-            pressStart = Util.milliTime();
-        }
-        return result || super.mouseClicked(mouseX, mouseY, button);
-    }
+//    @Override
+//    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+//        if (button != 0) return false;
+//        boolean result = super.isPressable(mouseX, mouseY);
+//        if (result) {
+//            pressStart = Util.milliTime();
+//        }
+//        return result || super.mouseClicked(mouseX, mouseY, button);
+//    }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
@@ -120,5 +112,10 @@ public class GuiHoldButton extends Button {
 
     public void reset() {
         pressStart = -1;
+    }
+
+    @Override
+    public void onPress() {
+        pressStart = Util.milliTime();
     }
 }

@@ -19,6 +19,7 @@
 package ichttt.mods.firstaid.client.util;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.platform.GlStateManager;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -31,7 +32,6 @@ import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
@@ -119,7 +119,7 @@ public class HealthRenderUtils {
             regen = (int) ((mc.ingameGUI.healthUpdateCounter / 2) % 15);
         boolean low = (current + absorption) < 1.25F;
 
-        mc.getTextureManager().bindTexture(AbstractGui.ICONS);
+        mc.getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
         GlStateManager.pushMatrix();
         GlStateManager.translatef(xTranslation, yTranslation, 0);
         boolean drawSecondLine = allowSecondLine;
@@ -225,7 +225,7 @@ public class HealthRenderUtils {
         if (toDraw < 0) throw new IllegalArgumentException("Cannot draw negative amount of icons " + toDraw);
         for (int i = 0; i < toDraw; i++) {
             boolean renderHalf = lastOneHalf && i + 1 == toDraw;
-            gui.drawTexturedModalRect(9F * i, (i == regen ? -2 : 0) - function.get(i), renderHalf ? halfTextureX : textureX, textureY, 9, 9);
+            gui.blit((int) (9F * i), (i == regen ? -2 : 0) - function.get(i), renderHalf ? halfTextureX : textureX, textureY, 9, 9);
         }
     }
 }

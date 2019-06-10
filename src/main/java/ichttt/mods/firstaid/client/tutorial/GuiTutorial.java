@@ -18,6 +18,7 @@
 
 package ichttt.mods.firstaid.client.tutorial;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
@@ -28,9 +29,10 @@ import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.TranslationTextComponent;
 
 public class GuiTutorial extends Screen {
     private final GuiHealthScreen parent;
@@ -40,6 +42,7 @@ public class GuiTutorial extends Screen {
 
     @SuppressWarnings("deprecation") // we still need this method
     public GuiTutorial() {
+        super(new TranslationTextComponent("firstaid.tutorial"));
         this.demoModel = PlayerDamageModel.create();
         this.parent = new GuiHealthScreen(demoModel);
         this.action = new TutorialAction(this);
@@ -59,36 +62,29 @@ public class GuiTutorial extends Screen {
         this.action.addTextWrapper("firstaid.tutorial.line6");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.HEAD.damage(16F, null, false));
         this.action.addTextWrapper("firstaid.tutorial.line7");
-        this.action.addTextWrapper("firstaid.tutorial.line8", I18n.format(ClientHooks.showWounds.func_197978_k()));
+        this.action.addTextWrapper("firstaid.tutorial.line8", I18n.format(ClientHooks.showWounds.getTranslationKey()));
         this.action.addTextWrapper("firstaid.tutorial.end");
 
         this.action.next();
     }
 
     @Override
-    public void initGui() {
-        parent.setWorldAndResolution(mc, this.width, this.height);
+    public void init() {
+        parent.init(minecraft, this.width, this.height);
         guiTop = parent.guiTop - 30;
-        addButton(new Button(0, parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, ">"){
-            @Override
-            public void onClick(double mouseX, double mouseY) {
-                if (action.hasNext())
-                    GuiTutorial.this.action.next();
-                else {
-                    FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
-                    mc.displayGuiScreen(new GuiHealthScreen(CommonUtils.getDamageModel(mc.player)));
-                }
+        addButton(new Button(parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, ">", button -> {
+            if (action.hasNext()) GuiTutorial.this.action.next();
+            else {
+                FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
+                minecraft.displayGuiScreen(new GuiHealthScreen(CommonUtils.getDamageModel(minecraft.player)));
             }
-        });
-        for (Button button : parent.getButtons()) {
-            if (button.id == 9) {
-                addButton(new Button(9, button.x, button.y, button.width, button.height, button.displayString) {
-                    @Override
-                    public void onClick(double mouseX, double mouseY) {
-                        FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
-                        mc.displayGuiScreen(null);
-                    }
-                });
+        }));
+        for (Widget button : parent.getButtons()) {
+            if (button == parent.cancelButton) {
+                addButton(new Button(button.x, button.y, button.getWidth(), button.getHeight(), button.getMessage(), ignored -> {
+                    FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
+                    minecraft.displayGuiScreen(null);
+                }));
                 continue;
             }
             addButton(button);
@@ -97,7 +93,7 @@ public class GuiTutorial extends Screen {
     }
 
     public void drawOffsetString(String s, int yOffset) {
-        drawString(mc.fontRenderer, s, parent.guiLeft + 30, guiTop + yOffset, 0xFFFFFF);
+        drawString(minecraft.fontRenderer, s, parent.guiLeft + 30, guiTop + yOffset, 0xFFFFFF);
     }
 
     @Override
@@ -105,17 +101,17 @@ public class GuiTutorial extends Screen {
         GlStateManager.pushMatrix();
         parent.render(mouseX, mouseY, partialTicks);
         GlStateManager.popMatrix();
-        mc.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
-        drawTexturedModalRect(parent.guiLeft, guiTop ,0, 139, GuiHealthScreen.xSize, 28);
+        minecraft.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
+        blit(parent.guiLeft, guiTop, 0, 139, GuiHealthScreen.xSize, 28);
         GlStateManager.pushMatrix();
         this.action.draw();
         GlStateManager.popMatrix();
-        drawCenteredString(mc.fontRenderer, I18n.format("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 140, 0xFFFFFF);
+        drawCenteredString(minecraft.fontRenderer, I18n.format("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 140, 0xFFFFFF);
         super.render(mouseX, mouseY, partialTicks);
     }
 
     @Override
-    public void onGuiClosed() {
+    public void onClose() {
         GuiHealthScreen.isOpen = false;
     }
 }

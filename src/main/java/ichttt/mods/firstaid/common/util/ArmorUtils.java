@@ -68,7 +68,7 @@ public class ArmorUtils {
         float totalArmor = armor.getDamageReduceAmount() * getArmorModifier(slot);
         float totalToughness = armor.getToughness() * getThougnessMofier(slot);
 
-        itemStack.damageItem((int) damage, entity);
+        itemStack.damageItem((int) damage, entity, (player) -> player.sendBreakAnimation(slot));
         damage = CombatRules.getDamageAfterAbsorb(damage, totalArmor, totalToughness);
         return damage;
     }

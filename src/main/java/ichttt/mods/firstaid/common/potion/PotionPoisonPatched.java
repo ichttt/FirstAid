@@ -26,6 +26,7 @@ import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.FakePlayer;
@@ -34,12 +35,12 @@ import javax.annotation.Nonnull;
 
 @SuppressWarnings("unused")
 public class PotionPoisonPatched extends Effect {
-    public static final PotionPoisonPatched INSTANCE = new PotionPoisonPatched(true, 5149489);
+    public static final PotionPoisonPatched INSTANCE = new PotionPoisonPatched(EffectType.HARMFUL, 5149489);
 
-    protected PotionPoisonPatched(boolean isBadEffectIn, int liquidColorIn) {
-        super(isBadEffectIn, liquidColorIn);
-        this.setIconIndex(6, 0);
-        this.setEffectiveness(0.25D);
+    protected PotionPoisonPatched(EffectType type, int liquidColorIn) {
+        super(type, liquidColorIn);
+//        this.setIconIndex(6, 0); TODO check out potions
+//        this.setEffectiveness(0.25D);
         this.setRegistryName(new ResourceLocation("minecraft", "poison"));
         FirstAid.LOGGER.info("Don't worry, the minecraft poison override IS intended.");
     }

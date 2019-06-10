@@ -34,7 +34,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.client.GuiIngameForge;
+import net.minecraftforge.client.ForgeIngameGui;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -102,11 +102,11 @@ public class ClientEventHandler {
         if (type == RenderGameOverlayEvent.ElementType.ALL || (type == RenderGameOverlayEvent.ElementType.TEXT && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.OFF && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)) {
             Minecraft mc = Minecraft.getInstance();
             if (!mc.player.isAlive()) return;
-            mc.profiler.startSection("FirstAidOverlay");
-            GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
+            mc.getProfiler().startSection("FirstAidOverlay");
+            ForgeIngameGui.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
             HUDHandler.INSTANCE.renderOverlay(mc, event.getPartialTicks());
-            mc.profiler.endSection();
-            mc.profiler.endSection();
+            mc.getProfiler().endSection();
+            mc.getProfiler().endSection();
         }
     }
 

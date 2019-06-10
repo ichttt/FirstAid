@@ -28,7 +28,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.util.Hand;
-import net.minecraftforge.client.GuiIngameForge;
+import net.minecraftforge.client.ForgeIngameGui;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -44,7 +44,7 @@ public class ClientHooks {
         FirstAid.LOGGER.debug("Loading ClientHooks");
         MinecraftForge.EVENT_BUS.register(ClientEventHandler.class);
         ClientRegistry.registerKeyBinding(showWounds);
-        GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
+        ForgeIngameGui.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
         EventCalendar.checkDate();
     }
 

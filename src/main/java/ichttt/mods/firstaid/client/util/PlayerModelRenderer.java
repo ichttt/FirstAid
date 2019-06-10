@@ -18,12 +18,12 @@
 
 package ichttt.mods.firstaid.client.util;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
 public class PlayerModelRenderer {
@@ -60,6 +60,6 @@ public class PlayerModelRenderer {
                 throw new RuntimeException(String.format("Calculated invalid health for part %s with current health %s and max health %d. Got value %s", part.part, part.currentHealth, maxHealth, healthPercentage));
             texX += SIZE * (healthPercentage > 0.5 ? 1 : 2);
         }
-        gui.drawTexturedModalRect(rawTexX, texY, texX, texY, sizeX, sizeY);
+        gui.blit(rawTexX, texY, texX, texY, sizeX, sizeY);
     }
 }

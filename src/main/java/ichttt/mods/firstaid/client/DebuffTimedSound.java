@@ -122,8 +122,8 @@ public class DebuffTimedSound implements ITickableSound {
     }
 
     @Override
-    public boolean isPriority() {
-        return true;
+    public boolean func_217861_m() { //maybe stream? dunno
+        return false;
     }
 
     @Override

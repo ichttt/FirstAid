@@ -95,7 +95,7 @@ public class CommonUtils {
 //    }
 
     public static boolean isValidArmorSlot(EquipmentSlotType slot) {
-        return slot.getSlotType() == EquipmentSlotType.Type.ARMOR;
+        return slot.getSlotType() == EquipmentSlotType.Group.ARMOR;
     }
 
     public static boolean isSurvivalOrAdventure(PlayerEntity player) {

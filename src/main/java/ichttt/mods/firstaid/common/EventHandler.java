@@ -42,20 +42,13 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.potion.Effect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.ServerWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.loot.ItemLootEntry;
-import net.minecraft.world.storage.loot.LootPool;
-import net.minecraft.world.storage.loot.LootTables;
-import net.minecraft.world.storage.loot.RandomValueRange;
-import net.minecraft.world.storage.loot.conditions.ILootCondition;
-import net.minecraft.world.storage.loot.functions.SetCount;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -127,10 +120,10 @@ public class EventHandler {
     @SubscribeEvent(priority =  EventPriority.LOWEST)
     public static void onProjectileImpact(ProjectileImpactEvent event) {
         RayTraceResult result = event.getRayTraceResult();
-        if (result.type != RayTraceResult.Type.ENTITY)
+        if (result.getType() != RayTraceResult.Type.ENTITY)
             return;
 
-        Entity entity = result.entity;
+        Entity entity = ((EntityRayTraceResult) result).getEntity();
         if (!entity.world.isRemote && entity instanceof PlayerEntity) {
             hitList.put((PlayerEntity) entity, Pair.of(event.getEntity(), event.getRayTraceResult()));
         }
@@ -162,14 +155,14 @@ public class EventHandler {
         if (event.phase == TickEvent.Phase.END) return;
         if (FirstAidConfig.SERVER.sleepHealPercentage.get() <= 0D) return;
         World world = event.world;
-        if (!world.isRemote && world instanceof ServerWorld && ((ServerWorld) world).areAllPlayersAsleep()) {
-            for (PlayerEntity player : world.playerEntities) {
+        if (!world.isRemote && world instanceof ServerWorld && ((ServerWorld) world).allPlayersSleeping && world.getPlayers().stream().noneMatch((player) -> !player.isSpectator() && !player.isPlayerFullyAsleep())) {
+            for (PlayerEntity player : world.getPlayers()) {
                 CommonUtils.getDamageModel(player).sleepHeal(player);
             }
         }
     }
 
-    @SubscribeEvent
+    /*@SubscribeEvent
     public static void onLootTableLoad(LootTableLoadEvent event) {
         ResourceLocation tableName = event.getName();
         LootPool pool = null;
@@ -191,7 +184,7 @@ public class EventHandler {
             pool.addEntry(new ItemLootEntry(FirstAidItems.PLASTER, plaster, 0, new SetCount[]{new SetCount(new ILootCondition[0], new RandomValueRange(1, 5))}, new ILootCondition[0], FirstAid.MODID + "plaster"));
             pool.addEntry(new ItemLootEntry(FirstAidItems.MORPHINE, morphine, 0, new SetCount[]{new SetCount(new ILootCondition[0], new RandomValueRange(1, 2))}, new ILootCondition[0], FirstAid.MODID + "morphine"));
         }
-    }
+    }*/ //TODO Loot tables
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onHeal(LivingHealEvent event) {

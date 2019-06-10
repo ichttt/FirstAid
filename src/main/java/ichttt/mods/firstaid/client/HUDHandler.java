@@ -18,6 +18,7 @@
 
 package ichttt.mods.firstaid.client;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -30,7 +31,6 @@ import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.math.MathHelper;
@@ -58,7 +58,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         TRANSLATION_MAP.clear();
         maxLength = 0;
         for (EnumPlayerPart part : EnumPlayerPart.VALUES) {
-            String translated = I18n.format("gui." + part.toString().toLowerCase(Locale.ENGLISH));
+            String translated = I18n.format("firstaid.gui." + part.toString().toLowerCase(Locale.ENGLISH));
             maxLength = Math.max(maxLength, Minecraft.getInstance().fontRenderer.getStringWidth(translated));
             TRANSLATION_MAP.put(part, translated);
         }
@@ -69,7 +69,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
     }
 
     public void renderOverlay(Minecraft mc, float partialTicks) {
-        mc.profiler.startSection("prepare");
+        mc.getProfiler().startSection("prepare");
         if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.OFF || mc.player == null || (GuiHealthScreen.isOpen && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) || !CommonUtils.isSurvivalOrAdventure(mc.player))
             return;
 
@@ -89,7 +89,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 return;
         }
 
-        mc.getTextureManager().bindTexture(AbstractGui.ICONS);
+        mc.getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
         AbstractGui gui = mc.ingameGUI;
         int xOffset = FirstAidConfig.overlay.xOffset;
         int yOffset = FirstAidConfig.overlay.yOffset;
@@ -115,7 +115,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 throw new RuntimeException("Invalid config option for position: " + FirstAidConfig.overlay.pos);
         }
 
-        if (mc.currentScreen instanceof ChatScreen && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)
+        if (mc.field_71462_r instanceof ChatScreen && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)
             return;
         if (mc.gameSettings.showDebugInfo && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.TOP_LEFT)
             return;
@@ -129,7 +129,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
             GlStateManager.enableBlend();
             GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         }
-        mc.profiler.endStartSection("render");
+        mc.getProfiler().endStartSection("render");
         if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) {
             PlayerModelRenderer.renderPlayerHealth(damageModel, gui, alpha);
         } else {
@@ -144,8 +144,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 GlStateManager.translatef(0, 10F, 0F);
             }
         }
-        mc.profiler.endSection();
-        mc.profiler.startSection("cleanup");
+        mc.getProfiler().endStartSection("cleanup");
         if (enableAlphaBlend)
             GlStateManager.disableBlend();
         GlStateManager.popMatrix();

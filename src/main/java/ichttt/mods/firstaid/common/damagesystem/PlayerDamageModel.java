@@ -127,7 +127,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     public void tick(World world, PlayerEntity player) {
         if (isDead(player))
             return;
-        world.profiler.startSection("FirstAidPlayerModel");
+        world.getProfiler().startSection("FirstAidPlayerModel");
         if (sleepBlockTicks > 0)
             sleepBlockTicks--;
         else if (sleepBlockTicks < 0)
@@ -136,7 +136,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         float currentHealth = getCurrentHealth();
         if (currentHealth <= 0F) {
             FirstAid.LOGGER.error("Got {} health left, but isn't marked as dead!", currentHealth);
-            world.profiler.endSection();
+            world.getProfiler().endSection();
             return;
         }
         if (!world.isRemote && resyncTimer != -1) {
@@ -173,12 +173,12 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         this.needsMorphineUpdate = false;
 
         //Debuff and part ticking
-        world.profiler.startSection("PartDebuffs");
+        world.getProfiler().startSection("PartDebuffs");
         forEach(part -> part.tick(world, player, morphine == null));
         if (morphine == null && !world.isRemote)
             sharedDebuffs.forEach(sharedDebuff -> sharedDebuff.tick(player));
-        world.profiler.endSection();
-        world.profiler.endSection();
+        world.getProfiler().endSection();
+        world.getProfiler().endSection();
     }
 
     public static int getRandMorphineDuration() { //Tweak tooltip event when changing as well
@@ -361,13 +361,13 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     @Override
     public void runScaleLogic(PlayerEntity player) {
         if (FirstAidConfig.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
-            player.world.profiler.startSection("healthscaling");
+            player.world.getProfiler().startSection("healthscaling");
             float globalFactor = player.getMaxHealth() / 20F;
             if (prevScaleFactor != globalFactor) {
                 if (FirstAidConfig.debug) {
                     FirstAid.LOGGER.info("Starting health scaling factor {} -> {} (max health {})", prevScaleFactor, globalFactor, player.getMaxHealth());
                 }
-                player.world.profiler.startSection("distribution");
+                player.world.getProfiler().startSection("distribution");
                 int reduced = 0;
                 int added = 0;
                 float expectedNewMaxHealth = 0F;
@@ -398,7 +398,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                     }
                     part.setMaxHealth(result);
                 }
-                player.world.profiler.endStartSection("correcting");
+                player.world.getProfiler().endStartSection("correcting");
                 if (Math.abs(expectedNewMaxHealth - newMaxHealth) >= 2F) {
                     if (FirstAidConfig.debug) {
                         FirstAid.LOGGER.info("Entering second stage - diff {}", Math.abs(expectedNewMaxHealth - newMaxHealth));
@@ -425,10 +425,10 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                         }
                     }
                 }
-                player.world.profiler.endSection();
+                player.world.getProfiler().endSection();
             }
             prevScaleFactor = globalFactor;
-            player.world.profiler.endSection();
+            player.world.getProfiler().endSection();
         }
     }
 

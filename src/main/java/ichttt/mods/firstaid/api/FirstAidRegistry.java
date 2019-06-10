@@ -24,7 +24,7 @@ import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -76,7 +76,7 @@ public abstract class FirstAidRegistry {
      *                             Otherwise, the list will be shuffled before each damage distribution
      * @param shufflePriorityTable If the {@code priorityTable} should be shuffled before each distribution
      */
-    public abstract void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable);
+    public abstract void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EquipmentSlotType, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable);
 
     /**
      * Binds the damage source to a distribution.

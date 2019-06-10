@@ -22,7 +22,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -53,7 +53,7 @@ public class MessageAddHealth {
             NetworkEvent.Context ctx = supplier.get();
             CommonUtils.checkClient(ctx);
             ctx.enqueueWork(() -> {
-                EntityPlayerSP playerSP = Minecraft.getInstance().player;
+                ClientPlayerEntity playerSP = Minecraft.getInstance().player;
                 AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(playerSP);
                 for (int i = 0; i < message.table.length; i++) {
                     float f = message.table[i];

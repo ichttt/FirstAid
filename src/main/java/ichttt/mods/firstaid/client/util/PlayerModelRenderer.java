@@ -22,7 +22,7 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
@@ -30,7 +30,7 @@ public class PlayerModelRenderer {
     private static final ResourceLocation HEALTH_RENDER_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health.png");
     private static final int SIZE = 64;
 
-    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, Gui gui, float alpha) {
+    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, AbstractGui gui, float alpha) {
         GlStateManager.enableAlphaTest();
         GlStateManager.enableBlend();
         GlStateManager.color4f(1F, 1F, 1F, 1 - (alpha / 255));
@@ -48,7 +48,7 @@ public class PlayerModelRenderer {
         GlStateManager.color4f(1F, 1F, 1F, 1F);
     }
 
-    private static void drawPart(Gui gui, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
+    private static void drawPart(AbstractGui gui, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
         int rawTexX = texX;
         int maxHealth = part.getMaxHealth();
         if (part.currentHealth <= 0.001) {

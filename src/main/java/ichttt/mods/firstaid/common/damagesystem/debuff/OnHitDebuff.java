@@ -22,8 +22,8 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
 import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.floats.Float2IntMap;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.potion.PotionEffect;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
@@ -42,14 +42,14 @@ public class OnHitDebuff extends AbstractDebuff {
     }
 
     @Override
-    public void handleDamageTaken(float damage, float healthPerMax, EntityPlayerMP player) {
+    public void handleDamageTaken(float damage, float healthPerMax, ServerPlayerEntity player) {
         if (!this.isEnabled.getAsBoolean())
             return;
         int value = -1;
         for (Float2IntMap.Entry entry : map.float2IntEntrySet()) {
             if (damage >= entry.getFloatKey()) {
                 value = Math.max(value, entry.getIntValue());
-                player.addPotionEffect(new PotionEffect(effect, entry.getIntValue(), 0, false, false));
+                player.addPotionEffect(new EffectInstance(effect, entry.getIntValue(), 0, false, false));
             }
         }
         if (value != -1 && sound != null)
@@ -57,7 +57,7 @@ public class OnHitDebuff extends AbstractDebuff {
     }
 
     @Override
-    public void handleHealing(float healingDone, float healthPerMax, EntityPlayerMP player) {
+    public void handleHealing(float healingDone, float healthPerMax, ServerPlayerEntity player) {
 
     }
 }

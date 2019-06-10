@@ -20,13 +20,13 @@ package ichttt.mods.firstaid.common.util;
 
 import com.google.common.collect.Iterators;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.MobEffects;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
 
@@ -35,10 +35,10 @@ import javax.annotation.Nonnull;
 public class ArmorUtils {
 
     /**
-     * Helper function to make {@link #applyArmor(EntityPlayer, ItemStack, DamageSource, float, EntityEquipmentSlot)}
+     * Helper function to make {@link #applyArmor(PlayerEntity, ItemStack, DamageSource, float, EquipmentSlotType)}
      * more diffable
      */
-    private static float getArmorModifier(EntityEquipmentSlot slot) {
+    private static float getArmorModifier(EquipmentSlotType slot) {
         switch (slot) {
             case CHEST:
                 return 2.5F;
@@ -52,19 +52,19 @@ public class ArmorUtils {
         }
     }
 
-    private static float getThougnessMofier(EntityEquipmentSlot slot) {
-        return (slot == EntityEquipmentSlot.CHEST || slot == EntityEquipmentSlot.LEGS ? 3 : 4);
+    private static float getThougnessMofier(EquipmentSlotType slot) {
+        return (slot == EquipmentSlotType.CHEST || slot == EquipmentSlotType.LEGS ? 3 : 4);
     }
 
     /**
-     * Changed copy of ISpecialArmor {@link EntityLivingBase#applyArmorCalculations(DamageSource, float)}
+     * Changed copy of ISpecialArmor {@link LivingEntity#applyArmorCalculations(DamageSource, float)}
      */
     @SuppressWarnings("JavadocReference")
-    public static float applyArmor(@Nonnull EntityPlayer entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, float damage, @Nonnull EntityEquipmentSlot slot) {
+    public static float applyArmor(@Nonnull PlayerEntity entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, float damage, @Nonnull EquipmentSlotType slot) {
         if (itemStack.isEmpty() || source.isUnblockable()) return damage; //TODO validate
         Item item = itemStack.getItem();
-        if (!(item instanceof ItemArmor)) return damage;
-        ItemArmor armor = (ItemArmor) item;
+        if (!(item instanceof ArmorItem)) return damage;
+        ArmorItem armor = (ArmorItem) item;
         float totalArmor = armor.getDamageReduceAmount() * getArmorModifier(slot);
         float totalToughness = armor.getToughness() * getThougnessMofier(slot);
 
@@ -74,15 +74,15 @@ public class ArmorUtils {
     }
 
     /**
-     * Changed copy of the first part from {@link EntityLivingBase#applyPotionDamageCalculations(DamageSource, float)}
+     * Changed copy of the first part from {@link LivingEntity#applyPotionDamageCalculations(DamageSource, float)}
      */
     @SuppressWarnings("JavadocReference")
-    public static float applyGlobalPotionModifiers(EntityPlayer player, DamageSource source, float damage) {
+    public static float applyGlobalPotionModifiers(PlayerEntity player, DamageSource source, float damage) {
         if (source.isDamageAbsolute())
             return damage;
-        if (player.isPotionActive(MobEffects.RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
+        if (player.isPotionActive(Effects.RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
             @SuppressWarnings("ConstantConditions")
-            int i = (player.getActivePotionEffect(MobEffects.RESISTANCE).getAmplifier() + 1) * 5;
+            int i = (player.getActivePotionEffect(Effects.RESISTANCE).getAmplifier() + 1) * 5;
             int j = 25 - i;
             float f = damage * (float) j;
             damage = f / 25.0F;
@@ -95,7 +95,7 @@ public class ArmorUtils {
     }
 
     /**
-     * Changed copy of the second part from {@link EntityLivingBase#applyPotionDamageCalculations(DamageSource, float)}
+     * Changed copy of the second part from {@link LivingEntity#applyPotionDamageCalculations(DamageSource, float)}
      */
     @SuppressWarnings("JavadocReference")
     public static float applyEnchantmentModifiers(ItemStack stack, DamageSource source, float damage) {

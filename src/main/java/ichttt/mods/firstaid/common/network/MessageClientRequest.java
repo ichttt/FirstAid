@@ -21,7 +21,7 @@ package ichttt.mods.firstaid.common.network;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -53,7 +53,7 @@ public class MessageClientRequest {
 
         public static void onMessage(MessageClientRequest message, Supplier<NetworkEvent.Context> supplier) {
             NetworkEvent.Context ctx = supplier.get();
-            EntityPlayerMP player = CommonUtils.checkServer(ctx);
+            ServerPlayerEntity player = CommonUtils.checkServer(ctx);
             if (message.type == Type.TUTORIAL_COMPLETE) {
                 CapProvider.tutorialDone.add(player.getName().getString());
                 ctx.enqueueWork(() -> CommonUtils.getDamageModel(player).hasTutorial = true);

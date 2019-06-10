@@ -24,8 +24,8 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.network.MessageAddHealth;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -42,11 +42,11 @@ public class HealthDistribution {
         parts.addAll(Arrays.asList(partArray));
     }
 
-    public static void manageHealth(float health, AbstractPlayerDamageModel damageModel, EntityPlayer player, boolean sendChanges, boolean distribute) {
+    public static void manageHealth(float health, AbstractPlayerDamageModel damageModel, PlayerEntity player, boolean sendChanges, boolean distribute) {
         if (sendChanges && player.world.isRemote) {
             FirstAid.LOGGER.catching(new RuntimeException("Someone set flag sendChanges on the client, this is not supported!"));
             sendChanges = false;
-        } else if (sendChanges && !(player instanceof EntityPlayerMP)) { //EntityOtherPlayerMP? log something?
+        } else if (sendChanges && !(player instanceof ServerPlayerEntity)) { //EntityOtherPlayerMP? log something?
             sendChanges = false;
         }
 
@@ -81,15 +81,15 @@ public class HealthDistribution {
         }
 
         if (sendChanges)
-            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (EntityPlayerMP) player), new MessageAddHealth(healingDone));
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageAddHealth(healingDone));
     }
 
-    public static void distributeHealth(float health, EntityPlayer player, boolean sendChanges) {
+    public static void distributeHealth(float health, PlayerEntity player, boolean sendChanges) {
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
         manageHealth(health, damageModel, player, sendChanges, true);
     }
 
-    public static void addRandomHealth(float health, EntityPlayer player, boolean sendChanges) {
+    public static void addRandomHealth(float health, PlayerEntity player, boolean sendChanges) {
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
         manageHealth(health, damageModel, player, sendChanges, false);
     }

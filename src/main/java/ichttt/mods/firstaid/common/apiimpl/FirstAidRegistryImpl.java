@@ -36,7 +36,7 @@ import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistribution;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -75,7 +75,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     }
 
     @Override
-    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable) {
+    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EquipmentSlotType, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable) {
         bindDamageSourceCustom(damageType, new StandardDamageDistribution(priorityTable, shufflePriorityTable));
     }
 

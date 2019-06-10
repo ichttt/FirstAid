@@ -28,9 +28,9 @@ import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.ModContainer;
@@ -47,24 +47,24 @@ import java.util.Objects;
 
 public class CommonUtils {
     @Nonnull
-    public static final EntityEquipmentSlot[] ARMOR_SLOTS;
+    public static final EquipmentSlotType[] ARMOR_SLOTS;
     @Nonnull
-    public static final ImmutableMap<EntityEquipmentSlot, List<EnumPlayerPart>> slotToParts;
+    public static final ImmutableMap<EquipmentSlotType, List<EnumPlayerPart>> slotToParts;
 
     static {
-        ARMOR_SLOTS = new EntityEquipmentSlot[4];
-        ARMOR_SLOTS[3] = EntityEquipmentSlot.HEAD;
-        ARMOR_SLOTS[2] = EntityEquipmentSlot.CHEST;
-        ARMOR_SLOTS[1] = EntityEquipmentSlot.LEGS;
-        ARMOR_SLOTS[0] = EntityEquipmentSlot.FEET;
-        slotToParts = ImmutableMap.<EntityEquipmentSlot, List<EnumPlayerPart>>builder().
-        put(EntityEquipmentSlot.HEAD, Collections.singletonList(EnumPlayerPart.HEAD)).
-        put(EntityEquipmentSlot.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY)).
-        put(EntityEquipmentSlot.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)).
-        put(EntityEquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)).build();
+        ARMOR_SLOTS = new EquipmentSlotType[4];
+        ARMOR_SLOTS[3] = EquipmentSlotType.HEAD;
+        ARMOR_SLOTS[2] = EquipmentSlotType.CHEST;
+        ARMOR_SLOTS[1] = EquipmentSlotType.LEGS;
+        ARMOR_SLOTS[0] = EquipmentSlotType.FEET;
+        slotToParts = ImmutableMap.<EquipmentSlotType, List<EnumPlayerPart>>builder().
+        put(EquipmentSlotType.HEAD, Collections.singletonList(EnumPlayerPart.HEAD)).
+        put(EquipmentSlotType.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY)).
+        put(EquipmentSlotType.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)).
+        put(EquipmentSlotType.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)).build();
     }
 
-    public static void killPlayer(@Nonnull EntityPlayer player, @Nullable DamageSource source) {
+    public static void killPlayer(@Nonnull PlayerEntity player, @Nullable DamageSource source) {
         if (source != null && FirstAidConfig.SERVER.allowOtherHealingItems.get() && player.checkTotemDeathProtection(source))
             return;
 
@@ -72,7 +72,7 @@ public class CommonUtils {
 //        if (revival != null)
 //            revival.startBleeding(player, source);
 //        else
-            ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
+            ((DataManagerWrapper) player.dataManager).set_impl(PlayerEntity.HEALTH, 0F);
     }
 
 //    /**
@@ -94,11 +94,11 @@ public class CommonUtils {
 //            return null;
 //    }
 
-    public static boolean isValidArmorSlot(EntityEquipmentSlot slot) {
-        return slot.getSlotType() == EntityEquipmentSlot.Type.ARMOR;
+    public static boolean isValidArmorSlot(EquipmentSlotType slot) {
+        return slot.getSlotType() == EquipmentSlotType.Type.ARMOR;
     }
 
-    public static boolean isSurvivalOrAdventure(EntityPlayer player) {
+    public static boolean isSurvivalOrAdventure(PlayerEntity player) {
         return !player.isSpectator() && !player.isCreative();
     }
 
@@ -107,7 +107,7 @@ public class CommonUtils {
         return activeModContainer == null ? "UNKNOWN-NULL" : activeModContainer.getModId();
     }
 
-    public static void healPlayerByPercentage(double percentage, AbstractPlayerDamageModel damageModel, EntityPlayer player) {
+    public static void healPlayerByPercentage(double percentage, AbstractPlayerDamageModel damageModel, PlayerEntity player) {
         Objects.requireNonNull(damageModel);
         int healValue = Ints.checkedCast(Math.round(damageModel.getCurrentMaxHealth() * percentage));
         HealthDistribution.manageHealth(healValue, damageModel, player, true, false);
@@ -123,16 +123,16 @@ public class CommonUtils {
     }
 
     @Nonnull
-    public static AbstractPlayerDamageModel getDamageModel(EntityPlayer player) {
+    public static AbstractPlayerDamageModel getDamageModel(PlayerEntity player) {
         return player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null).orElseThrow(() -> new IllegalArgumentException("Player " + player.getName() + " is missing a damage model!"));
     }
 
     public static boolean hasDamageModel(Entity entity) {
-        return entity instanceof EntityPlayer && !(entity instanceof FakePlayer);
+        return entity instanceof PlayerEntity && !(entity instanceof FakePlayer);
     }
 
     @Nonnull
-    public static EntityPlayerMP checkServer(NetworkEvent.Context context) {
+    public static ServerPlayerEntity checkServer(NetworkEvent.Context context) {
         if (context.getDirection() != NetworkDirection.PLAY_TO_SERVER)
             throw new IllegalArgumentException("Wrong side for server packet handler " + context.getDirection());
         context.setPacketHandled(true);

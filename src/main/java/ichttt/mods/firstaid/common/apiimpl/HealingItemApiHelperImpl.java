@@ -22,12 +22,12 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.item.HealingItemApiHelper;
 import ichttt.mods.firstaid.api.item.ItemHealing;
 import ichttt.mods.firstaid.client.ClientHooks;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -43,10 +43,10 @@ public class HealingItemApiHelperImpl extends HealingItemApiHelper {
 
     @Nonnull
     @Override
-    public ActionResult<ItemStack> onItemRightClick(ItemHealing itemHealing, World world, EntityPlayer player, EnumHand hand) {
+    public ActionResult<ItemStack> onItemRightClick(ItemHealing itemHealing, World world, PlayerEntity player, Hand hand) {
         if (world.isRemote)
             DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> ClientHooks.showGuiApplyHealth(hand));
-        return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
+        return new ActionResult<>(ActionResultType.SUCCESS, player.getHeldItem(hand));
     }
 
     @Nonnull

@@ -25,7 +25,7 @@ import net.minecraft.client.audio.ITickableSound;
 import net.minecraft.client.audio.Sound;
 import net.minecraft.client.audio.SoundEventAccessor;
 import net.minecraft.client.audio.SoundHandler;
-import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -42,7 +42,7 @@ public class DebuffTimedSound implements ITickableSound {
     private final int debuffDuration;
     private final ResourceLocation soundLocation;
     private final SoundEvent event;
-    private final WeakReference<EntityPlayerSP> player;
+    private final WeakReference<ClientPlayerEntity> player;
     private Sound sound;
     private float volume = volumeMultiplier;
     private int ticks;
@@ -73,7 +73,7 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Override
     public boolean isDonePlaying() {
-        EntityPlayerSP player = this.player.get();
+        ClientPlayerEntity player = this.player.get();
         boolean done = player == null || ticks >= debuffDuration || player.getHealth() <= 0;
         if (done)
             activeSounds.remove(this.event);
@@ -143,7 +143,7 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Override
     public float getX() {
-        EntityPlayerSP player = this.player.get();
+        ClientPlayerEntity player = this.player.get();
         if (player == null)
             return 0F;
         return (float) player.posX;
@@ -151,7 +151,7 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Override
     public float getY() {
-        EntityPlayerSP player = this.player.get();
+        ClientPlayerEntity player = this.player.get();
         if (player == null)
             return 0F;
         return (float) player.posY;
@@ -159,7 +159,7 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Override
     public float getZ() {
-        EntityPlayerSP player = this.player.get();
+        ClientPlayerEntity player = this.player.get();
         if (player == null)
             return 0F;
         return (float) player.posZ;

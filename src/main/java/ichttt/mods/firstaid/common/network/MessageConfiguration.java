@@ -26,18 +26,18 @@ import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class MessageConfiguration {
 
-    private NBTTagCompound playerDamageModel;
+    private CompoundNBT playerDamageModel;
 
-    public MessageConfiguration(NBTTagCompound model) {
+    public MessageConfiguration(CompoundNBT model) {
         this.playerDamageModel = model;
     }
 
@@ -62,7 +62,7 @@ public class MessageConfiguration {
                 if (damageModel.hasTutorial)
                     CapProvider.tutorialDone.add(Minecraft.getInstance().player.getName().getString());
                 else
-                    Minecraft.getInstance().player.sendMessage(new TextComponentString("[First Aid] " + I18n.format("firstaid.tutorial.hint", ClientHooks.showWounds.getKey().getName())));
+                    Minecraft.getInstance().player.sendMessage(new StringTextComponent("[First Aid] " + I18n.format("firstaid.tutorial.hint", ClientHooks.showWounds.getKey().getName())));
                 HUDHandler.INSTANCE.ticker = 200;
                 FirstAid.isSynced = true;
             });

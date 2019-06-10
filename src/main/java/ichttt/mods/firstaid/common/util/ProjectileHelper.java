@@ -19,8 +19,8 @@
 package ichttt.mods.firstaid.common.util;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.util.math.AxisAlignedBB;
 
 import javax.annotation.Nullable;
@@ -33,19 +33,19 @@ public class ProjectileHelper {
     private static final AxisAlignedBB FEET_AABB = new AxisAlignedBB(0D, 0.0D, 0D, 1D, 0.4D, 1D);
 
     @Nullable
-    public static EntityEquipmentSlot getPartByPosition(Entity hittingObject, EntityPlayer toTrack) {
+    public static EquipmentSlotType getPartByPosition(Entity hittingObject, PlayerEntity toTrack) {
         if (testAABB(hittingObject, toTrack, HEAD_AABB))
-            return EntityEquipmentSlot.HEAD;
+            return EquipmentSlotType.HEAD;
         if (testAABB(hittingObject, toTrack, MAIN_AABB))
-            return EntityEquipmentSlot.CHEST;
+            return EquipmentSlotType.CHEST;
         if (testAABB(hittingObject, toTrack, LEG_AABB))
-            return EntityEquipmentSlot.LEGS;
+            return EquipmentSlotType.LEGS;
         if (testAABB(hittingObject, toTrack, FEET_AABB))
-            return EntityEquipmentSlot.FEET;
+            return EquipmentSlotType.FEET;
         return null;
     }
 
-    private static boolean testAABB(Entity hittingObject, EntityPlayer toTest, AxisAlignedBB aabb) {
+    private static boolean testAABB(Entity hittingObject, PlayerEntity toTest, AxisAlignedBB aabb) {
         AxisAlignedBB toTestAABB = hittingObject.getBoundingBox();
         return (toTestAABB.minY - toTest.posY) < aabb.maxY && (toTestAABB.maxY - toTest.posY) > aabb.minY;
     }

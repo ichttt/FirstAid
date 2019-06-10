@@ -32,8 +32,8 @@ import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StringUtils;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -63,9 +63,9 @@ public class ClientEventHandler {
             if (id > 15) id = 0;
         }
         if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.world != null && mc.world.isRemote) {
-            mc.player.sendStatusMessage(new TextComponentString("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
+            mc.player.sendStatusMessage(new StringTextComponent("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
             for (String s : RegistryManager.debuffConfigErrors)
-                mc.player.sendStatusMessage(new TextComponentString("[FirstAid] " + s), false);
+                mc.player.sendStatusMessage(new StringTextComponent("[FirstAid] " + s), false);
             RegistryManager.debuffConfigErrors.clear();
         }
         if (HUDHandler.INSTANCE.ticker > 0)
@@ -114,13 +114,13 @@ public class ClientEventHandler {
     public static void tooltipItems(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
         if (stack.getItem() == FirstAidItems.MORPHINE) {
-            event.getToolTip().add(new TextComponentTranslation("firstaid.tooltip.morphine", "3:30-4:30"));
+            event.getToolTip().add(new TranslationTextComponent("firstaid.tooltip.morphine", "3:30-4:30"));
             return;
         }
 
         AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
         if (healer != null && event.getEntityPlayer() != null) {
-            event.getToolTip().add(new TextComponentTranslation("firstaid.tooltip.healer", healer.maxHeal.getAsInt() / 2, StringUtils.ticksToElapsedTime(healer.ticksPerHeal.getAsInt())));
+            event.getToolTip().add(new TranslationTextComponent("firstaid.tooltip.healer", healer.maxHeal.getAsInt() / 2, StringUtils.ticksToElapsedTime(healer.ticksPerHeal.getAsInt())));
         }
     }
 

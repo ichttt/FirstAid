@@ -19,11 +19,11 @@
 
 package ichttt.mods.firstaid.api.item;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
@@ -42,7 +42,7 @@ public abstract class HealingItemApiHelper {
     }
 
     @Nonnull
-    public abstract ActionResult<ItemStack> onItemRightClick(ItemHealing itemHealing, World worldIn, EntityPlayer playerIn, EnumHand handIn);
+    public abstract ActionResult<ItemStack> onItemRightClick(ItemHealing itemHealing, World worldIn, PlayerEntity playerIn, Hand handIn);
 
     @Nonnull
     public abstract ItemGroup getFirstAidTab();

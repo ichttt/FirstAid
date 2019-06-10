@@ -20,8 +20,8 @@
 package ichttt.mods.firstaid.api.damagesystem;
 
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -29,7 +29,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
 
-public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDamageablePart>, INBTSerializable<NBTTagCompound> {
+public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDamageablePart>, INBTSerializable<CompoundNBT> {
     public final AbstractDamageablePart HEAD;
     public final AbstractDamageablePart LEFT_ARM;
     public final AbstractDamageablePart LEFT_LEG;
@@ -78,7 +78,7 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
      * Updates the part.
      * Should not be called by other mods!
      */
-    public abstract void tick(World world, EntityPlayer player);
+    public abstract void tick(World world, PlayerEntity player);
 
     /**
      * @deprecated Migrated to a potion effect, pass it in to directly apply
@@ -86,7 +86,7 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
     @Deprecated
     public abstract void applyMorphine();
 
-    public abstract void applyMorphine(EntityPlayer player);
+    public abstract void applyMorphine(PlayerEntity player);
 
     public abstract int getMorphineTicks();
 
@@ -99,7 +99,7 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
      * @param player The player to check. If null, it will not be checked if the player can be revived (Using PlayerRevival)
      * @return true if dead, false otherwise
      */
-    public abstract boolean isDead(@Nullable EntityPlayer player);
+    public abstract boolean isDead(@Nullable PlayerEntity player);
 
     public abstract Float getAbsorption();
 
@@ -110,12 +110,12 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
     @OnlyIn(Dist.CLIENT)
     public abstract int getMaxRenderSize();
 
-    public abstract void sleepHeal(EntityPlayer player);
+    public abstract void sleepHeal(PlayerEntity player);
 
     /**
      * Internal for PlayerRevive compat
      */
-    public abstract void stopWaitingForHelp(EntityPlayer player);
+    public abstract void stopWaitingForHelp(PlayerEntity player);
 
     /**
      * Internal for PlayerRevive compat
@@ -123,14 +123,14 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
     public abstract boolean isWaitingForHelp();
 
     @Deprecated
-    public abstract void onNotHelped(EntityPlayer player);
+    public abstract void onNotHelped(PlayerEntity player);
 
     @Deprecated
-    public abstract void onHelpedUp(EntityPlayer player);
+    public abstract void onHelpedUp(PlayerEntity player);
 
-    public abstract void revivePlayer(EntityPlayer player);
+    public abstract void revivePlayer(PlayerEntity player);
 
-    public abstract void runScaleLogic(EntityPlayer player);
+    public abstract void runScaleLogic(PlayerEntity player);
 
     public abstract void scheduleResync();
 

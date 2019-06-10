@@ -27,9 +27,9 @@ import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -49,10 +49,10 @@ import java.util.List;
  * This should be compatible with other mods which do so as I respect the parent in any other case.
  */
 public class DataManagerWrapper extends EntityDataManager {
-    private final EntityPlayer player;
+    private final PlayerEntity player;
     private final EntityDataManager parent;
 
-    public DataManagerWrapper(EntityPlayer player, EntityDataManager parent) {
+    public DataManagerWrapper(PlayerEntity player, EntityDataManager parent) {
         super(player);
         this.player = player;
         this.parent = parent;
@@ -62,7 +62,7 @@ public class DataManagerWrapper extends EntityDataManager {
     @Override
     @Nonnull
     public <T> T get(@Nonnull DataParameter<T> key) {
-        if (key == EntityPlayer.ABSORPTION && player.isAlive())
+        if (key == PlayerEntity.ABSORPTION && player.isAlive())
             parent.set(key, (T) CommonUtils.getDamageModel(player).getAbsorption());
         return parent.get(key);
     }
@@ -73,15 +73,15 @@ public class DataManagerWrapper extends EntityDataManager {
 
     @Override
     public <T> void set(@Nonnull DataParameter<T> key, @Nonnull T value) {
-        if (key == EntityPlayer.ABSORPTION) {
+        if (key == PlayerEntity.ABSORPTION) {
             float floatValue = (Float) value;
-            if (player instanceof EntityPlayerMP) { //may be EntityOtherPlayerMP as well
-                EntityPlayerMP playerMP = (EntityPlayerMP) player;
+            if (player instanceof ServerPlayerEntity) { //may be EntityOtherPlayerMP as well
+                ServerPlayerEntity playerMP = (ServerPlayerEntity) player;
                 if (playerMP.connection != null) //also fired when connecting, ignore(otherwise the net handler would crash)
                     FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> playerMP), new MessageApplyAbsorption(floatValue));
             }
             CommonUtils.getDamageModel(player).setAbsorption(floatValue);
-        } else if (key == EntityLivingBase.HEALTH) {
+        } else if (key == LivingEntity.HEALTH) {
             if (value instanceof Float) {
                 Float aFloat = (Float) value;
                 LazyOptional<AbstractPlayerDamageModel> damageModel;
@@ -90,9 +90,9 @@ public class DataManagerWrapper extends EntityDataManager {
                 } else if ((damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).isPresent() && damageModel.orElseThrow(RuntimeException::new).isWaitingForHelp()) {
                     if (FirstAidConfig.debug)
                         CommonUtils.debugLogStacktrace("SetHealth falltrough");
-                } else if (FirstAidConfig.watchSetHealth && !aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && !player.world.isRemote && player instanceof EntityPlayerMP && ((EntityPlayerMP) player).connection != null) {
+                } else if (FirstAidConfig.watchSetHealth && !aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && !player.world.isRemote && player instanceof ServerPlayerEntity && ((ServerPlayerEntity) player).connection != null) {
                     //calculate diff
-                    Float orig = get(EntityLivingBase.HEALTH);
+                    Float orig = get(LivingEntity.HEALTH);
                     if (orig > 0 && !orig.isNaN() && !orig.isInfinite()) {
                         float healed = aFloat - orig;
                         if (Math.abs(healed) > 0.001) {

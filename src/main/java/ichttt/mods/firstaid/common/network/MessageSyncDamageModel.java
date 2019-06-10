@@ -21,14 +21,14 @@ package ichttt.mods.firstaid.common.network;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class MessageSyncDamageModel {
-    private final NBTTagCompound playerDamageModel;
+    private final CompoundNBT playerDamageModel;
 
     public MessageSyncDamageModel(PacketBuffer buffer) {
         this.playerDamageModel = buffer.readCompoundTag();

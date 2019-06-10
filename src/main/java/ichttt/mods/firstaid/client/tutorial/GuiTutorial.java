@@ -27,12 +27,12 @@ import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 
-public class GuiTutorial extends GuiScreen {
+public class GuiTutorial extends Screen {
     private final GuiHealthScreen parent;
     private final AbstractPlayerDamageModel demoModel;
     private int guiTop;
@@ -69,7 +69,7 @@ public class GuiTutorial extends GuiScreen {
     public void initGui() {
         parent.setWorldAndResolution(mc, this.width, this.height);
         guiTop = parent.guiTop - 30;
-        addButton(new GuiButton(0, parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, ">"){
+        addButton(new Button(0, parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, ">"){
             @Override
             public void onClick(double mouseX, double mouseY) {
                 if (action.hasNext())
@@ -80,9 +80,9 @@ public class GuiTutorial extends GuiScreen {
                 }
             }
         });
-        for (GuiButton button : parent.getButtons()) {
+        for (Button button : parent.getButtons()) {
             if (button.id == 9) {
-                addButton(new GuiButton(9, button.x, button.y, button.width, button.height, button.displayString) {
+                addButton(new Button(9, button.x, button.y, button.width, button.height, button.displayString) {
                     @Override
                     public void onClick(double mouseX, double mouseY) {
                         FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));

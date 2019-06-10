@@ -20,11 +20,11 @@ package ichttt.mods.firstaid.client.gui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.Util;
 
-public class GuiHoldButton extends GuiButton {
+public class GuiHoldButton extends Button {
     private int holdTime;
     private float textScaleFactor;
     public final boolean isRightSide;

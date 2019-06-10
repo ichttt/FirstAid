@@ -23,9 +23,9 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.potion.Potion;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.potion.Effect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.FakePlayer;
@@ -33,7 +33,7 @@ import net.minecraftforge.common.util.FakePlayer;
 import javax.annotation.Nonnull;
 
 @SuppressWarnings("unused")
-public class PotionPoisonPatched extends Potion {
+public class PotionPoisonPatched extends Effect {
     public static final PotionPoisonPatched INSTANCE = new PotionPoisonPatched(true, 5149489);
 
     protected PotionPoisonPatched(boolean isBadEffectIn, int liquidColorIn) {
@@ -45,11 +45,11 @@ public class PotionPoisonPatched extends Potion {
     }
 
     @Override
-    public void performEffect(@Nonnull EntityLivingBase entity, int amplifier) {
-        if (entity instanceof EntityPlayer && !(entity instanceof FakePlayer)) {
+    public void performEffect(@Nonnull LivingEntity entity, int amplifier) {
+        if (entity instanceof PlayerEntity && !(entity instanceof FakePlayer)) {
             if (entity.world.isRemote || !entity.isAlive())
                 return;
-            EntityPlayer player = (EntityPlayer) entity;
+            PlayerEntity player = (PlayerEntity) entity;
             AbstractPlayerDamageModel playerDamageModel = CommonUtils.getDamageModel(player);
             DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false);
         }

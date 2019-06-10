@@ -21,8 +21,8 @@ package ichttt.mods.firstaid.common;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -33,7 +33,7 @@ import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CapProvider implements ICapabilitySerializable<NBTTagCompound> {
+public class CapProvider implements ICapabilitySerializable<CompoundNBT> {
     public static final ResourceLocation IDENTIFIER = new ResourceLocation(FirstAid.MODID, "cap_adv_dmg_mdl");
     public static final Set<String> tutorialDone = new HashSet<>();
     private final AbstractPlayerDamageModel damageModel;
@@ -46,19 +46,19 @@ public class CapProvider implements ICapabilitySerializable<NBTTagCompound> {
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
         if (capability == CapabilityExtendedHealthSystem.INSTANCE)
             return optional.cast();
         return LazyOptional.empty();
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
+    public CompoundNBT serializeNBT() {
         return damageModel.serializeNBT();
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
+    public void deserializeNBT(CompoundNBT nbt) {
         damageModel.deserializeNBT(nbt);
     }
 }

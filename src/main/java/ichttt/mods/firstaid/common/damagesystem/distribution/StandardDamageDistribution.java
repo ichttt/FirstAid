@@ -19,8 +19,8 @@
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.util.DamageSource;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -32,12 +32,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class StandardDamageDistribution extends DamageDistribution {
-    private final List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList;
+    private final List<Pair<EquipmentSlotType, EnumPlayerPart[]>> partList;
     private final boolean shuffle;
 
-    public StandardDamageDistribution(List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList, boolean shuffle) {
+    public StandardDamageDistribution(List<Pair<EquipmentSlotType, EnumPlayerPart[]>> partList, boolean shuffle) {
         this.partList = partList;
-        for (Pair<EntityEquipmentSlot, EnumPlayerPart[]> pair : partList) {
+        for (Pair<EquipmentSlotType, EnumPlayerPart[]> pair : partList) {
             for (EnumPlayerPart part : pair.getRight()) {
                 if (part.slot != pair.getLeft())
                     throw new RuntimeException(part + " is not a member of " + pair.getLeft());
@@ -48,13 +48,13 @@ public class StandardDamageDistribution extends DamageDistribution {
 
     @Override
     @Nonnull
-    protected List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> getPartList() {
+    protected List<Pair<EquipmentSlotType, EnumPlayerPart[]>> getPartList() {
         if (this.shuffle) Collections.shuffle(this.partList);
         return this.partList;
     }
 
     @Override
-    public float distributeDamage(float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat) {
+    public float distributeDamage(float damage, @Nonnull PlayerEntity player, @Nonnull DamageSource source, boolean addStat) {
         float rest = super.distributeDamage(damage, player, source, addStat);
         if (rest > 0) {
             EnumPlayerPart[] parts = partList.get(partList.size() - 1).getRight();

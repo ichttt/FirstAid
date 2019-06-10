@@ -20,7 +20,7 @@ package ichttt.mods.firstaid.common.damagesystem.debuff;
 
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
-import net.minecraft.potion.Potion;
+import net.minecraft.potion.Effect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -30,7 +30,7 @@ import java.util.function.BooleanSupplier;
 
 public abstract class AbstractDebuff implements IDebuff {
     @Nonnull
-    public final Potion effect;
+    public final Effect effect;
     @Nonnull
     public final BooleanSupplier isEnabled;
     @Nonnull

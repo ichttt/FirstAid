@@ -1,6 +1,6 @@
 # First Aid mod definition file
 modLoader="javafml"
-loaderVersion="[25,)"
+loaderVersion="[26,)"
 issueTrackerURL="https://github.com/ichttt/firstaid"
 displayURL="https://minecraft.curseforge.com/projects/first-aid"
 logoFile="firstaid_logo.png"
@@ -13,12 +13,12 @@ authors="ichttt"
 [[dependencies.firstaid]]
     modId="forge"
     mandatory=true
-    versionRange="[25.0.149,)"
+    versionRange="[26.0.14,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.firstaid]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.13.2,1.14)"
+    versionRange="[1.14.2,1.15)"
     ordering="NONE"
     side="BOTH"

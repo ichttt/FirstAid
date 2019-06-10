@@ -28,8 +28,8 @@ import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.resources.IResourceManager;
@@ -89,8 +89,8 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 return;
         }
 
-        mc.getTextureManager().bindTexture(Gui.ICONS);
-        Gui gui = mc.ingameGUI;
+        mc.getTextureManager().bindTexture(AbstractGui.ICONS);
+        AbstractGui gui = mc.ingameGUI;
         int xOffset = FirstAidConfig.overlay.xOffset;
         int yOffset = FirstAidConfig.overlay.yOffset;
         boolean playerModel = FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL;
@@ -115,7 +115,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 throw new RuntimeException("Invalid config option for position: " + FirstAidConfig.overlay.pos);
         }
 
-        if (mc.currentScreen instanceof GuiChat && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)
+        if (mc.currentScreen instanceof ChatScreen && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)
             return;
         if (mc.gameSettings.showDebugInfo && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.TOP_LEFT)
             return;

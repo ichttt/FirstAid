@@ -38,10 +38,10 @@ import ichttt.mods.firstaid.common.util.MorpheusHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.INBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.potion.Potion;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.potion.Effect;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -97,7 +97,7 @@ public class FirstAid {
         bus.addListener(this::init);
         bus.addListener(this::loadComplete);
         bus.addGenericListener(Item.class, this::registerItems);
-        bus.addGenericListener(Potion.class, this::registerPotion);
+        bus.addGenericListener(Effect.class, this::registerPotion);
         bus.addGenericListener(SoundEvent.class, this::registerSound);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FirstAidConfig.serverSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FirstAidConfig.generalSpec);
@@ -119,13 +119,13 @@ public class FirstAid {
         CapabilityManager.INSTANCE.register(AbstractPlayerDamageModel.class, new Capability.IStorage<AbstractPlayerDamageModel>() {
                     @Nullable
                     @Override
-                    public INBTBase writeNBT(Capability<AbstractPlayerDamageModel> capability, AbstractPlayerDamageModel instance, EnumFacing side) {
+                    public INBT writeNBT(Capability<AbstractPlayerDamageModel> capability, AbstractPlayerDamageModel instance, Direction side) {
                         return instance.serializeNBT();
                     }
 
                     @Override
-                    public void readNBT(Capability<AbstractPlayerDamageModel> capability, AbstractPlayerDamageModel instance, EnumFacing side, INBTBase nbt) {
-                        instance.deserializeNBT((NBTTagCompound) nbt);
+                    public void readNBT(Capability<AbstractPlayerDamageModel> capability, AbstractPlayerDamageModel instance, Direction side, INBT nbt) {
+                        instance.deserializeNBT((CompoundNBT) nbt);
                     }
                 }
                 , () -> {
@@ -159,7 +159,7 @@ public class FirstAid {
         FirstAidItems.registerItems(event.getRegistry());
     }
 
-    public void registerPotion(RegistryEvent.Register<Potion> event) {
+    public void registerPotion(RegistryEvent.Register<Effect> event) {
         event.getRegistry().register(new FirstAidPotion(false, 0xDDD, FirstAidItems.MORPHINE).setBeneficial());
         event.getRegistry().register(PotionPoisonPatched.INSTANCE);
     }

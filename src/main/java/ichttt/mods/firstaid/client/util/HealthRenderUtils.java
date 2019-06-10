@@ -30,9 +30,9 @@ import it.unimi.dsi.fastutil.ints.Int2IntFunction;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.init.MobEffects;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 
@@ -92,7 +92,7 @@ public class HealthRenderUtils {
         return (maxHealth + maxExtraHealth > 8 && allowSecondLine) || ((maxHealth + maxExtraHealth) > 12);
     }
 
-    public static void drawHealth(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean allowSecondLine) {
+    public static void drawHealth(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, AbstractGui gui, boolean allowSecondLine) {
         int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
         int current = (int) Math.ceil(damageablePart.currentHealth);
@@ -115,11 +115,11 @@ public class HealthRenderUtils {
 
         Minecraft mc = Minecraft.getInstance();
         int regen = -1;
-        if (FirstAidConfig.SERVER.allowOtherHealingItems.get() && mc.player.isPotionActive(MobEffects.REGENERATION))
+        if (FirstAidConfig.SERVER.allowOtherHealingItems.get() && mc.player.isPotionActive(Effects.REGENERATION))
             regen = (int) ((mc.ingameGUI.healthUpdateCounter / 2) % 15);
         boolean low = (current + absorption) < 1.25F;
 
-        mc.getTextureManager().bindTexture(Gui.ICONS);
+        mc.getTextureManager().bindTexture(AbstractGui.ICONS);
         GlStateManager.pushMatrix();
         GlStateManager.translatef(xTranslation, yTranslation, 0);
         boolean drawSecondLine = allowSecondLine;
@@ -156,7 +156,7 @@ public class HealthRenderUtils {
         GlStateManager.popMatrix();
     }
 
-    private static void renderLine(int regen, boolean low, int yTexture, int maxHealth, int maxExtraHearts, int current, int absorption, Gui gui, boolean highlight) {
+    private static void renderLine(int regen, boolean low, int yTexture, int maxHealth, int maxExtraHearts, int current, int absorption, AbstractGui gui, boolean highlight) {
         GlStateManager.pushMatrix();
         Int2IntMap map = new Int2IntArrayMap();
         if (low) {
@@ -190,12 +190,12 @@ public class HealthRenderUtils {
         return maxCurrentHearts >> 1;
     }
 
-    private static void renderMax(int regen, Int2IntFunction function, int max, int yTexture, Gui gui, boolean highlight) {
+    private static void renderMax(int regen, Int2IntFunction function, int max, int yTexture, AbstractGui gui, boolean highlight) {
         final int BACKGROUND = (highlight ? 25 : 16);
         renderTexturedModalRects(regen, function, max, false, BACKGROUND, BACKGROUND, yTexture, gui);
     }
 
-    private static void renderCurrentHealth(int regen, Int2IntFunction function, int current, int yTexture, Gui gui) {
+    private static void renderCurrentHealth(int regen, Int2IntFunction function, int current, int yTexture, AbstractGui gui) {
         boolean renderLastHalf;
         int render;
 
@@ -208,7 +208,7 @@ public class HealthRenderUtils {
         renderTexturedModalRects(regen, function, render, renderLastHalf, 61, 52, yTexture, gui);
     }
 
-    private static void renderAbsorption(int regen, Int2IntFunction function, int absorption, int yTexture, Gui gui) {
+    private static void renderAbsorption(int regen, Int2IntFunction function, int absorption, int yTexture, AbstractGui gui) {
         boolean renderLastHalf = false;
         int render = absorption >> 1;
         if (absorption % 2 != 0) {
@@ -219,7 +219,7 @@ public class HealthRenderUtils {
         if (render > 0) renderTexturedModalRects(regen, function, render, renderLastHalf, 169, 160, yTexture, gui);
     }
 
-    private static void renderTexturedModalRects(int regen, Int2IntFunction function, int toDraw, boolean lastOneHalf, int halfTextureX, int textureX, int textureY, Gui gui) {
+    private static void renderTexturedModalRects(int regen, Int2IntFunction function, int toDraw, boolean lastOneHalf, int halfTextureX, int textureX, int textureY, AbstractGui gui) {
         if (toDraw == 0)
             return;
         if (toDraw < 0) throw new IllegalArgumentException("Cannot draw negative amount of icons " + toDraw);

@@ -30,26 +30,26 @@ import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.inventory.InventoryScreen;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.InputMappings;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
+import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
 import net.minecraft.util.StringUtils;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class GuiHealthScreen extends GuiScreen {
+public class GuiHealthScreen extends Screen {
     public static final int xSize = 256;
     public static final int ySize = 137;
     public static final ItemStack BED_ITEMSTACK = new ItemStack(Items.RED_BED);
@@ -65,15 +65,15 @@ public class GuiHealthScreen extends GuiScreen {
 
     public int guiLeft;
     public int guiTop;
-    private GuiButton head, leftArm, leftLeg, leftFoot, body, rightArm, rightLeg, rightFoot;
-    private EnumHand activeHand;
+    private Button head, leftArm, leftLeg, leftFoot, body, rightArm, rightLeg, rightFoot;
+    private Hand activeHand;
 
     public GuiHealthScreen(AbstractPlayerDamageModel damageModel) {
         this.damageModel = damageModel;
         disableButtons = true;
     }
 
-    public GuiHealthScreen(AbstractPlayerDamageModel damageModel, EnumHand activeHand) {
+    public GuiHealthScreen(AbstractPlayerDamageModel damageModel, Hand activeHand) {
         this.damageModel = damageModel;
         this.activeHand = activeHand;
         disableButtons = false;
@@ -116,7 +116,7 @@ public class GuiHealthScreen extends GuiScreen {
             rightFoot.enabled = false;
         }
 
-        GuiButton buttonCancel = new GuiButton(9, this.width / 2 - 100, this.height - 50, I18n.format("gui.cancel")) {
+        Button buttonCancel = new Button(9, this.width / 2 - 100, this.height - 50, I18n.format("gui.cancel")) {
             @Override
             public void onClick(double mouseX, double mouseY) {
                 mc.displayGuiScreen(null);
@@ -125,12 +125,12 @@ public class GuiHealthScreen extends GuiScreen {
         addButton(buttonCancel);
 
         if (this.mc.gameSettings.showDebugInfo) {
-            GuiButton refresh = new GuiButton(10, this.guiLeft + 218, this.guiTop + 115, 36, 20, "resync") {
+            Button refresh = new Button(10, this.guiLeft + 218, this.guiTop + 115, 36, 20, "resync") {
                 @Override
                 public void onClick(double mouseX, double mouseY) {
                     FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.REQUEST_REFRESH));
                     FirstAid.LOGGER.info("Requesting refresh");
-                    mc.player.sendStatusMessage(new TextComponentString("Re-downloading health data from server..."), true);
+                    mc.player.sendStatusMessage(new StringTextComponent("Re-downloading health data from server..."), true);
                     mc.displayGuiScreen(null);
                 }
             };
@@ -138,7 +138,7 @@ public class GuiHealthScreen extends GuiScreen {
         }
 
         holdButtons.clear();
-        for (GuiButton button : this.buttons) {
+        for (Button button : this.buttons) {
             if (button instanceof GuiHoldButton) {
                 Integer holdTime = activeHand == null ? null : FirstAidRegistryImpl.INSTANCE.getPartHealingTime(mc.player.getHeldItem(activeHand));
                 if (holdTime == null)
@@ -165,7 +165,7 @@ public class GuiHealthScreen extends GuiScreen {
             entityLookX = -entityLookX;
             entityLookY = -entityLookY;
         }
-        GuiInventory.drawEntityOnScreen(this.width / 2, this.height / 2 + 30, 45, entityLookX, entityLookY, mc.player);
+        InventoryScreen.drawEntityOnScreen(this.width / 2, this.height / 2 + 30, 45, entityLookX, entityLookY, mc.player);
 
         //Button
         super.render(mouseX, mouseY, partialTicks);
@@ -178,7 +178,7 @@ public class GuiHealthScreen extends GuiScreen {
             drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
 
         //Health
-        this.mc.getTextureManager().bindTexture(Gui.ICONS);
+        this.mc.getTextureManager().bindTexture(AbstractGui.ICONS);
         GlStateManager.color4f(1F, 1F, 1F, 1F);
         drawHealth(damageModel.HEAD, false, 14);
         drawHealth(damageModel.LEFT_ARM, false, 39);
@@ -225,7 +225,7 @@ public class GuiHealthScreen extends GuiScreen {
         holdButtonMouseCallback(true); //callback: check if buttons are finish
     }
 
-    private void tooltipButton(GuiButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
+    private void tooltipButton(Button button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
         if (!enabled && button.isMouseOver()) {
             drawHoveringText(Arrays.asList(I18n.format("gui.active_item") + ": " + I18n.format(part.activeHealer.stack.getTranslationKey() + ".name"), I18n.format("gui.next_heal", Math.round((part.activeHealer.ticksPerHeal.getAsInt() - part.activeHealer.getTicksPassed()) / 20F))), mouseX, mouseY);
@@ -295,7 +295,7 @@ public class GuiHealthScreen extends GuiScreen {
         isOpen = false;
     }
 
-    public List<GuiButton> getButtons() {
+    public List<Button> getButtons() {
         return this.buttons;
     }
 }

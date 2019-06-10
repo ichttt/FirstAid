@@ -20,19 +20,19 @@
 package ichttt.mods.firstaid.api.enums;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.inventory.EquipmentSlotType;
 
 public enum EnumPlayerPart {
-    HEAD(1, EntityEquipmentSlot.HEAD), LEFT_ARM(2, EntityEquipmentSlot.CHEST), LEFT_LEG(3, EntityEquipmentSlot.LEGS), LEFT_FOOT(4, EntityEquipmentSlot.FEET),
-    BODY(5, EntityEquipmentSlot.CHEST), RIGHT_ARM(6, EntityEquipmentSlot.CHEST), RIGHT_LEG(7, EntityEquipmentSlot.LEGS), RIGHT_FOOT(8, EntityEquipmentSlot.FEET);
+    HEAD(1, EquipmentSlotType.HEAD), LEFT_ARM(2, EquipmentSlotType.CHEST), LEFT_LEG(3, EquipmentSlotType.LEGS), LEFT_FOOT(4, EquipmentSlotType.FEET),
+    BODY(5, EquipmentSlotType.CHEST), RIGHT_ARM(6, EquipmentSlotType.CHEST), RIGHT_LEG(7, EquipmentSlotType.LEGS), RIGHT_FOOT(8, EquipmentSlotType.FEET);
 
     public static final EnumPlayerPart[] VALUES = values();
 
     public final byte id;
     private ImmutableList<EnumPlayerPart> neighbours;
-    public final EntityEquipmentSlot slot;
+    public final EquipmentSlotType slot;
 
-    EnumPlayerPart(int id, EntityEquipmentSlot slot) {
+    EnumPlayerPart(int id, EquipmentSlotType slot) {
         this.id = (byte) id;
         this.slot = slot;
     }

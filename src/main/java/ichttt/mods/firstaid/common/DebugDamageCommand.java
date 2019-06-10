@@ -32,14 +32,14 @@ import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 public class DebugDamageCommand {
-    private static final SimpleCommandExceptionType TYPE = new SimpleCommandExceptionType(new TextComponentString("0 is invalid as damage"));
+    private static final SimpleCommandExceptionType TYPE = new SimpleCommandExceptionType(new StringTextComponent("0 is invalid as damage"));
 
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         LiteralArgumentBuilder<CommandSource> builder = Commands.literal("damagePart").requires((source) -> source.hasPermissionLevel(2));
@@ -52,7 +52,7 @@ public class DebugDamageCommand {
         dispatcher.register(builder);
     }
 
-    private static int damage(EnumPlayerPart part, float damage, boolean debuff, EntityPlayerMP player) throws CommandSyntaxException {
+    private static int damage(EnumPlayerPart part, float damage, boolean debuff, ServerPlayerEntity player) throws CommandSyntaxException {
         if (damage == 0F)
             throw TYPE.create();
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
@@ -63,7 +63,7 @@ public class DebugDamageCommand {
         }
         FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageReceiveDamage(part, damage, 0F));
         if (damageModel.isDead(player)) {
-            player.sendMessage(new TextComponentTranslation("death.attack.generic", player.getDisplayName()));
+            player.sendMessage(new TranslationTextComponent("death.attack.generic", player.getDisplayName()));
             CommonUtils.killPlayer(player, null);
         }
         return 1;

@@ -21,14 +21,14 @@ package ichttt.mods.firstaid.common.items;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.EnumAction;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
@@ -44,10 +44,10 @@ public class ItemMorphine extends Item {
 
     @Override
     @Nonnull
-    public ItemStack onItemUseFinish(@Nonnull ItemStack stack, World world, EntityLivingBase entityLiving) {
+    public ItemStack onItemUseFinish(@Nonnull ItemStack stack, World world, LivingEntity entityLiving) {
         if (CommonUtils.hasDamageModel(entityLiving)) {
-            AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel((EntityPlayer) entityLiving);
-            Objects.requireNonNull(damageModel).applyMorphine((EntityPlayer) entityLiving);
+            AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel((PlayerEntity) entityLiving);
+            Objects.requireNonNull(damageModel).applyMorphine((PlayerEntity) entityLiving);
         }
         stack.shrink(1);
         return stack;
@@ -55,16 +55,16 @@ public class ItemMorphine extends Item {
 
     @Override
     @Nonnull
-    public EnumAction getUseAction(ItemStack stack) {
-        return EnumAction.EAT;
+    public UseAction getUseAction(ItemStack stack) {
+        return UseAction.EAT;
     }
 
     @Override
     @Nonnull
-    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
+    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, @Nonnull Hand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
         player.setActiveHand(hand);
-        return new ActionResult<>(EnumActionResult.SUCCESS, itemstack);
+        return new ActionResult<>(ActionResultType.SUCCESS, itemstack);
     }
 
     @Override

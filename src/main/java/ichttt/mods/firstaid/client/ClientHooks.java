@@ -27,7 +27,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.resources.IReloadableResourceManager;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
@@ -52,7 +52,7 @@ public class ClientHooks {
         ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(HUDHandler.INSTANCE);
     }
 
-    public static void showGuiApplyHealth(EnumHand activeHand) {
+    public static void showGuiApplyHealth(Hand activeHand) {
         Minecraft mc = Minecraft.getInstance();
         GuiHealthScreen.INSTANCE = new GuiHealthScreen(CommonUtils.getDamageModel(mc.player), activeHand);
         mc.displayGuiScreen(GuiHealthScreen.INSTANCE);

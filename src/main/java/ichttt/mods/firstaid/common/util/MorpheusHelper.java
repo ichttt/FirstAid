@@ -20,7 +20,7 @@ package ichttt.mods.firstaid.common.util;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
@@ -53,7 +53,7 @@ public class MorpheusHelper implements INewDayHandler {
             return;
 
         World world = ServerLifecycleHooks.getCurrentServer().getWorld(DimensionType.OVERWORLD);
-        for (EntityPlayer player : world.playerEntities) {
+        for (PlayerEntity player : world.playerEntities) {
             if (player.isPlayerFullyAsleep()) {
                 CommonUtils.getDamageModel(player).sleepHeal(player);
             }

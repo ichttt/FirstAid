@@ -90,6 +90,6 @@
 
   "keybinds.show_wounds": "显示伤口",
 
-  "subtitles.debuff.heartbeat": "心跳"
+  "subtitles.debuff.heartbeat": "心跳",
   "gui.next_heal": "下次治疗: %s 秒"
 }

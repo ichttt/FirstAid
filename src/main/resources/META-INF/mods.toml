@@ -16,9 +16,9 @@ authors="ichttt"
 #    versionRange="[26.0.13,)"
 #    ordering="NONE"
 #    side="BOTH"
-#[[dependencies.firstaid]]
-#    modId="minecraft"
-#    mandatory=true
-#    versionRange="[1.14.2,1.15)"
-#    ordering="NONE"
-#    side="BOTH"
+[[dependencies.firstaid]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.14.3,1.15)"
+    ordering="NONE"
+    side="BOTH"

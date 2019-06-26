@@ -122,7 +122,7 @@ public class DebuffTimedSound implements ITickableSound {
     }
 
     @Override
-    public boolean func_217861_m() { //maybe stream? dunno
+    public boolean isGlobal() {
         return false;
     }
 

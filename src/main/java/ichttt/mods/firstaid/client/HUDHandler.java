@@ -115,7 +115,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 throw new RuntimeException("Invalid config option for position: " + FirstAidConfig.overlay.pos);
         }
 
-        if (mc.field_71462_r instanceof ChatScreen && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)
+        if (mc.currentScreen instanceof ChatScreen && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)
             return;
         if (mc.gameSettings.showDebugInfo && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.TOP_LEFT)
             return;

@@ -45,6 +45,7 @@ import net.minecraft.util.FoodStats;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.ServerWorld;
 import net.minecraft.world.World;
@@ -229,7 +230,7 @@ public class EventHandler {
     public static void onWorldLoad(WorldEvent.Load event) {
         IWorld world = event.getWorld();
         if (!world.isRemote() && world instanceof World)
-            ((World) world).getGameRules().setOrCreateGameRule("naturalRegeneration", Boolean.toString(FirstAidConfig.SERVER.allowNaturalRegeneration.get()), ((World) world).getServer());
+            ((World) world).getGameRules().get(GameRules.NATURAL_REGENERATION).set(FirstAidConfig.SERVER.allowNaturalRegeneration.get(), ((World) world).getServer());
     }
 
     @SubscribeEvent

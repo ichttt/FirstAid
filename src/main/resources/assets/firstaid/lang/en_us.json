@@ -91,5 +91,6 @@
   "keybinds.show_wounds": "Show wounds",
 
   "subtitles.debuff.heartbeat": "Heart beats",
-  "gui.next_heal": "Next heal: %s seconds"
+  "gui.next_heal": "Next heal: %s seconds",
+  "effect.firstaid.morphine": "Morphine"
 }

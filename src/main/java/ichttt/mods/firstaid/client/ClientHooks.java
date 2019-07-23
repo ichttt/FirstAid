@@ -38,7 +38,7 @@ import org.lwjgl.glfw.GLFW;
 
 
 public class ClientHooks {
-    public static final KeyBinding showWounds = new KeyBinding("keybinds.show_wounds", KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrMakeInput(GLFW.GLFW_KEY_H), "First Aid");
+    public static final KeyBinding showWounds = new KeyBinding("keybinds.show_wounds", KeyConflictContext.UNIVERSAL, InputMappings.Type.KEYSYM.getOrMakeInput(GLFW.GLFW_KEY_H), "First Aid");
 
     public static void setup(FMLClientSetupEvent event) {
         FirstAid.LOGGER.debug("Loading ClientHooks");

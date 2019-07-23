@@ -121,7 +121,7 @@ public class GuiHealthScreen extends Screen {
             rightFoot.active = false;
         }
 
-        cancelButton = new Button(this.width / 2 - 100, this.height - 50, 200, 20, I18n.format("gui.cancel"), button -> minecraft.displayGuiScreen(null));
+        cancelButton = new Button(this.width / 2 - 100, this.height - 50, 200, 20, I18n.format("gui.cancel"), button -> onClose());
         addButton(cancelButton);
 
         if (this.minecraft.gameSettings.showDebugInfo) {
@@ -129,7 +129,7 @@ public class GuiHealthScreen extends Screen {
                 FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.REQUEST_REFRESH));
                 FirstAid.LOGGER.info("Requesting refresh");
                 minecraft.player.sendStatusMessage(new StringTextComponent("Re-downloading health data from server..."), true);
-                minecraft.displayGuiScreen(null);
+                onClose();
             });
             addButton(refresh);
         }
@@ -212,7 +212,7 @@ public class GuiHealthScreen extends Screen {
 
         //Sleep info tooltip
         if (mouseX >= bedX && mouseY >= bedY && mouseX < bedX + (16 * bedScaleFactor) && mouseY < bedY + (16 * bedScaleFactor)) {
-            String s = sleepHealing == 0D ? I18n.format("gui.no_sleep_heal") : I18n.format("gui.sleep_heal_amount", FORMAT.format(sleepHealing * 100));
+            String s = sleepHealing == 0D ? I18n.format("gui.no_sleep_heal") : I18n.format("firstaid.gui.sleep_heal_amount", FORMAT.format(sleepHealing * 100));
             renderTooltip(s, mouseX, mouseY);
             GlStateManager.disableLighting();
         }
@@ -242,9 +242,13 @@ public class GuiHealthScreen extends Screen {
 
     @Override
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-        if (ClientHooks.showWounds.isActiveAndMatches(InputMappings.getInputByCode(p_keyPressed_1_, p_keyPressed_2_)))
-            minecraft.displayGuiScreen(null);
-        return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+        if (super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_))
+            return true;
+        if (ClientHooks.showWounds.isActiveAndMatches(InputMappings.getInputByCode(p_keyPressed_1_, p_keyPressed_2_))) {
+            onClose();
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -263,7 +267,7 @@ public class GuiHealthScreen extends Screen {
                 FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, activeHand));
                 AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
                 part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(minecraft.player.getHeldItem(this.activeHand));
-                minecraft.displayGuiScreen(null);
+                onClose();
             } else if (!renderPass) {
                 button.reset();
             } else if (timeLeft != -1) {
@@ -282,9 +286,15 @@ public class GuiHealthScreen extends Screen {
     }
 
     @Override
+    public boolean shouldCloseOnEsc() {
+        return true;
+    }
+
+    @Override
     public void onClose() {
         INSTANCE = null;
         isOpen = false;
+        super.onClose();
     }
 
     public List<Widget> getButtons() {

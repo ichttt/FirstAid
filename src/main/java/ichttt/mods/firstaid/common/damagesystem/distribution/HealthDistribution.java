@@ -67,7 +67,7 @@ public class HealthDistribution {
             float diff = toHeal - part.heal(toHeal, player, !player.world.isRemote);
             //prevent inaccuracy
             diff = Math.round(diff * 10000.0F) / 10000.0F;
-            healingDone[part.part.id - 1] = diff;
+            healingDone[part.part.ordinal()] = diff;
 
             health -= diff;
             if (distribute) {

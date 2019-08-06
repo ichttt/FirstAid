@@ -79,7 +79,7 @@ public class FirstAid {
         }
     };
 
-    private static final String NETWORKING_MAJOR = "1.";
+    private static final String NETWORKING_MAJOR = "2.";
     private static final String NETWORKING_MINOR = "0";
 
     private static final String NETWORKING_VERSION = NETWORKING_MAJOR + NETWORKING_MINOR;

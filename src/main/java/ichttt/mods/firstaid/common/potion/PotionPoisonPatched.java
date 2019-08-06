@@ -19,6 +19,7 @@
 package ichttt.mods.firstaid.common.potion;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
@@ -30,17 +31,19 @@ import net.minecraft.potion.EffectType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 @SuppressWarnings("unused")
 public class PotionPoisonPatched extends Effect {
     public static final PotionPoisonPatched INSTANCE = new PotionPoisonPatched(EffectType.HARMFUL, 5149489);
+    private static final Method method = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_184581_c", DamageSource.class);
 
     protected PotionPoisonPatched(EffectType type, int liquidColorIn) {
         super(type, liquidColorIn);
-//        this.setIconIndex(6, 0); TODO check out potions
-//        this.setEffectiveness(0.25D);
         this.setRegistryName(new ResourceLocation("minecraft", "poison"));
         FirstAid.LOGGER.info("Don't worry, the minecraft poison override IS intended.");
     }
@@ -48,11 +51,30 @@ public class PotionPoisonPatched extends Effect {
     @Override
     public void performEffect(@Nonnull LivingEntity entity, int amplifier) {
         if (entity instanceof PlayerEntity && !(entity instanceof FakePlayer)) {
-            if (entity.world.isRemote || !entity.isAlive())
+            if (!entity.isAlive() || entity.isInvulnerableTo(DamageSource.MAGIC))
                 return;
-            PlayerEntity player = (PlayerEntity) entity;
-            AbstractPlayerDamageModel playerDamageModel = CommonUtils.getDamageModel(player);
-            DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false);
+            if (entity.world.isRemote) {
+                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel((PlayerEntity) entity);
+                boolean playSound = false;
+                for (AbstractDamageablePart part : damageModel) {
+                    playSound = part.currentHealth > (part.canCauseDeath ? 1F : 0F);
+                    if (playSound)
+                        break;
+                }
+                if (playSound) {
+                    try {
+                        method.invoke(entity, DamageSource.MAGIC);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        FirstAid.LOGGER.warn("Could not play hurt sound!", e);
+                    }
+                }
+            } else {
+                if (entity.isSleeping())
+                    entity.wakeUp();
+                PlayerEntity player = (PlayerEntity) entity;
+                AbstractPlayerDamageModel playerDamageModel = CommonUtils.getDamageModel(player);
+                DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false);
+            }
         }
         else {
             super.performEffect(entity, amplifier);

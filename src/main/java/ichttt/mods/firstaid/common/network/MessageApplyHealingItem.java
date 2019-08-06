@@ -40,7 +40,7 @@ public class MessageApplyHealingItem {
     private final Hand hand;
 
     public MessageApplyHealingItem(PacketBuffer buffer) {
-        this.part = EnumPlayerPart.fromID(buffer.readByte());
+        this.part = EnumPlayerPart.VALUES[buffer.readByte()];
         this.hand = buffer.readBoolean() ? Hand.MAIN_HAND : Hand.OFF_HAND;
     }
 
@@ -50,7 +50,7 @@ public class MessageApplyHealingItem {
     }
 
     public void encode(PacketBuffer buf) {
-        buf.writeByte(part.id);
+        buf.writeByte(part.ordinal());
         buf.writeBoolean(hand == Hand.MAIN_HAND);
     }
 

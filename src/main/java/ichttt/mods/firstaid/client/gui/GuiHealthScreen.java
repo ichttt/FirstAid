@@ -263,7 +263,7 @@ public class GuiHealthScreen extends Screen {
             if (timeLeft == 0) {
                 //We are officially done
                 button.reset();
-                EnumPlayerPart playerPart = EnumPlayerPart.fromID(button.id);
+                EnumPlayerPart playerPart = EnumPlayerPart.VALUES[button.id - 1];
                 FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, activeHand));
                 AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
                 part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(minecraft.player.getHeldItem(this.activeHand));

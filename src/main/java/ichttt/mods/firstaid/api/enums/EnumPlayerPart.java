@@ -22,30 +22,27 @@ package ichttt.mods.firstaid.api.enums;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.inventory.EquipmentSlotType;
 
-//TODO 1.15: clean up
 public enum EnumPlayerPart {
-    HEAD(1, EquipmentSlotType.HEAD), LEFT_ARM(2, EquipmentSlotType.CHEST), LEFT_LEG(3, EquipmentSlotType.LEGS), LEFT_FOOT(4, EquipmentSlotType.FEET),
-    BODY(5, EquipmentSlotType.CHEST), RIGHT_ARM(6, EquipmentSlotType.CHEST), RIGHT_LEG(7, EquipmentSlotType.LEGS), RIGHT_FOOT(8, EquipmentSlotType.FEET);
+    HEAD(EquipmentSlotType.HEAD), LEFT_ARM(EquipmentSlotType.CHEST), LEFT_LEG(EquipmentSlotType.LEGS), LEFT_FOOT(EquipmentSlotType.FEET),
+    BODY(EquipmentSlotType.CHEST), RIGHT_ARM(EquipmentSlotType.CHEST), RIGHT_LEG(EquipmentSlotType.LEGS), RIGHT_FOOT(EquipmentSlotType.FEET);
 
     public static final EnumPlayerPart[] VALUES = values();
 
-    public final byte id;
     private ImmutableList<EnumPlayerPart> neighbours;
     public final EquipmentSlotType slot;
 
-    EnumPlayerPart(int id, EquipmentSlotType slot) {
-        this.id = (byte) id;
+    EnumPlayerPart(EquipmentSlotType slot) {
         this.slot = slot;
     }
 
     public ImmutableList<EnumPlayerPart> getNeighbours() {
         if (neighbours == null) { // Need to do lazy init to avoid crashes when initializing class
             ImmutableList.Builder<EnumPlayerPart> builder = ImmutableList.builder();
-            if (this.id != 5 && this.id != 1)
+            if (this != BODY && this != HEAD) //Not quite sure what I though when I did this, but I', going to leave this as-is right now
                 builder.add(getUp());
-            if (this.id != 4 && this.id != 8)
+            if (this != LEFT_FOOT && this != RIGHT_FOOT)
                 builder.add(getDown());
-            if (this.id > 4)
+            if (this.ordinal() >= BODY.ordinal())
                 builder.add(getLeft());
             else
                 builder.add(getRight());
@@ -54,28 +51,24 @@ public enum EnumPlayerPart {
         return neighbours;
     }
 
-    public static EnumPlayerPart fromID(int id) {
-        return VALUES[id - 1];
-    }
-
     public EnumPlayerPart getUp() {
-        if (this.id == 5)
-            throw new IndexOutOfBoundsException("There is no part up from " + this.id);
-        return fromID(this.id - 1);
+        if (this == BODY)
+            throw new RuntimeException("There is no part up from " + this);
+        return VALUES[this.ordinal() - 1];
     }
 
     public EnumPlayerPart getDown() {
-        if (this.id == 4)
-            throw new IndexOutOfBoundsException("There is no part down from " + this.id);
-        return fromID(this.id + 1);
+        if (this == LEFT_FOOT)
+            throw new RuntimeException("There is no part down from " + this);
+        return VALUES[this.ordinal() + 1];
     }
 
     public EnumPlayerPart getLeft() {
-        return fromID(this.id - 4);
+        return VALUES[this.ordinal() - 4];
     }
 
     public EnumPlayerPart getRight() {
-        return fromID(this.id + 4);
+        return VALUES[this.ordinal() + 4];
     }
 
 }

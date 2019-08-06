@@ -35,7 +35,7 @@ public class MessageReceiveDamage {
     private final float minHealth;
 
     public MessageReceiveDamage(PacketBuffer buffer) {
-        this(EnumPlayerPart.fromID(buffer.readByte()), buffer.readFloat(), buffer.readFloat());
+        this(EnumPlayerPart.VALUES[buffer.readByte()], buffer.readFloat(), buffer.readFloat());
     }
 
     public MessageReceiveDamage(EnumPlayerPart part, float damageAmount, float minHealth) {
@@ -45,7 +45,7 @@ public class MessageReceiveDamage {
     }
 
     public void encode(PacketBuffer buf) {
-        buf.writeByte(part.id);
+        buf.writeByte(part.ordinal());
         buf.writeFloat(damageAmount);
         buf.writeFloat(minHealth);
     }

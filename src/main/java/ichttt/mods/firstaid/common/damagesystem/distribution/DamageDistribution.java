@@ -47,7 +47,7 @@ import java.util.List;
 
 public abstract class DamageDistribution implements IDamageDistribution {
 
-    public static void handleDamageTaken(IDamageDistribution damageDistribution, AbstractPlayerDamageModel damageModel, float damage, @Nonnull PlayerEntity player, @Nonnull DamageSource source, boolean addStat, boolean redistributeIfLeft) {
+    public static float handleDamageTaken(IDamageDistribution damageDistribution, AbstractPlayerDamageModel damageModel, float damage, @Nonnull PlayerEntity player, @Nonnull DamageSource source, boolean addStat, boolean redistributeIfLeft) {
         if (FirstAidConfig.debug) {
             FirstAid.LOGGER.info("Damaging {} using {} for dmg source {}, redistribute {}, addStat {}", damage, damageDistribution.toString(), source.damageType, redistributeIfLeft, addStat);
         }
@@ -69,11 +69,12 @@ public abstract class DamageDistribution implements IDamageDistribution {
         before.deserializeNBT(beforeCache);
         if (MinecraftForge.EVENT_BUS.post(new FirstAidLivingDamageEvent(player, damageModel, before, source, left))) {
             damageModel.deserializeNBT(beforeCache); //restore prev state
-            return;
+            return 0F;
         }
 
         if (damageModel.isDead(player))
             CommonUtils.killPlayer(player, source);
+        return left;
     }
 
     protected float minHealth(@Nonnull PlayerEntity player, @Nonnull AbstractDamageablePart part) {

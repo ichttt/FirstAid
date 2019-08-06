@@ -57,8 +57,7 @@ public class MessageAddHealth {
                 AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(playerSP);
                 for (int i = 0; i < message.table.length; i++) {
                     float f = message.table[i];
-                    //EnumPlayerPart is 1-indexed
-                    EnumPlayerPart part = EnumPlayerPart.fromID(i + 1);
+                    EnumPlayerPart part = EnumPlayerPart.VALUES[i];
                     damageModel.getFromEnum(part).heal(f, playerSP, false);
                 }
             });

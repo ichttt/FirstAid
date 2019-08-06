@@ -207,17 +207,17 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     @Nonnull
     public Iterator<AbstractDamageablePart> iterator() {
         return new Iterator<AbstractDamageablePart>() {
-            byte count = 1;
+            private byte count = 0;
             @Override
             public boolean hasNext() {
-                return count <= 8;
+                return count < 8;
             }
 
             @Override
             public AbstractDamageablePart next() {
-                if (count > 8)
+                if (count >= 8)
                     throw new NoSuchElementException();
-                AbstractDamageablePart part = getFromEnum(EnumPlayerPart.fromID(count));
+                AbstractDamageablePart part = getFromEnum(EnumPlayerPart.VALUES[count]);
                 count++;
                 return part;
             }

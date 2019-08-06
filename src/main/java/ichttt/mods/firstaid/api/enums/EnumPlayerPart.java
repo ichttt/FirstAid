@@ -22,6 +22,7 @@ package ichttt.mods.firstaid.api.enums;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.inventory.EquipmentSlotType;
 
+//TODO 1.15: clean up
 public enum EnumPlayerPart {
     HEAD(1, EquipmentSlotType.HEAD), LEFT_ARM(2, EquipmentSlotType.CHEST), LEFT_LEG(3, EquipmentSlotType.LEGS), LEFT_FOOT(4, EquipmentSlotType.FEET),
     BODY(5, EquipmentSlotType.CHEST), RIGHT_ARM(6, EquipmentSlotType.CHEST), RIGHT_LEG(7, EquipmentSlotType.LEGS), RIGHT_FOOT(8, EquipmentSlotType.FEET);

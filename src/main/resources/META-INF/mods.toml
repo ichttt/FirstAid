@@ -10,12 +10,12 @@ authors="ichttt"
     version="${file.jarVersion}"
     displayName="First Aid"
     description="First Aid is a game changing mod focused around a new health system"
-#[[dependencies.firstaid]]
-#    modId="forge"
-#    mandatory=true
-#    versionRange="[26.0.13,)"
-#    ordering="NONE"
-#    side="BOTH"
+[[dependencies.firstaid]]
+    modId="forge"
+    mandatory=true
+    versionRange="[28.0.45,)"
+    ordering="NONE"
+    side="BOTH"
 [[dependencies.firstaid]]
     modId="minecraft"
     mandatory=true

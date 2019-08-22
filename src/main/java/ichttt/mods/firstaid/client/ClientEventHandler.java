@@ -91,7 +91,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void preRender(RenderGameOverlayEvent.Pre event) {
         RenderGameOverlayEvent.ElementType type = event.getType();
-        if (type == RenderGameOverlayEvent.ElementType.HEALTH && !FirstAidConfig.overlay.showVanillaHealthBar) {
+        if (type == RenderGameOverlayEvent.ElementType.HEALTH && !FirstAidConfig.CLIENT.showVanillaHealthBar.get()) {
             event.setCanceled(true);
         }
     }
@@ -99,11 +99,11 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void renderOverlay(RenderGameOverlayEvent.Post event) {
         RenderGameOverlayEvent.ElementType type = event.getType();
-        if (type == RenderGameOverlayEvent.ElementType.ALL || (type == RenderGameOverlayEvent.ElementType.TEXT && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.OFF && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)) {
+        if (type == RenderGameOverlayEvent.ElementType.ALL || (type == RenderGameOverlayEvent.ElementType.TEXT && FirstAidConfig.CLIENT.overlayMode.get() != FirstAidConfig.Client.OverlayMode.OFF && FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.BOTTOM_LEFT)) {
             Minecraft mc = Minecraft.getInstance();
             if (!mc.player.isAlive()) return;
             mc.getProfiler().startSection("FirstAidOverlay");
-            ForgeIngameGui.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
+            ForgeIngameGui.renderHealth = FirstAidConfig.CLIENT.showVanillaHealthBar.get();
             HUDHandler.INSTANCE.renderOverlay(mc, event.getPartialTicks());
             mc.getProfiler().endSection();
             mc.getProfiler().endSection();

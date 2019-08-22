@@ -44,7 +44,7 @@ public class ClientHooks {
         FirstAid.LOGGER.debug("Loading ClientHooks");
         MinecraftForge.EVENT_BUS.register(ClientEventHandler.class);
         ClientRegistry.registerKeyBinding(showWounds);
-        ForgeIngameGui.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
+        ForgeIngameGui.renderHealth = FirstAidConfig.CLIENT.showVanillaHealthBar.get();
         EventCalendar.checkDate();
     }
 

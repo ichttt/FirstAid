@@ -70,7 +70,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
 
     public void renderOverlay(Minecraft mc, float partialTicks) {
         mc.getProfiler().startSection("prepare");
-        if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.OFF || mc.player == null || (GuiHealthScreen.isOpen && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) || !CommonUtils.isSurvivalOrAdventure(mc.player))
+        if (FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.OFF || mc.player == null || (GuiHealthScreen.isOpen && FirstAidConfig.CLIENT.overlayMode.get() != FirstAidConfig.Client.OverlayMode.PLAYER_MODEL) || !CommonUtils.isSurvivalOrAdventure(mc.player))
             return;
 
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
@@ -78,7 +78,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
             return;
 
         boolean playerDead = damageModel.isDead(mc.player);
-        if (FirstAidConfig.overlay.hideOnNoChange) {
+        if (FirstAidConfig.CLIENT.hideOnNoChange.get()) {
             for (AbstractDamageablePart damageablePart : damageModel) {
                 if (HealthRenderUtils.healthChanged(damageablePart, playerDead)) {
                     ticker = Math.max(ticker, 100);
@@ -91,10 +91,10 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
 
         mc.getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
         AbstractGui gui = mc.ingameGUI;
-        int xOffset = FirstAidConfig.overlay.xOffset;
-        int yOffset = FirstAidConfig.overlay.yOffset;
-        boolean playerModel = FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL;
-        switch (FirstAidConfig.overlay.pos) {
+        int xOffset = FirstAidConfig.CLIENT.xOffset.get();
+        int yOffset = FirstAidConfig.CLIENT.yOffset.get();
+        boolean playerModel = FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.PLAYER_MODEL;
+        switch (FirstAidConfig.CLIENT.pos.get()) {
             case TOP_LEFT:
                 if (playerModel)
                     xOffset += 1;
@@ -112,16 +112,16 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 yOffset = mc.mainWindow.getScaledHeight() - yOffset - (playerModel ? 62 : 80);
                 break;
             default:
-                throw new RuntimeException("Invalid config option for position: " + FirstAidConfig.overlay.pos);
+                throw new RuntimeException("Invalid config option for position: " + FirstAidConfig.CLIENT.pos.get());
         }
 
-        if (mc.currentScreen instanceof ChatScreen && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT)
+        if (mc.currentScreen instanceof ChatScreen && FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.BOTTOM_LEFT)
             return;
-        if (mc.gameSettings.showDebugInfo && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.TOP_LEFT)
+        if (mc.gameSettings.showDebugInfo && FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.TOP_LEFT)
             return;
 
-        boolean enableAlphaBlend = FirstAidConfig.overlay.hideOnNoChange && ticker < FADE_TIME;
-        int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), FirstAidConfig.overlay.alpha, 250) : FirstAidConfig.overlay.alpha;
+        boolean enableAlphaBlend = FirstAidConfig.CLIENT.hideOnNoChange.get() && ticker < FADE_TIME;
+        int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), FirstAidConfig.CLIENT.alpha.get(), 250) : FirstAidConfig.CLIENT.alpha.get();
 
         GlStateManager.pushMatrix();
         GlStateManager.translatef(xOffset, yOffset, 0F);
@@ -130,13 +130,13 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
             GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         }
         mc.getProfiler().endStartSection("render");
-        if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) {
+        if (FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.PLAYER_MODEL) {
             PlayerModelRenderer.renderPlayerHealth(damageModel, gui, alpha);
         } else {
             int xTranslation = maxLength;
             for (AbstractDamageablePart part : damageModel) {
                 mc.fontRenderer.drawStringWithShadow(TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF - (alpha << 24 & -0xFFFFFF));
-                if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.NUMBERS) {
+                if (FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.NUMBERS) {
                     HealthRenderUtils.drawHealthString(part, xTranslation, 0, false);
                 } else {
                     HealthRenderUtils.drawHealth(part, xTranslation, 0, gui, false);

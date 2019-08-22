@@ -46,8 +46,10 @@ public class DebugDamageCommand {
 
         for(EnumPlayerPart part : EnumPlayerPart.VALUES) {
             builder.then(Commands.literal(part.name())
-                   .then(Commands.argument("damage", FloatArgumentType.floatArg())
-                   .executes(context -> damage(part, FloatArgumentType.getFloat(context, "damage"), true, context.getSource().asPlayer()))));
+                    .then(Commands.argument("damage", FloatArgumentType.floatArg())
+                    .executes(context -> damage(part, FloatArgumentType.getFloat(context, "damage"), true, context.getSource().asPlayer()))
+                    .then(Commands.literal("nodebuff")
+                    .executes(context -> damage(part, FloatArgumentType.getFloat(context, "damage"), false, context.getSource().asPlayer())))));
         }
         dispatcher.register(builder);
     }

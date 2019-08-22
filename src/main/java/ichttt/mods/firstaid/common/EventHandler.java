@@ -75,8 +75,6 @@ public class EventHandler {
     public static final SoundEvent HEARTBEAT = FirstAidItems.getNull();
     @ObjectHolder("firstaid:morphine")
     public static final Effect MORPHINE = FirstAidItems.getNull();
-    @ObjectHolder("minecraft:poisen")
-    public static final Effect POISON_PATCHED = FirstAidItems.getNull();
 
     public static final Map<PlayerEntity, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
 

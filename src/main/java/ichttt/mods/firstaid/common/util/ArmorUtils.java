@@ -22,11 +22,13 @@ import com.google.common.collect.Iterators;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Effects;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
 
@@ -45,15 +47,26 @@ public class ArmorUtils {
             case LEGS:
                 return 3F;
             case FEET:
+                return 6F;
             case HEAD:
-                return 6.5F;
+                return 8F;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
     }
 
-    private static float getThougnessMofier(EquipmentSlotType slot) {
-        return (slot == EquipmentSlotType.CHEST || slot == EquipmentSlotType.LEGS ? 3 : 4);
+    private static float getToughnessModifier(EquipmentSlotType slot) {
+        switch (slot) {
+            case CHEST:
+            case LEGS:
+                return 3;
+            case FEET:
+                return 3.5F;
+            case HEAD:
+                return 4.5F;
+            default:
+                throw new IllegalArgumentException("Invalid slot " + slot);
+        }
     }
 
     /**
@@ -61,12 +74,12 @@ public class ArmorUtils {
      */
     @SuppressWarnings("JavadocReference")
     public static float applyArmor(@Nonnull PlayerEntity entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, float damage, @Nonnull EquipmentSlotType slot) {
-        if (itemStack.isEmpty() || source.isUnblockable()) return damage; //TODO validate
+        if (itemStack.isEmpty() || source.isUnblockable()) return damage;
         Item item = itemStack.getItem();
         if (!(item instanceof ArmorItem)) return damage;
         ArmorItem armor = (ArmorItem) item;
         float totalArmor = armor.getDamageReduceAmount() * getArmorModifier(slot);
-        float totalToughness = armor.getToughness() * getThougnessMofier(slot);
+        float totalToughness = armor.getToughness() * getToughnessModifier(slot);
 
         itemStack.damageItem((int) damage, entity, (player) -> player.sendBreakAnimation(slot));
         damage = CombatRules.getDamageAfterAbsorb(damage, totalArmor, totalToughness);
@@ -85,11 +98,17 @@ public class ArmorUtils {
             int i = (player.getActivePotionEffect(Effects.RESISTANCE).getAmplifier() + 1) * 5;
             int j = 25 - i;
             float f = damage * (float) j;
-            damage = f / 25.0F;
+            float f1 = damage;
+            damage = Math.max(f / 25.0F, 0.0F);
+            float f2 = f1 - damage;
+            if (f2 > 0.0F && f2 < 3.4028235E37F) {
+                if (player instanceof ServerPlayerEntity) {
+                    player.addStat(Stats.DAMAGE_RESISTED, Math.round(f2 * 10.0F));
+                } else if (source.getTrueSource() instanceof ServerPlayerEntity) {
+                    ((ServerPlayerEntity) source.getTrueSource()).addStat(Stats.DAMAGE_DEALT_RESISTED, Math.round(f2 * 10.0F));
+                }
+            }
         }
-
-        if (damage <= 0.0F)
-            return 0.0F;
 
         return damage;
     }

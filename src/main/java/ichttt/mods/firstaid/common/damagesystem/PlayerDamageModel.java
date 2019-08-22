@@ -288,7 +288,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         int max = 0;
         for (AbstractDamageablePart part : this) {
             int newMax;
-            if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.NUMBERS)
+            if (FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.NUMBERS)
                 newMax = Minecraft.getInstance().fontRenderer.getStringWidth(HealthRenderUtils.TEXT_FORMAT.format(part.currentHealth) + "/" + part.getMaxHealth()) + 1;
             else
                 newMax = (int) (((((int) (part.getMaxHealth() + part.getAbsorption() + 0.9999F)) + 1) / 2F) * 9F);

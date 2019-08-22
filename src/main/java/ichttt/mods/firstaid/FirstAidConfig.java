@@ -29,8 +29,10 @@ public class FirstAidConfig {
 
     static final ForgeConfigSpec serverSpec;
     static final ForgeConfigSpec generalSpec;
+    static final ForgeConfigSpec clientSpec;
     public static final FirstAidConfig.Server SERVER;
     public static final FirstAidConfig.General GENERAL;
+    public static final FirstAidConfig.Client CLIENT;
 
     static {
         final Pair<FirstAidConfig.Server, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(FirstAidConfig.Server::new);
@@ -42,6 +44,12 @@ public class FirstAidConfig {
         final Pair<FirstAidConfig.General, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(FirstAidConfig.General::new);
         generalSpec = specPair.getRight();
         GENERAL = specPair.getLeft();
+    }
+
+    static {
+        final Pair<FirstAidConfig.Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(FirstAidConfig.Client::new);
+        clientSpec = specPair.getRight();
+        CLIENT = specPair.getLeft();
     }
 
     public static class Server {
@@ -286,9 +294,65 @@ public class FirstAidConfig {
         }
     }
 
-    //    @Config.Comment("Settings regarding the health overlay when ingame")
-//    @Config.LangKey("firstaid.config.overlay")
-    public static final Overlay overlay = new Overlay(); //TODO client
+    public static class Client {
+
+        public enum OverlayMode {
+            OFF, NUMBERS, HEARTS, PLAYER_MODEL
+        }
+
+        public enum Position {
+            TOP_LEFT, TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT
+        }
+
+        public final ForgeConfigSpec.BooleanValue showVanillaHealthBar;
+        public final ForgeConfigSpec.BooleanValue hideOnNoChange;
+        public final ForgeConfigSpec.EnumValue<OverlayMode> overlayMode;
+        public final ForgeConfigSpec.EnumValue<Position> pos;
+        public final ForgeConfigSpec.IntValue xOffset;
+        public final ForgeConfigSpec.IntValue yOffset;
+        public final ForgeConfigSpec.IntValue alpha;
+
+        public Client(ForgeConfigSpec.Builder builder) {
+            builder.comment("Client only configuration settings").push("Overlay");
+            showVanillaHealthBar = builder
+                    .comment("True if the main health bar should be rendered (Will be average health)")
+                    .translation("firstaid.config.showvanillahealthbar")
+                    .define("showVanillaHealthBar", false);
+
+            hideOnNoChange = builder
+                    .comment("If true the overlay will automatically be hidden while health isn't changing. It will be shown when connecting and any health changes")
+                    .translation("firstaid.config.hideonnochange")
+                    .define("hideOnNoChange", false);
+
+            overlayMode = builder
+                    .comment("The design to use to visualize the health")
+                    .defineEnum("overlayMode", OverlayMode.PLAYER_MODEL);
+
+            pos = builder
+                    .comment("The relative point of the overlay")
+                    .translation("firstaid.config.position")
+                    .defineEnum("overlayPosition", Position.TOP_LEFT);
+
+            xOffset = builder
+                    .comment("The offset on the x axis")
+                    .translation("firstaid.config.xoffset")
+                    .defineInRange("xOffset", 0, Short.MIN_VALUE, Short.MAX_VALUE);
+
+            yOffset = builder
+                    .comment("The offset on the y axis")
+                    .translation("firstaid.config.yoffset")
+                    .defineInRange("yOffset", 1, Short.MIN_VALUE, Short.MAX_VALUE);
+
+            alpha = builder
+                    .comment("Determines the transparency of the overlay. 200 = Maximum transparency, 0 = Fully opaque")
+                    .translation("firstaid.config.alpha")
+                    .defineInRange("alpha", 50, 0 ,200);
+            builder.pop();
+            builder.push("Misc");
+            //TODO the rest :P
+            builder.pop();
+        }
+    }
 
     //    @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
 //    @Config.LangKey("firstaid.config.enablesoundsystem")
@@ -322,45 +386,4 @@ public class FirstAidConfig {
 //    @Config.RequiresMcRestart
 //    @ExtraConfig.Advanced
     public static boolean debug = false;
-
-    public static class Overlay {
-
-        public enum OverlayMode {
-            OFF, NUMBERS, HEARTS, PLAYER_MODEL
-        }
-
-        public enum Position {
-            TOP_LEFT, TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT
-        }
-
-        //        @Config.Comment("True if the main health bar should be rendered (Will be average health)")
-//        @Config.LangKey("firstaid.config.showvanillahealthbar")
-        public boolean showVanillaHealthBar = false;
-
-        //        @Config.Comment("If true the overlay will automatically be hidden while health isn't changing. It will be shown when connecting and any health changes")
-//        @Config.LangKey("firstaid.config.hideonnochange")
-        public boolean hideOnNoChange = false;
-
-        public OverlayMode overlayMode = OverlayMode.PLAYER_MODEL;
-
-        //        @Config.Comment("The relative point of the overlay")
-//        @Config.LangKey("firstaid.config.position")
-        public Position pos = Position.TOP_LEFT;
-
-        //        @Config.Comment("The offset on the x axis")
-//        @Config.LangKey("firstaid.config.xoffset")
-//        @ExtraConfig.Advanced
-        public int xOffset = 0;
-
-        //        @Config.Comment("The offset on the y axis")
-//        @Config.LangKey("firstaid.config.yoffset")
-//        @ExtraConfig.Advanced
-        public int yOffset = 1;
-
-        //        @Config.Comment("Determines the transparency of the overlay. 200 = Maximum transparency, 0 = Fully opaque")
-//        @Config.LangKey("firstaid.config.alpha")
-//        @Config.RangeInt(min = 0, max = 200)
-//        @ExtraConfig.Advanced
-        public int alpha = 50;
-    }
 }

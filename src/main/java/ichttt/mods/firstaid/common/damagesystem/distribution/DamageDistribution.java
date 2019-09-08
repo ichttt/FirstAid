@@ -48,7 +48,7 @@ import java.util.List;
 public abstract class DamageDistribution implements IDamageDistribution {
 
     public static float handleDamageTaken(IDamageDistribution damageDistribution, AbstractPlayerDamageModel damageModel, float damage, @Nonnull PlayerEntity player, @Nonnull DamageSource source, boolean addStat, boolean redistributeIfLeft) {
-        if (FirstAidConfig.debug) {
+        if (FirstAidConfig.GENERAL.debug.get()) {
             FirstAid.LOGGER.info("Damaging {} using {} for dmg source {}, redistribute {}, addStat {}", damage, damageDistribution.toString(), source.damageType, redistributeIfLeft, addStat);
         }
         CompoundNBT beforeCache = damageModel.serializeNBT();

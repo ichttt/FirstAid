@@ -66,7 +66,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             throw new IllegalStateException("A mod has registered a custom apiimpl for the registry. THIS IS NOT ALLOWED!" +
             "It should be " + INSTANCE.getClass().getName() + " but it actually is " + registryImpl.getClass().getName());
         INSTANCE.registrationAllowed = false;
-        if (FirstAidConfig.debug) {
+        if (FirstAidConfig.GENERAL.debug.get()) {
             FirstAid.LOGGER.info("REG READOUT:");
             for (Map.Entry<String, IDamageDistribution> entry : INSTANCE.DISTRIBUTION_MAP.entrySet()) {
                 FirstAid.LOGGER.info("{} bound to {}", entry.getKey(), entry.getValue());

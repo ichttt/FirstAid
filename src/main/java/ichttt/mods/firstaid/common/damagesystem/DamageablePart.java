@@ -111,7 +111,7 @@ public class DamageablePart extends AbstractDamageablePart {
     public CompoundNBT serializeNBT() {
         CompoundNBT compound = new CompoundNBT();
         compound.putFloat("health", currentHealth);
-        if (FirstAidConfig.scaleMaxHealth)
+        if (FirstAidConfig.SERVER.scaleMaxHealth.get())
             compound.putInt("maxHealth", maxHealth);
         if (absorption > 0F)
             compound.putFloat("absorption", absorption);
@@ -127,7 +127,7 @@ public class DamageablePart extends AbstractDamageablePart {
     public void deserializeNBT(@Nullable CompoundNBT nbt) {
         if (nbt == null)
             return;
-        if (nbt.contains("maxHealth") && FirstAidConfig.scaleMaxHealth)
+        if (nbt.contains("maxHealth") && FirstAidConfig.SERVER.scaleMaxHealth.get())
             maxHealth = nbt.getInt("maxHealth");
         currentHealth = Math.min(maxHealth, nbt.getFloat("health"));
         ItemStack stack = null;
@@ -148,7 +148,7 @@ public class DamageablePart extends AbstractDamageablePart {
 
     @Override
     public void setAbsorption(float absorption) {
-        if (absorption > 4F && FirstAidConfig.capMaxHealth)
+        if (absorption > 4F && FirstAidConfig.SERVER.capMaxHealth.get())
             absorption = 4F;
         if (absorption > 32F) absorption = 32F;
         this.absorption = absorption;
@@ -162,7 +162,7 @@ public class DamageablePart extends AbstractDamageablePart {
 
     @Override
     public void setMaxHealth(int maxHealth) {
-        if (maxHealth > 12 && FirstAidConfig.capMaxHealth)
+        if (maxHealth > 12 && FirstAidConfig.SERVER.capMaxHealth.get())
             maxHealth = 12;
         if (maxHealth > 128) //Apply a max cap even if disabled - This is already OP and I know no use case where the limit might be reached
             maxHealth = 128;

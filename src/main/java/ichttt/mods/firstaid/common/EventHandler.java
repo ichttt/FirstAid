@@ -201,7 +201,7 @@ public class EventHandler {
         } else {
             amount = amount * (float) (double) FirstAidConfig.SERVER.otherRegenMultiplier.get();
         }
-        if (FirstAidConfig.debug) {
+        if (FirstAidConfig.GENERAL.debug.get()) {
             CommonUtils.debugLogStacktrace("External healing: : " + amount);
         }
         HealthDistribution.distributeHealth(amount, (PlayerEntity) entity, true);

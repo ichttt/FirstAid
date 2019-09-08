@@ -113,7 +113,7 @@ public class FirstAid {
 
     public void init(FMLCommonSetupEvent event) {
         LOGGER.info("{} starting...", MODID);
-        if (FirstAidConfig.debug) {
+        if (FirstAidConfig.GENERAL.debug.get()) {
             LOGGER.warn("DEBUG MODE ENABLED");
             LOGGER.warn("FirstAid may be slower than usual and will produce much noisier logs if debug mode is enabled");
             LOGGER.warn("Disable debug in firstaid config");

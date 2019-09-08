@@ -316,7 +316,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public void stopWaitingForHelp(PlayerEntity player) {
-        if (FirstAidConfig.debug) {
+        if (FirstAidConfig.GENERAL.debug.get()) {
             FirstAid.LOGGER.info("Help waiting done!");
         }
         if (!this.waitingForHelp)
@@ -344,7 +344,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public void revivePlayer(PlayerEntity player) {
-        if (FirstAidConfig.debug) {
+        if (FirstAidConfig.GENERAL.debug.get()) {
             CommonUtils.debugLogStacktrace("Reviving player");
         }
         player.revive();
@@ -360,11 +360,11 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public void runScaleLogic(PlayerEntity player) {
-        if (FirstAidConfig.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
+        if (FirstAidConfig.SERVER.scaleMaxHealth.get()) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
             player.world.getProfiler().startSection("healthscaling");
             float globalFactor = player.getMaxHealth() / 20F;
             if (prevScaleFactor != globalFactor) {
-                if (FirstAidConfig.debug) {
+                if (FirstAidConfig.GENERAL.debug.get()) {
                     FirstAid.LOGGER.info("Starting health scaling factor {} -> {} (max health {})", prevScaleFactor, globalFactor, player.getMaxHealth());
                 }
                 player.world.getProfiler().startSection("distribution");
@@ -393,14 +393,14 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                         }
                     }
                     newMaxHealth += result;
-                    if (FirstAidConfig.debug) {
+                    if (FirstAidConfig.GENERAL.debug.get()) {
                         FirstAid.LOGGER.info("Part {} max health: {} initial; {} old; {} new", part.part.name(), part.initialMaxHealth, part.getMaxHealth(), result);
                     }
                     part.setMaxHealth(result);
                 }
                 player.world.getProfiler().endStartSection("correcting");
                 if (Math.abs(expectedNewMaxHealth - newMaxHealth) >= 2F) {
-                    if (FirstAidConfig.debug) {
+                    if (FirstAidConfig.GENERAL.debug.get()) {
                         FirstAid.LOGGER.info("Entering second stage - diff {}", Math.abs(expectedNewMaxHealth - newMaxHealth));
                     }
                     List<AbstractDamageablePart> prioList = new ArrayList<>();
@@ -410,7 +410,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                     prioList.sort(Comparator.comparingInt(AbstractDamageablePart::getMaxHealth));
                     for (AbstractDamageablePart part : prioList) {
                         int maxHealth = part.getMaxHealth();
-                        if (FirstAidConfig.debug) {
+                        if (FirstAidConfig.GENERAL.debug.get()) {
                             FirstAid.LOGGER.info("Part {}: Second stage with total diff {}", part.part.name(), Math.abs(expectedNewMaxHealth - newMaxHealth));
                         }
                         if (expectedNewMaxHealth > newMaxHealth) {

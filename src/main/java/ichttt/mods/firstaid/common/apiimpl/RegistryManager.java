@@ -69,7 +69,7 @@ public class RegistryManager {
         registry.bindDamageSourceStandard(DamageSource.LIGHTNING_BOLT, headArmsList, true);
 
         registry.bindDamageSourceRandom(DamageSource.MAGIC, false, false);
-        if (FirstAidConfig.hardMode) {
+        if (FirstAidConfig.GENERAL.hardMode.get()) {
             List<Pair<EquipmentSlotType, EnumPlayerPart[]>> bodyList = new ArrayList<>(1);
             bodyList.add(Pair.of(EquipmentSlotType.CHEST, new EnumPlayerPart[]{EnumPlayerPart.BODY}));
             registry.bindDamageSourceStandard(DamageSource.STARVE, bodyList, false);

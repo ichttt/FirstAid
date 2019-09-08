@@ -19,7 +19,6 @@
 package ichttt.mods.firstaid.common.potion;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
@@ -30,6 +29,7 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
@@ -40,7 +40,9 @@ import java.lang.reflect.Method;
 @SuppressWarnings("unused")
 public class PotionPoisonPatched extends Effect {
     public static final PotionPoisonPatched INSTANCE = new PotionPoisonPatched(EffectType.HARMFUL, 5149489);
-    private static final Method method = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_184581_c", DamageSource.class);
+    private static final Method getHurtSound = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_184601_bQ", DamageSource.class);
+    private static final Method getSoundVolume = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_70599_aP");
+    private static final Method getSoundPitch = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_70647_i");
 
     protected PotionPoisonPatched(EffectType type, int liquidColorIn) {
         super(type, liquidColorIn);
@@ -51,29 +53,19 @@ public class PotionPoisonPatched extends Effect {
     @Override
     public void performEffect(@Nonnull LivingEntity entity, int amplifier) {
         if (entity instanceof PlayerEntity && !(entity instanceof FakePlayer)) {
-            if (!entity.isAlive() || entity.isInvulnerableTo(DamageSource.MAGIC))
+            if (!entity.isAlive() || entity.isInvulnerableTo(DamageSource.MAGIC) || entity.world.isRemote())
                 return;
-            if (entity.world.isRemote) {
-                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel((PlayerEntity) entity);
-                boolean playSound = false;
-                for (AbstractDamageablePart part : damageModel) {
-                    playSound = part.currentHealth > (part.canCauseDeath ? 1F : 0F);
-                    if (playSound)
-                        break;
+            if (entity.isSleeping())
+                entity.wakeUp();
+            PlayerEntity player = (PlayerEntity) entity;
+            AbstractPlayerDamageModel playerDamageModel = CommonUtils.getDamageModel(player);
+            if (DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false) != 1.0F) {
+                try {
+                    SoundEvent sound = (SoundEvent) getHurtSound.invoke(player, DamageSource.MAGIC);
+                    player.world.playSound(null, player.posX, player.posY, player.posZ, sound, player.getSoundCategory(), (float) getSoundVolume.invoke(player), (float) getSoundPitch.invoke(player));
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    FirstAid.LOGGER.error("Could not play hurt sound!", e);
                 }
-                if (playSound) {
-                    try {
-                        method.invoke(entity, DamageSource.MAGIC);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        FirstAid.LOGGER.warn("Could not play hurt sound!", e);
-                    }
-                }
-            } else {
-                if (entity.isSleeping())
-                    entity.wakeUp();
-                PlayerEntity player = (PlayerEntity) entity;
-                AbstractPlayerDamageModel playerDamageModel = CommonUtils.getDamageModel(player);
-                DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false);
             }
         }
         else {

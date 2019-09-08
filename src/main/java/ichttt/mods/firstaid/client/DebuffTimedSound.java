@@ -49,7 +49,7 @@ public class DebuffTimedSound implements ITickableSound {
     private final static Map<SoundEvent, DebuffTimedSound> activeSounds = new HashMap<>();
 
     public static void playHurtSound(SoundEvent event, int duration) {
-        if (!FirstAidConfig.enableSoundSystem)
+        if (!FirstAidConfig.CLIENT.enableSounds.get())
             return;
         SoundHandler soundHandler = Minecraft.getInstance().getSoundHandler();
         DebuffTimedSound matchingSound = activeSounds.get(event);

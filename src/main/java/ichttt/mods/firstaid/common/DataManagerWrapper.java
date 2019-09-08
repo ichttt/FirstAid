@@ -88,7 +88,7 @@ public class DataManagerWrapper extends EntityDataManager {
                 if (aFloat > player.getMaxHealth()) {
                     CommonUtils.getDamageModel(player).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
                 } else if ((damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).isPresent() && damageModel.orElseThrow(RuntimeException::new).isWaitingForHelp()) {
-                    if (FirstAidConfig.debug)
+                    if (FirstAidConfig.GENERAL.debug.get())
                         CommonUtils.debugLogStacktrace("SetHealth falltrough");
                 } else if (FirstAidConfig.watchSetHealth && !aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && !player.world.isRemote && player instanceof ServerPlayerEntity && ((ServerPlayerEntity) player).connection != null) {
                     //calculate diff
@@ -97,12 +97,12 @@ public class DataManagerWrapper extends EntityDataManager {
                         float healed = aFloat - orig;
                         if (Math.abs(healed) > 0.001) {
                             if (healed < 0) {
-                                if (FirstAidConfig.debug) {
+                                if (FirstAidConfig.GENERAL.debug.get()) {
                                     CommonUtils.debugLogStacktrace("DAMAGING: " + (-healed));
                                 }
                                 DamageDistribution.handleDamageTaken(RandomDamageDistribution.NEAREST_KILL, CommonUtils.getDamageModel(player), -healed, player, DamageSource.MAGIC, true, true);
                             } else {
-                                if (FirstAidConfig.debug) {
+                                if (FirstAidConfig.GENERAL.debug.get()) {
                                     CommonUtils.debugLogStacktrace("HEALING: " + healed);
                                 }
                                 HealthDistribution.addRandomHealth(aFloat, player, true);

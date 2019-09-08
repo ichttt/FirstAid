@@ -106,6 +106,19 @@ public class FirstAidConfig {
                     .defineInRange("naturalRegenMultiplier", 0.5D, 0D, 20D);
 
             builder.pop();
+            builder.push("misc");
+            scaleMaxHealth = builder
+                    .comment("If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health")
+                    .translation("firstaid.config.scalemaxhealth")
+                    .worldRestart()
+                    .define("scaleMaxHealth", true);
+
+            capMaxHealth = builder
+                    .comment("If true, max health will be capped at 6 hearts and absorption at 2 hearts per limb. If false, the health cap will be much higher (64 hearts normal and 16 absorption)")
+                    .translation("firstaid.config.scalemaxhealth")
+                    .define("capMaxHealth", true);
+
+            builder.pop();
         }
 
         public final ForgeConfigSpec.IntValue maxHealthHead;
@@ -127,6 +140,9 @@ public class FirstAidConfig {
         public final ForgeConfigSpec.DoubleValue sleepHealPercentage;
         public final ForgeConfigSpec.DoubleValue otherRegenMultiplier;
         public final ForgeConfigSpec.DoubleValue naturalRegenMultiplier;
+
+        public final ForgeConfigSpec.BooleanValue scaleMaxHealth;
+        public final ForgeConfigSpec.BooleanValue capMaxHealth;
 
 
         private static ForgeConfigSpec.IntValue healthEntry(ForgeConfigSpec.Builder builder, String name, int defaultVal) {
@@ -168,12 +184,26 @@ public class FirstAidConfig {
             arms = new General.Arms(builder);
             legsAndFeet = new General.LegsAndFeet(builder);
             builder.pop();
+            builder.push("misc");
+            hardMode = builder
+                    .comment("If true, many damage distributions will be more realistic, but this will also cause them to be harder\\nIf enabled, e.g. drowing will only damage your body instead of your body and head last")
+                    .translation("firstaid.config.hardmode")
+                    .worldRestart()
+                    .define("hardMode", false);
+            debug = builder
+                    .comment("Enabled additional debug logs - May slow down the game and will increase log file size",
+                            "Only enable for special purposes")
+                    .translation("firstaid.config.debug")
+                    .define("debug", false);
+            builder.pop();
         }
 
         public final Head head;
         public final Body body;
         public final Arms arms;
         public final LegsAndFeet legsAndFeet;
+        public final ForgeConfigSpec.BooleanValue hardMode;
+        public final ForgeConfigSpec.BooleanValue debug;
 
         public static class Head {
 
@@ -311,6 +341,7 @@ public class FirstAidConfig {
         public final ForgeConfigSpec.IntValue xOffset;
         public final ForgeConfigSpec.IntValue yOffset;
         public final ForgeConfigSpec.IntValue alpha;
+        public final ForgeConfigSpec.BooleanValue enableSounds;
 
         public Client(ForgeConfigSpec.Builder builder) {
             builder.comment("Client only configuration settings").push("Overlay");
@@ -349,41 +380,16 @@ public class FirstAidConfig {
                     .defineInRange("alpha", 50, 0 ,200);
             builder.pop();
             builder.push("Misc");
-            //TODO the rest :P
+            enableSounds = builder
+                    .comment("Set to true to enable the debuff sounds. Only matters when debuffs are enabled")
+                    .translation("firstaid.config.enablesoundsystem")
+                    .define("enableSoundSystem", true);
             builder.pop();
         }
     }
 
-    //    @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
-//    @Config.LangKey("firstaid.config.enablesoundsystem")
-//    @ExtraConfig.Advanced
-    public static boolean enableSoundSystem = true; //TODO client
-
-    //    @Config.Comment("If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health")
-//    @Config.LangKey("firstaid.config.scalemaxhealth")
-//    @Config.RequiresWorldRestart
-//    @ExtraConfig.Sync
-    public static boolean scaleMaxHealth = false;
-
-    //    @Config.Comment("If true, max health will be capped at 6 hearts and absorption at 2 hearts per limb. If false, the health cap will be much higher (64 hearts normal and 16 absorption)")
-//    @Config.LangKey("firstaid.config.capmaxhealth")
-//    @Config.RequiresWorldRestart
-//    @ExtraConfig.Sync
-    public static boolean capMaxHealth = true;
-
 //    @Config.Comment("If true, all usages of setHealth from other mods will be captured. Should not cause any problems, but allow mods like scaling health bandages to apply")
 //    @Config.LangKey("firstaid.config.sethealth")
 //    @ExtraConfig.Advanced
-    public static boolean watchSetHealth = true; //TODO server as well
-
-//    @Config.Comment("If true, many damage distributions will be more realistic, but this will also cause them to be harder\nIf enabled, e.g. drowing will only damage your body instead of your body and head last")
-//    @Config.LangKey("firstaid.config.hardmode")
-//    @Config.RequiresMcRestart
-    public static boolean hardMode = false;
-
-//    @Config.Comment("Enabled additional debug logs - May slow down the game and will increase log file size\nOnly enable for special purposes")
-//    @Config.LangKey("firstaid.config.debug")
-//    @Config.RequiresMcRestart
-//    @ExtraConfig.Advanced
-    public static boolean debug = false;
+    public static boolean watchSetHealth = true; //If we need this at all, this is server as well
 }

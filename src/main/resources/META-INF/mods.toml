@@ -13,7 +13,7 @@ authors="ichttt"
 [[dependencies.firstaid]]
     modId="forge"
     mandatory=true
-    versionRange="[28.0.45,)"
+    versionRange="[28.0.91,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.firstaid]]

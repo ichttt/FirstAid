@@ -40,15 +40,30 @@ public class ArmorUtils {
      * Helper function to make {@link #applyArmor(EntityPlayer, ItemStack, DamageSource, double, EntityEquipmentSlot)}
      * more diffable
      */
-    private static float getModifier(EntityEquipmentSlot slot) {
+    private static float getArmorModifier(EntityEquipmentSlot slot) {
         switch (slot) {
             case CHEST:
                 return 2.5F;
             case LEGS:
                 return 3F;
             case FEET:
+                return 6F;
             case HEAD:
-                return 6.5F;
+                return 7F;
+            default:
+                throw new IllegalArgumentException("Invalid slot " + slot);
+        }
+    }
+
+    private static float getToughnessModifier(EntityEquipmentSlot slot) {
+        switch (slot) {
+            case CHEST:
+            case LEGS:
+                return 3;
+            case FEET:
+                return 3.5F;
+            case HEAD:
+                return 4F;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
@@ -83,8 +98,8 @@ public class ArmorUtils {
             return (float) damage;
         }
 
-        totalArmor = totalArmor * getModifier(slot);
-        totalToughness = totalToughness * (slot == EntityEquipmentSlot.CHEST || slot == EntityEquipmentSlot.LEGS ? 3 : 4);
+        totalArmor = totalArmor * getArmorModifier(slot);
+        totalToughness = totalToughness * getToughnessModifier(slot);
         if (totalArmor != 0) totalArmor += 0.5F;
 
         prop.Slot = slot.getIndex();

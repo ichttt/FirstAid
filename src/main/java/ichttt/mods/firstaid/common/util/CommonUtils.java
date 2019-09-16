@@ -99,6 +99,7 @@ public class CommonUtils {
         return !player.isSpectator() && !player.isCreative();
     }
 
+    @Nonnull
     public static String getActiveModidSafe() {
         ModContainer activeModContainer = Loader.instance().activeModContainer();
         return activeModContainer == null ? "UNKNOWN-NULL" : activeModContainer.getModId();

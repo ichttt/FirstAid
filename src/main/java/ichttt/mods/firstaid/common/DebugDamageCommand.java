@@ -18,18 +18,22 @@
 
 package ichttt.mods.firstaid.common;
 
+import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DirectDamageDistribution;
+import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.common.util.FakePlayer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -96,6 +100,8 @@ public class DebugDamageCommand extends CommandBase {
                 EnumPlayerPart part = EnumPlayerPart.valueOf(args[0].toUpperCase(Locale.ENGLISH));
                 damage(part, damage, debuff, (EntityPlayer) sender);
             }
+            if (sender instanceof EntityPlayerMP && !(sender instanceof FakePlayer))
+                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(((EntityPlayer) sender).getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), (EntityPlayerMP) sender);
         } catch (RuntimeException e) {
             throw new CommandException(e.toString());
         }

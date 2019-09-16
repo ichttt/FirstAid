@@ -28,14 +28,21 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
 public class PotionPoisonPatched extends Potion {
     public static final PotionPoisonPatched INSTANCE = new PotionPoisonPatched(true, 5149489);
+    private static final Method getHurtSound = ObfuscationReflectionHelper.findMethod(EntityLivingBase.class, "func_184601_bQ", SoundEvent.class, DamageSource.class);
+    private static final Method getSoundVolume = ObfuscationReflectionHelper.findMethod(EntityLivingBase.class, "func_70599_aP", float.class);
+    private static final Method getSoundPitch = ObfuscationReflectionHelper.findMethod(EntityLivingBase.class, "func_70647_i", float.class);
 
     protected PotionPoisonPatched(boolean isBadEffectIn, int liquidColorIn) {
         super(isBadEffectIn, liquidColorIn);
@@ -49,11 +56,20 @@ public class PotionPoisonPatched extends Potion {
     @Override
     public void performEffect(@Nonnull EntityLivingBase entity, int amplifier) {
         if (entity instanceof EntityPlayer && !(entity instanceof FakePlayer)) {
-            if (entity.world.isRemote)
+            if (entity.world.isRemote || entity.isDead || entity.isEntityInvulnerable(DamageSource.MAGIC))
                 return;
             EntityPlayer player = (EntityPlayer) entity;
             AbstractPlayerDamageModel playerDamageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
-            DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false);
+            if (DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false) != 1.0F) {
+                if (player.isPlayerSleeping())
+                    player.wakeUpPlayer(true, true, false);
+                try {
+                    SoundEvent sound = (SoundEvent) getHurtSound.invoke(player, DamageSource.MAGIC);
+                    player.world.playSound(null, player.posX, player.posY, player.posZ, sound, player.getSoundCategory(), (float) getSoundVolume.invoke(player), (float) getSoundPitch.invoke(player));
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    FirstAid.LOGGER.error("Could not play hurt sound!", e);
+                }
+            }
         }
         else {
             super.performEffect(entity, amplifier);

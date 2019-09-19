@@ -49,7 +49,7 @@ public class ArmorUtils {
             case FEET:
                 return 6F;
             case HEAD:
-                return 8F;
+                return 7F; //TODO: double check
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
@@ -63,7 +63,7 @@ public class ArmorUtils {
             case FEET:
                 return 3.5F;
             case HEAD:
-                return 4.5F;
+                return 4F;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }

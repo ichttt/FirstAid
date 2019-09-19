@@ -133,7 +133,8 @@ public class DamageablePart extends AbstractDamageablePart {
         ItemStack stack = null;
         if (nbt.contains("healingItem"))
             stack = new ItemStack(nbt.getByte("healingItem") == 1 ? FirstAidItems.PLASTER : FirstAidItems.BANDAGE);
-        else if (nbt.contains("healer")) stack = ItemStack.read((CompoundNBT) nbt.get("healer"));
+        else if (nbt.contains("healer"))
+            stack = ItemStack.read((CompoundNBT) Objects.requireNonNull(nbt.get("healer")));
 
         if (stack != null) {
             AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);

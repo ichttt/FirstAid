@@ -35,7 +35,7 @@ public class FirstAidItems {
     public static final Item PLASTER = getNull();
     public static final Item MORPHINE = getNull();
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings({"ConstantConditions", "SameReturnValue"})
     @Nonnull
     public static <T> T getNull() {
         return null;

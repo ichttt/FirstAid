@@ -35,7 +35,7 @@ import java.util.function.Supplier;
 
 public class MessageConfiguration {
 
-    private CompoundNBT playerDamageModel;
+    private final CompoundNBT playerDamageModel;
 
     public MessageConfiguration(CompoundNBT model) {
         this.playerDamageModel = model;

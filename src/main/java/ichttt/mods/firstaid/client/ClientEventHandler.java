@@ -36,7 +36,6 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.ForgeIngameGui;
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -44,13 +43,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class ClientEventHandler {
     private static int id;
-
-    @SubscribeEvent
-    public static void registerModels(ModelRegistryEvent event) {
-//        ModelLoader.setCustomModelResourceLocation(FirstAidItems.BANDAGE, 0, new ModelResourceLocation("firstaid:bandage"));
-//        ModelLoader.setCustomModelResourceLocation(FirstAidItems.PLASTER, 0, new ModelResourceLocation("firstaid:plaster"));
-//        ModelLoader.setCustomModelResourceLocation(FirstAidItems.MORPHINE, 0, new ModelResourceLocation("firstaid:morphine"));
-    }
 
     @SubscribeEvent
     public static void clientTick(TickEvent.ClientTickEvent event) {

@@ -87,3 +87,6 @@ keybinds.show_wounds=Wunden anzeigen
 
 subtitles.debuff.heartbeat=Herzklopfen
 gui.next_heal=Nächste Heilung: %s Sekunden
+
+firstaid.specificarmor= +%s Lokale Rüstung
+firstaid.specifictoughness= +%s Lokale Rüstungshärte

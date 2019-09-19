@@ -18,6 +18,7 @@
 
 package ichttt.mods.firstaid.client.util;
 
+import ichttt.mods.firstaid.FirstAidConfig;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -69,7 +70,7 @@ public class EventCalendar {
     }
 
     public static boolean isGuiFun() {
-        return isNewYear || isHalloween || isAFDay;
+        return FirstAidConfig.overlay.enableEasterEggs && (isNewYear || isHalloween || isAFDay);
     }
 
     public static boolean isNewYear() {

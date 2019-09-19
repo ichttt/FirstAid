@@ -36,34 +36,44 @@ import javax.annotation.Nonnull;
 
 public class ArmorUtils {
 
-    /**
-     * Helper function to make {@link #applyArmor(EntityPlayer, ItemStack, DamageSource, double, EntityEquipmentSlot)}
-     * more diffable
-     */
-    private static float getArmorModifier(EntityEquipmentSlot slot) {
+    public static double applyArmorModifier(EntityEquipmentSlot slot, double rawArmor) {
+        if (rawArmor <= 0D)
+            return 0D;
+        rawArmor = rawArmor * getArmorModifier(slot);
+        if (slot == EntityEquipmentSlot.HEAD) rawArmor += 1D;
+        return rawArmor;
+    }
+
+    public static double applyToughnessModifier(EntityEquipmentSlot slot, double rawToughness) {
+        if (rawToughness <= 0D)
+            return 0D;
+        rawToughness = rawToughness * getToughnessModifier(slot);
+        return rawToughness;
+    }
+
+    private static double getArmorModifier(EntityEquipmentSlot slot) {
         switch (slot) {
             case CHEST:
-                return 2.5F;
+                return 2.5D;
             case LEGS:
-                return 3F;
+                return 3D;
             case FEET:
-                return 6F;
             case HEAD:
-                return 7F;
+                return 6D;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
     }
 
-    private static float getToughnessModifier(EntityEquipmentSlot slot) {
+    private static double getToughnessModifier(EntityEquipmentSlot slot) {
         switch (slot) {
             case CHEST:
             case LEGS:
-                return 3;
+                return 3D;
             case FEET:
-                return 3.5F;
+                return 3.5D;
             case HEAD:
-                return 4F;
+                return 4D;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
@@ -85,7 +95,7 @@ public class ArmorUtils {
         if (item instanceof ISpecialArmor && (!unblockable || ((ISpecialArmor) item).handleUnblockableDamage(entity, itemStack, source, damage, slot.getIndex()))) {
             ISpecialArmor armor = (ISpecialArmor)item;
             prop = armor.getProperties(entity, itemStack, source, damage, slot.getIndex()).copy();
-            totalArmor = prop.Armor * 4;
+            totalArmor = prop.Armor;
             totalToughness = prop.Toughness;
         }  else if (item instanceof ItemArmor && !unblockable) {
             ItemArmor armor = (ItemArmor)item;
@@ -98,9 +108,8 @@ public class ArmorUtils {
             return (float) damage;
         }
 
-        totalArmor = totalArmor * getArmorModifier(slot);
-        totalToughness = totalToughness * getToughnessModifier(slot);
-        if (totalArmor != 0) totalArmor += 0.5F;
+        totalArmor = applyArmorModifier(slot, totalArmor);
+        totalToughness = applyToughnessModifier(slot, totalToughness);
 
         prop.Slot = slot.getIndex();
         double ratio = prop.AbsorbRatio;

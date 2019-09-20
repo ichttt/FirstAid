@@ -21,6 +21,7 @@ package ichttt.mods.firstaid.common.potion;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
@@ -52,6 +53,14 @@ public class FirstAidPotion extends Potion {
         GlStateManager.pushMatrix();
         GlStateManager.scale(1.2, 1.2, 1.2);
         mc.getRenderItem().renderItemAndEffectIntoGUI(new ItemStack(FirstAidItems.MORPHINE), Math.round(x / 1.2F) + 4, Math.round(y / 1.2F) + 5);
+        GlStateManager.popMatrix();
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void renderHUDEffect(@Nonnull PotionEffect effect, Gui gui, int x, int y, float z, float alpha) {
+        GlStateManager.pushMatrix();
+        Minecraft.getMinecraft().getRenderItem().renderItemAndEffectIntoGUI(new ItemStack(FirstAidItems.MORPHINE), x + 4, y + 4);
         GlStateManager.popMatrix();
     }
 }

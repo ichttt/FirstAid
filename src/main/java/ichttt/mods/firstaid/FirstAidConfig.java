@@ -195,7 +195,7 @@ public class FirstAidConfig {
 
         @Config.Comment("Determines how first aid should display armor on item tooltips.\nREPLACE replaces the vanilla description with the one fitting first aid\nAPPEND will add the first aid values at the bottom\nNONE will show the old vanilla values. Be advised this is purly visual, interally, the first aid value will always be used")
         @ExtraConfig.Advanced
-        public TooltipMode mode = TooltipMode.REPLACE;
+        public TooltipMode armorTooltipMode = TooltipMode.REPLACE;
 
         @Config.Comment("Disables the funny easter eggs on certain events")
         @ExtraConfig.Advanced

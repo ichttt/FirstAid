@@ -142,9 +142,9 @@ public class ClientEventHandler {
 
     private static <T> void replaceOrAppend(List<T> list, T search, T replace) {
         int index = list.indexOf(search);
-        if (FirstAidConfig.overlay.mode == FirstAidConfig.Overlay.TooltipMode.REPLACE && index >= 0) {
+        if (FirstAidConfig.overlay.armorTooltipMode == FirstAidConfig.Overlay.TooltipMode.REPLACE && index >= 0) {
             list.set(index, replace);
-        } else if (FirstAidConfig.overlay.mode != FirstAidConfig.Overlay.TooltipMode.NONE) {
+        } else {
             list.add(replace);
         }
     }
@@ -157,32 +157,37 @@ public class ClientEventHandler {
             event.getToolTip().add(I18n.format("firstaid.tooltip.morphine", "3:30-4:30"));
             return;
         }
-        boolean set = false;
-        if (item instanceof ISpecialArmor) {
-            ISpecialArmor armor = (ISpecialArmor) item;
-            EntityPlayer player = event.getEntityPlayer();
-            if (player != null) {
-                set = true;
-                int slot = player.inventory.armorInventory.indexOf(stack);
-                double totalArmor = ArmorUtils.applyArmorModifier(CommonUtils.ARMOR_SLOTS[slot], armor.getArmorDisplay(event.getEntityPlayer(), stack, slot));
-                if (FirstAidConfig.overlay.mode != FirstAidConfig.Overlay.TooltipMode.NONE)
-                    event.getToolTip().add(makeArmorMsg(totalArmor));
+        if (FirstAidConfig.overlay.armorTooltipMode != FirstAidConfig.Overlay.TooltipMode.NONE) {
+            boolean set = false;
+            if (item instanceof ISpecialArmor) {
+                ISpecialArmor armor = (ISpecialArmor) item;
+                EntityPlayer player = event.getEntityPlayer();
+                if (player != null) {
+                    int slot = player.inventory.armorInventory.indexOf(stack);
+                    if (slot > 0 && slot <= 3) {
+                        set = true;
+                        int displayArmor = armor.getArmorDisplay(event.getEntityPlayer(), stack, slot);
+                        double totalArmor = ArmorUtils.applyArmorModifier(CommonUtils.ARMOR_SLOTS[slot], armor.getArmorDisplay(event.getEntityPlayer(), stack, slot));
+                        String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(displayArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
+                        replaceOrAppend(event.getToolTip(), original, makeArmorMsg(totalArmor));
+                    }
+                }
             }
-        }
-        if (item instanceof ItemArmor && !set) {
-            ItemArmor armor = (ItemArmor) item;
-            List<String> tooltip = event.getToolTip();
+            if (item instanceof ItemArmor && !set) {
+                ItemArmor armor = (ItemArmor) item;
+                List<String> tooltip = event.getToolTip();
 
-            double totalArmor = ArmorUtils.applyArmorModifier(armor.armorType, armor.damageReduceAmount);
-            if (totalArmor > 0D) {
-                String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(armor.damageReduceAmount), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
-                replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
-            }
+                double totalArmor = ArmorUtils.applyArmorModifier(armor.armorType, armor.damageReduceAmount);
+                if (totalArmor > 0D) {
+                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(armor.damageReduceAmount), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
+                    replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
+                }
 
-            double totalToughness = ArmorUtils.applyToughnessModifier(armor.armorType, armor.toughness);
-            if (totalToughness > 0D) {
-                String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(armor.toughness), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armorToughness"));
-                replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
+                double totalToughness = ArmorUtils.applyToughnessModifier(armor.armorType, armor.toughness);
+                if (totalToughness > 0D) {
+                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(armor.toughness), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armorToughness"));
+                    replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
+                }
             }
         }
 

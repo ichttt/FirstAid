@@ -63,7 +63,7 @@ public class GuiHealthScreen extends Screen {
     private final AbstractPlayerDamageModel damageModel;
     private final List<GuiHoldButton> holdButtons = new ArrayList<>();
     private final boolean disableButtons;
-    private final float bedScaleFactor = EventCalendar.isGuiFun() ? 2F : 1.25F;
+    private final float bedScaleFactor = EventCalendar.isGuiFun() ? 1.5F : 1.25F;
 
     public int guiLeft;
     public int guiTop;

@@ -25,6 +25,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
 import ichttt.mods.firstaid.client.util.EventCalendar;
+import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
@@ -44,6 +45,7 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class ClientEventHandler {
+    private static final DecimalFormat FORMAT = new DecimalFormat("#.##");
     private static int id;
 
     @SubscribeEvent
@@ -55,6 +57,7 @@ public class ClientEventHandler {
             GuiHealthScreen.BED_ITEMSTACK.setDamage(id);
             if (mc.world != null && mc.world.getGameTime() % 3 == 0) id++;
             if (id > 15) id = 0;
+            PlayerModelRenderer.tickFun();
         }
         if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.world != null && mc.world.isRemote) {
             mc.player.sendStatusMessage(new StringTextComponent("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
@@ -104,12 +107,63 @@ public class ClientEventHandler {
         }
     }
 
+    private static String makeArmorMsg(double value) {
+        return TextFormatting.BLUE + I18n.format("firstaid.specificarmor", FORMAT.format(value)) + TextFormatting.RESET;
+    }
+
+    private static String makeToughnessMsg(double value) {
+        return TextFormatting.BLUE + I18n.format("firstaid.specifictoughness", FORMAT.format(value)) + TextFormatting.RESET;
+    }
+
+    private static <T> void replaceOrAppend(List<T> list, T search, T replace) {
+        int index = list.indexOf(search);
+        if (FirstAidConfig.overlay.armorTooltipMode == FirstAidConfig.Overlay.TooltipMode.REPLACE && index >= 0) {
+            list.set(index, replace);
+        } else {
+            list.add(replace);
+        }
+    }
+
     @SubscribeEvent
     public static void tooltipItems(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
-        if (stack.getItem() == FirstAidItems.MORPHINE) {
+        Item item = stack.getItem();
+        if (item == FirstAidItems.MORPHINE) {
             event.getToolTip().add(new TranslationTextComponent("firstaid.tooltip.morphine", "3:30-4:30"));
             return;
+        }
+        if (FirstAidConfig.overlay.armorTooltipMode != FirstAidConfig.Overlay.TooltipMode.NONE) {
+            boolean set = false;
+            if (item instanceof ISpecialArmor) {
+                ISpecialArmor armor = (ISpecialArmor) item;
+                EntityPlayer player = event.getEntityPlayer();
+                if (player != null) {
+                    int slot = player.inventory.armorInventory.indexOf(stack);
+                    if (slot > 0 && slot <= 3) {
+                        set = true;
+                        int displayArmor = armor.getArmorDisplay(event.getEntityPlayer(), stack, slot);
+                        double totalArmor = ArmorUtils.applyArmorModifier(CommonUtils.ARMOR_SLOTS[slot], armor.getArmorDisplay(event.getEntityPlayer(), stack, slot));
+                        String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(displayArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
+                        replaceOrAppend(event.getToolTip(), original, makeArmorMsg(totalArmor));
+                    }
+                }
+            }
+            if (item instanceof ItemArmor && !set) {
+                ItemArmor armor = (ItemArmor) item;
+                List<String> tooltip = event.getToolTip();
+
+                double totalArmor = ArmorUtils.applyArmorModifier(armor.armorType, armor.damageReduceAmount);
+                if (totalArmor > 0D) {
+                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(armor.damageReduceAmount), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
+                    replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
+                }
+
+                double totalToughness = ArmorUtils.applyToughnessModifier(armor.armorType, armor.toughness);
+                if (totalToughness > 0D) {
+                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(armor.toughness), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armorToughness"));
+                    replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
+                }
+            }
         }
 
         AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);

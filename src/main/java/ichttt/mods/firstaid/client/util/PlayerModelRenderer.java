@@ -20,6 +20,7 @@ package ichttt.mods.firstaid.client.util;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import net.minecraft.client.Minecraft;
@@ -29,13 +30,23 @@ import net.minecraft.util.ResourceLocation;
 public class PlayerModelRenderer {
     private static final ResourceLocation HEALTH_RENDER_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health.png");
     private static final int SIZE = 64;
+    private static int angle = 0;
+    private static boolean otherWay = false;
 
-    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, AbstractGui gui, float alpha) {
+    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, AbstractGui gui, float alpha, float partialTicks) {
         GlStateManager.enableAlphaTest();
         GlStateManager.enableBlend();
         GlStateManager.color4f(1F, 1F, 1F, 1 - (alpha / 255));
         Minecraft.getInstance().getTextureManager().bindTexture(HEALTH_RENDER_LOCATION);
         GlStateManager.scalef(0.5F, 0.5F, 0.5F);
+        if (FirstAidConfig.overlay.enableEasterEggs && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
+            float angle = PlayerModelRenderer.angle + ((otherWay ? -partialTicks : partialTicks) * 2);
+            if (FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT || FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.TOP_LEFT)
+                GlStateManager.translate(angle * 1.5F, 0, 0);
+            else
+                GlStateManager.translate(angle * 0.5F, 0, 0);
+            GlStateManager.rotate(angle, 0, 0, 1);
+        }
         drawPart(gui, damageModel.HEAD, 16, 0, 32, 32);
         drawPart(gui, damageModel.BODY, 16, 32, 32, 48);
         drawPart(gui, damageModel.LEFT_ARM, 0, 32, 16, 48);
@@ -61,5 +72,12 @@ public class PlayerModelRenderer {
             texX += SIZE * (healthPercentage > 0.5 ? 1 : 2);
         }
         gui.blit(rawTexX, texY, texX, texY, sizeX, sizeY);
+    }
+
+    public static void tickFun() {
+        angle += otherWay ? -2 : 2;
+        if (angle >= 90 || angle <= 0) {
+            otherWay = !otherWay;
+        }
     }
 }

@@ -36,34 +36,44 @@ import javax.annotation.Nonnull;
 
 public class ArmorUtils {
 
-    /**
-     * Helper function to make {@link #applyArmor(PlayerEntity, ItemStack, DamageSource, float, EquipmentSlotType)}
-     * more diffable
-     */
-    private static float getArmorModifier(EquipmentSlotType slot) {
+    public static double applyArmorModifier(EntityEquipmentSlot slot, double rawArmor) {
+        if (rawArmor <= 0D)
+            return 0D;
+        rawArmor = rawArmor * getArmorModifier(slot);
+        if (slot == EntityEquipmentSlot.HEAD) rawArmor += 1D;
+        return rawArmor;
+    }
+
+    public static double applyToughnessModifier(EntityEquipmentSlot slot, double rawToughness) {
+        if (rawToughness <= 0D)
+            return 0D;
+        rawToughness = rawToughness * getToughnessModifier(slot);
+        return rawToughness;
+    }
+
+    private static double getArmorModifier(EntityEquipmentSlot slot) {
         switch (slot) {
             case CHEST:
-                return 2.5F;
+                return 2.5D;
             case LEGS:
-                return 3F;
+                return 3D;
             case FEET:
-                return 6F;
             case HEAD:
-                return 7F;
+                return 6D;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
     }
 
-    private static float getToughnessModifier(EquipmentSlotType slot) {
+    private static double getToughnessModifier(EntityEquipmentSlot slot) {
         switch (slot) {
             case CHEST:
             case LEGS:
-                return 3;
+                return 3D;
             case FEET:
-                return 3.5F;
+                return 3.5D;
             case HEAD:
-                return 4F;
+                return 4D;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
@@ -78,8 +88,10 @@ public class ArmorUtils {
         Item item = itemStack.getItem();
         if (!(item instanceof ArmorItem)) return damage;
         ArmorItem armor = (ArmorItem) item;
-        float totalArmor = armor.getDamageReduceAmount() * getArmorModifier(slot);
-        float totalToughness = armor.getToughness() * getToughnessModifier(slot);
+        float totalArmor = armor.getDamageReduceAmount();
+        float totalToughness = armor.getToughness();
+        totalArmor = applyArmorModifier(slot, totalArmor);
+        totalToughness = applyToughnessModifier(slot, totalToughness);
 
         itemStack.damageItem((int) damage, entity, (player) -> player.sendBreakAnimation(slot));
         damage = CombatRules.getDamageAfterAbsorb(damage, totalArmor, totalToughness);

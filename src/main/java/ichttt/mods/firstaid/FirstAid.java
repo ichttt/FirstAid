@@ -111,6 +111,7 @@ public class FirstAid {
         RegistryManager.setupRegistries();
     }
 
+    @SuppressWarnings("Convert2MethodRef") //Fucking classloading
     public void init(FMLCommonSetupEvent event) {
         LOGGER.info("{} starting...", MODID);
         if (FirstAidConfig.GENERAL.debug.get()) {
@@ -135,14 +136,14 @@ public class FirstAid {
                 });
 
         int i = 0;
-        NETWORKING.registerMessage(++i, MessageReceiveDamage.class, MessageReceiveDamage::encode, MessageReceiveDamage::new, MessageReceiveDamage.Handler::onMessage);
-        NETWORKING.registerMessage(++i, MessageApplyHealingItem.class, MessageApplyHealingItem::encode, MessageApplyHealingItem::new, MessageApplyHealingItem.Handler::onMessage);
-        NETWORKING.registerMessage(++i, MessageConfiguration.class, MessageConfiguration::encode, MessageConfiguration::new, MessageConfiguration.Handler::onMessage);
-        NETWORKING.registerMessage(++i, MessageApplyAbsorption.class, MessageApplyAbsorption::encode, MessageApplyAbsorption::new, MessageApplyAbsorption.Handler::onMessage);
-        NETWORKING.registerMessage(++i, MessageAddHealth.class, MessageAddHealth::encode, MessageAddHealth::new, MessageAddHealth.Handler::onMessage);
-        NETWORKING.registerMessage(++i, MessagePlayHurtSound.class, MessagePlayHurtSound::encode, MessagePlayHurtSound::new, MessagePlayHurtSound.Handler::onMessage);
-        NETWORKING.registerMessage(++i, MessageClientRequest.class, MessageClientRequest::encode, MessageClientRequest::new, MessageClientRequest.Handler::onMessage);
-        NETWORKING.registerMessage(++i, MessageSyncDamageModel.class, MessageSyncDamageModel::encode, MessageSyncDamageModel::new, MessageSyncDamageModel.Handler::onMessage);
+        NETWORKING.registerMessage(++i, MessageReceiveDamage.class, MessageReceiveDamage::encode, MessageReceiveDamage::new, (message, supplier) -> MessageReceiveDamage.Handler.onMessage(message, supplier));
+        NETWORKING.registerMessage(++i, MessageApplyHealingItem.class, MessageApplyHealingItem::encode, MessageApplyHealingItem::new, (message, supplier) -> MessageApplyHealingItem.Handler.onMessage(message, supplier));
+        NETWORKING.registerMessage(++i, MessageConfiguration.class, MessageConfiguration::encode, MessageConfiguration::new, (message, supplier) -> MessageConfiguration.Handler.onMessage(message, supplier));
+        NETWORKING.registerMessage(++i, MessageApplyAbsorption.class, MessageApplyAbsorption::encode, MessageApplyAbsorption::new, (message, supplier) -> MessageApplyAbsorption.Handler.onMessage(message, supplier));
+        NETWORKING.registerMessage(++i, MessageAddHealth.class, MessageAddHealth::encode, MessageAddHealth::new, (message, supplier) -> MessageAddHealth.Handler.onMessage(message, supplier));
+        NETWORKING.registerMessage(++i, MessagePlayHurtSound.class, MessagePlayHurtSound::encode, MessagePlayHurtSound::new, (message, supplier) -> MessagePlayHurtSound.Handler.onMessage(message, supplier));
+        NETWORKING.registerMessage(++i, MessageClientRequest.class, MessageClientRequest::encode, MessageClientRequest::new, (message, supplier) -> MessageClientRequest.Handler.onMessage(message, supplier));
+        NETWORKING.registerMessage(++i, MessageSyncDamageModel.class, MessageSyncDamageModel::encode, MessageSyncDamageModel::new, (message, supplier) -> MessageSyncDamageModel.Handler.onMessage(message, supplier));
 
 
         if (ModList.get().isLoaded("morpheus")) {

@@ -62,7 +62,7 @@ public class MessageConfiguration {
                 if (damageModel.hasTutorial)
                     CapProvider.tutorialDone.add(Minecraft.getInstance().player.getName().getString());
                 else
-                    Minecraft.getInstance().player.sendMessage(new StringTextComponent("[First Aid] " + I18n.format("firstaid.tutorial.hint", I18n.format(ClientHooks.showWounds.getKey().getTranslationKey()))));
+                    Minecraft.getInstance().player.sendMessage(new StringTextComponent("[First Aid] " + I18n.format("firstaid.tutorial.hint", ClientHooks.showWounds.getLocalizedName())));
                 HUDHandler.INSTANCE.ticker = 200;
                 FirstAid.isSynced = true;
             });

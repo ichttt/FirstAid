@@ -90,5 +90,7 @@
 
   "subtitles.debuff.heartbeat": "Herzklopfen",
   "gui.next_heal": "Nächste Heilung: %s Sekunden",
-  "effect.firstaid.morphine": "Morphium"
+  "effect.firstaid.morphine": "Morphium",
+  "firstaid.specificarmor": " +%s Lokale Rüstung",
+  "firstaid.specifictoughness": " +%s Lokale Rüstungshärte"
 }

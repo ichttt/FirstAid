@@ -92,5 +92,7 @@
 
   "subtitles.debuff.heartbeat": "Heart beats",
   "gui.next_heal": "Next heal: %s seconds",
-  "effect.firstaid.morphine": "Morphine"
+  "effect.firstaid.morphine": "Morphine",
+  "firstaid.specificarmor": " +%s Locational Armor",
+  "firstaid.specifictoughness": " +%s Locational Armor Toughness"
 }

@@ -39,13 +39,13 @@ public class PlayerModelRenderer {
         GlStateManager.color4f(1F, 1F, 1F, 1 - (alpha / 255));
         Minecraft.getInstance().getTextureManager().bindTexture(HEALTH_RENDER_LOCATION);
         GlStateManager.scalef(0.5F, 0.5F, 0.5F);
-        if (FirstAidConfig.overlay.enableEasterEggs && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
+        if (FirstAidConfig.CLIENT.enableEasterEggs.get() && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
             float angle = PlayerModelRenderer.angle + ((otherWay ? -partialTicks : partialTicks) * 2);
-            if (FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT || FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.TOP_LEFT)
-                GlStateManager.translate(angle * 1.5F, 0, 0);
+            if (FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.BOTTOM_LEFT || FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.TOP_LEFT)
+                GlStateManager.translatef(angle * 1.5F, 0, 0);
             else
-                GlStateManager.translate(angle * 0.5F, 0, 0);
-            GlStateManager.rotate(angle, 0, 0, 1);
+                GlStateManager.translatef(angle * 0.5F, 0, 0);
+            GlStateManager.rotatef(angle, 0, 0, 1);
         }
         drawPart(gui, damageModel.HEAD, 16, 0, 32, 32);
         drawPart(gui, damageModel.BODY, 16, 32, 32, 48);

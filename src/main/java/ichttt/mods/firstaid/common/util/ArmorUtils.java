@@ -36,44 +36,44 @@ import javax.annotation.Nonnull;
 
 public class ArmorUtils {
 
-    public static double applyArmorModifier(EntityEquipmentSlot slot, double rawArmor) {
-        if (rawArmor <= 0D)
-            return 0D;
+    public static float applyArmorModifier(EquipmentSlotType slot, float rawArmor) {
+        if (rawArmor <= 0F)
+            return 0F;
         rawArmor = rawArmor * getArmorModifier(slot);
-        if (slot == EntityEquipmentSlot.HEAD) rawArmor += 1D;
+        if (slot == EquipmentSlotType.HEAD) rawArmor += 1F;
         return rawArmor;
     }
 
-    public static double applyToughnessModifier(EntityEquipmentSlot slot, double rawToughness) {
-        if (rawToughness <= 0D)
-            return 0D;
+    public static float applyToughnessModifier(EquipmentSlotType slot, float rawToughness) {
+        if (rawToughness <= 0F)
+            return 0F;
         rawToughness = rawToughness * getToughnessModifier(slot);
         return rawToughness;
     }
 
-    private static double getArmorModifier(EntityEquipmentSlot slot) {
+    private static float getArmorModifier(EquipmentSlotType slot) {
         switch (slot) {
             case CHEST:
-                return 2.5D;
+                return 2.5F;
             case LEGS:
-                return 3D;
+                return 3F;
             case FEET:
             case HEAD:
-                return 6D;
+                return 6F;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
     }
 
-    private static double getToughnessModifier(EntityEquipmentSlot slot) {
+    private static float getToughnessModifier(EquipmentSlotType slot) {
         switch (slot) {
             case CHEST:
             case LEGS:
-                return 3D;
+                return 3F;
             case FEET:
-                return 3.5D;
+                return 3.5F;
             case HEAD:
-                return 4D;
+                return 4F;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }

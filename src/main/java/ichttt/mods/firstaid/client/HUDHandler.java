@@ -131,7 +131,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         }
         mc.getProfiler().endStartSection("render");
         if (FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.PLAYER_MODEL) {
-            PlayerModelRenderer.renderPlayerHealth(damageModel, gui, alpha);
+            PlayerModelRenderer.renderPlayerHealth(damageModel, gui, alpha, partialTicks);
         } else {
             int xTranslation = maxLength;
             for (AbstractDamageablePart part : damageModel) {

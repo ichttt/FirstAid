@@ -342,14 +342,12 @@ public class FirstAidConfig {
         public final ForgeConfigSpec.BooleanValue hideOnNoChange;
         public final ForgeConfigSpec.EnumValue<OverlayMode> overlayMode;
         public final ForgeConfigSpec.EnumValue<Position> pos;
-        public final ForgeConfigSpec.EnumValue<>;
-        //        @Config.Comment("Determines how first aid should display armor on item tooltips.\nREPLACE replaces the vanilla description with the one fitting first aid\nAPPEND will add the first aid values at the bottom\nNONE will show the old vanilla values. Be advised this is purly visual, interally, the first aid value will always be used")
-        //        @ExtraConfig.Advanced
-        //        public TooltipMode armorTooltipMode = TooltipMode.REPLACE;
+        public final ForgeConfigSpec.EnumValue<TooltipMode> armorTooltipMode;
         public final ForgeConfigSpec.IntValue xOffset;
         public final ForgeConfigSpec.IntValue yOffset;
         public final ForgeConfigSpec.IntValue alpha;
         public final ForgeConfigSpec.BooleanValue enableSounds;
+        public final ForgeConfigSpec.BooleanValue enableEasterEggs;
 
         public Client(ForgeConfigSpec.Builder builder) {
             builder.comment("Client only configuration settings").push("Overlay");
@@ -372,6 +370,10 @@ public class FirstAidConfig {
                     .translation("firstaid.config.position")
                     .defineEnum("overlayPosition", Position.TOP_LEFT);
 
+            armorTooltipMode = builder
+                    .comment("Determines how first aid should display armor on item tooltips.", "REPLACE replaces the vanilla description with the one fitting first aid\nAPPEND will add the first aid values at the bottom", "NONE will show the old vanilla values. Be advised this is purly visual, interally, the first aid value will always be used")
+                    .defineEnum("armorTooltipMode", TooltipMode.REPLACE);
+
             xOffset = builder
                     .comment("The offset on the x axis")
                     .translation("firstaid.config.xoffset")
@@ -392,6 +394,9 @@ public class FirstAidConfig {
                     .comment("Set to true to enable the debuff sounds. Only matters when debuffs are enabled")
                     .translation("firstaid.config.enablesoundsystem")
                     .define("enableSoundSystem", true);
+            enableEasterEggs = builder
+                    .comment("Disables the funny easter eggs on certain events if false")
+                    .define("enableEasterEggs", true);
             builder.pop();
         }
     }

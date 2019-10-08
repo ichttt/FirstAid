@@ -30,11 +30,16 @@ import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
+import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StringUtils;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.ForgeIngameGui;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -43,6 +48,9 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+import java.text.DecimalFormat;
+import java.util.List;
 
 public class ClientEventHandler {
     private static final DecimalFormat FORMAT = new DecimalFormat("#.##");
@@ -107,17 +115,17 @@ public class ClientEventHandler {
         }
     }
 
-    private static String makeArmorMsg(double value) {
-        return TextFormatting.BLUE + I18n.format("firstaid.specificarmor", FORMAT.format(value)) + TextFormatting.RESET;
+    private static ITextComponent makeArmorMsg(double value) {
+        return new TranslationTextComponent("firstaid.specificarmor", FORMAT.format(value)).applyTextStyle(TextFormatting.BLUE);
     }
 
-    private static String makeToughnessMsg(double value) {
-        return TextFormatting.BLUE + I18n.format("firstaid.specifictoughness", FORMAT.format(value)) + TextFormatting.RESET;
+    private static ITextComponent makeToughnessMsg(double value) {
+        return new TranslationTextComponent("firstaid.specifictoughness", FORMAT.format(value)).applyTextStyle(TextFormatting.BLUE);
     }
 
     private static <T> void replaceOrAppend(List<T> list, T search, T replace) {
         int index = list.indexOf(search);
-        if (FirstAidConfig.overlay.armorTooltipMode == FirstAidConfig.Overlay.TooltipMode.REPLACE && index >= 0) {
+        if (FirstAidConfig.CLIENT.armorTooltipMode.get() == FirstAidConfig.Client.TooltipMode.REPLACE && index >= 0) {
             list.set(index, replace);
         } else {
             list.add(replace);
@@ -132,35 +140,20 @@ public class ClientEventHandler {
             event.getToolTip().add(new TranslationTextComponent("firstaid.tooltip.morphine", "3:30-4:30"));
             return;
         }
-        if (FirstAidConfig.overlay.armorTooltipMode != FirstAidConfig.Overlay.TooltipMode.NONE) {
-            boolean set = false;
-            if (item instanceof ISpecialArmor) {
-                ISpecialArmor armor = (ISpecialArmor) item;
-                EntityPlayer player = event.getEntityPlayer();
-                if (player != null) {
-                    int slot = player.inventory.armorInventory.indexOf(stack);
-                    if (slot > 0 && slot <= 3) {
-                        set = true;
-                        int displayArmor = armor.getArmorDisplay(event.getEntityPlayer(), stack, slot);
-                        double totalArmor = ArmorUtils.applyArmorModifier(CommonUtils.ARMOR_SLOTS[slot], armor.getArmorDisplay(event.getEntityPlayer(), stack, slot));
-                        String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(displayArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
-                        replaceOrAppend(event.getToolTip(), original, makeArmorMsg(totalArmor));
-                    }
-                }
-            }
-            if (item instanceof ItemArmor && !set) {
-                ItemArmor armor = (ItemArmor) item;
-                List<String> tooltip = event.getToolTip();
+        if (FirstAidConfig.CLIENT.armorTooltipMode.get() != FirstAidConfig.Client.TooltipMode.NONE) {
+            if (item instanceof ArmorItem) {
+                ArmorItem armor = (ArmorItem) item;
+                List<ITextComponent> tooltip = event.getToolTip();
 
-                double totalArmor = ArmorUtils.applyArmorModifier(armor.armorType, armor.damageReduceAmount);
+                double totalArmor = ArmorUtils.applyArmorModifier(armor.getEquipmentSlot(), armor.getDamageReduceAmount());
                 if (totalArmor > 0D) {
-                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(armor.damageReduceAmount), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
+                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(armor.getDamageReduceAmount()), new TranslationTextComponent("attribute.name.generic.armor")).applyTextStyle(TextFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
                 }
 
-                double totalToughness = ArmorUtils.applyToughnessModifier(armor.armorType, armor.toughness);
+                double totalToughness = ArmorUtils.applyToughnessModifier(armor.getEquipmentSlot(), armor.getToughness());
                 if (totalToughness > 0D) {
-                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(armor.toughness), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armorToughness"));
+                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(armor.getToughness()), new TranslationTextComponent("attribute.name.generic.armorToughness")).applyTextStyle(TextFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
                 }
             }

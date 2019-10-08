@@ -18,6 +18,8 @@
 
 package ichttt.mods.firstaid.client.util;
 
+import ichttt.mods.firstaid.FirstAidConfig;
+
 import java.util.Calendar;
 
 import static java.util.Calendar.*;
@@ -65,7 +67,7 @@ public class EventCalendar {
     }
 
     public static boolean isGuiFun() {
-        return FirstAidConfig.overlay.enableEasterEggs && (isNewYear || isHalloween || isAFDay);
+        return (isNewYear || isHalloween || isAFDay) && FirstAidConfig.CLIENT.enableEasterEggs.get();
     }
 
     public static boolean isNewYear() {

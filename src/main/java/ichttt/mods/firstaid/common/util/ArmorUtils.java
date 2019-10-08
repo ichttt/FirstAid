@@ -49,7 +49,7 @@ public class ArmorUtils {
             case FEET:
                 return 6F;
             case HEAD:
-                return 7F; //TODO: double check
+                return 7F;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }

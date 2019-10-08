@@ -18,6 +18,7 @@
 
 package ichttt.mods.firstaid.client;
 
+import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
@@ -35,6 +36,7 @@ import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.ForgeIngameGui;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.TickEvent;
@@ -116,13 +118,9 @@ public class ClientEventHandler {
         }
     }
 
-//    @SubscribeEvent TODO on disconnect
-//    public static void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
-//        FirstAid.isSynced = false;
-//        for (ConfigEntry<ExtraConfig.Sync> option : FirstAid.syncedConfigOptions) {
-//            if (option.hasRemoteData())
-//                option.revert();
-//        }
-//        HUDHandler.INSTANCE.ticker = -1;
-//    }
+    @SubscribeEvent
+    public static void onDisconnect(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+        FirstAid.isSynced = false;
+        HUDHandler.INSTANCE.ticker = -1;
+    }
 }

@@ -28,6 +28,7 @@ import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistrib
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
@@ -93,6 +94,8 @@ public class DataManagerWrapper extends EntityDataManager {
                     //calculate diff
                     Float orig = get(EntityLivingBase.HEALTH);
                     if (orig > 0 && !orig.isNaN() && !orig.isInfinite()) {
+                        if (FirstAidConfig.scaleMaxHealth)
+                            orig = Math.min(orig, (float) this.player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue());
                         float healed = aFloat - orig;
                         if (Math.abs(healed) > 0.001) {
                             if (healed < 0) {

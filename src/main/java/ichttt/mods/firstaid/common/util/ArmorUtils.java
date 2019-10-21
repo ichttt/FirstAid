@@ -21,6 +21,9 @@ package ichttt.mods.firstaid.common.util;
 import com.google.common.collect.Iterators;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -35,6 +38,15 @@ import net.minecraftforge.common.ISpecialArmor;
 import javax.annotation.Nonnull;
 
 public class ArmorUtils {
+
+    // Use attributes instead of fields on ItemArmor, these are likely more correct
+    public static double getArmor(ItemStack stack, EntityEquipmentSlot slot) {
+        return getValueFromAttributes(SharedMonsterAttributes.ARMOR, slot, stack);
+    }
+
+    public static double getArmorThoughness(ItemStack stack, EntityEquipmentSlot slot) {
+        return getValueFromAttributes(SharedMonsterAttributes.ARMOR_TOUGHNESS, slot, stack);
+    }
 
     public static double applyArmorModifier(EntityEquipmentSlot slot, double rawArmor) {
         if (rawArmor <= 0D)
@@ -79,6 +91,10 @@ public class ArmorUtils {
         }
     }
 
+    private static double getValueFromAttributes(IAttribute attribute, EntityEquipmentSlot slot, ItemStack stack) {
+        return stack.getItem().getAttributeModifiers(slot, stack).get(attribute.getName()).stream().mapToDouble(AttributeModifier::getAmount).sum();
+    }
+
     /**
      * Changed copy of ISpecialArmor{@link ISpecialArmor.ArmorProperties#applyArmor(EntityLivingBase, NonNullList, DamageSource, double)}
      */
@@ -86,8 +102,8 @@ public class ArmorUtils {
         if (itemStack.isEmpty()) return (float)damage;
         NonNullList<ItemStack> inventory = entity.inventory.armorInventory;
 
-        double totalArmor;
-        double totalToughness;
+        double totalArmor = 0;
+        double totalToughness = 0;
         Item item = itemStack.getItem();
 
         ISpecialArmor.ArmorProperties prop;
@@ -95,26 +111,28 @@ public class ArmorUtils {
         if (item instanceof ISpecialArmor && (!unblockable || ((ISpecialArmor) item).handleUnblockableDamage(entity, itemStack, source, damage, slot.getIndex()))) {
             ISpecialArmor armor = (ISpecialArmor)item;
             prop = armor.getProperties(entity, itemStack, source, damage, slot.getIndex()).copy();
-            totalArmor = prop.Armor;
-            totalToughness = prop.Toughness;
+            totalArmor += prop.Armor;
+            totalToughness += prop.Toughness;
         }  else if (item instanceof ItemArmor && !unblockable) {
             ItemArmor armor = (ItemArmor)item;
             prop = new ISpecialArmor.ArmorProperties(0, 0, Integer.MAX_VALUE);
             prop.Armor = armor.damageReduceAmount;
             prop.Toughness = armor.toughness;
-            totalArmor = armor.damageReduceAmount;
-            totalToughness = armor.toughness;
         } else {
             return (float) damage;
+        }
+        if (item instanceof ItemArmor) { //Always add normal armor (even if the item is a special armor), as forge does this as well
+            totalArmor += getArmor(itemStack, slot);
+            totalToughness += getArmorThoughness(itemStack, slot);
         }
 
         totalArmor = applyArmorModifier(slot, totalArmor);
         totalToughness = applyToughnessModifier(slot, totalToughness);
 
         prop.Slot = slot.getIndex();
-        double ratio = prop.AbsorbRatio;
+        double ratio = prop.AbsorbRatio * getArmorModifier(slot);
 
-        double absorb = damage * prop.AbsorbRatio;
+        double absorb = damage * ratio;
         if (absorb > 0) {
             ItemStack stack = inventory.get(prop.Slot);
             int itemDamage = (int) Math.max(1, absorb);

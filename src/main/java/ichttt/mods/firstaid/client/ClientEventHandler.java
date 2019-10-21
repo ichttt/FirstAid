@@ -164,12 +164,16 @@ public class ClientEventHandler {
                 EntityPlayer player = event.getEntityPlayer();
                 if (player != null) {
                     int slot = player.inventory.armorInventory.indexOf(stack);
-                    if (slot > 0 && slot <= 3) {
-                        set = true;
+                    if (slot == -1 && item instanceof ItemArmor)
+                        slot = ((ItemArmor) item).armorType.getIndex();
+                    if (slot >= 0 && slot <= 3) {
                         int displayArmor = armor.getArmorDisplay(event.getEntityPlayer(), stack, slot);
-                        double totalArmor = ArmorUtils.applyArmorModifier(CommonUtils.ARMOR_SLOTS[slot], armor.getArmorDisplay(event.getEntityPlayer(), stack, slot));
-                        String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(displayArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
-                        replaceOrAppend(event.getToolTip(), original, makeArmorMsg(totalArmor));
+                        if (displayArmor != 0) {
+                            set = true;
+                            double totalArmor = ArmorUtils.applyArmorModifier(CommonUtils.ARMOR_SLOTS[slot], displayArmor);
+                            String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(displayArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
+                            replaceOrAppend(event.getToolTip(), original, makeArmorMsg(totalArmor));
+                        }
                     }
                 }
             }
@@ -177,15 +181,17 @@ public class ClientEventHandler {
                 ItemArmor armor = (ItemArmor) item;
                 List<String> tooltip = event.getToolTip();
 
-                double totalArmor = ArmorUtils.applyArmorModifier(armor.armorType, armor.damageReduceAmount);
+                double normalArmor = ArmorUtils.getArmor(stack, armor.getEquipmentSlot());
+                double totalArmor = ArmorUtils.applyArmorModifier(armor.armorType, normalArmor);
                 if (totalArmor > 0D) {
-                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(armor.damageReduceAmount), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
+                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(normalArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
                     replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
                 }
 
-                double totalToughness = ArmorUtils.applyToughnessModifier(armor.armorType, armor.toughness);
+                double normalToughness = ArmorUtils.getArmorThoughness(stack, armor.getEquipmentSlot());
+                double totalToughness = ArmorUtils.applyToughnessModifier(armor.armorType, normalToughness);
                 if (totalToughness > 0D) {
-                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(armor.toughness), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armorToughness"));
+                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(normalToughness), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armorToughness"));
                     replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
                 }
             }

@@ -94,6 +94,8 @@ public class DataManagerWrapper extends EntityDataManager {
                     //calculate diff
                     Float orig = get(LivingEntity.HEALTH);
                     if (orig > 0 && !orig.isNaN() && !orig.isInfinite()) {
+                        if (FirstAidConfig.SERVER.scaleMaxHealth.get())
+                            orig = Math.min(orig, (float) this.player.getAttribute(SharedMonsterAttributes.MAX_HEALTH).getValue());
                         float healed = aFloat - orig;
                         if (Math.abs(healed) > 0.001) {
                             if (healed < 0) {

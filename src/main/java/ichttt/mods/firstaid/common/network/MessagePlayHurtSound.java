@@ -25,6 +25,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class MessagePlayHurtSound {
@@ -41,7 +42,7 @@ public class MessagePlayHurtSound {
     }
 
     public void encode(PacketBuffer buf) {
-        buf.writeResourceLocation(sound.getName());
+        buf.writeResourceLocation(Objects.requireNonNull(sound.getRegistryName()));
         buf.writeInt(duration);
     }
 

@@ -28,6 +28,7 @@ import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistrib
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;

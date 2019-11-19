@@ -27,7 +27,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.api.event.FirstAidLivingDamageEvent;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
-import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
+import ichttt.mods.firstaid.common.network.MessageUpdatePart;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.player.EntityPlayer;
@@ -90,8 +90,8 @@ public abstract class DamageDistribution implements IDamageDistribution {
         Collections.shuffle(damageableParts);
         for (AbstractDamageablePart part : damageableParts) {
             float minHealth = minHealth(player, part);
-            FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part.part, damage, minHealth), (EntityPlayerMP) player);
             float dmgDone = damage - part.damage(damage, player, damageModel.getMorphineTicks() == 0, minHealth);
+            FirstAid.NETWORKING.sendTo(new MessageUpdatePart(part), (EntityPlayerMP) player);
             if (addStat)
                 player.addStat(StatList.DAMAGE_TAKEN, Math.round(dmgDone * 10.0F));
             damage -= dmgDone;

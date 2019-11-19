@@ -35,8 +35,8 @@ import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import ichttt.mods.firstaid.common.network.MessageConfiguration;
 import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
-import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
+import ichttt.mods.firstaid.common.network.MessageUpdatePart;
 import ichttt.mods.firstaid.common.util.MorpheusHelper;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
@@ -141,7 +141,7 @@ public class FirstAid {
 
         int i = 0;
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
-        NETWORKING.registerMessage(MessageReceiveDamage.Handler.class, MessageReceiveDamage.class, ++i, Side.CLIENT);
+        NETWORKING.registerMessage(MessageUpdatePart.Handler.class, MessageUpdatePart.class, ++i, Side.CLIENT);
         NETWORKING.registerMessage(MessageApplyHealingItem.Handler.class, MessageApplyHealingItem.class, ++i , Side.SERVER);
         NETWORKING.registerMessage(MessageConfiguration.Handler.class, MessageConfiguration.class, ++i, Side.CLIENT);
         NETWORKING.registerMessage(MessageApplyAbsorption.Handler.class, MessageApplyAbsorption.class, ++i, Side.CLIENT);

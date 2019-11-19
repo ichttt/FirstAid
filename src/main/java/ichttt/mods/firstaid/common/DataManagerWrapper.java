@@ -82,7 +82,7 @@ public class DataManagerWrapper extends EntityDataManager {
             }
             Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).setAbsorption(floatValue);
         } else if (key == EntityLivingBase.HEALTH) {
-            if (value instanceof Float) {
+            if (value instanceof Float && !player.world.isRemote) {
                 Float aFloat = (Float) value;
                 AbstractPlayerDamageModel damageModel;
                 if (aFloat > player.getMaxHealth()) {
@@ -90,7 +90,7 @@ public class DataManagerWrapper extends EntityDataManager {
                 } else if ((damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)) != null && damageModel.isWaitingForHelp()) {
                     if (FirstAidConfig.debug)
                         CommonUtils.debugLogStacktrace("SetHealth falltrough");
-                } else if (FirstAidConfig.watchSetHealth && !aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && !player.world.isRemote && player instanceof EntityPlayerMP && ((EntityPlayerMP) player).connection != null) {
+                } else if (FirstAidConfig.watchSetHealth && !aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && player instanceof EntityPlayerMP && ((EntityPlayerMP) player).connection != null) {
                     //calculate diff
                     Float orig = get(EntityLivingBase.HEALTH);
                     if (orig > 0 && !orig.isNaN() && !orig.isInfinite()) {

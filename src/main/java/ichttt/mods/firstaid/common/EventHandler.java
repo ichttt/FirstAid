@@ -25,7 +25,6 @@ import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
@@ -35,7 +34,6 @@ import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.PreferredDamageDistribution;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.MessageConfiguration;
-import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.potion.FirstAidPotion;
 import ichttt.mods.firstaid.common.potion.PotionPoisonPatched;
@@ -109,7 +107,7 @@ public class EventHandler {
         if (amountToDamage == Float.MAX_VALUE) {
             damageModel.forEach(damageablePart -> damageablePart.currentHealth = 0F);
             if (player instanceof EntityPlayerMP)
-                Arrays.stream(EnumPlayerPart.VALUES).forEach(part -> FirstAid.NETWORKING.sendTo(new MessageReceiveDamage(part, Float.MAX_VALUE, 0F), (EntityPlayerMP) player));
+                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel), (EntityPlayerMP) player);
             event.setCanceled(true);
             CommonUtils.killPlayer(player, source);
             return;

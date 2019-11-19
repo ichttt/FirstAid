@@ -174,7 +174,6 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void tickPlayers(TickEvent.PlayerTickEvent event) {
-        FirstAid.LOGGER.info("Ticking {} @Phase={}, isSurvivalOrAdventure={}", event.player.getName(), event.phase, CommonUtils.isSurvivalOrAdventure(event.player));
         if (event.phase == TickEvent.Phase.END && CommonUtils.isSurvivalOrAdventure(event.player)) {
             Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).tick(event.player.world, event.player);
             hitList.remove(event.player); //Damage should be done in the same tick as the hit was noted, otherwise we got a false-positive

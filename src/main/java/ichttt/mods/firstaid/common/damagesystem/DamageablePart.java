@@ -52,7 +52,6 @@ public class DamageablePart extends AbstractDamageablePart {
 
     @Override
     public float heal(float amount, @Nullable EntityPlayer player, boolean applyDebuff) {
-        FirstAid.LOGGER.info("Healing {} for {}, applyDebuff={}", player == null ? null : player.getName(), amount, applyDebuff);
         if (amount <= 0F)
             return 0F;
         float notFitting = Math.abs(Math.min(0F, maxHealth - (currentHealth + amount)));
@@ -97,11 +96,8 @@ public class DamageablePart extends AbstractDamageablePart {
 
     @Override
     public void tick(World world, EntityPlayer player, boolean tickDebuffs) {
-        FirstAid.LOGGER.info("Ticking part {} for player {}", part.name(), player.getName());
         if (activeHealer != null) {
-            FirstAid.LOGGER.info("Ticking active healer {} ({}/{}ticks done), {}/{} heals done)", activeHealer, activeHealer.getTicksPassed(), activeHealer.ticksPerHeal, activeHealer.getHealsDone(), activeHealer.maxHeal);
             if (activeHealer.tick()) {
-                FirstAid.LOGGER.info("Applying ticker for {}", player.getName());
                 heal(1F, player, !world.isRemote);
             }
             if (activeHealer.hasFinished())

@@ -127,6 +127,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     public void tick(World world, EntityPlayer player) {
         if (isDead(player))
             return;
+        FirstAid.LOGGER.info("{} is not dead, ticking", player.getName());
         world.profiler.startSection("FirstAidPlayerModel");
         if (sleepBlockTicks > 0)
             sleepBlockTicks--;
@@ -179,6 +180,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             sharedDebuffs.forEach(sharedDebuff -> sharedDebuff.tick(player));
         world.profiler.endSection();
         world.profiler.endSection();
+        FirstAid.LOGGER.info("Finished ticking {}", player.getName());
     }
 
     public static int getRandMorphineDuration() { //Tweak tooltip event when changing as well
@@ -240,14 +242,18 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                 if (FirstAidConfig.debug && !waitingForHelp)
                     FirstAid.LOGGER.info("Player start waiting for help");
                 this.waitingForHelp = true; //Technically not dead yet, but we should still return true
+                FirstAid.LOGGER.info("{} is dead, reason: start wait help", player == null ? null : player.getName());
                 return true;
             } else if (this.waitingForHelp) {
+                FirstAid.LOGGER.info("{} is dead, reason: waitingforhelp", player == null ? null : player.getName());
                 return true;
             }
         }
 
-        if (player != null && (player.isDead || player.getHealth() <= 0F))
+        if (player != null && (player.isDead || player.getHealth() <= 0F)) {
+            FirstAid.LOGGER.info("{} is dead, reason: dead={}, health={}", player == null ? null : player.getName(), player.isDead, player.getHealth());
             return true;
+        }
 
         if (this.noCritical) {
             boolean dead = true;
@@ -257,10 +263,13 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                     break;
                 }
             }
+            if (dead)
+                FirstAid.LOGGER.info("{} is dead, reason: noCriticalCheck", player == null ? null : player.getName());
             return dead;
         } else {
             for (AbstractDamageablePart part : this) {
                 if (part.canCauseDeath && part.currentHealth <= 0) {
+                    FirstAid.LOGGER.info("{} is dead, reason: critical part {} is dead", player == null ? null : player.getName(), part.part.name());
                     return true;
                 }
             }

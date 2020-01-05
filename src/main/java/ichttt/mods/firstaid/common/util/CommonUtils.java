@@ -24,10 +24,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.server.MinecraftServer;
@@ -46,7 +47,7 @@ public class CommonUtils {
     @Nonnull
     public static final EntityEquipmentSlot[] ARMOR_SLOTS;
     @Nonnull
-    public static final ImmutableMap<EntityEquipmentSlot, List<EnumPlayerPart>> slotToParts;
+    public static final ImmutableMap<EntityEquipmentSlot, List<EnumBodyPart>> slotToParts;
 
     static {
         ARMOR_SLOTS = new EntityEquipmentSlot[4];
@@ -54,22 +55,28 @@ public class CommonUtils {
         ARMOR_SLOTS[2] = EntityEquipmentSlot.CHEST;
         ARMOR_SLOTS[1] = EntityEquipmentSlot.LEGS;
         ARMOR_SLOTS[0] = EntityEquipmentSlot.FEET;
-        slotToParts = ImmutableMap.<EntityEquipmentSlot, List<EnumPlayerPart>>builder().
-        put(EntityEquipmentSlot.HEAD, Collections.singletonList(EnumPlayerPart.HEAD)).
-        put(EntityEquipmentSlot.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY)).
-        put(EntityEquipmentSlot.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)).
-        put(EntityEquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)).build();
+        slotToParts = ImmutableMap.<EntityEquipmentSlot, List<EnumBodyPart>>builder().
+        put(EntityEquipmentSlot.HEAD, Collections.singletonList(EnumBodyPart.HEAD)).
+        put(EntityEquipmentSlot.CHEST, Arrays.asList(EnumBodyPart.LEFT_ARM, EnumBodyPart.RIGHT_ARM, EnumBodyPart.BODY)).
+        put(EntityEquipmentSlot.LEGS, Arrays.asList(EnumBodyPart.LEFT_LEG, EnumBodyPart.RIGHT_LEG)).
+        put(EntityEquipmentSlot.FEET, Arrays.asList(EnumBodyPart.LEFT_FOOT, EnumBodyPart.RIGHT_FOOT)).build();
     }
 
-    public static void killPlayer(@Nonnull EntityPlayer player, @Nullable DamageSource source) {
-        if (source != null && FirstAidConfig.externalHealing.allowOtherHealingItems && player.checkTotemDeathProtection(source))
+    public static void killEntity(@Nonnull EntityLivingBase entity, @Nullable DamageSource source) {
+        if (source != null && FirstAidConfig.externalHealing.allowOtherHealingItems && entity.checkTotemDeathProtection(source))
             return;
 
-        IRevival revival = getRevivalIfPossible(player);
-        if (revival != null)
-            revival.startBleeding(player, source);
-        else
-            ((DataManagerWrapper) player.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
+        boolean kill = true;
+        if (entity instanceof EntityPlayer) {
+            EntityPlayer player = (EntityPlayer) entity;
+            IRevival revival = getRevivalIfPossible(player);
+            if (revival != null) {
+                revival.startBleeding(player, source);
+                kill = false;
+            }
+        }
+        if (kill)
+            ((DataManagerWrapper) entity.dataManager).set_impl(EntityPlayer.HEALTH, 0F);
     }
 
     /**
@@ -105,7 +112,7 @@ public class CommonUtils {
         return activeModContainer == null ? "UNKNOWN-NULL" : activeModContainer.getModId();
     }
 
-    public static void healPlayerByPercentage(double percentage, AbstractPlayerDamageModel damageModel, EntityPlayer player) {
+    public static void healPlayerByPercentage(double percentage, EntityDamageModel damageModel, EntityPlayer player) {
         Objects.requireNonNull(damageModel);
         int healValue = Ints.checkedCast(Math.round(damageModel.getCurrentMaxHealth() * percentage));
         HealthDistribution.manageHealth(healValue, damageModel, player, true, false);

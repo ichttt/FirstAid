@@ -34,6 +34,7 @@
  * 11: 1.5.10 (BREAKING CHANGE - Changed debuffs registration to supplier based)
  * 12: 1.6.5 (Minor changes)
  * 13: 1.6.7 (Debuffs now take DamageSource instead of String, FirstAidLivingDamageEvent)
+ * 14: 2.0.0 (BREAKING CHANGE - Complete Refactor, sorry for breaking everything >.>)
  */
 @API(apiVersion = "13", provides = "FirstAid API", owner = "firstaid")
 package ichttt.mods.firstaid.api;

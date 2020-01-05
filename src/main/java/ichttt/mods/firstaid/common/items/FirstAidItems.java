@@ -20,7 +20,7 @@ package ichttt.mods.firstaid.common.items;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.common.damagesystem.PartHealer;
+import ichttt.mods.firstaid.common.damagesystem.PartHealerImpl;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -41,8 +41,8 @@ public class FirstAidItems {
 
     public static void registerItems(IForgeRegistry<Item> registry) {
         FirstAidConfig.InternalHealing healing = FirstAidConfig.internalHealing;
-        registry.register(new DefaultItemHealing("bandage", stack -> new PartHealer(healing.bandage.secondsPerHeal * 20, healing.bandage.totalHeals, stack), stack -> healing.bandage.applyTime));
-        registry.register(new DefaultItemHealing("plaster", stack -> new PartHealer(healing.plaster.secondsPerHeal * 20, healing.plaster.totalHeals, stack), stack -> healing.plaster.applyTime));
+        registry.register(new DefaultItemHealing("bandage", stack -> new PartHealerImpl(healing.bandage.secondsPerHeal * 20, healing.bandage.totalHeals, stack), stack -> healing.bandage.applyTime));
+        registry.register(new DefaultItemHealing("plaster", stack -> new PartHealerImpl(healing.plaster.secondsPerHeal * 20, healing.plaster.totalHeals, stack), stack -> healing.plaster.applyTime));
         registry.register(new ItemMorphine());
     }
 }

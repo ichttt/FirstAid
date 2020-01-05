@@ -22,14 +22,14 @@ package ichttt.mods.firstaid.api.enums;
 import javax.annotation.Nonnull;
 
 public enum EnumDebuffSlot {
-    HEAD(EnumPlayerPart.HEAD), BODY(EnumPlayerPart.BODY),
-    ARMS(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM),
-    LEGS_AND_FEET(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT);
+    HEAD(EnumBodyPart.HEAD), BODY(EnumBodyPart.BODY),
+    ARMS(EnumBodyPart.LEFT_ARM, EnumBodyPart.RIGHT_ARM),
+    LEGS_AND_FEET(EnumBodyPart.LEFT_LEG, EnumBodyPart.RIGHT_LEG, EnumBodyPart.LEFT_FOOT, EnumBodyPart.RIGHT_FOOT);
 
-    EnumDebuffSlot(@Nonnull EnumPlayerPart... playerParts) {
+    EnumDebuffSlot(@Nonnull EnumBodyPart... playerParts) {
         this.playerParts = playerParts;
     }
 
     @Nonnull
-    public final EnumPlayerPart[] playerParts;
+    public final EnumBodyPart[] playerParts;
 }

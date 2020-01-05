@@ -21,6 +21,7 @@ package ichttt.mods.firstaid.client;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
+import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.IProxy;
@@ -65,7 +66,7 @@ public class ClientProxy implements IProxy {
     @Override
     public void showGuiApplyHealth(EnumHand activeHand) {
         Minecraft mc = Minecraft.getMinecraft();
-        GuiHealthScreen.INSTANCE = new GuiHealthScreen(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null), activeHand);
+        GuiHealthScreen.INSTANCE = new GuiHealthScreen((PlayerDamageModel) mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null), activeHand);
         mc.displayGuiScreen(GuiHealthScreen.INSTANCE);
     }
 }

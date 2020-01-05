@@ -20,8 +20,7 @@ package ichttt.mods.firstaid.common.damagesystem.debuff;
 
 import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.floats.Float2IntMap;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.potion.PotionEffect;
 
 import javax.annotation.Nonnull;
@@ -52,22 +51,22 @@ public class ConstantDebuff extends AbstractDebuff {
     }
 
     @Override
-    public void handleDamageTaken(float damage, float healthPerMax, EntityPlayerMP player) {
+    public void handleDamageTaken(float damage, float healthPerMax, EntityLivingBase entity) {
         syncMultiplier(healthPerMax);
     }
 
     @Override
-    public void handleHealing(float healingDone, float healthPerMax, EntityPlayerMP player) {
+    public void handleHealing(float healingDone, float healthPerMax, EntityLivingBase entity) {
         syncMultiplier(healthPerMax);
     }
 
     @Override
-    public void update(EntityPlayer player) {
-        this.update(player, -1);
+    public void update(EntityLivingBase entity) {
+        this.update(entity, -1);
     }
 
     @Override
-    public void update(EntityPlayer player, float healthPerMax) {
+    public void update(EntityLivingBase entity, float healthPerMax) {
         if (!this.isEnabled.getAsBoolean()) return;
         if (activeMultiplier == 0) {
             ticks = 0;
@@ -76,7 +75,7 @@ public class ConstantDebuff extends AbstractDebuff {
                 if (healthPerMax != -1)
                     syncMultiplier(healthPerMax); //There are apparently some cases where the multiplier does not sync up right... fix this
                 if (activeMultiplier != 0)
-                    player.addPotionEffect(new PotionEffect(effect, 169, activeMultiplier - 1, false, false));
+                    entity.addPotionEffect(new PotionEffect(effect, 169, activeMultiplier - 1, false, false));
             }
             ticks++;
             if (ticks >= 79) ticks = 0;

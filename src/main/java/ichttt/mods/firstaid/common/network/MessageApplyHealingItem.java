@@ -20,10 +20,10 @@ package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.PartHealer;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,19 +38,19 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import java.util.Objects;
 
 public class MessageApplyHealingItem implements IMessage {
-    private EnumPlayerPart part;
+    private EnumBodyPart part;
     private EnumHand hand;
 
     public MessageApplyHealingItem() {}
 
-    public MessageApplyHealingItem(EnumPlayerPart part, EnumHand hand) {
+    public MessageApplyHealingItem(EnumBodyPart part, EnumHand hand) {
         this.part = part;
         this.hand = hand;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        part = EnumPlayerPart.fromID(buf.readByte());
+        part = EnumBodyPart.fromID(buf.readByte());
         hand = buf.readBoolean() ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
     }
 
@@ -67,18 +67,18 @@ public class MessageApplyHealingItem implements IMessage {
             //noinspection ConstantConditions
             ctx.getServerHandler().player.getServer().addScheduledTask(() -> {
                 EntityPlayer player = ctx.getServerHandler().player;
-                AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                EntityDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
                 ItemStack stack = player.getHeldItem(message.hand);
                 Item item = stack.getItem();
-                AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
+                PartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
                 if (healer == null) {
                     FirstAid.LOGGER.warn("Player {} has invalid item in hand {} while it should be an healing item", player.getName(), item.getRegistryName());
                     player.sendMessage(new TextComponentString("Unable to apply healing item!"));
                     return;
                 }
                 stack.shrink(1);
-                AbstractDamageablePart damageablePart = damageModel.getFromEnum(message.part);
-                damageablePart.activeHealer = healer;
+                DamageablePart damageablePart = damageModel.getFromEnum(message.part);
+                damageablePart.setActiveHealer(healer);
             });
             return null;
         }

@@ -19,7 +19,7 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
@@ -37,7 +37,7 @@ public class MessageSyncDamageModel implements IMessage {
 
     public MessageSyncDamageModel() {}
 
-    public MessageSyncDamageModel(AbstractPlayerDamageModel damageModel) {
+    public MessageSyncDamageModel(EntityDamageModel damageModel) {
         this.playerDamageModel = damageModel.serializeNBT();
     }
 

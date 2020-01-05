@@ -20,9 +20,10 @@ package ichttt.mods.firstaid.client.gui;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.PartHealer;
+import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.client.util.EventCalendar;
@@ -61,7 +62,7 @@ public class GuiHealthScreen extends GuiScreen {
     public static GuiHealthScreen INSTANCE;
     public static boolean isOpen = false;
 
-    private final AbstractPlayerDamageModel damageModel;
+    private final PlayerDamageModel damageModel;
     private final List<GuiHoldButton> holdButtons = new ArrayList<>();
     private final boolean disableButtons;
     private final float bedScaleFactor = EventCalendar.isGuiFun() ? 1.5F : 1.25F;
@@ -71,12 +72,12 @@ public class GuiHealthScreen extends GuiScreen {
     private GuiButton head, leftArm, leftLeg, leftFoot, body, rightArm, rightLeg, rightFoot;
     private EnumHand activeHand;
 
-    public GuiHealthScreen(AbstractPlayerDamageModel damageModel) {
+    public GuiHealthScreen(PlayerDamageModel damageModel) {
         this.damageModel = damageModel;
         disableButtons = true;
     }
 
-    public GuiHealthScreen(AbstractPlayerDamageModel damageModel, EnumHand activeHand) {
+    public GuiHealthScreen(PlayerDamageModel damageModel, EnumHand activeHand) {
         this.damageModel = damageModel;
         this.activeHand = activeHand;
         disableButtons = false;
@@ -172,27 +173,27 @@ public class GuiHealthScreen extends GuiScreen {
         GlStateManager.color(1F, 1F, 1F, 1F);
         if (FirstAid.isSynced) {
             GlStateManager.pushMatrix();
-            drawHealth(damageModel.HEAD, false, 14);
-            drawHealth(damageModel.LEFT_ARM, false, 39);
-            drawHealth(damageModel.LEFT_LEG, false, 64);
-            drawHealth(damageModel.LEFT_FOOT, false, 89);
-            drawHealth(damageModel.BODY, true, 14);
-            drawHealth(damageModel.RIGHT_ARM, true, 39);
-            drawHealth(damageModel.RIGHT_LEG, true, 64);
-            drawHealth(damageModel.RIGHT_FOOT, true, 89);
+            drawHealth(damageModel.getFromEnum(EnumBodyPart.HEAD), false, 14);
+            drawHealth(damageModel.getFromEnum(EnumBodyPart.LEFT_ARM), false, 39);
+            drawHealth(damageModel.getFromEnum(EnumBodyPart.LEFT_LEG), false, 64);
+            drawHealth(damageModel.getFromEnum(EnumBodyPart.LEFT_FOOT), false, 89);
+            drawHealth(damageModel.getFromEnum(EnumBodyPart.BODY), true, 14);
+            drawHealth(damageModel.getFromEnum(EnumBodyPart.RIGHT_ARM), true, 39);
+            drawHealth(damageModel.getFromEnum(EnumBodyPart.RIGHT_LEG), true, 64);
+            drawHealth(damageModel.getFromEnum(EnumBodyPart.RIGHT_FOOT), true, 89);
             GlStateManager.popMatrix();
         }
 
         //Tooltip
         GlStateManager.pushMatrix();
-        tooltipButton(head, damageModel.HEAD, mouseX, mouseY);
-        tooltipButton(leftArm, damageModel.LEFT_ARM, mouseX, mouseY);
-        tooltipButton(leftLeg, damageModel.LEFT_LEG, mouseX, mouseY);
-        tooltipButton(leftFoot, damageModel.LEFT_FOOT, mouseX, mouseY);
-        tooltipButton(body, damageModel.BODY, mouseX, mouseY);
-        tooltipButton(rightArm, damageModel.RIGHT_ARM, mouseX, mouseY);
-        tooltipButton(rightLeg, damageModel.RIGHT_LEG, mouseX, mouseY);
-        tooltipButton(rightFoot, damageModel.RIGHT_FOOT, mouseX, mouseY);
+        tooltipButton(head, damageModel.getFromEnum(EnumBodyPart.HEAD), mouseX, mouseY);
+        tooltipButton(leftArm, damageModel.getFromEnum(EnumBodyPart.LEFT_ARM), mouseX, mouseY);
+        tooltipButton(leftLeg, damageModel.getFromEnum(EnumBodyPart.LEFT_LEG), mouseX, mouseY);
+        tooltipButton(leftFoot, damageModel.getFromEnum(EnumBodyPart.LEFT_FOOT), mouseX, mouseY);
+        tooltipButton(body, damageModel.getFromEnum(EnumBodyPart.BODY), mouseX, mouseY);
+        tooltipButton(rightArm, damageModel.getFromEnum(EnumBodyPart.RIGHT_ARM), mouseX, mouseY);
+        tooltipButton(rightLeg, damageModel.getFromEnum(EnumBodyPart.RIGHT_LEG), mouseX, mouseY);
+        tooltipButton(rightFoot, damageModel.getFromEnum(EnumBodyPart.RIGHT_FOOT), mouseX, mouseY);
         GlStateManager.popMatrix();
 
         //Sleep info setup
@@ -219,23 +220,24 @@ public class GuiHealthScreen extends GuiScreen {
         //TODO color the critical parts of the player red?
     }
 
-    private void tooltipButton(GuiButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
-        boolean enabled = part.activeHealer == null;
+    private void tooltipButton(GuiButton button, DamageablePart part, int mouseX, int mouseY) {
+        PartHealer healer = part.getActiveHealer();
+        boolean enabled = healer == null;
         if (!enabled && button.isMouseOver()) {
-            drawHoveringText(Arrays.asList(I18n.format("gui.active_item") + ": " + I18n.format(part.activeHealer.stack.getTranslationKey() + ".name"), I18n.format("gui.next_heal", Math.round((part.activeHealer.ticksPerHeal - part.activeHealer.getTicksPassed()) / 20F))), mouseX, mouseY);
+            drawHoveringText(Arrays.asList(I18n.format("gui.active_item") + ": " + I18n.format(healer.stack.getTranslationKey() + ".name"), I18n.format("gui.next_heal", Math.round((healer.ticksPerHeal - healer.getTicksPassed()) / 20F))), mouseX, mouseY);
         }
         if (!disableButtons)
             button.enabled = enabled;
     }
 
-    public void drawHealth(AbstractDamageablePart damageablePart, boolean right, int yOffset) {
+    public void drawHealth(DamageablePart damageablePart, boolean right, int yOffset) {
         GlStateManager.pushMatrix();
         int xTranslation = guiLeft + (right ? getRightOffset(damageablePart) : 57);
         HealthRenderUtils.drawHealth(damageablePart, xTranslation, guiTop + yOffset, this, true);
         GlStateManager.popMatrix();
     }
 
-    private static int getRightOffset(AbstractDamageablePart damageablePart) {
+    private static int getRightOffset(DamageablePart damageablePart) {
         if (HealthRenderUtils.drawAsString(damageablePart, true))
             return 200 - 40;
         return 200 - Math.min(40, HealthRenderUtils.getMaxHearts(damageablePart.getMaxHealth()) * 9 + HealthRenderUtils.getMaxHearts(damageablePart.getAbsorption()) * 9 + 2);
@@ -251,11 +253,11 @@ public class GuiHealthScreen extends GuiScreen {
     @Override
     protected void actionPerformed(GuiButton button) {
         if (button.id < 9) {
-            EnumPlayerPart playerPart = EnumPlayerPart.fromID((button.id));
+            EnumBodyPart playerPart = EnumBodyPart.fromID((button.id));
             FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, activeHand));
             //TODO notify the user somehow (sound?)
-            AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
-            part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(mc.player.getHeldItem(this.activeHand));
+            DamageablePart part = damageModel.getFromEnum(playerPart);
+            part.setActiveHealer(FirstAidRegistryImpl.INSTANCE.getPartHealer(mc.player.getHeldItem(this.activeHand)));
         } else if (button.id == 10) {
             FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.REQUEST_REFRESH));
             FirstAid.LOGGER.info("Requesting refresh");

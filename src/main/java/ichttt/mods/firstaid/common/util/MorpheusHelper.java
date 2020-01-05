@@ -21,7 +21,7 @@ package ichttt.mods.firstaid.common.util;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
@@ -59,7 +59,7 @@ public class MorpheusHelper implements INewDayHandler {
             World world = DimensionManager.getWorld(0);
             for (EntityPlayer player : world.playerEntities) {
                 if (player.isPlayerFullyAsleep()) {
-                    AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+                    PlayerDamageModel damageModel = (PlayerDamageModel) player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
                     Objects.requireNonNull(damageModel, "damage model").sleepHeal(player);
                 }
             }

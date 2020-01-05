@@ -20,30 +20,33 @@ package ichttt.mods.firstaid.common.damagesystem;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
+import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.PartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class DamageablePart extends AbstractDamageablePart {
+public class DamageablePartImpl extends DamageablePart implements INBTSerializable<NBTTagCompound> {
     private int maxHealth;
     @Nonnull
     private final IDebuff[] debuffs;
     private float absorption;
+    private float currentHealth;
+    private PartHealer activeHealer;
 
-    public DamageablePart(int maxHealth, boolean canCauseDeath, @Nonnull EnumPlayerPart playerPart, @Nonnull IDebuff... debuffs) {
+    public DamageablePartImpl(int maxHealth, boolean canCauseDeath, @Nonnull EnumBodyPart playerPart, @Nonnull IDebuff... debuffs) {
         super(maxHealth, canCauseDeath, playerPart);
         this.maxHealth = maxHealth;
         this.currentHealth = maxHealth;
@@ -51,7 +54,7 @@ public class DamageablePart extends AbstractDamageablePart {
     }
 
     @Override
-    public float heal(float amount, @Nullable EntityPlayer player, boolean applyDebuff) {
+    public float heal(float amount, @Nullable EntityLivingBase entity, boolean applyDebuff) {
         if (amount <= 0F)
             return 0F;
         float notFitting = Math.abs(Math.min(0F, maxHealth - (currentHealth + amount)));
@@ -63,19 +66,19 @@ public class DamageablePart extends AbstractDamageablePart {
         }
         final float finalNotFitting = notFitting;
         if (applyDebuff) {
-            Objects.requireNonNull(player, "Got null player with applyDebuff = true");
-            Arrays.stream(debuffs).forEach(debuff -> debuff.handleHealing(amount - finalNotFitting, currentHealth / maxHealth, (EntityPlayerMP) player));
+            Objects.requireNonNull(entity, "Got null player with applyDebuff = true");
+            Arrays.stream(debuffs).forEach(debuff -> debuff.handleHealing(amount - finalNotFitting, currentHealth / maxHealth, (EntityPlayerMP) entity));
         }
         return notFitting;
     }
 
     @Override
-    public float damage(float amount, @Nullable EntityPlayer player, boolean applyDebuff) {
-        return damage(amount, player, applyDebuff, 0F);
+    public float damage(float amount, @Nullable EntityLivingBase entity, boolean applyDebuff) {
+        return damage(amount, entity, applyDebuff, 0F);
     }
 
     @Override
-    public float damage(float amount, @Nullable EntityPlayer player, boolean applyDebuff, float minHealth) {
+    public float damage(float amount, @Nullable EntityLivingBase entity, boolean applyDebuff, float minHealth) {
         if (amount <= 0F)
             return 0F;
         if (minHealth > maxHealth)
@@ -88,23 +91,23 @@ public class DamageablePart extends AbstractDamageablePart {
         float notFitting = Math.abs(Math.min(minHealth, currentHealth - amount) - minHealth);
         currentHealth = Math.max(minHealth, currentHealth - amount);
         if (applyDebuff) {
-            Objects.requireNonNull(player, "Got null player with applyDebuff = true");
-            Arrays.stream(debuffs).forEach(debuff -> debuff.handleDamageTaken(origAmount - notFitting, currentHealth / maxHealth, (EntityPlayerMP) player));
+            Objects.requireNonNull(entity, "Got null player with applyDebuff = true");
+            Arrays.stream(debuffs).forEach(debuff -> debuff.handleDamageTaken(origAmount - notFitting, currentHealth / maxHealth, (EntityPlayerMP) entity));
         }
         return notFitting;
     }
 
     @Override
-    public void tick(World world, EntityPlayer player, boolean tickDebuffs) {
+    public void tick(World world, EntityLivingBase entity, boolean tickDebuffs) {
         if (activeHealer != null) {
             if (activeHealer.tick()) {
-                heal(1F, player, !world.isRemote);
+                heal(1F, entity, !world.isRemote);
             }
             if (activeHealer.hasFinished())
                 activeHealer = null;
         }
         if (!world.isRemote && tickDebuffs)
-            Arrays.stream(debuffs).forEach(debuff -> debuff.update(player, currentHealth / maxHealth));
+            Arrays.stream(debuffs).forEach(debuff -> debuff.update(entity, currentHealth / maxHealth));
     }
 
     @Override
@@ -136,7 +139,7 @@ public class DamageablePart extends AbstractDamageablePart {
         else if (nbt.hasKey("healer")) stack = new ItemStack((NBTTagCompound) nbt.getTag("healer"));
 
         if (stack != null) {
-            AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
+            PartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
             if (healer == null) FirstAid.LOGGER.warn("Failed to lookup healer for item {}", stack.getItem());
             else activeHealer = healer.loadNBT(nbt.getInteger("itemTicks"), nbt.getInteger("itemHeals"));
         }
@@ -173,5 +176,26 @@ public class DamageablePart extends AbstractDamageablePart {
     @Override
     public int getMaxHealth() {
         return maxHealth;
+    }
+
+    @Override
+    public void setActiveHealer(@Nullable PartHealer activeHealer) {
+        this.activeHealer = activeHealer;
+    }
+
+    @Nullable
+    @Override
+    public PartHealer getActiveHealer() {
+        return this.activeHealer;
+    }
+
+    @Override
+    public void setCurrentHealth(float currentHealth) {
+        this.currentHealth = currentHealth;
+    }
+
+    @Override
+    public float getCurrentHealth() {
+        return this.currentHealth;
     }
 }

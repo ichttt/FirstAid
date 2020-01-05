@@ -20,7 +20,7 @@ package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -35,9 +35,9 @@ import java.util.Set;
 public class CapProvider implements ICapabilitySerializable<NBTTagCompound> {
     public static final ResourceLocation IDENTIFIER = new ResourceLocation(FirstAid.MODID, "capExtendedHealthSystem");
     public static final Set<String> tutorialDone = new HashSet<>();
-    private final AbstractPlayerDamageModel damageModel;
+    private final EntityDamageModel damageModel;
 
-    public CapProvider(AbstractPlayerDamageModel damageModel) {
+    public CapProvider(EntityDamageModel damageModel) {
         this.damageModel = damageModel;
     }
     @Override

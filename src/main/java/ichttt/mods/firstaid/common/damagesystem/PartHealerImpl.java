@@ -18,19 +18,18 @@
 
 package ichttt.mods.firstaid.common.damagesystem;
 
-import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import net.minecraft.item.ItemStack;
 
-public class PartHealer extends AbstractPartHealer {
+public class PartHealerImpl extends ichttt.mods.firstaid.api.damagesystem.PartHealer {
     private int ticksPassed = 0;
     private int heals = 0;
 
-    public PartHealer(int ticksPerHeal, int maxHeal, ItemStack stack) {
+    public PartHealerImpl(int ticksPerHeal, int maxHeal, ItemStack stack) {
         super(maxHeal, stack, ticksPerHeal);
     }
 
     @Override
-    public AbstractPartHealer loadNBT(int ticksPassed, int heals) {
+    public ichttt.mods.firstaid.api.damagesystem.PartHealer loadNBT(int ticksPassed, int heals) {
         this.ticksPassed = ticksPassed;
         this.heals = heals;
         return this;

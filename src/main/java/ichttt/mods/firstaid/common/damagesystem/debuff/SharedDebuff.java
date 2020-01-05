@@ -19,19 +19,18 @@
 package ichttt.mods.firstaid.common.damagesystem.debuff;
 
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.EntityLivingBase;
 
 import java.util.Objects;
 
 public class SharedDebuff implements IDebuff {
     private final IDebuff debuff;
-    private final EnumPlayerPart[] parts;
+    private final EnumBodyPart[] parts;
     private int damage;
     private int healingDone;
     private int damageCount;
@@ -45,7 +44,7 @@ public class SharedDebuff implements IDebuff {
     }
 
     @Override
-    public void handleDamageTaken(float damage, float healthPerMax, EntityPlayerMP player) {
+    public void handleDamageTaken(float damage, float healthPerMax, EntityLivingBase entity) {
         if (debuff.isEnabled()) {
             this.damage += damage;
             this.damageCount++;
@@ -53,38 +52,38 @@ public class SharedDebuff implements IDebuff {
     }
 
     @Override
-    public void handleHealing(float healingDone, float healthPerMax, EntityPlayerMP player) {
+    public void handleHealing(float healingDone, float healthPerMax, EntityLivingBase entity) {
         if (debuff.isEnabled()) {
             this.healingDone += healingDone;
             this.healingCount++;
         }
     }
 
-    public void tick(EntityPlayer player) {
-        if (!debuff.isEnabled() || player.world.isRemote || !(player instanceof EntityPlayerMP))
+    public void tick(EntityLivingBase entity) {
+        if (!debuff.isEnabled() || entity.world.isRemote)
             return;
 
-        AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+        EntityDamageModel damageModel = Objects.requireNonNull(entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
         float healthPerMax = 0;
-        for (EnumPlayerPart part : parts) {
-            AbstractDamageablePart damageablePart = damageModel.getFromEnum(part);
-            healthPerMax += damageablePart.currentHealth / damageablePart.getMaxHealth();
+        for (EnumBodyPart part : parts) {
+            DamageablePart damageablePart = damageModel.getFromEnum(part);
+            healthPerMax += damageablePart.getCurrentHealth() / damageablePart.getMaxHealth();
         }
 
         healthPerMax /= parts.length;
         if (healingCount > 0) {
             this.healingDone /= healingCount;
-            debuff.handleHealing(this.healingDone, healthPerMax, (EntityPlayerMP) player);
+            debuff.handleHealing(this.healingDone, healthPerMax, entity);
         }
         if (damageCount > 0) {
             this.damage /= damageCount;
-            debuff.handleDamageTaken(this.damage, healthPerMax, (EntityPlayerMP) player);
+            debuff.handleDamageTaken(this.damage, healthPerMax, entity);
         }
         this.healingDone = 0;
         this.damage = 0;
         this.damageCount = 0;
         this.healingCount = 0;
 
-        debuff.update(player, healthPerMax);
+        debuff.update(entity, healthPerMax);
     }
 }

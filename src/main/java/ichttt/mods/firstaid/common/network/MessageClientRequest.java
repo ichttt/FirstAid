@@ -20,6 +20,7 @@ package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
+import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.CapProvider;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -62,7 +63,8 @@ public class MessageClientRequest implements IMessage {
             player.getServer().addScheduledTask(() -> {
                 if (message.type == Type.TUTORIAL_COMPLETE) {
                     CapProvider.tutorialDone.add(player.getName());
-                    Objects.requireNonNull(player.getServer()).addScheduledTask(() -> Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).hasTutorial = true);
+                    PlayerDamageModel damageModel = (PlayerDamageModel) Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                    damageModel.setTutorial();
                 } else if (message.type == Type.REQUEST_REFRESH) {
                     FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), player);
                 }

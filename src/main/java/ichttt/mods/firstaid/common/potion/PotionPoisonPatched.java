@@ -21,7 +21,7 @@ package ichttt.mods.firstaid.common.potion;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import net.minecraft.entity.EntityLivingBase;
@@ -60,7 +60,7 @@ public class PotionPoisonPatched extends Potion {
             if (entity.world.isRemote || entity.isDead || entity.isEntityInvulnerable(DamageSource.MAGIC))
                 return;
             EntityPlayer player = (EntityPlayer) entity;
-            AbstractPlayerDamageModel playerDamageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+            EntityDamageModel playerDamageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
             if (DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false) != 1.0F) {
                 if (player.isPlayerSleeping())
                     player.wakeUpPlayer(true, true, false);

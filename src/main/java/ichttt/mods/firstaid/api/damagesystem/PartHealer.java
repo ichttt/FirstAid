@@ -21,12 +21,12 @@ package ichttt.mods.firstaid.api.damagesystem;
 
 import net.minecraft.item.ItemStack;
 
-public abstract class AbstractPartHealer {
+public abstract class PartHealer {
     public final int maxHeal;
     public final ItemStack stack;
     public final int ticksPerHeal;
 
-    public AbstractPartHealer(int maxHeal, ItemStack stack, int ticksPerHeal) {
+    public PartHealer(int maxHeal, ItemStack stack, int ticksPerHeal) {
         this.maxHeal = maxHeal;
         this.stack = stack;
         this.ticksPerHeal = ticksPerHeal;
@@ -37,7 +37,7 @@ public abstract class AbstractPartHealer {
      *
      * @return this
      */
-    public abstract AbstractPartHealer loadNBT(int ticksPassed, int heals);
+    public abstract PartHealer loadNBT(int ticksPassed, int heals);
 
     /**
      * Returns true if the healer is finished healing the body part.

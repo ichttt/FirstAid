@@ -20,7 +20,8 @@ package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.common.CapProvider;
@@ -47,7 +48,7 @@ public class MessageConfiguration implements IMessage {
 
     public MessageConfiguration() {}
 
-    public MessageConfiguration(AbstractPlayerDamageModel model, boolean syncConfig) {
+    public MessageConfiguration(EntityDamageModel model, boolean syncConfig) {
         this.playerDamageModel = model.serializeNBT();
         this.syncConfig = syncConfig;
     }
@@ -83,9 +84,9 @@ public class MessageConfiguration implements IMessage {
 
             FirstAid.LOGGER.info(message.syncConfig ? "Received remote damage model and config" : "Received remote damage model");
             mc.addScheduledTask(() -> {
-                AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                PlayerDamageModel damageModel = (PlayerDamageModel) Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
                 damageModel.deserializeNBT(message.playerDamageModel);
-                if (damageModel.hasTutorial)
+                if (damageModel.hasTutorial())
                     CapProvider.tutorialDone.add(mc.player.getName());
                 else
                     mc.player.sendMessage(new TextComponentString("[First Aid] " + I18n.format("firstaid.tutorial.hint", ClientProxy.showWounds.getDisplayName())));

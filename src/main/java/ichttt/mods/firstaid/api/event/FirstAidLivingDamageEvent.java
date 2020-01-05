@@ -19,10 +19,10 @@
 
 package ichttt.mods.firstaid.api.event;
 
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import net.minecraft.entity.player.EntityPlayer;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.DamageSource;
-import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 
 /**
@@ -30,13 +30,13 @@ import net.minecraftforge.fml.common.eventhandler.Cancelable;
  * Canceling this event will cause the damage to be reset to {@link #getBeforeDamage()}
  */
 @Cancelable
-public class FirstAidLivingDamageEvent extends PlayerEvent {
-    private final AbstractPlayerDamageModel afterDamageDone;
-    private final AbstractPlayerDamageModel beforeDamageDone;
+public class FirstAidLivingDamageEvent extends LivingEvent {
+    private final EntityDamageModel afterDamageDone;
+    private final EntityDamageModel beforeDamageDone;
     private final DamageSource source;
     private final float undistributedDamage;
 
-    public FirstAidLivingDamageEvent(EntityPlayer entity, AbstractPlayerDamageModel afterDamageDone, AbstractPlayerDamageModel beforeDamageDone, DamageSource source, float undistributedDamage) {
+    public FirstAidLivingDamageEvent(EntityLivingBase entity, EntityDamageModel afterDamageDone, EntityDamageModel beforeDamageDone, DamageSource source, float undistributedDamage) {
         super(entity);
         this.afterDamageDone = afterDamageDone;
         this.beforeDamageDone = beforeDamageDone;
@@ -47,14 +47,14 @@ public class FirstAidLivingDamageEvent extends PlayerEvent {
     /**
      * @return The damage model before this damage got applied. Canceling this event causes this to be restored
      */
-    public AbstractPlayerDamageModel getAfterDamage() {
+    public EntityDamageModel getAfterDamage() {
         return this.afterDamageDone;
     }
 
     /**
      * @return The damage model after this damage got applied. Not canceling this event causes this to applied
      */
-    public AbstractPlayerDamageModel getBeforeDamage() {
+    public EntityDamageModel getBeforeDamage() {
         return this.beforeDamageDone;
     }
 

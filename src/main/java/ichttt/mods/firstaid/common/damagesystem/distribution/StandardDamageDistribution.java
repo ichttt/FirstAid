@@ -18,8 +18,8 @@
 
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import net.minecraft.entity.player.EntityPlayer;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.DamageSource;
 import org.apache.commons.lang3.tuple.Pair;
@@ -32,13 +32,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class StandardDamageDistribution extends DamageDistribution {
-    private final List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList;
+    private final List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> partList;
     private final boolean shuffle;
 
-    public StandardDamageDistribution(List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList, boolean shuffle) {
+    public StandardDamageDistribution(List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> partList, boolean shuffle) {
         this.partList = partList;
-        for (Pair<EntityEquipmentSlot, EnumPlayerPart[]> pair : partList) {
-            for (EnumPlayerPart part : pair.getRight()) {
+        for (Pair<EntityEquipmentSlot, EnumBodyPart[]> pair : partList) {
+            for (EnumBodyPart part : pair.getRight()) {
                 if (part.slot != pair.getLeft())
                     throw new RuntimeException(part + " is not a member of " + pair.getLeft());
             }
@@ -48,22 +48,22 @@ public class StandardDamageDistribution extends DamageDistribution {
 
     @Override
     @Nonnull
-    protected List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> getPartList() {
+    protected List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> getPartList() {
         if (this.shuffle) Collections.shuffle(this.partList);
         return this.partList;
     }
 
     @Override
-    public float distributeDamage(float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat) {
-        float rest = super.distributeDamage(damage, player, source, addStat);
+    public float distributeDamage(float damage, @Nonnull EntityLivingBase entity, @Nonnull DamageSource source, boolean addStat) {
+        float rest = super.distributeDamage(damage, entity, source, addStat);
         if (rest > 0) {
-            EnumPlayerPart[] parts = partList.get(partList.size() - 1).getRight();
-            Optional<EnumPlayerPart> playerPart = Arrays.stream(parts).filter(enumPlayerPart -> !enumPlayerPart.getNeighbours().isEmpty()).findAny();
+            EnumBodyPart[] parts = partList.get(partList.size() - 1).getRight();
+            Optional<EnumBodyPart> playerPart = Arrays.stream(parts).filter(enumPlayerPart -> !enumPlayerPart.getNeighbours().isEmpty()).findAny();
             if (playerPart.isPresent()) {
-                List<EnumPlayerPart> neighbours = playerPart.get().getNeighbours();
+                List<EnumBodyPart> neighbours = playerPart.get().getNeighbours();
                 neighbours = neighbours.stream().filter(part -> partList.stream().noneMatch(pair -> Arrays.stream(pair.getRight()).anyMatch(p2 -> p2 == part))).collect(Collectors.toList());
-                for (EnumPlayerPart part : neighbours)
-                    rest = new PreferredDamageDistribution(part).distributeDamage(rest, player, source, addStat);
+                for (EnumBodyPart part : neighbours)
+                    rest = new PreferredDamageDistribution(part).distributeDamage(rest, entity, source, addStat);
             }
         }
         return rest;

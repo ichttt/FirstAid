@@ -20,7 +20,7 @@
 package ichttt.mods.firstaid.api.item;
 
 import ichttt.mods.firstaid.api.FirstAidRegistry;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
+import ichttt.mods.firstaid.api.damagesystem.PartHealer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -44,7 +44,7 @@ public class ItemHealing extends Item {
      * @param time The time it takes in the GUI in ms
      * @param healerFunction The function to create a new healer from the GUI
      */
-    public ItemHealing(Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
+    public ItemHealing(Function<ItemStack, PartHealer> healerFunction, Function<ItemStack, Integer> time) {
         setCreativeTab(HealingItemApiHelper.INSTANCE.getFirstAidTab());
         Objects.requireNonNull(FirstAidRegistry.getImpl(), "FirstAid not loaded or not present!").registerHealingType(this, healerFunction, time);
     }

@@ -18,7 +18,7 @@
 
 package ichttt.mods.firstaid;
 
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.DebugDamageCommand;
 import ichttt.mods.firstaid.common.EventHandler;
@@ -112,15 +112,15 @@ public class FirstAid {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        CapabilityManager.INSTANCE.register(AbstractPlayerDamageModel.class, new Capability.IStorage<AbstractPlayerDamageModel>() {
+        CapabilityManager.INSTANCE.register(EntityDamageModel.class, new Capability.IStorage<EntityDamageModel>() {
                     @Nullable
                     @Override
-                    public NBTBase writeNBT(Capability<AbstractPlayerDamageModel> capability, AbstractPlayerDamageModel instance, EnumFacing side) {
+                    public NBTBase writeNBT(Capability<EntityDamageModel> capability, EntityDamageModel instance, EnumFacing side) {
                         return instance.serializeNBT();
                     }
 
                     @Override
-                    public void readNBT(Capability<AbstractPlayerDamageModel> capability, AbstractPlayerDamageModel instance, EnumFacing side, NBTBase nbt) {
+                    public void readNBT(Capability<EntityDamageModel> capability, EntityDamageModel instance, EnumFacing side, NBTBase nbt) {
                         instance.deserializeNBT((NBTTagCompound) nbt);
                     }
                 }

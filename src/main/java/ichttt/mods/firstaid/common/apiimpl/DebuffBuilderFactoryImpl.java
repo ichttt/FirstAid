@@ -18,8 +18,8 @@
 
 package ichttt.mods.firstaid.common.apiimpl;
 
-import ichttt.mods.firstaid.api.debuff.builder.DebuffBuilderFactory;
-import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
+import ichttt.mods.firstaid.api.debuff.DebuffBuilderFactory;
+import ichttt.mods.firstaid.api.debuff.IDebuffBuilder;
 
 import javax.annotation.Nonnull;
 

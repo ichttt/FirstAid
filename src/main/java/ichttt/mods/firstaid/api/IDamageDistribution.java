@@ -19,12 +19,12 @@
 
 package ichttt.mods.firstaid.api;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.DamageSource;
 
 import javax.annotation.Nonnull;
 
 public interface IDamageDistribution {
 
-    float distributeDamage(float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat);
+    float distributeDamage(float damage, @Nonnull EntityLivingBase entity, @Nonnull DamageSource source, boolean addStat);
 }

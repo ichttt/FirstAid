@@ -24,11 +24,12 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.IDamageDistribution;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
-import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.common.damagesystem.EntityDamageModelImpl;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.PreferredDamageDistribution;
@@ -101,15 +102,15 @@ public class EventHandler {
             return;
         float amountToDamage = event.getAmount();
         EntityPlayer player = (EntityPlayer) entity;
-        AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+        EntityDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
         DamageSource source = event.getSource();
 
         if (amountToDamage == Float.MAX_VALUE) {
-            damageModel.forEach(damageablePart -> damageablePart.currentHealth = 0F);
+            damageModel.forEach(damageablePart -> damageablePart.setCurrentHealth(0F));
             if (player instanceof EntityPlayerMP)
                 FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel), (EntityPlayerMP) player);
             event.setCanceled(true);
-            CommonUtils.killPlayer(player, source);
+            CommonUtils.killEntity(player, source);
             return;
         }
 
@@ -149,7 +150,7 @@ public class EventHandler {
         Entity obj = event.getObject();
         if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer)) {
             EntityPlayer player = (EntityPlayer) obj;
-            AbstractPlayerDamageModel damageModel = PlayerDamageModel.create();
+            EntityDamageModel damageModel = EntityDamageModelImpl.create();
             event.addCapability(CapProvider.IDENTIFIER, new CapProvider(damageModel));
             //replace the data manager with our wrapper to grab absorption
             player.dataManager = new DataManagerWrapper(player, player.dataManager);
@@ -187,7 +188,7 @@ public class EventHandler {
         World world = event.world;
         if (!world.isRemote && world instanceof WorldServer && ((WorldServer) world).areAllPlayersAsleep()) {
             for (EntityPlayer player : world.playerEntities) {
-                AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                PlayerDamageModel damageModel = (PlayerDamageModel) Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
                 Objects.requireNonNull(damageModel, "damage model").sleepHeal(player);
             }
         }
@@ -271,8 +272,8 @@ public class EventHandler {
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!event.player.world.isRemote) {
             FirstAid.LOGGER.debug("Sending damage model to " + event.player.getName());
-            AbstractPlayerDamageModel damageModel = Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
-            if (damageModel.hasTutorial)
+            PlayerDamageModel damageModel = (PlayerDamageModel) Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+            if (damageModel.hasTutorial())
                 CapProvider.tutorialDone.add(event.player.getName());
             EntityPlayerMP playerMP = (EntityPlayerMP) event.player;
             FirstAid.NETWORKING.sendTo(new MessageConfiguration(damageModel, !playerMP.connection.netManager.isLocalChannel()), playerMP);
@@ -300,7 +301,7 @@ public class EventHandler {
     @SubscribeEvent
     public static void onPlayerBleedToDeath(PlayerKilledEvent event) {
         EntityPlayer player = event.getEntityPlayer();
-        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+        PlayerDamageModel damageModel = (PlayerDamageModel) player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
         if (damageModel != null) {
             damageModel.stopWaitingForHelp(player);
         }
@@ -309,7 +310,7 @@ public class EventHandler {
     @SubscribeEvent
     public static void onPlayerRevived(PlayerRevivedEvent event) {
         EntityPlayer player = event.getEntityPlayer();
-        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+        PlayerDamageModel damageModel = (PlayerDamageModel) player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
         if (damageModel != null) {
             damageModel.revivePlayer(player);
             damageModel.stopWaitingForHelp(player);
@@ -319,7 +320,7 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (!event.isEndConquered() && !event.player.world.isRemote && event.player instanceof EntityPlayerMP) {
-            AbstractPlayerDamageModel damageModel = Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+            PlayerDamageModel damageModel = (PlayerDamageModel) Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
             damageModel.runScaleLogic(event.player);
             damageModel.forEach(damageablePart -> damageablePart.heal(damageablePart.getMaxHealth(), event.player, false));
             damageModel.scheduleResync();

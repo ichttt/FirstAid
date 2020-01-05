@@ -20,7 +20,7 @@ package ichttt.mods.firstaid.common.items;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
@@ -49,7 +49,7 @@ public class ItemMorphine extends Item {
     @Nonnull
     public ItemStack onItemUseFinish(@Nonnull ItemStack stack, World world, EntityLivingBase entityLiving) {
         if (entityLiving instanceof EntityPlayer && !(entityLiving instanceof FakePlayer)) {
-            AbstractPlayerDamageModel damageModel = entityLiving.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+            EntityDamageModel damageModel = entityLiving.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
             Objects.requireNonNull(damageModel).applyMorphine((EntityPlayer) entityLiving);
         }
         stack.shrink(1);

@@ -21,7 +21,8 @@ package ichttt.mods.firstaid.common;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
@@ -49,12 +50,12 @@ import java.util.Objects;
  * This should be compatible with other mods which do so as I respect the parent in any other case.
  */
 public class DataManagerWrapper extends EntityDataManager {
-    private final EntityPlayer player;
+    private final EntityLivingBase entity;
     private final EntityDataManager parent;
 
-    public DataManagerWrapper(EntityPlayer player, EntityDataManager parent) {
-        super(player);
-        this.player = player;
+    public DataManagerWrapper(EntityLivingBase entity, EntityDataManager parent) {
+        super(entity);
+        this.entity = entity;
         this.parent = parent;
     }
 
@@ -63,7 +64,7 @@ public class DataManagerWrapper extends EntityDataManager {
     @Nonnull
     public <T> T get(@Nonnull DataParameter<T> key) {
         if (key == EntityPlayer.ABSORPTION)
-            parent.set(key, (T) Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).getAbsorption());
+            parent.set(key, (T) Objects.requireNonNull(entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).getAbsorption());
         return parent.get(key);
     }
 
@@ -75,39 +76,39 @@ public class DataManagerWrapper extends EntityDataManager {
     public <T> void set(@Nonnull DataParameter<T> key, @Nonnull T value) {
         if (key == EntityPlayer.ABSORPTION) {
             float floatValue = (Float) value;
-            if (player instanceof EntityPlayerMP) { //may be EntityOtherPlayerMP as well
-                EntityPlayerMP playerMP = (EntityPlayerMP) player;
+            if (entity instanceof EntityPlayerMP) { //may be EntityOtherPlayerMP as well
+                EntityPlayerMP playerMP = (EntityPlayerMP) entity;
                 if (playerMP.connection != null) //also fired when connecting, ignore(otherwise the net handler would crash)
                     FirstAid.NETWORKING.sendTo(new MessageApplyAbsorption(floatValue), playerMP);
             }
-            Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).setAbsorption(floatValue);
+            Objects.requireNonNull(entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).setAbsorption(floatValue);
         } else if (key == EntityLivingBase.HEALTH) {
-            if (value instanceof Float && !player.world.isRemote) {
-                Float aFloat = (Float) value;
-                AbstractPlayerDamageModel damageModel;
-                if (aFloat > player.getMaxHealth()) {
-                    Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
-                } else if ((damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)) != null && damageModel.isWaitingForHelp()) {
+            if (value instanceof Float && !entity.world.isRemote) {
+                float aFloat = (Float) value;
+                EntityDamageModel damageModel;
+                if (aFloat > entity.getMaxHealth()) {
+                    Objects.requireNonNull(entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).forEach(damageablePart -> damageablePart.setCurrentHealth(damageablePart.getMaxHealth()));
+                } else if ((damageModel = entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)) != null && damageModel instanceof PlayerDamageModel && ((PlayerDamageModel)damageModel).isWaitingForHelp()) {
                     if (FirstAidConfig.debug)
                         CommonUtils.debugLogStacktrace("SetHealth falltrough");
-                } else if (FirstAidConfig.watchSetHealth && !aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && player instanceof EntityPlayerMP && ((EntityPlayerMP) player).connection != null) {
+                } else if (FirstAidConfig.watchSetHealth && !Float.isInfinite(aFloat) && !Float.isNaN(aFloat) && aFloat > 0 && entity instanceof EntityPlayerMP && ((EntityPlayerMP) entity).connection != null) {
                     //calculate diff
-                    Float orig = get(EntityLivingBase.HEALTH);
-                    if (orig > 0 && !orig.isNaN() && !orig.isInfinite()) {
+                    float orig = get(EntityLivingBase.HEALTH);
+                    if (orig > 0 && !Float.isNaN(orig) && !Float.isInfinite(orig)) {
                         if (FirstAidConfig.scaleMaxHealth)
-                            orig = Math.min(orig, (float) this.player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue());
+                            orig = Math.min(orig, (float) this.entity.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue());
                         float healed = aFloat - orig;
                         if (Math.abs(healed) > 0.001) {
                             if (healed < 0) {
                                 if (FirstAidConfig.debug) {
                                     CommonUtils.debugLogStacktrace("DAMAGING: " + (-healed));
                                 }
-                                DamageDistribution.handleDamageTaken(RandomDamageDistribution.NEAREST_KILL, player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null), -healed, player, DamageSource.MAGIC, true, true);
+                                DamageDistribution.handleDamageTaken(RandomDamageDistribution.NEAREST_KILL, damageModel, -healed, entity, DamageSource.MAGIC, true, true);
                             } else {
                                 if (FirstAidConfig.debug) {
                                     CommonUtils.debugLogStacktrace("HEALING: " + healed);
                                 }
-                                HealthDistribution.addRandomHealth(aFloat, player, true);
+                                HealthDistribution.addRandomHealth(aFloat, entity, true);
                             }
                         }
                         return;

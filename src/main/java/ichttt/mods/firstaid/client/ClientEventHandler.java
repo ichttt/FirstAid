@@ -21,8 +21,8 @@ package ichttt.mods.firstaid.client;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.PartHealer;
+import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
 import ichttt.mods.firstaid.client.util.EventCalendar;
@@ -99,9 +99,9 @@ public class ClientEventHandler {
     public static void onKeyPress(InputEvent.KeyInputEvent event) {
         if (ClientProxy.showWounds.isPressed()) {
             Minecraft mc = Minecraft.getMinecraft();
-            AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
-            if (!damageModel.hasTutorial) {
-                damageModel.hasTutorial = true;
+            PlayerDamageModel damageModel = (PlayerDamageModel) Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+            if (!damageModel.hasTutorial()) {
+                damageModel.setTutorial();
                 CapProvider.tutorialDone.add(mc.player.getName());
                 Minecraft.getMinecraft().displayGuiScreen(new GuiTutorial());
             }
@@ -197,7 +197,7 @@ public class ClientEventHandler {
             }
         }
 
-        AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
+        PartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
         if (healer != null) {
             event.getToolTip().add(I18n.format("firstaid.tooltip.healer", healer.maxHeal / 2, StringUtils.ticksToElapsedTime(healer.ticksPerHeal)));
         }

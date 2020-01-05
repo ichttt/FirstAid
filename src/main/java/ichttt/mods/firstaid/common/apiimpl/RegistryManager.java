@@ -21,10 +21,10 @@ package ichttt.mods.firstaid.common.apiimpl;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
-import ichttt.mods.firstaid.api.debuff.builder.DebuffBuilderFactory;
-import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
+import ichttt.mods.firstaid.api.debuff.DebuffBuilderFactory;
+import ichttt.mods.firstaid.api.debuff.IDebuffBuilder;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.EventHandler;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.DamageSource;
@@ -51,30 +51,30 @@ public class RegistryManager {
         FirstAidRegistry registry = Objects.requireNonNull(FirstAidRegistry.getImpl());
 
         //---DAMAGE SOURCES---
-        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> feetList = new ArrayList<>(2);
-        feetList.add(Pair.of(EntityEquipmentSlot.FEET, new EnumPlayerPart[]{EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT}));
-        feetList.add(Pair.of(EntityEquipmentSlot.LEGS, new EnumPlayerPart[]{EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG}));
+        List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> feetList = new ArrayList<>(2);
+        feetList.add(Pair.of(EntityEquipmentSlot.FEET, new EnumBodyPart[]{EnumBodyPart.LEFT_FOOT, EnumBodyPart.RIGHT_FOOT}));
+        feetList.add(Pair.of(EntityEquipmentSlot.LEGS, new EnumBodyPart[]{EnumBodyPart.LEFT_LEG, EnumBodyPart.RIGHT_LEG}));
         registry.bindDamageSourceStandard(DamageSource.FALL, feetList, false);
         registry.bindDamageSourceStandard(DamageSource.HOT_FLOOR, feetList, false);
 
-        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> headList = new ArrayList<>(1);
-        headList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumPlayerPart[]{EnumPlayerPart.HEAD}));
+        List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> headList = new ArrayList<>(1);
+        headList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumBodyPart[]{EnumBodyPart.HEAD}));
         registry.bindDamageSourceStandard(DamageSource.ANVIL, headList, false);
 
-        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> headArmsList = new ArrayList<>(2);
-        headArmsList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumPlayerPart[]{EnumPlayerPart.HEAD}));
-        headArmsList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM}));
+        List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> headArmsList = new ArrayList<>(2);
+        headArmsList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumBodyPart[]{EnumBodyPart.HEAD}));
+        headArmsList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumBodyPart[]{EnumBodyPart.LEFT_ARM, EnumBodyPart.RIGHT_ARM}));
         registry.bindDamageSourceStandard(DamageSource.LIGHTNING_BOLT, headArmsList, true);
 
         registry.bindDamageSourceRandom(DamageSource.MAGIC, false, false);
         if (FirstAidConfig.hardMode) {
-            List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> bodyList = new ArrayList<>(1);
-            bodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.BODY}));
+            List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> bodyList = new ArrayList<>(1);
+            bodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumBodyPart[]{EnumBodyPart.BODY}));
             registry.bindDamageSourceStandard(DamageSource.STARVE, bodyList, false);
 
-            List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> headBodyList = new ArrayList<>(2);
-            headBodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.BODY}));
-            headBodyList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumPlayerPart[]{EnumPlayerPart.HEAD}));
+            List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> headBodyList = new ArrayList<>(2);
+            headBodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumBodyPart[]{EnumBodyPart.BODY}));
+            headBodyList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumBodyPart[]{EnumBodyPart.HEAD}));
             registry.bindDamageSourceStandard(DamageSource.DROWN, headBodyList, true);
         } else {
             registry.bindDamageSourceRandom(DamageSource.STARVE, false, true);

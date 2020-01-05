@@ -21,8 +21,8 @@ package ichttt.mods.firstaid.client.util;
 import com.google.common.collect.ImmutableMap;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import ichttt.mods.firstaid.client.gui.FlashStateManager;
 import ichttt.mods.firstaid.common.EventHandler;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
@@ -44,20 +44,20 @@ import java.util.Objects;
 public class HealthRenderUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
     public static final DecimalFormat TEXT_FORMAT = new DecimalFormat("0.0");
-    private static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
-    private static final ImmutableMap<EnumPlayerPart, FlashStateManager> flashStates;
+    private static final Object2IntOpenHashMap<EnumBodyPart> prevHealth = new Object2IntOpenHashMap<>();
+    private static final ImmutableMap<EnumBodyPart, FlashStateManager> flashStates;
 
     static {
-        ImmutableMap.Builder<EnumPlayerPart, FlashStateManager> builder = ImmutableMap.builder();
-        for (EnumPlayerPart part : EnumPlayerPart.VALUES) {
+        ImmutableMap.Builder<EnumBodyPart, FlashStateManager> builder = ImmutableMap.builder();
+        for (EnumBodyPart part : EnumBodyPart.VALUES) {
             builder.put(part, new FlashStateManager());
         }
         flashStates = builder.build();
     }
 
-    public static void drawHealthString(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, boolean allowSecondLine) {
+    public static void drawHealthString(DamageablePart damageablePart, float xTranslation, float yTranslation, boolean allowSecondLine) {
         float absorption = damageablePart.getAbsorption();
-        String text = TEXT_FORMAT.format(damageablePart.currentHealth) + "/" + damageablePart.getMaxHealth();
+        String text = TEXT_FORMAT.format(damageablePart.getCurrentHealth()) + "/" + damageablePart.getMaxHealth();
         if (absorption > 0) {
             String line2 = "+ " + TEXT_FORMAT.format(absorption);
             if (allowSecondLine) {
@@ -70,15 +70,15 @@ public class HealthRenderUtils {
         Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(text, xTranslation, yTranslation, 0xFFFFFF);
     }
 
-    private static void updatePrev(EnumPlayerPart part, int current, boolean playerDead) {
+    private static void updatePrev(EnumBodyPart part, int current, boolean playerDead) {
         if (!playerDead)
             prevHealth.put(part, current);
         else
             prevHealth.clear();
     }
 
-    public static boolean healthChanged(AbstractDamageablePart damageablePart, boolean playerDead) {
-        int current = (int) Math.ceil(damageablePart.currentHealth);
+    public static boolean healthChanged(DamageablePart damageablePart, boolean playerDead) {
+        int current = (int) Math.ceil(damageablePart.getCurrentHealth());
         if (prevHealth.containsKey(damageablePart.part)) {
             int prev = prevHealth.getInt(damageablePart.part);
             updatePrev(damageablePart.part, current, playerDead);
@@ -88,16 +88,16 @@ public class HealthRenderUtils {
         return true;
     }
 
-    public static boolean drawAsString(AbstractDamageablePart damageablePart, boolean allowSecondLine) {
+    public static boolean drawAsString(DamageablePart damageablePart, boolean allowSecondLine) {
         int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
         return (maxHealth + maxExtraHealth > 8 && allowSecondLine) || ((maxHealth + maxExtraHealth) > 12);
     }
 
-    public static void drawHealth(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean allowSecondLine) {
+    public static void drawHealth(DamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean allowSecondLine) {
         int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
-        int current = (int) Math.ceil(damageablePart.currentHealth);
+        int current = (int) Math.ceil(damageablePart.getCurrentHealth());
         FlashStateManager activeFlashState = Objects.requireNonNull(flashStates.get(damageablePart.part));
 
         if (prevHealth.containsKey(damageablePart.part)) {

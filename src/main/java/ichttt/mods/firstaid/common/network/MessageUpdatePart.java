@@ -19,8 +19,8 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -37,11 +37,11 @@ public class MessageUpdatePart implements IMessage {
 
     public MessageUpdatePart() {}
 
-    public MessageUpdatePart(AbstractDamageablePart part) {
+    public MessageUpdatePart(DamageablePart part) {
         this.id = part.part.id;
         this.maxHealth = part.getMaxHealth();
         this.absorption = part.getAbsorption();
-        this.currentHealth = part.currentHealth;
+        this.currentHealth = part.getCurrentHealth();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class MessageUpdatePart implements IMessage {
             throw new RuntimeException("Negative absorption!");
         if (maxHealth < 0)
             throw new RuntimeException("Negative maxHealth!");
-        if (EnumPlayerPart.fromID(id).id != this.id)
+        if (EnumBodyPart.fromID(id).id != this.id)
             throw new RuntimeException("Wrong player mapping!");
     }
 
@@ -79,10 +79,10 @@ public class MessageUpdatePart implements IMessage {
         public IMessage onMessage(MessageUpdatePart message, MessageContext ctx) {
             Minecraft mc = Minecraft.getMinecraft();
             mc.addScheduledTask(() -> {
-                AbstractDamageablePart damageablePart = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).getFromEnum(EnumPlayerPart.fromID(message.id));
+                DamageablePart damageablePart = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).getFromEnum(EnumBodyPart.fromID(message.id));
                 damageablePart.setMaxHealth(message.maxHealth);
                 damageablePart.setAbsorption(message.absorption);
-                damageablePart.currentHealth = message.currentHealth;
+                damageablePart.setCurrentHealth(message.currentHealth);
             });
             return null;
         }

@@ -19,12 +19,12 @@
 package ichttt.mods.firstaid.common.util;
 
 import com.google.common.collect.Iterators;
+import ichttt.mods.firstaid.FirstAid;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
@@ -36,6 +36,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.ISpecialArmor;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 public class ArmorUtils {
 
@@ -98,9 +99,14 @@ public class ArmorUtils {
     /**
      * Changed copy of ISpecialArmor{@link ISpecialArmor.ArmorProperties#applyArmor(EntityLivingBase, NonNullList, DamageSource, double)}
      */
-    public static float applyArmor(@Nonnull EntityPlayer entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, double damage, @Nonnull EntityEquipmentSlot slot) {
+    public static float applyArmor(@Nonnull EntityLivingBase entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, double damage, @Nonnull EntityEquipmentSlot slot) {
         if (itemStack.isEmpty()) return (float)damage;
-        NonNullList<ItemStack> inventory = entity.inventory.armorInventory;
+        Iterable<ItemStack> inventoryIterable = entity.getArmorInventoryList();
+        if (!(inventoryIterable instanceof List<?>)) {
+            FirstAid.LOGGER.warn("Entity {} does not have a armor list!", entity.getClass());
+            return (float) damage;
+        }
+        List<ItemStack> inventory = (List<ItemStack>) inventoryIterable;
 
         double totalArmor = 0;
         double totalToughness = 0;
@@ -154,12 +160,12 @@ public class ArmorUtils {
     /**
      * Changed copy of the first part from {@link EnchantmentHelper#applyEnchantmentModifier(EnchantmentHelper.IModifier, ItemStack)}
      */
-    public static float applyGlobalPotionModifiers(EntityPlayer player, DamageSource source, float damage) {
+    public static float applyGlobalPotionModifiers(EntityLivingBase entity, DamageSource source, float damage) {
         if (source.isDamageAbsolute())
             return damage;
-        if (player.isPotionActive(MobEffects.RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
+        if (entity.isPotionActive(MobEffects.RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
             @SuppressWarnings("ConstantConditions")
-            int i = (player.getActivePotionEffect(MobEffects.RESISTANCE).getAmplifier() + 1) * 5;
+            int i = (entity.getActivePotionEffect(MobEffects.RESISTANCE).getAmplifier() + 1) * 5;
             int j = 25 - i;
             float f = damage * (float) j;
             damage = f / 25.0F;

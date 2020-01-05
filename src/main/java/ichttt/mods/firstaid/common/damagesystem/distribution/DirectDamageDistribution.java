@@ -20,23 +20,23 @@ package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.IDamageDistribution;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import net.minecraft.entity.player.EntityPlayer;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.DamageSource;
 
 import javax.annotation.Nonnull;
 
 public class DirectDamageDistribution implements IDamageDistribution {
-    private final EnumPlayerPart part;
+    private final EnumBodyPart part;
     private final boolean debuff;
 
-    public DirectDamageDistribution(EnumPlayerPart part, boolean debuff) {
+    public DirectDamageDistribution(EnumBodyPart part, boolean debuff) {
         this.part = part;
         this.debuff = debuff;
     }
 
     @Override
-    public float distributeDamage(float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat) {
-        return player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null).getFromEnum(part).damage(damage, player, debuff);
+    public float distributeDamage(float damage, @Nonnull EntityLivingBase entity, @Nonnull DamageSource source, boolean addStat) {
+        return entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null).getFromEnum(part).damage(damage, entity, debuff);
     }
 }

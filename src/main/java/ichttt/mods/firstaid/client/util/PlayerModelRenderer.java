@@ -20,8 +20,9 @@ package ichttt.mods.firstaid.client.util;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -36,7 +37,7 @@ public class PlayerModelRenderer {
     private static int angle = 0;
     private static boolean otherWay = false;
 
-    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, Gui gui, float alpha, float partialTicks) {
+    public static void renderPlayerHealth(EntityDamageModel damageModel, Gui gui, float alpha, float partialTicks) {
         GlStateManager.pushMatrix();
         GlStateManager.enableBlend();
         GlStateManager.color(1F, 1F, 1F, 1 - (alpha / 255));
@@ -50,29 +51,30 @@ public class PlayerModelRenderer {
                 GlStateManager.translate(angle * 0.5F, 0, 0);
             GlStateManager.rotate(angle, 0, 0, 1);
         }
-        drawPart(gui, damageModel.HEAD, 16, 0, 32, 32);
-        drawPart(gui, damageModel.BODY, 16, 32, 32, 48);
-        drawPart(gui, damageModel.LEFT_ARM, 0, 32, 16, 48);
-        drawPart(gui, damageModel.RIGHT_ARM, 48, 32, 16, 48);
-        drawPart(gui, damageModel.LEFT_LEG, 16, 80, 16, 32);
-        drawPart(gui, damageModel.RIGHT_LEG, 32, 80, 16, 32);
-        drawPart(gui, damageModel.LEFT_FOOT, 16, 112, 16, 16);
-        drawPart(gui, damageModel.RIGHT_FOOT, 32, 112, 16, 16);
+        drawPart(gui, damageModel.getFromEnum(EnumBodyPart.HEAD), 16, 0, 32, 32);
+        drawPart(gui, damageModel.getFromEnum(EnumBodyPart.BODY), 16, 32, 32, 48);
+        drawPart(gui, damageModel.getFromEnum(EnumBodyPart.LEFT_ARM), 0, 32, 16, 48);
+        drawPart(gui, damageModel.getFromEnum(EnumBodyPart.RIGHT_ARM), 48, 32, 16, 48);
+        drawPart(gui, damageModel.getFromEnum(EnumBodyPart.LEFT_LEG), 16, 80, 16, 32);
+        drawPart(gui, damageModel.getFromEnum(EnumBodyPart.RIGHT_LEG), 32, 80, 16, 32);
+        drawPart(gui, damageModel.getFromEnum(EnumBodyPart.LEFT_FOOT), 16, 112, 16, 16);
+        drawPart(gui, damageModel.getFromEnum(EnumBodyPart.RIGHT_FOOT), 32, 112, 16, 16);
 
         GlStateManager.color(1F, 1F, 1F, 1F);
         GlStateManager.popMatrix();
     }
 
-    private static void drawPart(Gui gui, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
+    private static void drawPart(Gui gui, DamageablePart part, int texX, int texY, int sizeX, int sizeY) {
         int rawTexX = texX;
         int maxHealth = part.getMaxHealth();
-        if (part.currentHealth <= 0.001) {
+        float currentHealth = part.getCurrentHealth();
+        if (currentHealth <= 0.001) {
             texX += SIZE * 3;
         }
-        else if (Math.abs(part.currentHealth - maxHealth) > 0.001) {
-            float healthPercentage = part.currentHealth / maxHealth;
+        else if (Math.abs(currentHealth - maxHealth) > 0.001) {
+            float healthPercentage = currentHealth / maxHealth;
             if (healthPercentage >= 1 || healthPercentage <= 0)
-                throw new RuntimeException(String.format("Calculated invalid health for part %s with current health %s and max health %d. Got value %s", part.part, part.currentHealth, maxHealth, healthPercentage));
+                throw new RuntimeException(String.format("Calculated invalid health for part %s with current health %s and max health %d. Got value %s", part.part, currentHealth, maxHealth, healthPercentage));
             texX += SIZE * (healthPercentage > 0.5 ? 1 : 2);
         }
         gui.drawTexturedModalRect(rawTexX, texY, texX, texY, sizeX, sizeY);

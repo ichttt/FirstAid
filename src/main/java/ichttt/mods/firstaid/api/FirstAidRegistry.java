@@ -19,11 +19,12 @@
 
 package ichttt.mods.firstaid.api;
 
-import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
+import ichttt.mods.firstaid.api.damagesystem.PartHealer;
+import ichttt.mods.firstaid.api.debuff.DebuffBuilderFactory;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
-import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
+import ichttt.mods.firstaid.api.debuff.IDebuffBuilder;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -69,7 +70,7 @@ public abstract class FirstAidRegistry {
      * @deprecated Use {@link #bindDamageSourceStandard(DamageSource, List, boolean)} instead
      */
     @Deprecated
-    public abstract void bindDamageSourceStandard(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable);
+    public abstract void bindDamageSourceStandard(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> priorityTable);
 
     /**
      * Binds the damage source to a distribution.
@@ -82,7 +83,7 @@ public abstract class FirstAidRegistry {
      *                             Otherwise, the list will be shuffled before each damage distribution
      * @param shufflePriorityTable If the {@code priorityTable} should be shuffled before each distribution
      */
-    public abstract void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable);
+    public abstract void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> priorityTable, boolean shufflePriorityTable);
 
     /**
      * @deprecated Use {@link #bindDamageSourceRandom(DamageSource, boolean, boolean)} instead
@@ -121,7 +122,7 @@ public abstract class FirstAidRegistry {
      *
      * @param slot    The slot this debuff should be active on
      * @param builder The builder containing all the information needed for the system.
-     *                To retrieve a new builder use {@link ichttt.mods.firstaid.api.debuff.builder.DebuffBuilderFactory}
+     *                To retrieve a new builder use {@link DebuffBuilderFactory}
      */
     public abstract void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull IDebuffBuilder builder);
 
@@ -143,7 +144,7 @@ public abstract class FirstAidRegistry {
      * @param applyTime The time it takes to apply this in the UI
      */
     @Deprecated
-    public abstract void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, int applyTime);
+    public abstract void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, PartHealer> factory, int applyTime);
 
     /**
      * Registers a healing type, so it can be used by the damage system when the user applies it.
@@ -153,10 +154,10 @@ public abstract class FirstAidRegistry {
      *                  This should always create a new healer and get the itemstack that will shrink after creating the healer
      * @param applyTime The time it takes to apply this in the UI
      */
-    public abstract void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, Function<ItemStack, Integer> applyTime);
+    public abstract void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, PartHealer> factory, Function<ItemStack, Integer> applyTime);
 
     @Nullable
-    public abstract AbstractPartHealer getPartHealer(@Nonnull ItemStack type);
+    public abstract PartHealer getPartHealer(@Nonnull ItemStack type);
 
     @Deprecated
     @Nullable

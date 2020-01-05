@@ -19,7 +19,7 @@
 package ichttt.mods.firstaid.common.apiimpl;
 
 import ichttt.mods.firstaid.api.FirstAidRegistry;
-import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
+import ichttt.mods.firstaid.api.debuff.IDebuffBuilder;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
 import net.minecraft.util.SoundEvent;

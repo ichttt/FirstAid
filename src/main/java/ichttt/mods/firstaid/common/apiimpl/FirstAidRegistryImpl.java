@@ -25,11 +25,11 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.IDamageDistribution;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
+import ichttt.mods.firstaid.api.damagesystem.PartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
-import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
+import ichttt.mods.firstaid.api.debuff.IDebuffBuilder;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.damagesystem.debuff.ConstantDebuff;
 import ichttt.mods.firstaid.common.damagesystem.debuff.OnHitDebuff;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
@@ -54,7 +54,7 @@ import java.util.function.Supplier;
 public class FirstAidRegistryImpl extends FirstAidRegistry {
     public static final FirstAidRegistryImpl INSTANCE = new FirstAidRegistryImpl();
     private final Map<String, IDamageDistribution> DISTRIBUTION_MAP = new HashMap<>();
-    private final Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> HEALER_MAP = new HashMap<>();
+    private final Map<Item, Pair<Function<ItemStack, PartHealer>, Function<ItemStack, Integer>>> HEALER_MAP = new HashMap<>();
     private final Multimap<EnumDebuffSlot, Supplier<IDebuff>> DEBUFFS = HashMultimap.create();
     private boolean registrationAllowed = true;
 
@@ -76,12 +76,12 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
     @Deprecated
     @Override
-    public void bindDamageSourceStandard(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable) {
+    public void bindDamageSourceStandard(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> priorityTable) {
         bindDamageSourceStandard(new DamageSource(damageType), priorityTable, false);
     }
 
     @Override
-    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable) {
+    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> priorityTable, boolean shufflePriorityTable) {
         bindDamageSourceCustom(damageType, new StandardDamageDistribution(priorityTable, shufflePriorityTable));
     }
 
@@ -118,12 +118,12 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
     @Deprecated
     @Override
-    public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, int applyTime) {
+    public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, PartHealer> factory, int applyTime) {
         registerHealingType(item, factory, stack -> applyTime);
     }
 
     @Override
-    public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, Function<ItemStack, Integer> applyTime) {
+    public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, PartHealer> factory, Function<ItemStack, Integer> applyTime) {
         if (this.HEALER_MAP.containsKey(item))
             FirstAid.LOGGER.warn("Healing type override detected for item " + item);
         this.HEALER_MAP.put(item, Pair.of(factory, applyTime));
@@ -131,8 +131,8 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
     @Nullable
     @Override
-    public AbstractPartHealer getPartHealer(@Nonnull ItemStack type) {
-        Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>> pair = this.HEALER_MAP.get(type.getItem());
+    public PartHealer getPartHealer(@Nonnull ItemStack type) {
+        Pair<Function<ItemStack, PartHealer>, Function<ItemStack, Integer>> pair = this.HEALER_MAP.get(type.getItem());
         if (pair != null)
             return pair.getLeft().apply(type);
         return null;
@@ -147,7 +147,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
     @Override
     public Integer getPartHealingTime(@Nonnull ItemStack stack) {
-        Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>> pair = this.HEALER_MAP.get(stack.getItem());
+        Pair<Function<ItemStack, PartHealer>, Function<ItemStack, Integer>> pair = this.HEALER_MAP.get(stack.getItem());
         if (pair != null)
             return pair.getRight().apply(stack);
         return null;

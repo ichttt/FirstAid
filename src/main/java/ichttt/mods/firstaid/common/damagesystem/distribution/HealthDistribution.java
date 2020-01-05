@@ -20,11 +20,11 @@ package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import ichttt.mods.firstaid.common.network.MessageAddHealth;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.util.ArrayList;
@@ -34,36 +34,36 @@ import java.util.Comparator;
 import java.util.List;
 
 public class HealthDistribution {
-    private static final List<EnumPlayerPart> parts;
+    private static final List<EnumBodyPart> parts;
     static {
-        EnumPlayerPart[] partArray = EnumPlayerPart.VALUES;
+        EnumBodyPart[] partArray = EnumBodyPart.VALUES;
         parts = new ArrayList<>(partArray.length);
         parts.addAll(Arrays.asList(partArray));
     }
 
-    public static void manageHealth(float health, AbstractPlayerDamageModel damageModel, EntityPlayer player, boolean sendChanges, boolean distribute) {
-        if (sendChanges && player.world.isRemote) {
+    public static void manageHealth(float health, EntityDamageModel damageModel, EntityLivingBase entity, boolean sendChanges, boolean distribute) {
+        if (sendChanges && entity.world.isRemote) {
             FirstAid.LOGGER.catching(new RuntimeException("Someone set flag sendChanges on the client, this is not supported!"));
             sendChanges = false;
-        } else if (sendChanges && !(player instanceof EntityPlayerMP)) { //EntityOtherPlayerMP? log something?
+        } else if (sendChanges && !(entity instanceof EntityPlayerMP)) {
             sendChanges = false;
         }
 
         float toHeal = distribute ? health / 8F : health;
-        Collections.shuffle(parts, player.world.rand);
-        List<AbstractDamageablePart> damageableParts = new ArrayList<>(parts.size());
+        Collections.shuffle(parts, entity.world.rand);
+        List<DamageablePart> damageableParts = new ArrayList<>(parts.size());
 
-        for (EnumPlayerPart part : parts) {
+        for (EnumBodyPart part : parts) {
             damageableParts.add(damageModel.getFromEnum(part));
         }
 
         if (distribute)
-            damageableParts.sort(Comparator.comparingDouble(value -> value.getMaxHealth() - value.currentHealth));
+            damageableParts.sort(Comparator.comparingDouble(value -> value.getMaxHealth() - value.getCurrentHealth()));
         float[] healingDone = new float[8];
 
         for (int i = 0; i < 8; i++) {
-            AbstractDamageablePart part = damageableParts.get(i);
-            float diff = toHeal - part.heal(toHeal, player, !player.world.isRemote);
+            DamageablePart part = damageableParts.get(i);
+            float diff = toHeal - part.heal(toHeal, entity, !entity.world.isRemote);
             //prevent inaccuracy
             diff = Math.round(diff * 10000.0F) / 10000.0F;
             healingDone[part.part.id - 1] = diff;
@@ -80,16 +80,16 @@ public class HealthDistribution {
         }
 
         if (sendChanges)
-            FirstAid.NETWORKING.sendTo(new MessageAddHealth(healingDone), (EntityPlayerMP) player);
+            FirstAid.NETWORKING.sendTo(new MessageAddHealth(healingDone), (EntityPlayerMP) entity);
     }
 
-    public static void distributeHealth(float health, EntityPlayer player, boolean sendChanges) {
-        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+    public static void distributeHealth(float health, EntityLivingBase player, boolean sendChanges) {
+        EntityDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
         manageHealth(health, damageModel, player, sendChanges, true);
     }
 
-    public static void addRandomHealth(float health, EntityPlayer player, boolean sendChanges) {
-        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+    public static void addRandomHealth(float health, EntityLivingBase player, boolean sendChanges) {
+        EntityDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
         manageHealth(health, damageModel, player, sendChanges, false);
     }
 }

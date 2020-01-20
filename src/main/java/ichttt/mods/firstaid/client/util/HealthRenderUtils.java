@@ -22,7 +22,7 @@ import com.google.common.collect.ImmutableMap;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.gui.FlashStateManager;
 import ichttt.mods.firstaid.common.EventHandler;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
@@ -44,12 +44,12 @@ import java.util.Objects;
 public class HealthRenderUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
     public static final DecimalFormat TEXT_FORMAT = new DecimalFormat("0.0");
-    private static final Object2IntOpenHashMap<EnumBodyPart> prevHealth = new Object2IntOpenHashMap<>();
-    private static final ImmutableMap<EnumBodyPart, FlashStateManager> flashStates;
+    private static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
+    private static final ImmutableMap<EnumPlayerPart, FlashStateManager> flashStates;
 
     static {
-        ImmutableMap.Builder<EnumBodyPart, FlashStateManager> builder = ImmutableMap.builder();
-        for (EnumBodyPart part : EnumBodyPart.VALUES) {
+        ImmutableMap.Builder<EnumPlayerPart, FlashStateManager> builder = ImmutableMap.builder();
+        for (EnumPlayerPart part : EnumPlayerPart.VALUES) {
             builder.put(part, new FlashStateManager());
         }
         flashStates = builder.build();
@@ -70,7 +70,7 @@ public class HealthRenderUtils {
         Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(text, xTranslation, yTranslation, 0xFFFFFF);
     }
 
-    private static void updatePrev(EnumBodyPart part, int current, boolean playerDead) {
+    private static void updatePrev(EnumPlayerPart part, int current, boolean playerDead) {
         if (!playerDead)
             prevHealth.put(part, current);
         else
@@ -78,13 +78,14 @@ public class HealthRenderUtils {
     }
 
     public static boolean healthChanged(DamageablePart damageablePart, boolean playerDead) {
+        EnumPlayerPart playerPart = EnumPlayerPart.fromPart(damageablePart);
         int current = (int) Math.ceil(damageablePart.getCurrentHealth());
-        if (prevHealth.containsKey(damageablePart.part)) {
-            int prev = prevHealth.getInt(damageablePart.part);
-            updatePrev(damageablePart.part, current, playerDead);
+        if (prevHealth.containsKey(playerPart)) {
+            int prev = prevHealth.getInt(playerPart);
+            updatePrev(playerPart, current, playerDead);
             return prev != current;
         }
-        updatePrev(damageablePart.part, current, playerDead);
+        updatePrev(playerPart, current, playerDead);
         return true;
     }
 
@@ -95,13 +96,14 @@ public class HealthRenderUtils {
     }
 
     public static void drawHealth(DamageablePart damageablePart, float xTranslation, float yTranslation, Gui gui, boolean allowSecondLine) {
+        EnumPlayerPart playerPart = EnumPlayerPart.fromPart(damageablePart);
         int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
         int current = (int) Math.ceil(damageablePart.getCurrentHealth());
-        FlashStateManager activeFlashState = Objects.requireNonNull(flashStates.get(damageablePart.part));
+        FlashStateManager activeFlashState = Objects.requireNonNull(flashStates.get(playerPart));
 
-        if (prevHealth.containsKey(damageablePart.part)) {
-            int prev = prevHealth.getInt(damageablePart.part);
+        if (prevHealth.containsKey(playerPart)) {
+            int prev = prevHealth.getInt(playerPart);
             if (prev != current)
                 activeFlashState.setActive(Minecraft.getSystemTime());
         }

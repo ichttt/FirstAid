@@ -20,8 +20,8 @@ package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DirectDamageDistribution;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
@@ -51,9 +51,9 @@ public class DebugDamageCommand extends CommandBase {
         if (!(sender instanceof EntityPlayer))
             return Collections.emptyList();
         if (args.length == 1) {
-            EnumBodyPart[] parts = EnumBodyPart.values();
+            EnumPlayerPart[] parts = EnumPlayerPart.values();
             List<String> values = new ArrayList<>(parts.length);
-            for (EnumBodyPart part : parts)
+            for (EnumPlayerPart part : parts)
                 values.add(part.toString());
             values.add("ALL");
             return getListOfStringsMatchingLastWord(args, values);
@@ -94,10 +94,10 @@ public class DebugDamageCommand extends CommandBase {
                 debuff = Boolean.parseBoolean(args[2]);
 
             if (args[0].equalsIgnoreCase("ALL")) {
-                for (EnumBodyPart part : EnumBodyPart.VALUES)
+                for (EnumPlayerPart part : EnumPlayerPart.VALUES)
                     damage(part, damage, debuff, (EntityPlayer) sender);
             } else {
-                EnumBodyPart part = EnumBodyPart.valueOf(args[0].toUpperCase(Locale.ENGLISH));
+                EnumPlayerPart part = EnumPlayerPart.valueOf(args[0].toUpperCase(Locale.ENGLISH));
                 damage(part, damage, debuff, (EntityPlayer) sender);
             }
             if (sender instanceof EntityPlayerMP && !(sender instanceof FakePlayer))
@@ -107,10 +107,10 @@ public class DebugDamageCommand extends CommandBase {
         }
     }
 
-    private static void damage(EnumBodyPart part, float damage, boolean debuff, EntityPlayer player) {
+    private static void damage(EnumPlayerPart part, float damage, boolean debuff, EntityPlayer player) {
         if (damage == 0F)
             return;
-        EntityDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+        PlayerDamageModel damageModel = (PlayerDamageModel) Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
         if (damage > 0F) {
             DamageDistribution.handleDamageTaken(new DirectDamageDistribution(part, debuff), damageModel, damage, player, DamageSource.OUT_OF_WORLD, false, false);
         } else {

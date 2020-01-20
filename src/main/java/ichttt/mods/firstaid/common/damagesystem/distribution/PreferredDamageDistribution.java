@@ -18,8 +18,10 @@
 
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
-import ichttt.mods.firstaid.common.util.CommonUtils;
+import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -30,10 +32,8 @@ import java.util.List;
 public class PreferredDamageDistribution extends DamageDistribution {
     private final EntityEquipmentSlot slot;
 
-    public PreferredDamageDistribution(EnumBodyPart preferred) {
+    public PreferredDamageDistribution(EnumPlayerPart preferred) {
         this.slot = preferred.slot;
-        if (!CommonUtils.slotToParts.get(slot).contains(preferred)) //assertion
-            throw new IllegalArgumentException("ArmorSlot " + slot + " is not for PlayerPart " + preferred);
     }
 
     public PreferredDamageDistribution(EntityEquipmentSlot slot) {
@@ -42,11 +42,7 @@ public class PreferredDamageDistribution extends DamageDistribution {
 
     @Nonnull
     @Override
-    protected List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> getPartList() {
-        int posInArray = slot.getIndex();
-        EntityEquipmentSlot slot = CommonUtils.ARMOR_SLOTS[posInArray];
-        List<EnumBodyPart> parts = CommonUtils.slotToParts.get(slot);
-        Collections.shuffle(parts);
-        return Collections.singletonList(Pair.of(slot, parts.toArray(new EnumBodyPart[0])));
+    protected List<Pair<EntityEquipmentSlot, List<DamageablePart>>> getPartList(EntityDamageModel damageModel, EntityLivingBase entity) {
+        return Collections.singletonList(Pair.of(slot, damageModel.getParts(this.slot)));
     }
 }

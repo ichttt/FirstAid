@@ -30,13 +30,11 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 @SuppressWarnings("unused")
 public class PotionPoisonPatched extends Potion {
@@ -56,17 +54,20 @@ public class PotionPoisonPatched extends Potion {
 
     @Override
     public void performEffect(@Nonnull EntityLivingBase entity, int amplifier) {
-        if (entity instanceof EntityPlayer && !(entity instanceof FakePlayer) && (FirstAidConfig.damageSystem.causeDeathBody || FirstAidConfig.damageSystem.causeDeathHead)) {
+        if (FirstAidConfig.damageSystem.causeDeathBody || FirstAidConfig.damageSystem.causeDeathHead) {
             if (entity.world.isRemote || entity.isDead || entity.isEntityInvulnerable(DamageSource.MAGIC))
                 return;
-            EntityPlayer player = (EntityPlayer) entity;
-            EntityDamageModel playerDamageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
-            if (DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false) != 1.0F) {
-                if (player.isPlayerSleeping())
-                    player.wakeUpPlayer(true, true, false);
+            EntityDamageModel damageModel = entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+            if (damageModel == null) {
+                super.performEffect(entity, amplifier);
+                return;
+            }
+            if (DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, damageModel, 1.0F, entity, DamageSource.MAGIC, true, false) != 1.0F) {
+                if (entity.isPlayerSleeping() && entity instanceof EntityPlayer)
+                    ((EntityPlayer)entity).wakeUpPlayer(true, true, false);
                 try {
-                    SoundEvent sound = (SoundEvent) getHurtSound.invoke(player, DamageSource.MAGIC);
-                    player.world.playSound(null, player.posX, player.posY, player.posZ, sound, player.getSoundCategory(), (float) getSoundVolume.invoke(player), (float) getSoundPitch.invoke(player));
+                    SoundEvent sound = (SoundEvent) getHurtSound.invoke(entity, DamageSource.MAGIC);
+                    entity.world.playSound(null, entity.posX, entity.posY, entity.posZ, sound, entity.getSoundCategory(), (float) getSoundVolume.invoke(entity), (float) getSoundPitch.invoke(entity));
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     FirstAid.LOGGER.error("Could not play hurt sound!", e);
                 }

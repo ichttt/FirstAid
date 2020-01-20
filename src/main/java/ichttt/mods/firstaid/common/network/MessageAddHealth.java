@@ -19,8 +19,8 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -62,11 +62,11 @@ public class MessageAddHealth implements IMessage {
         public IMessage onMessage(MessageAddHealth message, MessageContext ctx) {
             Minecraft.getMinecraft().addScheduledTask(() -> {
                 EntityPlayerSP playerSP = Minecraft.getMinecraft().player;
-                EntityDamageModel damageModel = Objects.requireNonNull(playerSP.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                PlayerDamageModel damageModel = (PlayerDamageModel) Objects.requireNonNull(playerSP.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
                 for (int i = 0; i < message.table.length; i++) {
                     float f = message.table[i];
                     //EnumPlayerPart is 1-indexed
-                    EnumBodyPart part = EnumBodyPart.fromID(i + 1);
+                    EnumPlayerPart part = EnumPlayerPart.fromID(i + 1);
                     damageModel.getFromEnum(part).heal(f, playerSP, false);
                 }
             });

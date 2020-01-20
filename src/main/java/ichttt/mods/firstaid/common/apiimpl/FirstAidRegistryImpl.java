@@ -28,11 +28,13 @@ import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.PartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.debuff.IDebuffBuilder;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
-import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
+import ichttt.mods.firstaid.api.enums.EnumPlayerDebuffSlot;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.damagesystem.debuff.ConstantDebuff;
 import ichttt.mods.firstaid.common.damagesystem.debuff.OnHitDebuff;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
+import ichttt.mods.firstaid.common.damagesystem.distribution.GeneralDamageDistribution;
+import ichttt.mods.firstaid.common.damagesystem.distribution.PlayerDamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistribution;
 import ichttt.mods.firstaid.common.util.CommonUtils;
@@ -50,12 +52,14 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class FirstAidRegistryImpl extends FirstAidRegistry {
     public static final FirstAidRegistryImpl INSTANCE = new FirstAidRegistryImpl();
     private final Map<String, IDamageDistribution> DISTRIBUTION_MAP = new HashMap<>();
     private final Map<Item, Pair<Function<ItemStack, PartHealer>, Function<ItemStack, Integer>>> HEALER_MAP = new HashMap<>();
-    private final Multimap<EnumDebuffSlot, Supplier<IDebuff>> DEBUFFS = HashMultimap.create();
+    private final Multimap<EnumPlayerDebuffSlot, Supplier<IDebuff>> PLAYER_DEBUFFS = HashMultimap.create();
+    private final Multimap<EntityEquipmentSlot, Supplier<IDebuff>> GENERAL_DEBUFFS = HashMultimap.create();
     private boolean registrationAllowed = true;
 
     public static void finish() {
@@ -74,21 +78,17 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         }
     }
 
-    @Deprecated
     @Override
-    public void bindDamageSourceStandard(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> priorityTable) {
-        bindDamageSourceStandard(new DamageSource(damageType), priorityTable, false);
+    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, boolean shufflePriorityTable, @Nonnull EntityEquipmentSlot... priorityList) {
+        this.bindDamageSourceStandard(damageType, shufflePriorityTable, null, priorityList);
     }
 
     @Override
-    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> priorityTable, boolean shufflePriorityTable) {
-        bindDamageSourceCustom(damageType, new StandardDamageDistribution(priorityTable, shufflePriorityTable));
-    }
-
-    @Deprecated
-    @Override
-    public void bindDamageSourceRandom(@Nonnull String damageType, boolean nearestFirst, boolean tryNoKill) {
-        bindDamageSourceRandom(new DamageSource(damageType), nearestFirst, tryNoKill);
+    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, boolean shufflePriorityTable, @Nullable List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable, @Nonnull EntityEquipmentSlot... priorityList) {
+        if (priorityTable == null)
+            this.bindDamageSourceCustom(damageType, new GeneralDamageDistribution(shufflePriorityTable, priorityList));
+        else
+            this.bindDamageSourceCustom(damageType, new StandardDamageDistribution(new PlayerDamageDistribution(shufflePriorityTable, priorityTable), new GeneralDamageDistribution(shufflePriorityTable, priorityList)));
     }
 
     @Override
@@ -103,23 +103,11 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         }
     }
 
-    @Deprecated
-    @Override
-    public void bindDamageSourceCustom(@Nonnull String damageType, @Nonnull IDamageDistribution distributionTable) {
-        bindDamageSourceCustom(new DamageSource(damageType), distributionTable);
-    }
-
     @Override
     public void bindDamageSourceCustom(@Nonnull DamageSource damageType, @Nonnull IDamageDistribution distributionTable) {
         if (DISTRIBUTION_MAP.containsKey(damageType.damageType))
             FirstAid.LOGGER.info("Damage Distribution override detected for source " + damageType);
         DISTRIBUTION_MAP.put(damageType.damageType, distributionTable);
-    }
-
-    @Deprecated
-    @Override
-    public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, PartHealer> factory, int applyTime) {
-        registerHealingType(item, factory, stack -> applyTime);
     }
 
     @Override
@@ -138,13 +126,6 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         return null;
     }
 
-    @Deprecated
-    @Nullable
-    @Override
-    public Integer getPartHealingTime(@Nonnull Item item) {
-        return getPartHealingTime(new ItemStack(item));
-    }
-
     @Override
     public Integer getPartHealingTime(@Nonnull ItemStack stack) {
         Pair<Function<ItemStack, PartHealer>, Function<ItemStack, Integer>> pair = this.HEALER_MAP.get(stack.getItem());
@@ -154,7 +135,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     }
 
     @Override
-    public void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull IDebuffBuilder abstractBuilder) {
+    public void registerDebuff(@Nonnull EnumPlayerDebuffSlot playerSlot, @Nullable EntityEquipmentSlot generalSlot, @Nonnull IDebuffBuilder abstractBuilder) {
         DebuffBuilder builder;
         try {
             builder = (DebuffBuilder) abstractBuilder;
@@ -162,7 +143,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             throw new IllegalArgumentException("Builder must an instance of the default builder received via DebuffBuilderFactory!", e);
         }
         //Build the finished debuff
-        FirstAid.LOGGER.debug("Building debuff from mod {} for slot {} with potion effect {}, type = {}", CommonUtils.getActiveModidSafe(), slot, builder.potionName, builder.isOnHit ? "OnHit" : "Constant");
+        FirstAid.LOGGER.debug("Building debuff from mod {} for slot {} (general {}) with potion effect {}, type = {}", CommonUtils.getActiveModidSafe(), playerSlot, generalSlot, builder.potionName, builder.isOnHit ? "OnHit" : "Constant");
         BooleanSupplier isEnabled;
         if (builder.isEnabledSupplier == null)
             isEnabled = () -> true;
@@ -177,20 +158,19 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             Preconditions.checkArgument(builder.sound == null, "Tried to register constant debuff with sound effect.");
             debuff = () -> new ConstantDebuff(builder.potionName, builder.map, isEnabled);
         }
-        registerDebuff(slot, debuff);
+        registerDebuff(playerSlot, generalSlot, debuff);
     }
 
     @Override
-    public void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull Supplier<IDebuff> debuff) {
+    public void registerDebuff(@Nonnull EnumPlayerDebuffSlot playerSlot, @Nullable EntityEquipmentSlot generalSlot, @Nonnull Supplier<IDebuff> debuff) {
         if (!registrationAllowed)
             throw new IllegalStateException("Registration must take place before FMLLoadCompleteEvent");
 
-        if (slot.playerParts.length > 1 && !(debuff instanceof SharedDebuff)) {
-            this.DEBUFFS.put(slot, () -> new SharedDebuff(debuff.get(), slot));
-            return;
+        if (debuff instanceof SharedDebuff) {
+            throw new IllegalArgumentException("Debuff must not be shared!");
         }
 
-        this.DEBUFFS.put(slot, debuff);
+        this.PLAYER_DEBUFFS.put(playerSlot, playerSlot.playerParts.length <= 1 ? debuff : () -> new SharedDebuff(debuff.get(), playerSlot.playerParts.length));
     }
 
     @Nonnull
@@ -204,7 +184,16 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
     @Nonnull
     @Override
-    public IDebuff[] getDebuffs(@Nonnull EnumDebuffSlot slot) {
-        return DEBUFFS.get(slot).stream().map(Supplier::get).toArray(IDebuff[]::new);
+    public IDebuff[] getPlayerDebuff(@Nonnull EnumPlayerDebuffSlot slot) {
+        return PLAYER_DEBUFFS.get(slot).stream().map(Supplier::get).toArray(IDebuff[]::new);
+    }
+
+    @Nonnull
+    @Override
+    public IDebuff[] getGeneralDebuff(@Nonnull EntityEquipmentSlot slot, int count) {
+        Stream<IDebuff> stream =  GENERAL_DEBUFFS.get(slot).stream().map(Supplier::get);
+        if (count > 1)
+            stream = stream.map(iDebuff -> new SharedDebuff(iDebuff, count));
+        return stream.toArray(IDebuff[]::new);
     }
 }

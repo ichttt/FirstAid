@@ -23,7 +23,7 @@ import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.PartHealer;
 import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.client.util.EventCalendar;
@@ -173,27 +173,27 @@ public class GuiHealthScreen extends GuiScreen {
         GlStateManager.color(1F, 1F, 1F, 1F);
         if (FirstAid.isSynced) {
             GlStateManager.pushMatrix();
-            drawHealth(damageModel.getFromEnum(EnumBodyPart.HEAD), false, 14);
-            drawHealth(damageModel.getFromEnum(EnumBodyPart.LEFT_ARM), false, 39);
-            drawHealth(damageModel.getFromEnum(EnumBodyPart.LEFT_LEG), false, 64);
-            drawHealth(damageModel.getFromEnum(EnumBodyPart.LEFT_FOOT), false, 89);
-            drawHealth(damageModel.getFromEnum(EnumBodyPart.BODY), true, 14);
-            drawHealth(damageModel.getFromEnum(EnumBodyPart.RIGHT_ARM), true, 39);
-            drawHealth(damageModel.getFromEnum(EnumBodyPart.RIGHT_LEG), true, 64);
-            drawHealth(damageModel.getFromEnum(EnumBodyPart.RIGHT_FOOT), true, 89);
+            drawHealth(damageModel.getFromEnum(EnumPlayerPart.HEAD), false, 14);
+            drawHealth(damageModel.getFromEnum(EnumPlayerPart.LEFT_ARM), false, 39);
+            drawHealth(damageModel.getFromEnum(EnumPlayerPart.LEFT_LEG), false, 64);
+            drawHealth(damageModel.getFromEnum(EnumPlayerPart.LEFT_FOOT), false, 89);
+            drawHealth(damageModel.getFromEnum(EnumPlayerPart.BODY), true, 14);
+            drawHealth(damageModel.getFromEnum(EnumPlayerPart.RIGHT_ARM), true, 39);
+            drawHealth(damageModel.getFromEnum(EnumPlayerPart.RIGHT_LEG), true, 64);
+            drawHealth(damageModel.getFromEnum(EnumPlayerPart.RIGHT_FOOT), true, 89);
             GlStateManager.popMatrix();
         }
 
         //Tooltip
         GlStateManager.pushMatrix();
-        tooltipButton(head, damageModel.getFromEnum(EnumBodyPart.HEAD), mouseX, mouseY);
-        tooltipButton(leftArm, damageModel.getFromEnum(EnumBodyPart.LEFT_ARM), mouseX, mouseY);
-        tooltipButton(leftLeg, damageModel.getFromEnum(EnumBodyPart.LEFT_LEG), mouseX, mouseY);
-        tooltipButton(leftFoot, damageModel.getFromEnum(EnumBodyPart.LEFT_FOOT), mouseX, mouseY);
-        tooltipButton(body, damageModel.getFromEnum(EnumBodyPart.BODY), mouseX, mouseY);
-        tooltipButton(rightArm, damageModel.getFromEnum(EnumBodyPart.RIGHT_ARM), mouseX, mouseY);
-        tooltipButton(rightLeg, damageModel.getFromEnum(EnumBodyPart.RIGHT_LEG), mouseX, mouseY);
-        tooltipButton(rightFoot, damageModel.getFromEnum(EnumBodyPart.RIGHT_FOOT), mouseX, mouseY);
+        tooltipButton(head, damageModel.getFromEnum(EnumPlayerPart.HEAD), mouseX, mouseY);
+        tooltipButton(leftArm, damageModel.getFromEnum(EnumPlayerPart.LEFT_ARM), mouseX, mouseY);
+        tooltipButton(leftLeg, damageModel.getFromEnum(EnumPlayerPart.LEFT_LEG), mouseX, mouseY);
+        tooltipButton(leftFoot, damageModel.getFromEnum(EnumPlayerPart.LEFT_FOOT), mouseX, mouseY);
+        tooltipButton(body, damageModel.getFromEnum(EnumPlayerPart.BODY), mouseX, mouseY);
+        tooltipButton(rightArm, damageModel.getFromEnum(EnumPlayerPart.RIGHT_ARM), mouseX, mouseY);
+        tooltipButton(rightLeg, damageModel.getFromEnum(EnumPlayerPart.RIGHT_LEG), mouseX, mouseY);
+        tooltipButton(rightFoot, damageModel.getFromEnum(EnumPlayerPart.RIGHT_FOOT), mouseX, mouseY);
         GlStateManager.popMatrix();
 
         //Sleep info setup
@@ -253,7 +253,7 @@ public class GuiHealthScreen extends GuiScreen {
     @Override
     protected void actionPerformed(GuiButton button) {
         if (button.id < 9) {
-            EnumBodyPart playerPart = EnumBodyPart.fromID((button.id));
+            EnumPlayerPart playerPart = EnumPlayerPart.fromID((button.id));
             FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, activeHand));
             //TODO notify the user somehow (sound?)
             DamageablePart part = damageModel.getFromEnum(playerPart);

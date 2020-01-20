@@ -19,7 +19,8 @@
 
 package ichttt.mods.firstaid.api.debuff;
 
-import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
+import ichttt.mods.firstaid.api.enums.EnumPlayerDebuffSlot;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.SoundEvent;
 
 import javax.annotation.Nonnull;
@@ -31,7 +32,7 @@ import java.util.function.Supplier;
  * Use this if you want to add simple onHit or constant debuffs.
  * <br>
  * If you want to do your own, custom implementation, you can use {@link ichttt.mods.firstaid.api.debuff.IDebuff}
- * directly and register it using {@link ichttt.mods.firstaid.api.FirstAidRegistry#registerDebuff(EnumDebuffSlot, Supplier)}.
+ * directly and register it using {@link ichttt.mods.firstaid.api.FirstAidRegistry#registerDebuff(EnumPlayerDebuffSlot, EntityEquipmentSlot, Supplier)}.
  */
 public interface IDebuffBuilder {
 
@@ -68,9 +69,10 @@ public interface IDebuffBuilder {
     /**
      * Builds and registers this debuff to the FirstAid registry.
      * This is the final step.
-     * This does the same as {@link ichttt.mods.firstaid.api.FirstAidRegistry#registerDebuff(EnumDebuffSlot, IDebuffBuilder)}
+     * This does the same as {@link ichttt.mods.firstaid.api.FirstAidRegistry#registerDebuff(EnumPlayerDebuffSlot, EntityEquipmentSlot, IDebuffBuilder)}
      *
-     * @param slot The slot where the debuff should apply
+     * @param playerSlot The slot where the debuff should apply if the entity is a player
+     * @param generalSlot The slot where the debuff should apply on any other entity. Use null if this is player-specific
      */
-    void register(@Nonnull EnumDebuffSlot slot);
+    void register(@Nonnull EnumPlayerDebuffSlot playerSlot, @Nullable EntityEquipmentSlot generalSlot);
 }

@@ -19,17 +19,33 @@
 
 package ichttt.mods.firstaid.api.enums;
 
+import net.minecraft.inventory.EntityEquipmentSlot;
+
 import javax.annotation.Nonnull;
 
-public enum EnumDebuffSlot {
-    HEAD(EnumBodyPart.HEAD), BODY(EnumBodyPart.BODY),
-    ARMS(EnumBodyPart.LEFT_ARM, EnumBodyPart.RIGHT_ARM),
-    LEGS_AND_FEET(EnumBodyPart.LEFT_LEG, EnumBodyPart.RIGHT_LEG, EnumBodyPart.LEFT_FOOT, EnumBodyPart.RIGHT_FOOT);
+public enum EnumPlayerDebuffSlot {
+    HEAD(EnumPlayerPart.HEAD), BODY(EnumPlayerPart.BODY),
+    ARMS(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM),
+    LEGS_AND_FEET(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT);
 
-    EnumDebuffSlot(@Nonnull EnumBodyPart... playerParts) {
+    EnumPlayerDebuffSlot(@Nonnull EnumPlayerPart... playerParts) {
         this.playerParts = playerParts;
     }
 
     @Nonnull
-    public final EnumBodyPart[] playerParts;
+    public final EnumPlayerPart[] playerParts;
+
+    public static EnumPlayerDebuffSlot fromEquipmentSlot(EntityEquipmentSlot slot) {
+        switch (slot) {
+            case HEAD:
+                return HEAD;
+            case CHEST:
+                return BODY;
+            case LEGS:
+            case FEET:
+                return LEGS_AND_FEET;
+            default:
+                throw new IllegalArgumentException("Invalid slot " + slot);
+        }
+    }
 }

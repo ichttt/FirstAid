@@ -22,8 +22,8 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
-import ichttt.mods.firstaid.common.network.MessageAddHealth;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -34,9 +34,9 @@ import java.util.Comparator;
 import java.util.List;
 
 public class HealthDistribution {
-    private static final List<EnumBodyPart> parts;
+    private static final List<EnumPlayerPart> parts;
     static {
-        EnumBodyPart[] partArray = EnumBodyPart.VALUES;
+        EnumPlayerPart[] partArray = EnumPlayerPart.VALUES;
         parts = new ArrayList<>(partArray.length);
         parts.addAll(Arrays.asList(partArray));
     }
@@ -51,22 +51,17 @@ public class HealthDistribution {
 
         float toHeal = distribute ? health / 8F : health;
         Collections.shuffle(parts, entity.world.rand);
-        List<DamageablePart> damageableParts = new ArrayList<>(parts.size());
 
-        for (EnumBodyPart part : parts) {
-            damageableParts.add(damageModel.getFromEnum(part));
-        }
+        List<DamageablePart> damageableParts = new ArrayList<>(damageModel.getParts());
 
         if (distribute)
             damageableParts.sort(Comparator.comparingDouble(value -> value.getMaxHealth() - value.getCurrentHealth()));
-        float[] healingDone = new float[8];
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < damageableParts.size(); i++) {
             DamageablePart part = damageableParts.get(i);
             float diff = toHeal - part.heal(toHeal, entity, !entity.world.isRemote);
             //prevent inaccuracy
             diff = Math.round(diff * 10000.0F) / 10000.0F;
-            healingDone[part.part.id - 1] = diff;
 
             health -= diff;
             if (distribute) {
@@ -80,7 +75,7 @@ public class HealthDistribution {
         }
 
         if (sendChanges)
-            FirstAid.NETWORKING.sendTo(new MessageAddHealth(healingDone), (EntityPlayerMP) entity);
+            FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel), (EntityPlayerMP) entity);
     }
 
     public static void distributeHealth(float health, EntityLivingBase player, boolean sendChanges) {

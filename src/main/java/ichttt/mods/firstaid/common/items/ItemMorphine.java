@@ -31,10 +31,8 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.FakePlayer;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 public class ItemMorphine extends Item {
 
@@ -48,10 +46,9 @@ public class ItemMorphine extends Item {
     @Override
     @Nonnull
     public ItemStack onItemUseFinish(@Nonnull ItemStack stack, World world, EntityLivingBase entityLiving) {
-        if (entityLiving instanceof EntityPlayer && !(entityLiving instanceof FakePlayer)) {
-            EntityDamageModel damageModel = entityLiving.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
-            Objects.requireNonNull(damageModel).applyMorphine((EntityPlayer) entityLiving);
-        }
+        EntityDamageModel damageModel = entityLiving.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+        if (damageModel != null)
+            damageModel.applyMorphine(entityLiving);
         stack.shrink(1);
         return stack;
     }

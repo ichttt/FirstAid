@@ -20,8 +20,9 @@ package ichttt.mods.firstaid.common.apiimpl;
 
 import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.debuff.IDebuffBuilder;
-import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
+import ichttt.mods.firstaid.api.enums.EnumPlayerDebuffSlot;
 import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.SoundEvent;
 
 import javax.annotation.Nonnull;
@@ -68,7 +69,7 @@ public class DebuffBuilder implements IDebuffBuilder {
     }
 
     @Override
-    public void register(@Nonnull EnumDebuffSlot slot) {
-        Objects.requireNonNull(FirstAidRegistry.getImpl()).registerDebuff(slot, this);
+    public void register(@Nonnull EnumPlayerDebuffSlot playerSlot, @Nullable EntityEquipmentSlot generalSlot) {
+        Objects.requireNonNull(FirstAidRegistry.getImpl()).registerDebuff(playerSlot, generalSlot, this);
     }
 }

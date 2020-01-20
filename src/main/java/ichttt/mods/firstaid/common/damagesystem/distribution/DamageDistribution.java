@@ -25,10 +25,9 @@ import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
 import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.api.event.FirstAidLivingDamageEvent;
 import ichttt.mods.firstaid.api.event.FirstAidPlayerDamageEvent;
-import ichttt.mods.firstaid.common.damagesystem.EntityDamageModelImpl;
 import ichttt.mods.firstaid.common.network.MessageUpdatePart;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
@@ -73,12 +72,12 @@ public abstract class DamageDistribution implements IDamageDistribution {
 
         FirstAidLivingDamageEvent event;
         if (entity instanceof EntityPlayer) {
-            PlayerDamageModel before = EntityDamageModelImpl.createPlayer();
+            PlayerDamageModel before = (PlayerDamageModel) damageModel.createCopy();
             before.deserializeNBT(beforeCache);
             event = new FirstAidPlayerDamageEvent((EntityPlayer) entity, (PlayerDamageModel) damageModel, before, source, left);
 
         } else {
-            EntityDamageModel before = EntityDamageModelImpl.create();
+            EntityDamageModel before = damageModel.createCopy();
             before.deserializeNBT(beforeCache);
             event = new FirstAidLivingDamageEvent(entity, damageModel, before, source, left);
         }
@@ -97,18 +96,19 @@ public abstract class DamageDistribution implements IDamageDistribution {
         return 0F;
     }
 
-    protected float distributeDamageOnParts(float damage, @Nonnull EntityDamageModel damageModel, @Nonnull EnumBodyPart[] enumParts, @Nonnull EntityLivingBase entity, boolean addStat) {
-        ArrayList<DamageablePart> damageableParts = new ArrayList<>(enumParts.length);
-        for (EnumBodyPart part : enumParts) {
-            damageableParts.add(damageModel.getFromEnum(part));
+    protected float distributeDamageOnParts(float damage, @Nonnull EntityDamageModel damageModel, @Nonnull List<DamageablePart> damageableParts, @Nonnull EntityLivingBase entity, boolean addStat) {
+        if (damageableParts.size() > 1) {
+            damageableParts = new ArrayList<>(damageableParts);
+            Collections.shuffle(damageableParts);
         }
-        Collections.shuffle(damageableParts);
         for (DamageablePart part : damageableParts) {
             float minHealth = minHealth(entity, part);
             float dmgDone = damage - part.damage(damage, entity, damageModel.getMorphineTicks() == 0, minHealth);
             if (entity instanceof EntityPlayer) {
-                FirstAid.NETWORKING.sendTo(new MessageUpdatePart(part), (EntityPlayerMP) entity);
-                if (addStat) ((EntityPlayer) entity).addStat(StatList.DAMAGE_TAKEN, Math.round(dmgDone * 10.0F));
+                EntityPlayer player = (EntityPlayer) entity;
+                FirstAid.NETWORKING.sendTo(new MessageUpdatePart(part, EnumPlayerPart.fromPart(part)), (EntityPlayerMP) player);
+                if (addStat)
+                    player.addStat(StatList.DAMAGE_TAKEN, Math.round(dmgDone * 10.0F));
             }
             damage -= dmgDone;
             if (damage == 0)
@@ -122,13 +122,12 @@ public abstract class DamageDistribution implements IDamageDistribution {
     }
 
     @Nonnull
-    protected abstract List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> getPartList();
+    protected abstract List<Pair<EntityEquipmentSlot, List<DamageablePart>>> getPartList(EntityDamageModel damageModel, EntityLivingBase entity);
 
-    @SuppressWarnings("unchecked")
     @Override
-    public float  distributeDamage(float damage, @Nonnull EntityLivingBase entity, @Nonnull DamageSource source, boolean addStat) {
+    public float distributeDamage(float damage, @Nonnull EntityLivingBase entity, @Nonnull DamageSource source, boolean addStat) {
         EntityDamageModel damageModel = Objects.requireNonNull(entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
-        for (Pair<EntityEquipmentSlot, EnumBodyPart[]> pair : getPartList()) {
+        for (Pair<EntityEquipmentSlot, List<DamageablePart>> pair : getPartList(damageModel, entity)) {
             EntityEquipmentSlot slot = pair.getLeft();
             damage = ArmorUtils.applyArmor(entity, entity.getItemStackFromSlot(slot), source, damage, slot);
             if (damage <= 0F)

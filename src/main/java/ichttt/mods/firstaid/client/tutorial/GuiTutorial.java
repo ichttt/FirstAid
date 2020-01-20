@@ -22,11 +22,11 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.ClientProxy;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
-import ichttt.mods.firstaid.common.damagesystem.EntityDamageModelImpl;
+import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModelImpl;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -44,24 +44,24 @@ public class GuiTutorial extends GuiScreen {
 
     @SuppressWarnings("deprecation") // we still need this method
     public GuiTutorial() {
-        this.demoModel = EntityDamageModelImpl.createPlayer();
+        this.demoModel = PlayerDamageModelImpl.createPlayer();
         this.parent = new GuiHealthScreen(demoModel);
         this.action = new TutorialAction(this);
 
         this.action.addTextWrapper("firstaid.tutorial.welcome");
         this.action.addTextWrapper("firstaid.tutorial.line1");
         this.action.addTextWrapper("firstaid.tutorial.line2");
-        this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.getFromEnum(EnumBodyPart.LEFT_FOOT).damage(4F, null, false));
+        this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.getFromEnum(EnumPlayerPart.LEFT_FOOT).damage(4F, null, false));
         this.action.addTextWrapper("firstaid.tutorial.line3");
         //We need the deprecated version
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.applyMorphine());
         this.action.addTextWrapper("firstaid.tutorial.line4");
         this.action.addTextWrapper("firstaid.tutorial.line5");
-        this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.getFromEnum(EnumBodyPart.LEFT_FOOT).heal(3F, null, false));
+        this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.getFromEnum(EnumPlayerPart.LEFT_FOOT).heal(3F, null, false));
         if (FirstAidConfig.externalHealing.sleepHealPercentage != 0D)
             this.action.addTextWrapper("firstaid.tutorial.sleephint");
         this.action.addTextWrapper("firstaid.tutorial.line6");
-        this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.getFromEnum(EnumBodyPart.HEAD).damage(16F, null, false));
+        this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.getFromEnum(EnumPlayerPart.HEAD).damage(16F, null, false));
         this.action.addTextWrapper("firstaid.tutorial.line7");
         this.action.addTextWrapper("firstaid.tutorial.line8", ClientProxy.showWounds.getDisplayName());
         this.action.addTextWrapper("firstaid.tutorial.end");

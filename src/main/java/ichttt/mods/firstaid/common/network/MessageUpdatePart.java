@@ -20,7 +20,8 @@ package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -37,8 +38,8 @@ public class MessageUpdatePart implements IMessage {
 
     public MessageUpdatePart() {}
 
-    public MessageUpdatePart(DamageablePart part) {
-        this.id = part.part.id;
+    public MessageUpdatePart(DamageablePart part, EnumPlayerPart enumPart) {
+        this.id = enumPart.id;
         this.maxHealth = part.getMaxHealth();
         this.absorption = part.getAbsorption();
         this.currentHealth = part.getCurrentHealth();
@@ -69,7 +70,7 @@ public class MessageUpdatePart implements IMessage {
             throw new RuntimeException("Negative absorption!");
         if (maxHealth < 0)
             throw new RuntimeException("Negative maxHealth!");
-        if (EnumBodyPart.fromID(id).id != this.id)
+        if (EnumPlayerPart.fromID(id).id != this.id)
             throw new RuntimeException("Wrong player mapping!");
     }
 
@@ -79,7 +80,8 @@ public class MessageUpdatePart implements IMessage {
         public IMessage onMessage(MessageUpdatePart message, MessageContext ctx) {
             Minecraft mc = Minecraft.getMinecraft();
             mc.addScheduledTask(() -> {
-                DamageablePart damageablePart = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).getFromEnum(EnumBodyPart.fromID(message.id));
+                PlayerDamageModel damageModel = (PlayerDamageModel) Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                DamageablePart damageablePart = damageModel.getFromEnum(EnumPlayerPart.fromID(message.id));
                 damageablePart.setMaxHealth(message.maxHealth);
                 damageablePart.setAbsorption(message.absorption);
                 damageablePart.setCurrentHealth(message.currentHealth);

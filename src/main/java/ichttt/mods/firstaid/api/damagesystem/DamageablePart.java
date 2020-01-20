@@ -1,24 +1,20 @@
 package ichttt.mods.firstaid.api.damagesystem;
 
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import ichttt.mods.firstaid.api.debuff.IDebuff;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public abstract class DamageablePart implements INBTSerializable<NBTTagCompound> {
     public final int initialMaxHealth;
     public final boolean canCauseDeath;
-    @Nonnull
-    public final EnumBodyPart part;
 
-    public DamageablePart(int maxHealth, boolean canCauseDeath, @Nonnull EnumBodyPart playerPart) {
+    public DamageablePart(int maxHealth, boolean canCauseDeath) {
         this.initialMaxHealth = maxHealth;
         this.canCauseDeath = canCauseDeath;
-        this.part = playerPart;
     }
 
     /**
@@ -74,4 +70,8 @@ public abstract class DamageablePart implements INBTSerializable<NBTTagCompound>
     public abstract void setCurrentHealth(float currentHealth);
 
     public abstract float getCurrentHealth();
+
+    public abstract String getName();
+
+    public abstract IDebuff[] getDebuffs();
 }

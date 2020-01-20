@@ -23,7 +23,7 @@ import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
@@ -53,7 +53,7 @@ import java.util.function.Predicate;
 public class HUDHandler implements ISelectiveResourceReloadListener {
     public static final HUDHandler INSTANCE = new HUDHandler();
     private static final int FADE_TIME = 30;
-    private final Map<EnumBodyPart, String> TRANSLATION_MAP = new EnumMap<>(EnumBodyPart.class);
+    private final Map<EnumPlayerPart, String> TRANSLATION_MAP = new EnumMap<>(EnumPlayerPart.class);
     private int maxLength;
     public int ticker = -1;
 
@@ -63,7 +63,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         FirstAid.LOGGER.debug("Building GUI translation table");
         TRANSLATION_MAP.clear();
         maxLength = 0;
-        for (EnumBodyPart part : EnumBodyPart.VALUES) {
+        for (EnumPlayerPart part : EnumPlayerPart.VALUES) {
             String translated = I18n.format("gui." + part.toString().toLowerCase(Locale.ENGLISH));
             maxLength = Math.max(maxLength, Minecraft.getMinecraft().fontRenderer.getStringWidth(translated));
             TRANSLATION_MAP.put(part, translated);
@@ -86,7 +86,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
 
         boolean playerDead = damageModel.isDead(mc.player);
         if (FirstAidConfig.overlay.hideOnNoChange) {
-            for (DamageablePart damageablePart : damageModel) {
+            for (DamageablePart damageablePart : damageModel.getParts()) {
                 if (HealthRenderUtils.healthChanged(damageablePart, playerDead)) {
                     ticker = Math.max(ticker, 100);
                     break;
@@ -141,8 +141,8 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
             PlayerModelRenderer.renderPlayerHealth(damageModel, gui, alpha, partialTicks);
         } else {
             int xTranslation = maxLength;
-            for (DamageablePart part : damageModel) {
-                mc.fontRenderer.drawStringWithShadow(TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF - (alpha << 24 & -0xFFFFFF));
+            for (DamageablePart part : damageModel.getParts()) {
+                mc.fontRenderer.drawStringWithShadow(TRANSLATION_MAP.get(EnumPlayerPart.fromPart(part)), 0, 0, 0xFFFFFF - (alpha << 24 & -0xFFFFFF));
                 if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.NUMBERS) {
                     HealthRenderUtils.drawHealthString(part, xTranslation, 0, false);
                 } else {

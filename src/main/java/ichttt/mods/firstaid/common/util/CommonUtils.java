@@ -20,12 +20,10 @@ package ichttt.mods.firstaid.common.util;
 
 import com.creativemd.playerrevive.api.IRevival;
 import com.creativemd.playerrevive.api.capability.CapaRevive;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import net.minecraft.entity.EntityLivingBase;
@@ -38,28 +36,25 @@ import net.minecraftforge.fml.common.ModContainer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 public class CommonUtils {
     @Nonnull
     public static final EntityEquipmentSlot[] ARMOR_SLOTS;
-    @Nonnull
-    public static final ImmutableMap<EntityEquipmentSlot, List<EnumBodyPart>> slotToParts;
+//    @Nonnull
+//    public static final ImmutableMap<EntityEquipmentSlot, List<EnumPlayerPart>> slotToParts;
 
     static {
         ARMOR_SLOTS = new EntityEquipmentSlot[4];
-        ARMOR_SLOTS[3] = EntityEquipmentSlot.HEAD;
-        ARMOR_SLOTS[2] = EntityEquipmentSlot.CHEST;
-        ARMOR_SLOTS[1] = EntityEquipmentSlot.LEGS;
-        ARMOR_SLOTS[0] = EntityEquipmentSlot.FEET;
-        slotToParts = ImmutableMap.<EntityEquipmentSlot, List<EnumBodyPart>>builder().
-        put(EntityEquipmentSlot.HEAD, Collections.singletonList(EnumBodyPart.HEAD)).
-        put(EntityEquipmentSlot.CHEST, Arrays.asList(EnumBodyPart.LEFT_ARM, EnumBodyPart.RIGHT_ARM, EnumBodyPart.BODY)).
-        put(EntityEquipmentSlot.LEGS, Arrays.asList(EnumBodyPart.LEFT_LEG, EnumBodyPart.RIGHT_LEG)).
-        put(EntityEquipmentSlot.FEET, Arrays.asList(EnumBodyPart.LEFT_FOOT, EnumBodyPart.RIGHT_FOOT)).build();
+        for (EntityEquipmentSlot slot : EntityEquipmentSlot.values()) {
+            if (slot.getSlotType() == EntityEquipmentSlot.Type.ARMOR)
+                ARMOR_SLOTS[slot.getIndex()] = slot;
+        }
+//        slotToParts = ImmutableMap.<EntityEquipmentSlot, List<EnumPlayerPart>>builder().
+//        put(EntityEquipmentSlot.HEAD, Collections.singletonList(EnumPlayerPart.HEAD)).
+//        put(EntityEquipmentSlot.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY)).
+//        put(EntityEquipmentSlot.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)).
+//        put(EntityEquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)).build();
     }
 
     public static void killEntity(@Nonnull EntityLivingBase entity, @Nullable DamageSource source) {

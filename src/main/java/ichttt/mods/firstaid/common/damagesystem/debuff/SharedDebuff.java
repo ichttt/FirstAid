@@ -22,25 +22,23 @@ import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
-import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import net.minecraft.entity.EntityLivingBase;
 
 import java.util.Objects;
 
 public class SharedDebuff implements IDebuff {
     private final IDebuff debuff;
-    private final EnumBodyPart[] parts;
+    private final int parts;
     private int damage;
     private int healingDone;
     private int damageCount;
     private int healingCount;
 
-    public SharedDebuff(IDebuff debuff, EnumDebuffSlot slot) {
-        if (slot.playerParts.length <= 1)
+    public SharedDebuff(IDebuff debuff, int count) {
+        if (count <= 1)
             throw new IllegalArgumentException("Only slots with more then more parts can be wrapped by SharedDebuff!");
         this.debuff = debuff;
-        this.parts = slot.playerParts;
+        this.parts = count;
     }
 
     @Override
@@ -65,12 +63,11 @@ public class SharedDebuff implements IDebuff {
 
         EntityDamageModel damageModel = Objects.requireNonNull(entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
         float healthPerMax = 0;
-        for (EnumBodyPart part : parts) {
-            DamageablePart damageablePart = damageModel.getFromEnum(part);
+        for (DamageablePart damageablePart : damageModel.getParts()) {
             healthPerMax += damageablePart.getCurrentHealth() / damageablePart.getMaxHealth();
         }
 
-        healthPerMax /= parts.length;
+        healthPerMax /= parts;
         if (healingCount > 0) {
             this.healingDone /= healingCount;
             debuff.handleHealing(this.healingDone, healthPerMax, entity);

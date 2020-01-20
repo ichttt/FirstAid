@@ -19,27 +19,34 @@
 
 package ichttt.mods.firstaid.api.enums;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
+import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
 import net.minecraft.inventory.EntityEquipmentSlot;
 
-public enum EnumBodyPart {
+public enum EnumPlayerPart {
     HEAD(1, EntityEquipmentSlot.HEAD), LEFT_ARM(2, EntityEquipmentSlot.CHEST), LEFT_LEG(3, EntityEquipmentSlot.LEGS), LEFT_FOOT(4, EntityEquipmentSlot.FEET),
     BODY(5, EntityEquipmentSlot.CHEST), RIGHT_ARM(6, EntityEquipmentSlot.CHEST), RIGHT_LEG(7, EntityEquipmentSlot.LEGS), RIGHT_FOOT(8, EntityEquipmentSlot.FEET);
 
-    public static final EnumBodyPart[] VALUES = values();
+    public static final EnumPlayerPart[] VALUES = values();
 
     public final byte id;
-    private ImmutableList<EnumBodyPart> neighbours;
+    private ImmutableList<EnumPlayerPart> neighbours;
     public final EntityEquipmentSlot slot;
 
-    EnumBodyPart(int id, EntityEquipmentSlot slot) {
+    EnumPlayerPart(int id, EntityEquipmentSlot slot) {
         this.id = (byte) id;
         this.slot = slot;
     }
 
-    public ImmutableList<EnumBodyPart> getNeighbours() {
+    public static EnumPlayerPart fromPart(DamageablePart damageablePart) {
+        String name = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, damageablePart.getName());
+        return valueOf(name);
+    }
+
+    public ImmutableList<EnumPlayerPart> getNeighbours() {
         if (neighbours == null) { // Need to do lazy init to avoid crashes when initializing class
-            ImmutableList.Builder<EnumBodyPart> builder = ImmutableList.builder();
+            ImmutableList.Builder<EnumPlayerPart> builder = ImmutableList.builder();
             if (this.id != 5 && this.id != 1)
                 builder.add(getUp());
             if (this.id != 4 && this.id != 8)
@@ -53,7 +60,7 @@ public enum EnumBodyPart {
         return neighbours;
     }
 
-    public static EnumBodyPart fromID(int id) {
+    public static EnumPlayerPart fromID(int id) {
         switch (id) {
             case 1:
                 return HEAD;
@@ -75,23 +82,23 @@ public enum EnumBodyPart {
         throw new IndexOutOfBoundsException("Invalid id " + id);
     }
 
-    public EnumBodyPart getUp() {
+    public EnumPlayerPart getUp() {
         if (this.id == 5)
             throw new IndexOutOfBoundsException("There is no part up from " + this.id);
         return fromID(this.id - 1);
     }
 
-    public EnumBodyPart getDown() {
+    public EnumPlayerPart getDown() {
         if (this.id == 4)
             throw new IndexOutOfBoundsException("There is no part down from " + this.id);
         return fromID(this.id + 1);
     }
 
-    public EnumBodyPart getLeft() {
+    public EnumPlayerPart getLeft() {
         return fromID(this.id - 4);
     }
 
-    public EnumBodyPart getRight() {
+    public EnumPlayerPart getRight() {
         return fromID(this.id + 4);
     }
 

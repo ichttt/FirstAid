@@ -23,7 +23,6 @@ import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.PartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.entity.EntityLivingBase;
@@ -39,6 +38,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class DamageablePartImpl extends DamageablePart implements INBTSerializable<NBTTagCompound> {
+    private final String name;
     private int maxHealth;
     @Nonnull
     private final IDebuff[] debuffs;
@@ -46,8 +46,9 @@ public class DamageablePartImpl extends DamageablePart implements INBTSerializab
     private float currentHealth;
     private PartHealer activeHealer;
 
-    public DamageablePartImpl(int maxHealth, boolean canCauseDeath, @Nonnull EnumBodyPart playerPart, @Nonnull IDebuff... debuffs) {
-        super(maxHealth, canCauseDeath, playerPart);
+    public DamageablePartImpl(String name, int maxHealth, boolean canCauseDeath, @Nonnull IDebuff... debuffs) {
+        super(maxHealth, canCauseDeath);
+        this.name = name;
         this.maxHealth = maxHealth;
         this.currentHealth = maxHealth;
         this.debuffs = debuffs;
@@ -197,5 +198,15 @@ public class DamageablePartImpl extends DamageablePart implements INBTSerializab
     @Override
     public float getCurrentHealth() {
         return this.currentHealth;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public IDebuff[] getDebuffs() {
+        return this.debuffs;
     }
 }

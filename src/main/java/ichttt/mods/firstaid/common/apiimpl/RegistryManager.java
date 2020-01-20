@@ -23,8 +23,8 @@ import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.debuff.DebuffBuilderFactory;
 import ichttt.mods.firstaid.api.debuff.IDebuffBuilder;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
-import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
+import ichttt.mods.firstaid.api.enums.EnumPlayerDebuffSlot;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.EventHandler;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.DamageSource;
@@ -51,31 +51,29 @@ public class RegistryManager {
         FirstAidRegistry registry = Objects.requireNonNull(FirstAidRegistry.getImpl());
 
         //---DAMAGE SOURCES---
-        List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> feetList = new ArrayList<>(2);
-        feetList.add(Pair.of(EntityEquipmentSlot.FEET, new EnumBodyPart[]{EnumBodyPart.LEFT_FOOT, EnumBodyPart.RIGHT_FOOT}));
-        feetList.add(Pair.of(EntityEquipmentSlot.LEGS, new EnumBodyPart[]{EnumBodyPart.LEFT_LEG, EnumBodyPart.RIGHT_LEG}));
-        registry.bindDamageSourceStandard(DamageSource.FALL, feetList, false);
-        registry.bindDamageSourceStandard(DamageSource.HOT_FLOOR, feetList, false);
+        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> feetList = new ArrayList<>(2);
+        registry.bindDamageSourceStandard(DamageSource.FALL, false, EntityEquipmentSlot.FEET, EntityEquipmentSlot.LEGS);
+        registry.bindDamageSourceStandard(DamageSource.HOT_FLOOR, false, EntityEquipmentSlot.FEET, EntityEquipmentSlot.LEGS);
 
-        List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> headList = new ArrayList<>(1);
-        headList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumBodyPart[]{EnumBodyPart.HEAD}));
-        registry.bindDamageSourceStandard(DamageSource.ANVIL, headList, false);
+        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> headList = new ArrayList<>(1);
+        headList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumPlayerPart[]{EnumPlayerPart.HEAD}));
+        registry.bindDamageSourceStandard(DamageSource.ANVIL, false, EntityEquipmentSlot.HEAD);
 
-        List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> headArmsList = new ArrayList<>(2);
-        headArmsList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumBodyPart[]{EnumBodyPart.HEAD}));
-        headArmsList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumBodyPart[]{EnumBodyPart.LEFT_ARM, EnumBodyPart.RIGHT_ARM}));
-        registry.bindDamageSourceStandard(DamageSource.LIGHTNING_BOLT, headArmsList, true);
+        List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> headArmsList = new ArrayList<>(2);
+        headArmsList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumPlayerPart[]{EnumPlayerPart.HEAD}));
+        headArmsList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM}));
+        registry.bindDamageSourceStandard(DamageSource.LIGHTNING_BOLT, true, headArmsList, EntityEquipmentSlot.HEAD, EntityEquipmentSlot.CHEST);
 
         registry.bindDamageSourceRandom(DamageSource.MAGIC, false, false);
         if (FirstAidConfig.hardMode) {
-            List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> bodyList = new ArrayList<>(1);
-            bodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumBodyPart[]{EnumBodyPart.BODY}));
-            registry.bindDamageSourceStandard(DamageSource.STARVE, bodyList, false);
+            List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> bodyList = new ArrayList<>(1);
+            bodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.BODY}));
+            registry.bindDamageSourceStandard(DamageSource.STARVE, false, bodyList, EntityEquipmentSlot.CHEST);
 
-            List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> headBodyList = new ArrayList<>(2);
-            headBodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumBodyPart[]{EnumBodyPart.BODY}));
-            headBodyList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumBodyPart[]{EnumBodyPart.HEAD}));
-            registry.bindDamageSourceStandard(DamageSource.DROWN, headBodyList, true);
+            List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> headBodyList = new ArrayList<>(2);
+            headBodyList.add(Pair.of(EntityEquipmentSlot.CHEST, new EnumPlayerPart[]{EnumPlayerPart.BODY}));
+            headBodyList.add(Pair.of(EntityEquipmentSlot.HEAD, new EnumPlayerPart[]{EnumPlayerPart.HEAD}));
+            registry.bindDamageSourceStandard(DamageSource.DROWN, true, headBodyList, EntityEquipmentSlot.HEAD, EntityEquipmentSlot.CHEST);
         } else {
             registry.bindDamageSourceRandom(DamageSource.STARVE, false, true);
             registry.bindDamageSourceRandom(DamageSource.DROWN, false, true);
@@ -84,15 +82,15 @@ public class RegistryManager {
 
         //---DEBUFFS---
         DebuffBuilderFactory factory = DebuffBuilderFactory.getInstance();
-        loadValuesFromConfig(factory, "blindness", () -> FirstAidConfig.debuffs.head.blindness, EventHandler.HEARTBEAT, FirstAidConfig.debuffs.head.blindnessConditions, EnumDebuffSlot.HEAD);
-        loadValuesFromConfig(factory, "nausea", () -> FirstAidConfig.debuffs.head.nausea, null, FirstAidConfig.debuffs.head.nauseaConditions, EnumDebuffSlot.HEAD);
-        loadValuesFromConfig(factory, "nausea", () -> FirstAidConfig.debuffs.body.nausea, null, FirstAidConfig.debuffs.body.nauseaConditions, EnumDebuffSlot.BODY);
-        loadValuesFromConfig(factory, "weakness", () -> FirstAidConfig.debuffs.body.weakness, FirstAidConfig.debuffs.body.weaknessConditions, EnumDebuffSlot.BODY);
-        loadValuesFromConfig(factory, "mining_fatigue", () -> FirstAidConfig.debuffs.arms.mining_fatigue, FirstAidConfig.debuffs.arms.miningFatigueConditions, EnumDebuffSlot.ARMS);
-        loadValuesFromConfig(factory, "slowness", () -> FirstAidConfig.debuffs.legsAndFeet.slowness, FirstAidConfig.debuffs.legsAndFeet.slownessConditions, EnumDebuffSlot.LEGS_AND_FEET);
+        loadValuesFromConfig(factory, "blindness", () -> FirstAidConfig.debuffs.head.blindness, EventHandler.HEARTBEAT, FirstAidConfig.debuffs.head.blindnessConditions, EnumPlayerDebuffSlot.HEAD, EntityEquipmentSlot.HEAD);
+        loadValuesFromConfig(factory, "nausea", () -> FirstAidConfig.debuffs.head.nausea, null, FirstAidConfig.debuffs.head.nauseaConditions, EnumPlayerDebuffSlot.HEAD, EntityEquipmentSlot.HEAD);
+        loadValuesFromConfig(factory, "nausea", () -> FirstAidConfig.debuffs.body.nausea, null, FirstAidConfig.debuffs.body.nauseaConditions, EnumPlayerDebuffSlot.BODY, EntityEquipmentSlot.CHEST);
+        loadValuesFromConfig(factory, "weakness", () -> FirstAidConfig.debuffs.body.weakness, FirstAidConfig.debuffs.body.weaknessConditions, EnumPlayerDebuffSlot.BODY, EntityEquipmentSlot.CHEST);
+        loadValuesFromConfig(factory, "mining_fatigue", () -> FirstAidConfig.debuffs.arms.mining_fatigue, FirstAidConfig.debuffs.arms.miningFatigueConditions, EnumPlayerDebuffSlot.ARMS, EntityEquipmentSlot.CHEST);
+        loadValuesFromConfig(factory, "slowness", () -> FirstAidConfig.debuffs.legsAndFeet.slowness, FirstAidConfig.debuffs.legsAndFeet.slownessConditions, EnumPlayerDebuffSlot.LEGS_AND_FEET, EntityEquipmentSlot.LEGS);
     }
 
-    private static void loadValuesFromConfig(DebuffBuilderFactory factory, String potionName, BooleanSupplier enableCondition, SoundEvent event, FirstAidConfig.Debuffs.ConditionOnHit config, EnumDebuffSlot slot) {
+    private static void loadValuesFromConfig(DebuffBuilderFactory factory, String potionName, BooleanSupplier enableCondition, SoundEvent event, FirstAidConfig.Debuffs.ConditionOnHit config, EnumPlayerDebuffSlot slot, EntityEquipmentSlot generalSlot) {
         if (config.debuffLength.length != config.damageTaken.length) {
             logError("The fields to not have the same amount of values!", potionName, slot);
             return;
@@ -117,10 +115,10 @@ public class RegistryManager {
             builder.addBound(config.damageTaken[i], config.debuffLength[i]);
 
         if (event != null) builder.addSoundEffect(event);
-        builder.register(slot);
+        builder.register(slot, generalSlot);
     }
 
-    private static void loadValuesFromConfig(DebuffBuilderFactory factory, String potionName, BooleanSupplier enableCondition, FirstAidConfig.Debuffs.ConditionConstant config, EnumDebuffSlot slot) {
+    private static void loadValuesFromConfig(DebuffBuilderFactory factory, String potionName, BooleanSupplier enableCondition, FirstAidConfig.Debuffs.ConditionConstant config, EnumPlayerDebuffSlot slot, EntityEquipmentSlot generalSlot) {
         if (config.debuffStrength.length != config.healthPercentageLeft.length) {
             logError("The fields to not have the same amount of values!", potionName, slot);
             return;
@@ -139,10 +137,10 @@ public class RegistryManager {
         for (int i = 0; i < config.healthPercentageLeft.length; i++)
             builder.addBound(config.healthPercentageLeft[i], config.debuffStrength[i]);
 
-        builder.register(slot);
+        builder.register(slot, generalSlot);
     }
 
-    private static void logError(String error, String potionName, EnumDebuffSlot slot) {
+    private static void logError(String error, String potionName, EnumPlayerDebuffSlot slot) {
         String errorMsg = String.format("Invalid config entry for debuff %s at part %s: %s", potionName, slot.toString(), error);
         FirstAid.LOGGER.warn(errorMsg);
         debuffConfigErrors.add(errorMsg);

@@ -76,7 +76,7 @@ public class DataManagerWrapper extends EntityDataManager {
     public <T> void set(@Nonnull DataParameter<T> key, @Nonnull T value) {
         if (key == EntityPlayer.ABSORPTION) {
             float floatValue = (Float) value;
-            if (entity instanceof EntityPlayerMP) { //may be EntityOtherPlayerMP as well
+            if (entity instanceof EntityPlayerMP) { //may be other entities as well
                 EntityPlayerMP playerMP = (EntityPlayerMP) entity;
                 if (playerMP.connection != null) //also fired when connecting, ignore(otherwise the net handler would crash)
                     FirstAid.NETWORKING.sendTo(new MessageApplyAbsorption(floatValue), playerMP);
@@ -87,7 +87,7 @@ public class DataManagerWrapper extends EntityDataManager {
                 float aFloat = (Float) value;
                 EntityDamageModel damageModel;
                 if (aFloat > entity.getMaxHealth()) {
-                    Objects.requireNonNull(entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).forEach(damageablePart -> damageablePart.setCurrentHealth(damageablePart.getMaxHealth()));
+                    Objects.requireNonNull(entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).getParts().forEach(damageablePart -> damageablePart.setCurrentHealth(damageablePart.getMaxHealth()));
                 } else if ((damageModel = entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)) != null && damageModel instanceof PlayerDamageModel && ((PlayerDamageModel)damageModel).isWaitingForHelp()) {
                     if (FirstAidConfig.debug)
                         CommonUtils.debugLogStacktrace("SetHealth falltrough");

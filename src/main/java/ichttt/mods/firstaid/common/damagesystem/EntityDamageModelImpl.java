@@ -18,144 +18,102 @@
 
 package ichttt.mods.firstaid.common.damagesystem;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
-import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
-import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.EventHandler;
-import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
+import ichttt.mods.firstaid.common.damagesystem.definition.DamageModelDefinition;
+import ichttt.mods.firstaid.common.damagesystem.definition.DamageablePartDefinition;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class EntityDamageModelImpl implements EntityDamageModel {
-    protected final DamageablePart head;
-    protected final DamageablePart leftArm;
-    protected final DamageablePart leftLeg;
-    protected final DamageablePart leftFoot;
-    protected final DamageablePart body;
-    protected final DamageablePart rightArm;
-    protected final DamageablePart rightLeg;
-    protected final DamageablePart rightFoot;
-    protected final Set<SharedDebuff> sharedDebuffs = new HashSet<>();
-    protected final boolean noCritical;
+
+    protected final Set<SharedDebuff> sharedDebuffs;
+    private final ImmutableCollection<DamageablePart> parts;
+    private final DamageModelDefinition definition;
+    private final Map<EntityEquipmentSlot, ImmutableList<DamageablePart>> map;
     protected int morphineTicksLeft = 0;
+    protected final boolean noCritical;
     protected float prevHealthCurrent = -1F;
     protected float prevScaleFactor;
     protected boolean needsMorphineUpdate = false;
 
-    public static <T extends EntityLivingBase> EntityDamageModel create() {
-        FirstAidRegistry registry = FirstAidRegistryImpl.INSTANCE;
-        IDebuff[] headDebuffs = registry.getDebuffs(EnumDebuffSlot.HEAD);
-        IDebuff[] bodyDebuffs = registry.getDebuffs(EnumDebuffSlot.BODY);
-        IDebuff[] armsDebuffs = registry.getDebuffs(EnumDebuffSlot.ARMS);
-        IDebuff[] legFootDebuffs = registry.getDebuffs(EnumDebuffSlot.LEGS_AND_FEET);
-        return new EntityDamageModelImpl(headDebuffs, bodyDebuffs, armsDebuffs, legFootDebuffs);
+    public static EntityDamageModel create(DamageModelDefinition definition) {
+        Map<EntityEquipmentSlot, ImmutableList<DamageablePart>> map = new HashMap<>();
+        Set<SharedDebuff> sharedDebuffs = new HashSet<>();
+        boolean noCritical = true;
+        for (EntityEquipmentSlot slot : CommonUtils.ARMOR_SLOTS) {
+            ImmutableList.Builder<DamageablePart> builder = new ImmutableList.Builder<>();
+            Collection<DamageablePartDefinition> partDefinitions = definition.getPartDefinitions(slot);
+            IDebuff[] debuffs = Objects.requireNonNull(FirstAidRegistry.getImpl()).getGeneralDebuff(slot, partDefinitions.size());
+            if (debuffs.length > 0 && debuffs[0] instanceof SharedDebuff) {
+                for (IDebuff debuff : debuffs)
+                    sharedDebuffs.add((SharedDebuff) debuff);
+            }
+            for (DamageablePartDefinition partDefinition : partDefinitions) {
+                if (!partDefinition.isCauseDeath()) noCritical = false;
+                builder.add(new DamageablePartImpl(partDefinition.getName(), partDefinition.getMaxHealth(), partDefinition.isCauseDeath(), debuffs));
+            }
+            map.put(slot, builder.build());
+        }
+        return new EntityDamageModelImpl(definition, map, noCritical, sharedDebuffs);
     }
 
-    public static PlayerDamageModel createPlayer() {
-        FirstAidRegistry registry = FirstAidRegistryImpl.INSTANCE;
-        IDebuff[] headDebuffs = registry.getDebuffs(EnumDebuffSlot.HEAD);
-        IDebuff[] bodyDebuffs = registry.getDebuffs(EnumDebuffSlot.BODY);
-        IDebuff[] armsDebuffs = registry.getDebuffs(EnumDebuffSlot.ARMS);
-        IDebuff[] legFootDebuffs = registry.getDebuffs(EnumDebuffSlot.LEGS_AND_FEET);
-        return new PlayerDamageModelImpl(headDebuffs, bodyDebuffs, armsDebuffs, legFootDebuffs);
-    }
-
-    protected EntityDamageModelImpl(IDebuff[] headDebuffs, IDebuff[] bodyDebuffs, IDebuff[] armDebuffs, IDebuff[] legFootDebuffs) {
-        this.head = new DamageablePartImpl(FirstAidConfig.damageSystem.maxHealthHead, FirstAidConfig.damageSystem.causeDeathHead, EnumBodyPart.HEAD, headDebuffs);
-        this.leftArm = new DamageablePartImpl(FirstAidConfig.damageSystem.maxHealthLeftArm, false, EnumBodyPart.LEFT_ARM, armDebuffs);
-        this.leftLeg = new DamageablePartImpl(FirstAidConfig.damageSystem.maxHealthLeftLeg, false, EnumBodyPart.LEFT_LEG, legFootDebuffs);
-        this.leftFoot = new DamageablePartImpl(FirstAidConfig.damageSystem.maxHealthLeftFoot, false, EnumBodyPart.LEFT_FOOT, legFootDebuffs);
-        this.body = new DamageablePartImpl(FirstAidConfig.damageSystem.maxHealthBody, FirstAidConfig.damageSystem.causeDeathBody, EnumBodyPart.BODY, bodyDebuffs);
-        this.rightArm = new DamageablePartImpl(FirstAidConfig.damageSystem.maxHealthRightArm, false, EnumBodyPart.RIGHT_ARM, armDebuffs);
-        this.rightLeg = new DamageablePartImpl(FirstAidConfig.damageSystem.maxHealthRightLeg, false, EnumBodyPart.RIGHT_LEG, legFootDebuffs);
-        this.rightFoot = new DamageablePartImpl(FirstAidConfig.damageSystem.maxHealthRightFoot, false, EnumBodyPart.RIGHT_FOOT, legFootDebuffs);
-        for (IDebuff debuff : armDebuffs)
-            this.sharedDebuffs.add((SharedDebuff) debuff);
-        for (IDebuff debuff : legFootDebuffs)
-            this.sharedDebuffs.add((SharedDebuff) debuff);
-        noCritical = !FirstAidConfig.damageSystem.causeDeathBody && !FirstAidConfig.damageSystem.causeDeathHead;
+    protected EntityDamageModelImpl(DamageModelDefinition definition, Map<EntityEquipmentSlot, ImmutableList<DamageablePart>> map, boolean noCritical, Set<SharedDebuff> debuffs) {
+        this.definition = definition;
+        this.map = map;
+        ImmutableList.Builder<DamageablePart> builder = ImmutableList.builder();
+        for (EntityEquipmentSlot slot : CommonUtils.ARMOR_SLOTS) {
+            builder.addAll(map.get(slot));
+        }
+        this.parts = builder.build();
+        this.noCritical = noCritical;
+        this.sharedDebuffs = debuffs;
     }
 
     @Override
     public NBTTagCompound serializeNBT() {
         NBTTagCompound tagCompound = new NBTTagCompound();
-        tagCompound.setTag("head", head.serializeNBT());
-        tagCompound.setTag("leftArm", leftArm.serializeNBT());
-        tagCompound.setTag("leftLeg", leftLeg.serializeNBT());
-        tagCompound.setTag("leftFoot", leftFoot.serializeNBT());
-        tagCompound.setTag("body", body.serializeNBT());
-        tagCompound.setTag("rightArm", rightArm.serializeNBT());
-        tagCompound.setTag("rightLeg", rightLeg.serializeNBT());
-        tagCompound.setTag("rightFoot", rightFoot.serializeNBT());
+        for (DamageablePart part : getParts())
+            tagCompound.setTag(part.getName(), part.serializeNBT());
         return tagCompound;
     }
 
     @Override
     public void deserializeNBT(NBTTagCompound nbt) {
-        head.deserializeNBT((NBTTagCompound) nbt.getTag("head"));
-        leftArm.deserializeNBT((NBTTagCompound) nbt.getTag("leftArm"));
-        leftLeg.deserializeNBT((NBTTagCompound) nbt.getTag("leftLeg"));
-        leftFoot.deserializeNBT((NBTTagCompound) nbt.getTag("leftFoot"));
-        body.deserializeNBT((NBTTagCompound) nbt.getTag("body"));
-        rightArm.deserializeNBT((NBTTagCompound) nbt.getTag("rightArm"));
-        rightLeg.deserializeNBT((NBTTagCompound) nbt.getTag("rightLeg"));
-        rightFoot.deserializeNBT((NBTTagCompound) nbt.getTag("rightFoot"));
-        if (nbt.hasKey("morphineTicks")) { //legacy - we still have to write it
-            morphineTicksLeft = nbt.getInteger("morphineTicks");
-            needsMorphineUpdate = true;
-        }
-    }
-
-    @Override
-    public DamageablePart getFromEnum(EnumBodyPart part) {
-        switch (part) {
-            case HEAD:
-                return head;
-            case LEFT_ARM:
-                return leftArm;
-            case LEFT_LEG:
-                return leftLeg;
-            case BODY:
-                return body;
-            case RIGHT_ARM:
-                return rightArm;
-            case RIGHT_LEG:
-                return rightLeg;
-            case LEFT_FOOT:
-                return leftFoot;
-            case RIGHT_FOOT:
-                return rightFoot;
-            default:
-                throw new RuntimeException("Unknown enum " + part);
-        }
+        for (DamageablePart part : getParts())
+            part.deserializeNBT(nbt.getCompoundTag(part.getName()));
     }
 
     @Override
     public boolean tick(World world, EntityLivingBase entity) {
         if (isDead(entity))
             return false;
-        world.profiler.startSection("FirstAidPlayerModel");
+        world.profiler.startSection("FirstAidDamageModel");
 
         float currentHealth = getCurrentHealth();
         if (currentHealth <= 0F) {
@@ -188,7 +146,7 @@ public class EntityDamageModelImpl implements EntityDamageModel {
 
         //Debuff and part ticking
         world.profiler.startSection("PartDebuffs");
-        forEach(part -> part.tick(world, entity, morphine == null));
+        getParts().forEach(part -> part.tick(world, entity, morphine == null));
         if (morphine == null)
             sharedDebuffs.forEach(sharedDebuff -> sharedDebuff.tick(entity));
         world.profiler.endSection();
@@ -219,30 +177,9 @@ public class EntityDamageModelImpl implements EntityDamageModel {
     }
 
     @Override
-    @Nonnull
-    public Iterator<DamageablePart> iterator() {
-        return new Iterator<DamageablePart>() {
-            byte count = 1;
-            @Override
-            public boolean hasNext() {
-                return count <= 8;
-            }
-
-            @Override
-            public DamageablePart next() {
-                if (count > 8)
-                    throw new NoSuchElementException();
-                DamageablePart part = getFromEnum(EnumBodyPart.fromID(count));
-                count++;
-                return part;
-            }
-        };
-    }
-
-    @Override
     public float getCurrentHealth() {
         float currentHealth = 0;
-        for (DamageablePart part : this)
+        for (DamageablePart part : this.getParts())
             currentHealth += part.getCurrentHealth();
         return currentHealth;
     }
@@ -254,7 +191,7 @@ public class EntityDamageModelImpl implements EntityDamageModel {
 
         if (this.noCritical) {
             boolean dead = true;
-            for (DamageablePart part : this) {
+            for (DamageablePart part : this.getParts()) {
                 if (part.getCurrentHealth() > 0) {
                     dead = false;
                     break;
@@ -262,7 +199,7 @@ public class EntityDamageModelImpl implements EntityDamageModel {
             }
             return dead;
         } else {
-            for (DamageablePart part : this) {
+            for (DamageablePart part : this.getParts()) {
                 if (part.canCauseDeath && part.getCurrentHealth() <= 0) {
                     return true;
                 }
@@ -274,7 +211,7 @@ public class EntityDamageModelImpl implements EntityDamageModel {
     @Override
     public Float getAbsorption() { //Float class because of DataManager
         float value = 0;
-        for (DamageablePart part : this)
+        for (DamageablePart part : this.getParts())
                 value += part.getAbsorption();
         return value; //Autoboxing FTW
     }
@@ -282,13 +219,13 @@ public class EntityDamageModelImpl implements EntityDamageModel {
     @Override
     public void setAbsorption(float absorption) {
         final float newAbsorption = absorption / 8F;
-        forEach(damageablePart -> damageablePart.setAbsorption(newAbsorption));
+        getParts().forEach(damageablePart -> damageablePart.setAbsorption(newAbsorption));
     }
 
     @Override
     public int getCurrentMaxHealth() {
         int maxHealth = 0;
-        for (DamageablePart part : this) {
+        for (DamageablePart part : this.getParts()) {
             maxHealth += part.getMaxHealth();
         }
         return maxHealth;
@@ -308,7 +245,7 @@ public class EntityDamageModelImpl implements EntityDamageModel {
                 int added = 0;
                 float expectedNewMaxHealth = 0F;
                 int newMaxHealth = 0;
-                for (DamageablePart part : this) {
+                for (DamageablePart part : this.getParts()) {
                     float floatResult = ((float) part.initialMaxHealth) * globalFactor;
                     expectedNewMaxHealth += floatResult;
                     int result = (int) floatResult;
@@ -330,7 +267,7 @@ public class EntityDamageModelImpl implements EntityDamageModel {
                     }
                     newMaxHealth += result;
                     if (FirstAidConfig.debug) {
-                        FirstAid.LOGGER.info("Part {} max health: {} initial; {} old; {} new", part.part.name(), part.initialMaxHealth, part.getMaxHealth(), result);
+                        FirstAid.LOGGER.info("Part {} max health: {} initial; {} old; {} new", part.getName(), part.initialMaxHealth, part.getMaxHealth(), result);
                     }
                     part.setMaxHealth(result);
                 }
@@ -339,15 +276,12 @@ public class EntityDamageModelImpl implements EntityDamageModel {
                     if (FirstAidConfig.debug) {
                         FirstAid.LOGGER.info("Entering second stage - diff {}", Math.abs(expectedNewMaxHealth - newMaxHealth));
                     }
-                    List<DamageablePart> prioList = new ArrayList<>();
-                    for (DamageablePart part : this) {
-                        prioList.add(part);
-                    }
+                    List<DamageablePart> prioList = new ArrayList<>(this.getParts());
                     prioList.sort(Comparator.comparingInt(DamageablePart::getMaxHealth));
                     for (DamageablePart part : prioList) {
                         int maxHealth = part.getMaxHealth();
                         if (FirstAidConfig.debug) {
-                            FirstAid.LOGGER.info("Part {}: Second stage with total diff {}", part.part.name(), Math.abs(expectedNewMaxHealth - newMaxHealth));
+                            FirstAid.LOGGER.info("Part {}: Second stage with total diff {}", part.getName(), Math.abs(expectedNewMaxHealth - newMaxHealth));
                         }
                         if (expectedNewMaxHealth > newMaxHealth) {
                             part.setMaxHealth(maxHealth + 2);
@@ -371,5 +305,35 @@ public class EntityDamageModelImpl implements EntityDamageModel {
     @Override
     public boolean hasNoCritical() {
         return this.noCritical;
+    }
+
+    @Override
+    public ImmutableCollection<DamageablePart> getParts() {
+        return this.parts;
+    }
+
+    @Override
+    public ImmutableList<DamageablePart> getParts(EntityEquipmentSlot slot) {
+        return this.map.get(slot);
+    }
+
+    @Override
+    public EntityDamageModel createCopy() {
+        return create(definition);
+    }
+
+    @Nullable
+    @Override
+    public EntityEquipmentSlot getHitSlot(float yRelative) {
+        Map<EnumHeightOffset, Float> offsets = definition.getHeightOffsets();
+        if (offsets == null) return null;
+        if (yRelative > offsets.get(EnumHeightOffset.HEAD_BODY))
+            return EntityEquipmentSlot.HEAD;
+        else if (yRelative > offsets.get(EnumHeightOffset.BODY_LEGS))
+            return EntityEquipmentSlot.CHEST;
+        else if (yRelative > offsets.get(EnumHeightOffset.LEGS_FEET))
+            return EntityEquipmentSlot.LEGS;
+        else
+            return EntityEquipmentSlot.FEET;
     }
 }

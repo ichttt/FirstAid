@@ -23,8 +23,8 @@ import ichttt.mods.firstaid.api.damagesystem.PartHealer;
 import ichttt.mods.firstaid.api.debuff.DebuffBuilderFactory;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.debuff.IDebuffBuilder;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
-import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
+import ichttt.mods.firstaid.api.enums.EnumPlayerDebuffSlot;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -67,29 +67,25 @@ public abstract class FirstAidRegistry {
     }
 
     /**
-     * @deprecated Use {@link #bindDamageSourceStandard(DamageSource, List, boolean)} instead
+     * Binds the damage source to a distribution.
+     * The distribution will be a GeneralDamageDistribution
+     *
+     * @param damageType           The source - If you only have a source string, just wrap it in a {@link DamageSource(String)}
+     * @param priorityList         The raw distribution table. Allows not as fine control, but can be used on all entities
+     * @param shufflePriorityTable If the {@code priorityTable} should be shuffled before each distribution
      */
-    @Deprecated
-    public abstract void bindDamageSourceStandard(@Nonnull String damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> priorityTable);
+    public abstract void bindDamageSourceStandard(@Nonnull DamageSource damageType, boolean shufflePriorityTable, @Nonnull EntityEquipmentSlot... priorityList);
 
     /**
      * Binds the damage source to a distribution.
-     * The distribution will be a StandardDamageDistribution
+     * The distribution will be a StandardDamageDistribution or GeneralDamageDistribution
      *
      * @param damageType           The source - If you only have a source string, just wrap it in a {@link DamageSource(String)}
-     * @param priorityTable        The distribution table. If {@code shufflePriorityTable} is true,
-     *                             the first item on the list will be damaged first,
-     *                             if the health there drops under zero, the second will be damaged and so on.
-     *                             Otherwise, the list will be shuffled before each damage distribution
+     * @param priorityTable        The fine-controlled distribution table. This will only be used for player entities
+     * @param priorityList         The raw distribution table. Allows not as fine control, but can be used on all entities
      * @param shufflePriorityTable If the {@code priorityTable} should be shuffled before each distribution
      */
-    public abstract void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> priorityTable, boolean shufflePriorityTable);
-
-    /**
-     * @deprecated Use {@link #bindDamageSourceRandom(DamageSource, boolean, boolean)} instead
-     */
-    @Deprecated
-    public abstract void bindDamageSourceRandom(@Nonnull String damageType, boolean nearestFirst, boolean tryNoKill);
+    public abstract void bindDamageSourceStandard(@Nonnull DamageSource damageType, boolean shufflePriorityTable, @Nullable List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable, @Nonnull EntityEquipmentSlot... priorityList);
 
     /**
      * Binds the damage source to a distribution.
@@ -104,12 +100,6 @@ public abstract class FirstAidRegistry {
     public abstract void bindDamageSourceRandom(@Nonnull DamageSource damageType, boolean nearestFirst, boolean tryNoKill);
 
     /**
-     * @deprecated Use {@link #bindDamageSourceCustom(DamageSource, IDamageDistribution)} instead
-     */
-    @Deprecated
-    public abstract void bindDamageSourceCustom(@Nonnull String damageType, @Nonnull IDamageDistribution distributionTable);
-
-    /**
      * Binds the damage source to a custom distribution
      *
      * @param damageType        The source
@@ -120,31 +110,22 @@ public abstract class FirstAidRegistry {
     /**
      * Registers your debuff to the FirstAid mod.
      *
-     * @param slot    The slot this debuff should be active on
-     * @param builder The builder containing all the information needed for the system.
-     *                To retrieve a new builder use {@link DebuffBuilderFactory}
+     * @param playerSlot  The slot this debuff should be active on the player
+     * @param generalSlot The slot this debuff should be active on general mobs. null if this only applies to players
+     * @param builder     The builder containing all the information needed for the system.
+     *                    To retrieve a new builder use {@link DebuffBuilderFactory}
      */
-    public abstract void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull IDebuffBuilder builder);
+    public abstract void registerDebuff(@Nonnull EnumPlayerDebuffSlot playerSlot, @Nullable EntityEquipmentSlot generalSlot, @Nonnull IDebuffBuilder builder);
 
     /**
      * Registers you debuff to the FirstAid mod.
-     * If you just need a simple onHit or constant debuff, you might want to use {@link #registerDebuff(EnumDebuffSlot, IDebuffBuilder)}
+     * If you just need a simple onHit or constant debuff, you might want to use {@link #registerDebuff(EnumPlayerDebuffSlot, EntityEquipmentSlot, IDebuffBuilder)}
      *
-     * @param slot   The slot this debuff should be active on
-     * @param debuff Your custom implementation of a debuff
+     * @param playerSlot   The slot this debuff should be active on
+     * @param generalSlot  The slot this debuff should be active on general mobs. null if this only applies to players
+     * @param debuff       Your custom implementation of a debuff
      */
-    public abstract void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull Supplier<IDebuff> debuff);
-
-    /**
-     * Registers a healing type, so it can be used by the damage system when the user applies it.
-     *
-     * @param item      The item to bind to
-     * @param factory   The factory to create a new healing type.
-     *                  This should always create a new healer and get the itemstack that will shrink after creating the healer
-     * @param applyTime The time it takes to apply this in the UI
-     */
-    @Deprecated
-    public abstract void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, PartHealer> factory, int applyTime);
+    public abstract void registerDebuff(@Nonnull EnumPlayerDebuffSlot playerSlot, @Nullable EntityEquipmentSlot generalSlot, @Nonnull Supplier<IDebuff> debuff);
 
     /**
      * Registers a healing type, so it can be used by the damage system when the user applies it.
@@ -159,15 +140,14 @@ public abstract class FirstAidRegistry {
     @Nullable
     public abstract PartHealer getPartHealer(@Nonnull ItemStack type);
 
-    @Deprecated
-    @Nullable
-    public abstract Integer getPartHealingTime(@Nonnull Item item);
-
     public abstract Integer getPartHealingTime(@Nonnull ItemStack itemStack);
 
     @Nonnull
     public abstract IDamageDistribution getDamageDistribution(@Nonnull DamageSource source);
 
     @Nonnull
-    public abstract IDebuff[] getDebuffs(@Nonnull EnumDebuffSlot slot);
+    public abstract IDebuff[] getPlayerDebuff(@Nonnull EnumPlayerDebuffSlot slot);
+
+    @Nonnull
+    public abstract IDebuff[] getGeneralDebuff(@Nonnull EntityEquipmentSlot slot, int count);
 }

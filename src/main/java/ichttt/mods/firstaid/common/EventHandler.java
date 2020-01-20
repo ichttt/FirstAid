@@ -30,6 +30,9 @@ import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.damagesystem.EntityDamageModelImpl;
+import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModelImpl;
+import ichttt.mods.firstaid.common.damagesystem.definition.DamageModelDefinition;
+import ichttt.mods.firstaid.common.damagesystem.definition.DefinitionManager;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.PreferredDamageDistribution;
@@ -39,10 +42,10 @@ import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.potion.FirstAidPotion;
 import ichttt.mods.firstaid.common.potion.PotionPoisonPatched;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import ichttt.mods.firstaid.common.util.ProjectileHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -53,6 +56,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -64,7 +68,6 @@ import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.functions.SetCount;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
-import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegistryEvent;
@@ -93,24 +96,24 @@ public class EventHandler {
     public static final Potion MORPHINE = new FirstAidPotion(false, 0xDDD, "morphine").setBeneficial();
     public static final Potion POISEN_PATCHED = PotionPoisonPatched.INSTANCE;
 
-    public static final Map<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
+    public static final Map<EntityLivingBase, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
 
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
-        if (entity.world.isRemote || !(entity instanceof EntityPlayer) || entity instanceof FakePlayer)
+        if (entity.world.isRemote)
             return;
         float amountToDamage = event.getAmount();
-        EntityPlayer player = (EntityPlayer) entity;
-        EntityDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+        EntityDamageModel damageModel = entity.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+        if (damageModel == null) return;
         DamageSource source = event.getSource();
 
         if (amountToDamage == Float.MAX_VALUE) {
-            damageModel.forEach(damageablePart -> damageablePart.setCurrentHealth(0F));
-            if (player instanceof EntityPlayerMP)
-                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel), (EntityPlayerMP) player);
+            damageModel.getParts().forEach(damageablePart -> damageablePart.setCurrentHealth(0F));
+            if (entity instanceof EntityPlayerMP)
+                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel), (EntityPlayerMP) entity);
             event.setCanceled(true);
-            CommonUtils.killEntity(player, source);
+            CommonUtils.killEntity(entity, source);
             return;
         }
 
@@ -118,19 +121,21 @@ public class EventHandler {
         IDamageDistribution damageDistribution = FirstAidRegistryImpl.INSTANCE.getDamageDistribution(source);
 
         if (source.isProjectile()) {
-            Pair<Entity, RayTraceResult> rayTraceResult = hitList.remove(player);
+            Pair<Entity, RayTraceResult> rayTraceResult = hitList.remove(entity);
             if (rayTraceResult != null) {
                 Entity entityProjectile = rayTraceResult.getLeft();
-                EntityEquipmentSlot slot = ProjectileHelper.getPartByPosition(entityProjectile, player);
+                AxisAlignedBB toTestAABB = entityProjectile.getEntityBoundingBox();
+                float meanHeight = (float) (((toTestAABB.minY - entity.posY) + (toTestAABB.maxY - entity.posY)) / 2F);
+                EntityEquipmentSlot slot = damageModel.getHitSlot(meanHeight);
                 if (slot != null)
                     damageDistribution = new PreferredDamageDistribution(slot);
             }
         }
-        DamageDistribution.handleDamageTaken(damageDistribution, damageModel, amountToDamage, player, source, addStat, true);
+        DamageDistribution.handleDamageTaken(damageDistribution, damageModel, amountToDamage, entity, source, addStat, true);
 
         event.setCanceled(true);
 
-        hitList.remove(player);
+        hitList.remove(entity);
     }
 
     @SubscribeEvent(priority =  EventPriority.LOWEST)
@@ -140,20 +145,30 @@ public class EventHandler {
             return;
 
         Entity entity = result.entityHit;
-        if (!entity.world.isRemote && entity instanceof EntityPlayer) {
-            hitList.put((EntityPlayer) entity, Pair.of(event.getEntity(), event.getRayTraceResult()));
+        if (!entity.world.isRemote && entity instanceof EntityLivingBase) {
+            hitList.put((EntityLivingBase) entity, Pair.of(event.getEntity(), event.getRayTraceResult()));
         }
     }
 
     @SubscribeEvent
     public static void registerCapability(AttachCapabilitiesEvent<Entity> event) {
         Entity obj = event.getObject();
-        if (obj instanceof EntityPlayer && !(obj instanceof FakePlayer)) {
-            EntityPlayer player = (EntityPlayer) obj;
-            EntityDamageModel damageModel = EntityDamageModelImpl.create();
+        if (obj instanceof EntityLivingBase) {
+            EntityDamageModel damageModel;
+            if (obj instanceof EntityPlayer)
+                damageModel = PlayerDamageModelImpl.createPlayer();
+            else if (true) { //TODO config
+                ResourceLocation resourceLocation = EntityList.getKey(obj);
+                DamageModelDefinition definition = DefinitionManager.getDefinition(resourceLocation);
+                if (definition == null) return;
+                damageModel = EntityDamageModelImpl.create(definition);
+            } else {
+                return;
+            }
+            EntityLivingBase entity = (EntityLivingBase) obj;
             event.addCapability(CapProvider.IDENTIFIER, new CapProvider(damageModel));
             //replace the data manager with our wrapper to grab absorption
-            player.dataManager = new DataManagerWrapper(player, player.dataManager);
+            entity.dataManager = new DataManagerWrapper(entity, entity.dataManager);
         }
     }
 
@@ -322,7 +337,7 @@ public class EventHandler {
         if (!event.isEndConquered() && !event.player.world.isRemote && event.player instanceof EntityPlayerMP) {
             PlayerDamageModel damageModel = (PlayerDamageModel) Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
             damageModel.runScaleLogic(event.player);
-            damageModel.forEach(damageablePart -> damageablePart.heal(damageablePart.getMaxHealth(), event.player, false));
+            damageModel.getParts().forEach(damageablePart -> damageablePart.heal(damageablePart.getMaxHealth(), event.player, false));
             damageModel.scheduleResync();
         }
     }

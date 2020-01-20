@@ -19,7 +19,7 @@
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -56,35 +56,34 @@ public class RandomDamageDistribution extends DamageDistribution {
 
     @Override
     @Nonnull
-    protected List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> getPartList() {
+    protected List<Pair<EntityEquipmentSlot, List<DamageablePart>>> getPartList(EntityDamageModel damageModel, EntityLivingBase entity) {
         if (nearestFirst) {
             int startValue = RANDOM.nextInt(4);
-            return addAllRandom(startValue, RANDOM.nextBoolean());
+            return addAllRandom(startValue, RANDOM.nextBoolean(), damageModel);
         } else {
-            List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> partList = new ArrayList<>();
+            List<Pair<EntityEquipmentSlot, List<DamageablePart>>> partList = new ArrayList<>();
             List<EntityEquipmentSlot> slots = Arrays.asList(EntityEquipmentSlot.values());
             Collections.shuffle(slots, RANDOM);
             for (EntityEquipmentSlot slot : slots) {
                 if (!CommonUtils.isValidArmorSlot(slot))
                     continue;
-                List<EnumBodyPart> parts = CommonUtils.slotToParts.get(slot);
+                List<DamageablePart> parts = damageModel.getParts(slot);
                 Collections.shuffle(parts);
-                partList.add(Pair.of(slot, parts.toArray(new EnumBodyPart[0])));
+                partList.add(Pair.of(slot, parts));
             }
             return partList;
         }
     }
 
-    public static List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> addAllRandom(int startValue, boolean up) {
-        List<Pair<EntityEquipmentSlot, EnumBodyPart[]>> partList = new ArrayList<>();
+    public static List<Pair<EntityEquipmentSlot, List<DamageablePart>>> addAllRandom(int startValue, boolean up, EntityDamageModel damageModel) {
+        List<Pair<EntityEquipmentSlot, List<DamageablePart>>> partList = new ArrayList<>();
         for (int i = 0; i < CommonUtils.ARMOR_SLOTS.length; i ++) {
             int posInArray = Math.abs(i - (up ? 0 : 3)) + startValue;
             if (posInArray > 3)
                 posInArray -= 4;
             EntityEquipmentSlot slot = CommonUtils.ARMOR_SLOTS[posInArray];
-            List<EnumBodyPart> parts = CommonUtils.slotToParts.get(slot);
-            Collections.shuffle(parts);
-            partList.add(Pair.of(slot, parts.toArray(new EnumBodyPart[0])));
+            List<DamageablePart> parts = damageModel.getParts(slot);
+            partList.add(Pair.of(slot, parts));
         }
         return partList;
     }

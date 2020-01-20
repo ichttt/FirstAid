@@ -28,6 +28,7 @@ import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
 import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.config.ExtraConfigManager;
+import ichttt.mods.firstaid.common.damagesystem.definition.DefinitionManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.MessageAddHealth;
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
@@ -63,6 +64,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.List;
 
 @Mod(modid = FirstAid.MODID,
@@ -108,6 +110,12 @@ public class FirstAid {
         HealingItemApiHelperImpl.init();
         RegistryManager.setupRegistries();
         checkEarlyExit();
+        try {
+            DefinitionManager.load(event.getModConfigurationDirectory().toPath());
+        } catch (IOException e) {
+            LOGGER.error("Error loading definitions!", e);
+            throw new RuntimeException("Failed to load definitions!");
+        }
     }
 
     @Mod.EventHandler

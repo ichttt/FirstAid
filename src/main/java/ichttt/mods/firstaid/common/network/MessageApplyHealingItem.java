@@ -21,9 +21,9 @@ package ichttt.mods.firstaid.common.network;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.DamageablePart;
-import ichttt.mods.firstaid.api.damagesystem.EntityDamageModel;
 import ichttt.mods.firstaid.api.damagesystem.PartHealer;
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import ichttt.mods.firstaid.api.damagesystem.PlayerDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,19 +38,19 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import java.util.Objects;
 
 public class MessageApplyHealingItem implements IMessage {
-    private EnumBodyPart part;
+    private EnumPlayerPart part;
     private EnumHand hand;
 
     public MessageApplyHealingItem() {}
 
-    public MessageApplyHealingItem(EnumBodyPart part, EnumHand hand) {
+    public MessageApplyHealingItem(EnumPlayerPart part, EnumHand hand) {
         this.part = part;
         this.hand = hand;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        part = EnumBodyPart.fromID(buf.readByte());
+        part = EnumPlayerPart.fromID(buf.readByte());
         hand = buf.readBoolean() ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
     }
 
@@ -67,7 +67,7 @@ public class MessageApplyHealingItem implements IMessage {
             //noinspection ConstantConditions
             ctx.getServerHandler().player.getServer().addScheduledTask(() -> {
                 EntityPlayer player = ctx.getServerHandler().player;
-                EntityDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                PlayerDamageModel damageModel = (PlayerDamageModel) Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
                 ItemStack stack = player.getHeldItem(message.hand);
                 Item item = stack.getItem();
                 PartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);

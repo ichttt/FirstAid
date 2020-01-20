@@ -19,16 +19,17 @@
 
 package ichttt.mods.firstaid.api.damagesystem;
 
-import ichttt.mods.firstaid.api.enums.EnumBodyPart;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
 
-public interface EntityDamageModel extends Iterable<DamageablePart>, INBTSerializable<NBTTagCompound> {
-    DamageablePart getFromEnum(EnumBodyPart part);
+public interface EntityDamageModel extends INBTSerializable<NBTTagCompound> {
 
     /**
      * Updates the part.
@@ -66,4 +67,13 @@ public interface EntityDamageModel extends Iterable<DamageablePart>, INBTSeriali
     void runScaleLogic(EntityLivingBase entity);
 
     boolean hasNoCritical();
+
+    ImmutableCollection<DamageablePart> getParts();
+
+    ImmutableList<DamageablePart> getParts(EntityEquipmentSlot slot);
+
+    EntityDamageModel createCopy();
+
+    @Nullable
+    EntityEquipmentSlot getHitSlot(float yRelative);
 }

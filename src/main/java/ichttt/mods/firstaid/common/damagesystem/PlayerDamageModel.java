@@ -135,6 +135,10 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             throw new RuntimeException("Negative sleepBlockTicks " + sleepBlockTicks);
 
         float newCurrentHealth = calculateNewCurrentHealth(player);
+        if (Float.isNaN(newCurrentHealth)) {
+            FirstAid.LOGGER.warn("New current health is not a number, setting it to 0!");
+            newCurrentHealth = 0F;
+        }
         if (newCurrentHealth <= 0F) {
             FirstAid.LOGGER.error("Got {} health left, but isn't marked as dead!", newCurrentHealth);
             world.profiler.endSection();

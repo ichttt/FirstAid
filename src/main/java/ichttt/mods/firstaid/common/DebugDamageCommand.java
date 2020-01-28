@@ -101,7 +101,7 @@ public class DebugDamageCommand extends CommandBase {
                 damage(part, damage, debuff, (EntityPlayer) sender);
             }
             if (sender instanceof EntityPlayerMP && !(sender instanceof FakePlayer))
-                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(((EntityPlayer) sender).getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), (EntityPlayerMP) sender);
+                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(((EntityPlayer) sender).getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)), false), (EntityPlayerMP) sender);
         } catch (RuntimeException e) {
             throw new CommandException(e.toString());
         }

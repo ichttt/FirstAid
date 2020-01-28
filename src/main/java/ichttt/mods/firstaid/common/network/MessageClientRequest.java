@@ -64,7 +64,7 @@ public class MessageClientRequest implements IMessage {
                     CapProvider.tutorialDone.add(player.getName());
                     Objects.requireNonNull(player.getServer()).addScheduledTask(() -> Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).hasTutorial = true);
                 } else if (message.type == Type.REQUEST_REFRESH) {
-                    FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null))), player);
+                    FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)), true), player);
                 }
             });
             return null;

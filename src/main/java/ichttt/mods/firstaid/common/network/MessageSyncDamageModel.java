@@ -34,21 +34,25 @@ import java.util.Objects;
 
 public class MessageSyncDamageModel implements IMessage {
     private NBTTagCompound playerDamageModel;
+    private boolean scaleMaxHealth;
 
     public MessageSyncDamageModel() {}
 
-    public MessageSyncDamageModel(AbstractPlayerDamageModel damageModel) {
+    public MessageSyncDamageModel(AbstractPlayerDamageModel damageModel, boolean scaleMaxHealth) {
         this.playerDamageModel = damageModel.serializeNBT();
+        this.scaleMaxHealth = scaleMaxHealth;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         playerDamageModel = ByteBufUtils.readTag(buf);
+        scaleMaxHealth = buf.readBoolean();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         ByteBufUtils.writeTag(buf, this.playerDamageModel);
+        buf.writeBoolean(scaleMaxHealth);
     }
 
     public static final class Handler implements IMessageHandler<MessageSyncDamageModel, IMessage> {
@@ -57,7 +61,12 @@ public class MessageSyncDamageModel implements IMessage {
         @Override
         public IMessage onMessage(MessageSyncDamageModel message, MessageContext ctx) {
             Minecraft mc = Minecraft.getMinecraft();
-            mc.addScheduledTask(() -> Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).deserializeNBT(message.playerDamageModel));
+            mc.addScheduledTask(() -> {
+                AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                if (message.scaleMaxHealth)
+                    damageModel.runScaleLogic(mc.player);
+                damageModel.deserializeNBT(message.playerDamageModel);
+            });
             return null;
         }
     }

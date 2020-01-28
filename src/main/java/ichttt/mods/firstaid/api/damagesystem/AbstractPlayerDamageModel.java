@@ -94,6 +94,7 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
     @Deprecated
     public abstract int getMorphineTicks();
 
+    @Deprecated
     public abstract float getCurrentHealth();
 
     /**

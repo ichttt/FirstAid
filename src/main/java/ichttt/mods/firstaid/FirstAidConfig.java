@@ -80,6 +80,19 @@ public class FirstAidConfig {
     @Config.RequiresMcRestart
     public static boolean hardMode = false;
 
+    @Config.Comment("Specifies how the vanilla health is calculated. Affects the visual health bar, as well as the value other mods get when they query the player health.\n" +
+            "AVERAGE_ALL simply takes all limbs and calculates the average of it.\n" +
+            "AVERAGE_CRITICAL takes all critical limbs and calculates the average of it\n" +
+            "MIN_CRITICAl takes the smallest health value of all critical limb\n" +
+            "Does not have any effect if all critical limbs have been disabled.")
+    @Config.RequiresWorldRestart
+    @ExtraConfig.Sync
+    public static VanillaHealthCalculationMode vanillaHealthCalculation = VanillaHealthCalculationMode.AVERAGE_ALL;
+
+    public enum VanillaHealthCalculationMode {
+        AVERAGE_ALL, AVERAGE_CRITICAL, MIN_CRITICAL;
+    }
+
     @Config.Comment("Enabled additional debug logs - May slow down the game and will increase log file size\nOnly enable for special purposes")
     @Config.LangKey("firstaid.config.debug")
     @Config.RequiresMcRestart

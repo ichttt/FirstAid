@@ -52,6 +52,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 
 public class PlayerDamageModel extends AbstractPlayerDamageModel {
@@ -133,9 +134,9 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         else if (sleepBlockTicks < 0)
             throw new RuntimeException("Negative sleepBlockTicks " + sleepBlockTicks);
 
-        float currentHealth = getCurrentHealth();
-        if (currentHealth <= 0F) {
-            FirstAid.LOGGER.error("Got {} health left, but isn't marked as dead!", currentHealth);
+        float newCurrentHealth = calculateNewCurrentHealth(player);
+        if (newCurrentHealth <= 0F) {
+            FirstAid.LOGGER.error("Got {} health left, but isn't marked as dead!", newCurrentHealth);
             world.profiler.endSection();
             return;
         }
@@ -143,11 +144,9 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             resyncTimer--;
             if (resyncTimer == 0) {
                 resyncTimer = -1;
-                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this), (EntityPlayerMP) player);
+                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this, true), (EntityPlayerMP) player);
             }
         }
-
-        float newCurrentHealth = (currentHealth / getCurrentMaxHealth()) * player.getMaxHealth();
 
         if (Float.isInfinite(newCurrentHealth)) {
             FirstAid.LOGGER.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe
@@ -224,12 +223,48 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         };
     }
 
+    @Deprecated
     @Override
     public float getCurrentHealth() {
         float currentHealth = 0;
         for (AbstractDamageablePart part : this)
             currentHealth += part.currentHealth;
         return currentHealth;
+    }
+
+    private float calculateNewCurrentHealth(EntityPlayer player) {
+        float currentHealth = 0;
+        switch (FirstAidConfig.vanillaHealthCalculation) {
+            case AVERAGE_CRITICAL:
+                int maxHealth = 0;
+                for (AbstractDamageablePart part : this) {
+                    if (part.canCauseDeath) {
+                        currentHealth += part.currentHealth;
+                        maxHealth += part.getMaxHealth();
+                    }
+                }
+                currentHealth = currentHealth / maxHealth;
+                break;
+            case MIN_CRITICAL:
+                AbstractDamageablePart minimal = null;
+                float lowest = Float.MAX_VALUE;
+                for (AbstractDamageablePart part : this) {
+                    float partMaxHealth = part.currentHealth;
+                    if (partMaxHealth < lowest) {
+                        minimal = part;
+                        lowest = partMaxHealth;
+                    }
+                }
+                Objects.requireNonNull(minimal);
+                currentHealth = minimal.currentHealth / minimal.getMaxHealth();
+                break;
+            case AVERAGE_ALL:
+                for (AbstractDamageablePart part : this)
+                    currentHealth += part.currentHealth;
+                currentHealth = currentHealth / getCurrentMaxHealth();
+                break;
+        }
+        return currentHealth * player.getMaxHealth();
     }
 
     @Override
@@ -355,7 +390,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         }
         //make sure to resync the client health
         if (!player.world.isRemote && player instanceof EntityPlayerMP)
-            FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this), (EntityPlayerMP) player); //Upload changes to the client
+            FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this, true), (EntityPlayerMP) player); //Upload changes to the client
     }
 
     @Override
@@ -435,7 +470,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     @Override
     public void scheduleResync() {
         if (this.resyncTimer == -1) {
-            this.resyncTimer = 2;
+            this.resyncTimer = 3;
         } else {
             FirstAid.LOGGER.warn("resync already scheduled!");
         }

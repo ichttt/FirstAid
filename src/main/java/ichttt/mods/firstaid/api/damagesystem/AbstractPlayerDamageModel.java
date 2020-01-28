@@ -88,6 +88,10 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
 
     public abstract void applyMorphine(EntityPlayer player);
 
+    /**
+     * @deprecated Migrated to a potion effect
+     */
+    @Deprecated
     public abstract int getMorphineTicks();
 
     public abstract float getCurrentHealth();

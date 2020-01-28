@@ -18,6 +18,7 @@
 
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
+import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.util.CommonUtils;
@@ -37,6 +38,10 @@ public class RandomDamageDistribution extends DamageDistribution {
     public static final RandomDamageDistribution NEAREST_KILL = new RandomDamageDistribution(true, false);
     public static final RandomDamageDistribution ANY_NOKILL = new RandomDamageDistribution(false, true);
     public static final RandomDamageDistribution ANY_KILL = new RandomDamageDistribution(false, false);
+
+    public static RandomDamageDistribution getDefault() {
+        return FirstAidConfig.useFriendlyRandomDistribution ? NEAREST_NOKILL : NEAREST_KILL;
+    }
 
     private static final Random RANDOM = new Random();
     private final boolean nearestFirst;

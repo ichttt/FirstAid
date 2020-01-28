@@ -64,7 +64,7 @@ public class EqualDamageDistribution implements IDamageDistribution {
 
             for (AbstractDamageablePart part : damageModel) {
                 if (part.currentHealth > 0F) {
-                    damageLeft += part.damage(toDamage, player, player.isPotionActive(EventHandler.MORPHINE), tryNoKillThisRound ? 1F : 0F);
+                    damageLeft += part.damage(toDamage, player, !player.isPotionActive(EventHandler.MORPHINE), tryNoKillThisRound ? 1F : 0F);
                     divCount++;
                 }
             }

@@ -93,6 +93,11 @@ public class FirstAidConfig {
         AVERAGE_ALL, AVERAGE_CRITICAL, MIN_CRITICAL;
     }
 
+    @Config.Comment("Only effects the fallback random distribution.\n" +
+            "If enabled, the default random damage distribution will be changed to leave critical limbs at 1hp if possible.\n" +
+            "When there is too much damage, the damage will still kill the player. Other distributions that defined are not affected by this.")
+    public static boolean useFriendlyRandomDistribution = false;
+
     @Config.Comment("Enabled additional debug logs - May slow down the game and will increase log file size\nOnly enable for special purposes")
     @Config.LangKey("firstaid.config.debug")
     @Config.RequiresMcRestart

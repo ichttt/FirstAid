@@ -64,8 +64,12 @@ public abstract class DamageDistribution implements IDamageDistribution {
 
         float left = damageDistribution.distributeDamage(damage, player, source, addStat);
         if (left > 0 && redistributeIfLeft) {
-            damageDistribution = RandomDamageDistribution.NEAREST_KILL;
+            damageDistribution = RandomDamageDistribution.getDefault();
             left = damageDistribution.distributeDamage(left, player, source, addStat);
+            if (left > 0) {
+                damageDistribution = RandomDamageDistribution.NEAREST_KILL;
+                left = damageDistribution.distributeDamage(left, player, source, addStat);
+            }
         }
         PlayerDamageModel before = PlayerDamageModel.create();
         before.deserializeNBT(beforeCache);
@@ -91,7 +95,7 @@ public abstract class DamageDistribution implements IDamageDistribution {
         Collections.shuffle(damageableParts);
         for (AbstractDamageablePart part : damageableParts) {
             float minHealth = minHealth(player, part);
-            float dmgDone = damage - part.damage(damage, player, player.isPotionActive(EventHandler.MORPHINE), minHealth);
+            float dmgDone = damage - part.damage(damage, player, !player.isPotionActive(EventHandler.MORPHINE), minHealth);
             FirstAid.NETWORKING.sendTo(new MessageUpdatePart(part), (EntityPlayerMP) player);
             if (addStat)
                 player.addStat(StatList.DAMAGE_TAKEN, Math.round(dmgDone * 10.0F));

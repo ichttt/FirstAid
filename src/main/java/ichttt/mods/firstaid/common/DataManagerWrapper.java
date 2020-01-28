@@ -102,7 +102,7 @@ public class DataManagerWrapper extends EntityDataManager {
                                 if (FirstAidConfig.debug) {
                                     CommonUtils.debugLogStacktrace("DAMAGING: " + (-healed));
                                 }
-                                DamageDistribution.handleDamageTaken(RandomDamageDistribution.NEAREST_KILL, player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null), -healed, player, DamageSource.MAGIC, true, true);
+                                DamageDistribution.handleDamageTaken(RandomDamageDistribution.getDefault(), player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null), -healed, player, DamageSource.MAGIC, true, true);
                             } else {
                                 if (FirstAidConfig.debug) {
                                     CommonUtils.debugLogStacktrace("HEALING: " + healed);

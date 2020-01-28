@@ -187,7 +187,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             }
         }
         if (distribution == null)
-            distribution = RandomDamageDistribution.NEAREST_KILL;
+            distribution = RandomDamageDistribution.getDefault();
         return distribution;
     }
 

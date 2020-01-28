@@ -79,8 +79,13 @@ public class HealthDistribution {
             }
         }
 
-        if (sendChanges)
-            FirstAid.NETWORKING.sendTo(new MessageAddHealth(healingDone), (EntityPlayerMP) player);
+        if (sendChanges) {
+            EntityPlayerMP playerMP = (EntityPlayerMP) player;
+            if (playerMP.connection == null || playerMP.connection.netManager == null)
+                damageModel.scheduleResync(); //Too early to send changes, keep in mind and do it later
+            else
+                FirstAid.NETWORKING.sendTo(new MessageAddHealth(healingDone), (EntityPlayerMP) player);
+        }
     }
 
     public static void distributeHealth(float health, EntityPlayer player, boolean sendChanges) {

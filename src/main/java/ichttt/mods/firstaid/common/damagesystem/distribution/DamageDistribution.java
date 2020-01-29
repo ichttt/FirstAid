@@ -43,6 +43,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -54,7 +55,8 @@ public abstract class DamageDistribution implements IDamageDistribution {
             FirstAid.LOGGER.info("Damaging {} using {} for dmg source {}, redistribute {}, addStat {}", damage, damageDistribution.toString(), source.damageType, redistributeIfLeft, addStat);
         }
         NBTTagCompound beforeCache = damageModel.serializeNBT();
-        damage = ArmorUtils.applyGlobalPotionModifiers(player, source, damage);
+        if (!damageDistribution.skipGlobalPotionModifiers())
+            damage = ArmorUtils.applyGlobalPotionModifiers(player, source, damage);
         //VANILLA COPY - combat tracker and exhaustion
         if (damage != 0.0F) {
             player.addExhaustion(source.getHungerDamage());
@@ -64,9 +66,10 @@ public abstract class DamageDistribution implements IDamageDistribution {
 
         float left = damageDistribution.distributeDamage(damage, player, source, addStat);
         if (left > 0 && redistributeIfLeft) {
-            damageDistribution = RandomDamageDistribution.getDefault();
+            boolean hasTriedNoKill = damageDistribution == RandomDamageDistribution.NEAREST_NOKILL || damageDistribution == RandomDamageDistribution.ANY_NOKILL;
+            damageDistribution = hasTriedNoKill ? RandomDamageDistribution.NEAREST_KILL : RandomDamageDistribution.getDefault();
             left = damageDistribution.distributeDamage(left, player, source, addStat);
-            if (left > 0) {
+            if (left > 0 && !hasTriedNoKill) {
                 damageDistribution = RandomDamageDistribution.NEAREST_KILL;
                 left = damageDistribution.distributeDamage(left, player, source, addStat);
             }
@@ -118,18 +121,23 @@ public abstract class DamageDistribution implements IDamageDistribution {
         AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
         for (Pair<EntityEquipmentSlot, EnumPlayerPart[]> pair : getPartList()) {
             EntityEquipmentSlot slot = pair.getLeft();
-            damage = ArmorUtils.applyArmor(player, player.getItemStackFromSlot(slot), source, damage, slot);
-            if (damage <= 0F)
-                return 0F;
-            damage = ArmorUtils.applyEnchantmentModifiers(player.getItemStackFromSlot(slot), source, damage);
-            if (damage <= 0F)
-                return 0F;
-            damage = ForgeHooks.onLivingDamage(player, source, damage); //we post every time we damage a part, make it so other mods can modify
-            if (damage <= 0F) return 0F;
+            EnumPlayerPart[] parts = pair.getRight();
+            if (Arrays.stream(parts).map(damageModel::getFromEnum).anyMatch(part -> part.currentHealth > minHealth(player, part))) {
+                damage = ArmorUtils.applyArmor(player, player.getItemStackFromSlot(slot), source, damage, slot);
+                if (damage <= 0F)
+                    return 0F;
+                damage = ArmorUtils.applyEnchantmentModifiers(player.getItemStackFromSlot(slot), source, damage);
+                if (damage <= 0F)
+                    return 0F;
+                damage = ForgeHooks.onLivingDamage(player, source, damage); //we post every time we damage a part, make it so other mods can modify
+                if (damage <= 0F) return 0F;
 
-            damage = distributeDamageOnParts(damage, damageModel, pair.getRight(), player, addStat);
-            if (damage == 0F)
-                break;
+                damage = distributeDamageOnParts(damage, damageModel, parts, player, addStat);
+                if (damage == 0F)
+                    break;
+            } else if (FirstAidConfig.debug) {
+                FirstAid.LOGGER.info("Skipping {}, no health <in parts!", slot);
+            }
         }
         return damage;
     }

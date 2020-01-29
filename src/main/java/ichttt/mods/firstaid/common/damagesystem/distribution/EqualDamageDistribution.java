@@ -7,10 +7,12 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.EventHandler;
+import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
@@ -26,13 +28,16 @@ import java.util.Objects;
 public class EqualDamageDistribution implements IDamageDistribution {
     private static final Method applyPotionDamageCalculationsMethod = ObfuscationReflectionHelper.findMethod(EntityLivingBase.class, "func_70672_c", float.class, DamageSource.class, float.class);
     private final boolean tryNoKill;
+    private final float reductionMultiplier;
 
-    public EqualDamageDistribution(boolean tryNoKill) {
+    public EqualDamageDistribution(boolean tryNoKill, float reductionMultiplier) {
         this.tryNoKill = tryNoKill;
+        this.reductionMultiplier = reductionMultiplier;
     }
 
-    private float reduceDamage(float damage, EntityPlayer player, DamageSource source) {
+    private float reduceDamage(float originalDamage, EntityPlayer player, DamageSource source) {
         //As we damage all, also go through each armor slot
+        float damage = originalDamage;
         for (EntityEquipmentSlot slot : CommonUtils.ARMOR_SLOTS) {
             ItemStack armor = player.getItemStackFromSlot(slot);
             damage = ArmorUtils.applyArmor(player, armor, source, damage, slot);
@@ -44,6 +49,10 @@ public class EqualDamageDistribution implements IDamageDistribution {
         } catch (IllegalAccessException | InvocationTargetException e) {
             FirstAid.LOGGER.error("Could not invoke applyPotionDamageCalculations!", e);
         }
+        if (damage <= 0F) return 0F; // If the damage got reduced to zero, respect that and continue.
+        float reduction = originalDamage - damage;
+        if (reduction > 0F) reduction *= reductionMultiplier;
+        damage = originalDamage - reduction;
         if (damage <= 0F) return 0F;
         damage = ForgeHooks.onLivingDamage(player, source, damage);
         return damage;
@@ -90,10 +99,16 @@ public class EqualDamageDistribution implements IDamageDistribution {
         if (damageLeft > 0F && tryNoKill)
             damageLeft = distributeOnParts(damage, damageModel, player, false);
 
+        FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel, false), (EntityPlayerMP) player);
         float effectiveDmg = damage - damageLeft;
         if (effectiveDmg < 3.4028235E37F) {
             player.addStat(StatList.DAMAGE_TAKEN, Math.round(effectiveDmg * 10.0F));
         }
         return damageLeft;
+    }
+
+    @Override
+    public boolean skipGlobalPotionModifiers() {
+        return true; //We apply all potions ourself
     }
 }

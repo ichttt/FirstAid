@@ -83,7 +83,8 @@ public class RegistryManager {
         } else {
             distributionBuilderFactory.newRandomBuilder().tryNoKill().registerStatic(DamageSource.STARVE, DamageSource.DROWN);
         }
-        distributionBuilderFactory.newRandomBuilder().tryNoKill().registerStatic(DamageSource.IN_WALL);
+        distributionBuilderFactory.newRandomBuilder().tryNoKill().registerStatic(DamageSource.IN_WALL, DamageSource.CRAMMING);
+        distributionBuilderFactory.newEqualBuilder().reductionMultiplier(0.8F).registerDynamic(DamageSource::isExplosion);
 
         //---DEBUFFS---
         DebuffBuilderFactory debuffBuilderFactory = DebuffBuilderFactory.getInstance();

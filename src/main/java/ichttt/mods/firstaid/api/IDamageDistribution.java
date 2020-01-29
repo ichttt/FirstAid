@@ -27,4 +27,8 @@ import javax.annotation.Nonnull;
 public interface IDamageDistribution {
 
     float distributeDamage(float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat);
+
+    default boolean skipGlobalPotionModifiers() {
+        return false;
+    }
 }

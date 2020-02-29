@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2019
+ * Copyright (C) 2017-2020
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ public class MessageClientRequest {
                 CapProvider.tutorialDone.add(player.getName().getString());
                 ctx.enqueueWork(() -> CommonUtils.getDamageModel(player).hasTutorial = true);
             } else if (message.type == Type.REQUEST_REFRESH) {
-                ctx.enqueueWork(() -> FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(CommonUtils.getDamageModel(player)), player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT));
+                    FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)), true), player);
             }
         }
     }

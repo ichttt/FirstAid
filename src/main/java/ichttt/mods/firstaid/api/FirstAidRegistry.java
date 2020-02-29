@@ -1,6 +1,6 @@
 /*
  * FirstAid API
- * Copyright (c) 2017-2019
+ * Copyright (c) 2017-2020
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@ package ichttt.mods.firstaid.api;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
+import ichttt.mods.firstaid.api.distribution.DamageDistributionBuilderFactory;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -66,36 +67,21 @@ public abstract class FirstAidRegistry {
     }
 
     /**
-     * Binds the damage source to a distribution.
-     * The distribution will be a StandardDamageDistribution
-     *
-     * @param damageType           The source - If you only have a source string, just wrap it in a {@link DamageSource(String)}
-     * @param priorityTable        The distribution table. If {@code shufflePriorityTable} is true,
-     *                             the first item on the list will be damaged first,
-     *                             if the health there drops under zero, the second will be damaged and so on.
-     *                             Otherwise, the list will be shuffled before each damage distribution
-     * @param shufflePriorityTable If the {@code priorityTable} should be shuffled before each distribution
+     * @deprecated Use {@link DamageDistributionBuilderFactory#newStandardBuilder()} instead.
      */
-    public abstract void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EquipmentSlotType, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable);
+    @Deprecated
+    public abstract void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable);
 
     /**
-     * Binds the damage source to a distribution.
-     * The distribution will be a RandomDamageDistribution
-     * This (with nearestFirst = true) is the default setting when nothing else is specified
-     *
-     * @param damageType   The source
-     * @param nearestFirst True, if only a random start point should be chosen and the nearest other parts will be damaged
-     *                     if the health there drops under zero, false if everything should be random
-     * @param tryNoKill    If true, head and torso will only drop to 1 health and will only die if there is nothing else left
+     * @deprecated Use {@link DamageDistributionBuilderFactory#newRandomBuilder()} instead.
      */
+    @Deprecated
     public abstract void bindDamageSourceRandom(@Nonnull DamageSource damageType, boolean nearestFirst, boolean tryNoKill);
 
     /**
-     * Binds the damage source to a custom distribution
-     *
-     * @param damageType        The source
-     * @param distributionTable Your custom distribution
+     * @deprecated Use {@link DamageDistributionBuilderFactory#newCustomBuilder(IDamageDistribution)} instead.
      */
+    @Deprecated
     public abstract void bindDamageSourceCustom(@Nonnull DamageSource damageType, @Nonnull IDamageDistribution distributionTable);
 
     /**

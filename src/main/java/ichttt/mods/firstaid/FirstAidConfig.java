@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2019
+ * Copyright (C) 2017-2020
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,6 +80,29 @@ public class FirstAidConfig {
             plaster = new IEEntry(builder, "plaster", 2, 22, 3000);
 
             builder.pop().push("External Healing");
+    @Config.Comment("Specifies how the vanilla health is calculated. Affects the visual health bar, as well as the value other mods get when they query the player health.\n" +
+            "AVERAGE_ALL simply takes all limbs and calculates the average of it.\n" +
+            "AVERAGE_CRITICAL takes all critical limbs and calculates the average of it\n" +
+            "MIN_CRITICAl takes the smallest health value of all critical limb\n" +
+            "Does not have any effect if all critical limbs have been disabled.")
+    @Config.RequiresWorldRestart
+    @ExtraConfig.Sync
+    public static VanillaHealthCalculationMode vanillaHealthCalculation = VanillaHealthCalculationMode.AVERAGE_ALL;
+
+    public enum VanillaHealthCalculationMode {
+        AVERAGE_ALL, AVERAGE_CRITICAL, MIN_CRITICAL;
+    }
+
+    @Config.Comment("Only effects the fallback random distribution.\n" +
+            "If enabled, the default random damage distribution will be changed to leave critical limbs at 1hp if possible.\n" +
+            "When there is too much damage, the damage will still kill the player. Other distributions that defined are not affected by this.")
+    public static boolean useFriendlyRandomDistribution = false;
+
+    @Config.Comment("Enabled additional debug logs - May slow down the game and will increase log file size\nOnly enable for special purposes")
+    @Config.LangKey("firstaid.config.debug")
+    @Config.RequiresMcRestart
+    @ExtraConfig.Advanced
+    public static boolean debug = false;
 
             allowNaturalRegeneration = builder
                     .comment("Allow vanilla's natural regeneration. Requires \"allowOtherHealingItems\" to be true", "**WARNING** This sets the gamerule \"naturalRegeneration\" for all of your worlds internally, so it persists even if you remove the mod")

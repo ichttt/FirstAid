@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2019
+ * Copyright (C) 2017-2020
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,17 +29,21 @@ import java.util.function.Supplier;
 
 public class MessageSyncDamageModel {
     private final CompoundNBT playerDamageModel;
+    private boolean scaleMaxHealth;
 
     public MessageSyncDamageModel(PacketBuffer buffer) {
         this.playerDamageModel = buffer.readCompoundTag();
+        this.scaleMaxHealth = buffer.readBoolean();
     }
 
-    public MessageSyncDamageModel(AbstractPlayerDamageModel damageModel) {
+    public MessageSyncDamageModel(AbstractPlayerDamageModel damageModel, boolean scaleMaxHealth) {
         this.playerDamageModel = damageModel.serializeNBT();
+        this.scaleMaxHealth = scaleMaxHealth;
     }
 
     public void encode(PacketBuffer buffer) {
         buffer.writeCompoundTag(this.playerDamageModel);
+        buffer.writeBoolean(scaleMaxHealth);
     }
 
     public static final class Handler {
@@ -48,6 +52,17 @@ public class MessageSyncDamageModel {
             NetworkEvent.Context ctx = supplier.get();
             CommonUtils.checkClient(ctx);
             ctx.enqueueWork(() -> CommonUtils.getDamageModel(Minecraft.getInstance().player).deserializeNBT(message.playerDamageModel));
+        @SideOnly(Side.CLIENT)
+        @Override
+        public IMessage onMessage(MessageSyncDamageModel message, MessageContext ctx) {
+            Minecraft mc = Minecraft.getMinecraft();
+            mc.addScheduledTask(() -> {
+                AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+                if (message.scaleMaxHealth)
+                    damageModel.runScaleLogic(mc.player);
+                damageModel.deserializeNBT(message.playerDamageModel);
+            });
+            return null;
         }
     }
 }

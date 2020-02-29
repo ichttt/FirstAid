@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2019
+ * Copyright (C) 2017-2020
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -140,20 +140,41 @@ public class ClientEventHandler {
             event.getToolTip().add(new TranslationTextComponent("firstaid.tooltip.morphine", "3:30-4:30"));
             return;
         }
-        if (FirstAidConfig.CLIENT.armorTooltipMode.get() != FirstAidConfig.Client.TooltipMode.NONE) {
-            if (item instanceof ArmorItem) {
-                ArmorItem armor = (ArmorItem) item;
-                List<ITextComponent> tooltip = event.getToolTip();
+        if (FirstAidConfig.overlay.armorTooltipMode != FirstAidConfig.Overlay.TooltipMode.NONE) {
+            boolean set = false;
+            if (item instanceof ISpecialArmor) {
+                ISpecialArmor armor = (ISpecialArmor) item;
+                EntityPlayer player = event.getEntityPlayer();
+                if (player != null) {
+                    int slot = player.inventory.armorInventory.indexOf(stack);
+                    if (slot == -1 && item instanceof ItemArmor)
+                        slot = ((ItemArmor) item).armorType.getIndex();
+                    if (slot >= 0 && slot <= 3) {
+                        int displayArmor = armor.getArmorDisplay(event.getEntityPlayer(), stack, slot);
+                        if (displayArmor != 0) {
+                            set = true;
+                            double totalArmor = ArmorUtils.applyArmorModifier(CommonUtils.ARMOR_SLOTS[slot], displayArmor);
+                            String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(displayArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
+                            replaceOrAppend(event.getToolTip(), original, makeArmorMsg(totalArmor));
+                        }
+                    }
+                }
+            }
+            if (item instanceof ItemArmor && !set) {
+                ItemArmor armor = (ItemArmor) item;
+                List<String> tooltip = event.getToolTip();
 
-                double totalArmor = ArmorUtils.applyArmorModifier(armor.getEquipmentSlot(), armor.getDamageReduceAmount());
+                double normalArmor = ArmorUtils.getArmor(stack, armor.getEquipmentSlot());
+                double totalArmor = ArmorUtils.applyArmorModifier(armor.armorType, normalArmor);
                 if (totalArmor > 0D) {
-                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(armor.getDamageReduceAmount()), new TranslationTextComponent("attribute.name.generic.armor")).applyTextStyle(TextFormatting.BLUE);
+                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(normalArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
                     replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
                 }
 
-                double totalToughness = ArmorUtils.applyToughnessModifier(armor.getEquipmentSlot(), armor.getToughness());
+                double normalToughness = ArmorUtils.getArmorThoughness(stack, armor.getEquipmentSlot());
+                double totalToughness = ArmorUtils.applyToughnessModifier(armor.armorType, normalToughness);
                 if (totalToughness > 0D) {
-                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(armor.getToughness()), new TranslationTextComponent("attribute.name.generic.armorToughness")).applyTextStyle(TextFormatting.BLUE);
+                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(normalToughness), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armorToughness"));
                     replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
                 }
             }

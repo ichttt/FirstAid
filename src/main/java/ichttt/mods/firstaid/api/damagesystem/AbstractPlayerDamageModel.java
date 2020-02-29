@@ -1,6 +1,6 @@
 /*
  * FirstAid API
- * Copyright (c) 2017-2019
+ * Copyright (c) 2017-2020
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -88,8 +88,13 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
 
     public abstract void applyMorphine(PlayerEntity player);
 
+    /**
+     * @deprecated Migrated to a potion effect
+     */
+    @Deprecated
     public abstract int getMorphineTicks();
 
+    @Deprecated
     public abstract float getCurrentHealth();
 
     /**

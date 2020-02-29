@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2019
+ * Copyright (C) 2017-2020
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,13 +28,15 @@ import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
+import ichttt.mods.firstaid.api.distribution.IRandomDamageDistributionBuilder;
+import ichttt.mods.firstaid.api.distribution.IStandardDamageDistributionBuilder;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.apiimpl.distribution.DamageDistributionBuilderFactoryImpl;
 import ichttt.mods.firstaid.common.damagesystem.debuff.ConstantDebuff;
 import ichttt.mods.firstaid.common.damagesystem.debuff.OnHitDebuff;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
-import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistribution;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
@@ -44,18 +46,22 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class FirstAidRegistryImpl extends FirstAidRegistry {
     public static final FirstAidRegistryImpl INSTANCE = new FirstAidRegistryImpl();
-    private final Map<String, IDamageDistribution> DISTRIBUTION_MAP = new ConcurrentHashMap<>();
-    private final Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> HEALER_MAP = new ConcurrentHashMap<>();
-    private final Multimap<EnumDebuffSlot, Supplier<IDebuff>> DEBUFFS = HashMultimap.create();
+    private final ArrayList<Pair<Predicate<DamageSource>, IDamageDistribution>> distributionsDynamic = new ArrayList<>();
+    private final Map<String, IDamageDistribution> distributionsStatic = new HashMap<>();
+    private final Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> healerMap = new HashMap<>();
+    private final Multimap<EnumDebuffSlot, Supplier<IDebuff>> debuffs = HashMultimap.create();
     private boolean registrationAllowed = true;
 
     public static void finish() {
@@ -66,53 +72,55 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             throw new IllegalStateException("A mod has registered a custom apiimpl for the registry. THIS IS NOT ALLOWED!" +
             "It should be " + INSTANCE.getClass().getName() + " but it actually is " + registryImpl.getClass().getName());
         INSTANCE.registrationAllowed = false;
-        if (FirstAidConfig.GENERAL.debug.get()) {
+        INSTANCE.distributionsDynamic.trimToSize();
+        if (FirstAidConfig.debug) {
             FirstAid.LOGGER.info("REG READOUT:");
-            for (Map.Entry<String, IDamageDistribution> entry : INSTANCE.DISTRIBUTION_MAP.entrySet()) {
+            for (Map.Entry<String, IDamageDistribution> entry : INSTANCE.distributionsStatic.entrySet()) {
                 FirstAid.LOGGER.info("{} bound to {}", entry.getKey(), entry.getValue());
             }
+            FirstAid.LOGGER.info("+{} additional dynamic distributions", INSTANCE.distributionsDynamic.size());
         }
     }
 
+    @Deprecated
     @Override
-    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EquipmentSlotType, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable) {
-        bindDamageSourceCustom(damageType, new StandardDamageDistribution(priorityTable, shufflePriorityTable));
+    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable) {
+        IStandardDamageDistributionBuilder builder = DamageDistributionBuilderFactoryImpl.INSTANCE.newStandardBuilder();
+        for (Pair<EntityEquipmentSlot, EnumPlayerPart[]> pair : priorityTable)
+            builder.addDistributionLayer(pair.getLeft(), pair.getRight());
+        if (shufflePriorityTable)
+            builder.ignoreOrder();
+        builder.registerStatic(damageType);
     }
 
+    @Deprecated
     @Override
     public void bindDamageSourceRandom(@Nonnull DamageSource damageType, boolean nearestFirst, boolean tryNoKill) {
-        if (nearestFirst) {
-            if (!tryNoKill)
-                bindDamageSourceCustom(damageType, RandomDamageDistribution.NEAREST_KILL);
-            else
-                bindDamageSourceCustom(damageType, RandomDamageDistribution.NEAREST_NOKILL);
-        } else {
-            bindDamageSourceCustom(damageType, tryNoKill ? RandomDamageDistribution.ANY_NOKILL : RandomDamageDistribution.ANY_KILL);
-        }
+        IRandomDamageDistributionBuilder builder = DamageDistributionBuilderFactoryImpl.INSTANCE.newRandomBuilder();
+        if (nearestFirst)
+            builder.useNearestFirst();
+        if (tryNoKill)
+            builder.tryNoKill();
+        builder.registerStatic(damageType);
+    }
+
+    @Deprecated
+    @Override
+    public void bindDamageSourceCustom(@Nonnull DamageSource damageType, @Nonnull IDamageDistribution distributionTable) {
+        DamageDistributionBuilderFactoryImpl.INSTANCE.newCustomBuilder(distributionTable).registerStatic(damageType);
     }
 
     @Override
-    public synchronized void bindDamageSourceCustom(@Nonnull DamageSource damageType, @Nonnull IDamageDistribution distributionTable) {
-        String type = damageType.damageType;
-        if (DISTRIBUTION_MAP.containsKey(type))
-            FirstAid.LOGGER.info("Damage Distribution override detected for source " + damageType);
-        if (distributionTable == RandomDamageDistribution.NEAREST_KILL) //This is the default
-            DISTRIBUTION_MAP.remove(type);
-        else
-            DISTRIBUTION_MAP.put(type, distributionTable);
-    }
-
-    @Override
-    public synchronized void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, Function<ItemStack, Integer> applyTime) {
-        if (this.HEALER_MAP.containsKey(item))
+    public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, Function<ItemStack, Integer> applyTime) {
+        if (this.healerMap.containsKey(item))
             FirstAid.LOGGER.warn("Healing type override detected for item " + item);
-        this.HEALER_MAP.put(item, Pair.of(factory, applyTime));
+        this.healerMap.put(item, Pair.of(factory, applyTime));
     }
 
     @Nullable
     @Override
     public AbstractPartHealer getPartHealer(@Nonnull ItemStack type) {
-        Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>> pair = this.HEALER_MAP.get(type.getItem());
+        Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>> pair = this.healerMap.get(type.getItem());
         if (pair != null)
             return pair.getLeft().apply(type);
         return null;
@@ -120,7 +128,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
     @Override
     public Integer getPartHealingTime(@Nonnull ItemStack stack) {
-        Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>> pair = this.HEALER_MAP.get(stack.getItem());
+        Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>> pair = this.healerMap.get(stack.getItem());
         if (pair != null)
             return pair.getRight().apply(stack);
         return null;
@@ -159,25 +167,48 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             throw new IllegalStateException("Registration must take place before FMLLoadCompleteEvent");
 
         if (slot.playerParts.length > 1 && !(debuff instanceof SharedDebuff)) {
-            this.DEBUFFS.put(slot, () -> new SharedDebuff(debuff.get(), slot));
+            this.debuffs.put(slot, () -> new SharedDebuff(debuff.get(), slot));
             return;
         }
 
-        this.DEBUFFS.put(slot, debuff);
+        this.debuffs.put(slot, debuff);
     }
 
     @Nonnull
     @Override
     public IDamageDistribution getDamageDistribution(@Nonnull DamageSource source) {
-        IDamageDistribution distribution = DISTRIBUTION_MAP.get(source.damageType);
+        IDamageDistribution distribution = distributionsStatic.get(source.damageType);
+        if (distribution == null) {
+            //lookup if we have any matching dynamic distribution
+            for (Pair<Predicate<DamageSource>, IDamageDistribution> pair : distributionsDynamic) {
+                if (pair.getLeft().test(source)) {
+                    distribution = pair.getRight();
+                    break;
+                }
+            }
+        }
         if (distribution == null)
-            distribution = RandomDamageDistribution.NEAREST_KILL;
+            distribution = RandomDamageDistribution.getDefault();
         return distribution;
     }
 
     @Nonnull
     @Override
     public IDebuff[] getDebuffs(@Nonnull EnumDebuffSlot slot) {
-        return DEBUFFS.get(slot).stream().map(Supplier::get).toArray(IDebuff[]::new);
+        return debuffs.get(slot).stream().map(Supplier::get).toArray(IDebuff[]::new);
+    }
+
+    public void registerDistribution(Predicate<DamageSource> matcher, IDamageDistribution distribution) {
+        if (!registrationAllowed) throw new IllegalStateException("Too late to register!");
+        distributionsDynamic.add(Pair.of(matcher, distribution));
+    }
+
+    public void registerDistribution(DamageSource[] sources, IDamageDistribution distribution) {
+        if (!registrationAllowed) throw new IllegalStateException("Too late to register!");
+        for (DamageSource damageType : sources) {
+            if (distributionsStatic.containsKey(damageType.damageType))
+                FirstAid.LOGGER.info("Damage Distribution override detected for source " + damageType);
+            distributionsStatic.put(damageType.damageType, distribution);
+        }
     }
 }

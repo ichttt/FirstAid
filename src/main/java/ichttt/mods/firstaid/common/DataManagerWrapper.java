@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2019
+ * Copyright (C) 2017-2020
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +27,10 @@ import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -81,9 +81,9 @@ public class DataManagerWrapper extends EntityDataManager {
                 if (playerMP.connection != null) //also fired when connecting, ignore(otherwise the net handler would crash)
                     FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> playerMP), new MessageApplyAbsorption(floatValue));
             }
-            CommonUtils.getDamageModel(player).setAbsorption(floatValue);
-        } else if (key == LivingEntity.HEALTH) {
-            if (value instanceof Float) {
+            Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).setAbsorption(floatValue);
+        } else if (key == EntityLivingBase.HEALTH) {
+            if (value instanceof Float && !player.world.isRemote) {
                 Float aFloat = (Float) value;
                 LazyOptional<AbstractPlayerDamageModel> damageModel;
                 if (aFloat > player.getMaxHealth()) {
@@ -91,19 +91,19 @@ public class DataManagerWrapper extends EntityDataManager {
                 } else if ((damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).isPresent() && damageModel.orElseThrow(RuntimeException::new).isWaitingForHelp()) {
                     if (FirstAidConfig.GENERAL.debug.get())
                         CommonUtils.debugLogStacktrace("SetHealth falltrough");
-                } else if (FirstAidConfig.watchSetHealth && !aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && !player.world.isRemote && player instanceof ServerPlayerEntity && ((ServerPlayerEntity) player).connection != null) {
+                } else if (FirstAidConfig.watchSetHealth && !aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && player instanceof EntityPlayerMP && ((EntityPlayerMP) player).connection != null) {
                     //calculate diff
                     Float orig = get(LivingEntity.HEALTH);
                     if (orig > 0 && !orig.isNaN() && !orig.isInfinite()) {
-                        if (FirstAidConfig.SERVER.scaleMaxHealth.get())
-                            orig = Math.min(orig, (float) this.player.getAttribute(SharedMonsterAttributes.MAX_HEALTH).getValue());
+                        if (FirstAidConfig.scaleMaxHealth)
+                            orig = Math.min(orig, (float) this.player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue());
                         float healed = aFloat - orig;
                         if (Math.abs(healed) > 0.001) {
                             if (healed < 0) {
                                 if (FirstAidConfig.GENERAL.debug.get()) {
                                     CommonUtils.debugLogStacktrace("DAMAGING: " + (-healed));
                                 }
-                                DamageDistribution.handleDamageTaken(RandomDamageDistribution.NEAREST_KILL, CommonUtils.getDamageModel(player), -healed, player, DamageSource.MAGIC, true, true);
+                                DamageDistribution.handleDamageTaken(RandomDamageDistribution.getDefault(), player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null), -healed, player, DamageSource.MAGIC, true, true);
                             } else {
                                 if (FirstAidConfig.GENERAL.debug.get()) {
                                     CommonUtils.debugLogStacktrace("HEALING: " + healed);

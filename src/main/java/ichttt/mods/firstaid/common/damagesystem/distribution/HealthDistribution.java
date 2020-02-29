@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2019
+ * Copyright (C) 2017-2020
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,8 +80,13 @@ public class HealthDistribution {
             }
         }
 
-        if (sendChanges)
-            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageAddHealth(healingDone));
+        if (sendChanges) {
+            EntityPlayerMP playerMP = (EntityPlayerMP) player;
+            if (playerMP.connection == null || playerMP.connection.netManager == null)
+                damageModel.scheduleResync(); //Too early to send changes, keep in mind and do it later
+            else
+                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageAddHealth(healingDone));
+        }
     }
 
     public static void distributeHealth(float health, PlayerEntity player, boolean sendChanges) {

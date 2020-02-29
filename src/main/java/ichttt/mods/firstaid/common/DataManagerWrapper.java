@@ -31,7 +31,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
@@ -42,7 +41,6 @@ import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -130,11 +128,6 @@ public class DataManagerWrapper extends EntityDataManager {
     @Nullable
     public List<DataEntry<?>> getDirty() {
         return parent.getDirty();
-    }
-
-    @Override
-    public void writeEntries(PacketBuffer buf) throws IOException {
-        parent.writeEntries(buf);
     }
 
     @Override

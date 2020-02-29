@@ -28,7 +28,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.util.Hand;
-import net.minecraftforge.client.ForgeIngameGui;
+import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;

@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 
 public class MessageSyncDamageModel {
     private final CompoundNBT playerDamageModel;
-    private boolean scaleMaxHealth;
+    private final boolean scaleMaxHealth;
 
     public MessageSyncDamageModel(PacketBuffer buffer) {
         this.playerDamageModel = buffer.readCompoundTag();

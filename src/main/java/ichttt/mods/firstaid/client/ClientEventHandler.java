@@ -41,10 +41,10 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.client.ForgeIngameGui;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -163,7 +163,7 @@ public class ClientEventHandler {
         }
 
         AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
-        if (healer != null && event.getEntityPlayer() != null) {
+        if (healer != null && event.getPlayer() != null) {
             event.getToolTip().add(new TranslationTextComponent("firstaid.tooltip.healer", healer.maxHeal.getAsInt() / 2, StringUtils.ticksToElapsedTime(healer.ticksPerHeal.getAsInt())));
         }
     }

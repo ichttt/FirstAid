@@ -18,7 +18,7 @@
 
 package ichttt.mods.firstaid.client.tutorial;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
@@ -98,14 +98,14 @@ public class GuiTutorial extends Screen {
 
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         parent.render(mouseX, mouseY, partialTicks);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         minecraft.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
         blit(parent.guiLeft, guiTop, 0, 139, GuiHealthScreen.xSize, 28);
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         this.action.draw();
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         drawCenteredString(minecraft.fontRenderer, I18n.format("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 140, 0xFFFFFF);
         super.render(mouseX, mouseY, partialTicks);
     }

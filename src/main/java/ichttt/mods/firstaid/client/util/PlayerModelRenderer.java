@@ -18,7 +18,7 @@
 
 package ichttt.mods.firstaid.client.util;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -34,18 +34,18 @@ public class PlayerModelRenderer {
     private static boolean otherWay = false;
 
     public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, AbstractGui gui, float alpha, float partialTicks) {
-        GlStateManager.enableAlphaTest();
-        GlStateManager.enableBlend();
-        GlStateManager.color4f(1F, 1F, 1F, 1 - (alpha / 255));
+        RenderSystem.enableAlphaTest();
+        RenderSystem.enableBlend();
+        RenderSystem.color4f(1F, 1F, 1F, 1 - (alpha / 255));
         Minecraft.getInstance().getTextureManager().bindTexture(HEALTH_RENDER_LOCATION);
-        GlStateManager.scalef(0.5F, 0.5F, 0.5F);
+        RenderSystem.scalef(0.5F, 0.5F, 0.5F);
         if (FirstAidConfig.CLIENT.enableEasterEggs.get() && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
             float angle = PlayerModelRenderer.angle + ((otherWay ? -partialTicks : partialTicks) * 2);
             if (FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.BOTTOM_LEFT || FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.TOP_LEFT)
-                GlStateManager.translatef(angle * 1.5F, 0, 0);
+                RenderSystem.translatef(angle * 1.5F, 0, 0);
             else
-                GlStateManager.translatef(angle * 0.5F, 0, 0);
-            GlStateManager.rotatef(angle, 0, 0, 1);
+                RenderSystem.translatef(angle * 0.5F, 0, 0);
+            RenderSystem.rotatef(angle, 0, 0, 1);
         }
         drawPart(gui, damageModel.HEAD, 16, 0, 32, 32);
         drawPart(gui, damageModel.BODY, 16, 32, 32, 48);
@@ -56,7 +56,7 @@ public class PlayerModelRenderer {
         drawPart(gui, damageModel.LEFT_FOOT, 16, 112, 16, 16);
         drawPart(gui, damageModel.RIGHT_FOOT, 32, 112, 16, 16);
 
-        GlStateManager.color4f(1F, 1F, 1F, 1F);
+        RenderSystem.color4f(1F, 1F, 1F, 1F);
     }
 
     private static void drawPart(AbstractGui gui, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {

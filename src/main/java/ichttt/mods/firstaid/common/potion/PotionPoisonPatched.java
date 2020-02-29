@@ -63,7 +63,7 @@ public class PotionPoisonPatched extends Effect {
             if (DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false) != 1.0F) {
                 try {
                     SoundEvent sound = (SoundEvent) getHurtSound.invoke(player, DamageSource.MAGIC);
-                    player.world.playSound(null, player.posX, player.posY, player.posZ, sound, player.getSoundCategory(), (float) getSoundVolume.invoke(player), (float) getSoundPitch.invoke(player));
+                    player.world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), sound, player.getSoundCategory(), (float) getSoundVolume.invoke(player), (float) getSoundPitch.invoke(player));
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     FirstAid.LOGGER.error("Could not play hurt sound!", e);
                 }

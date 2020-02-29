@@ -19,6 +19,7 @@
 package ichttt.mods.firstaid.client;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -100,16 +101,16 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                     xOffset += 1;
                 break;
             case TOP_RIGHT:
-                xOffset = mc.mainWindow.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() - (maxLength));
+                xOffset = mc.getMainWindow().getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() - (maxLength));
                 break;
             case BOTTOM_LEFT:
                 if (playerModel)
                     xOffset += 1;
-                yOffset = mc.mainWindow.getScaledHeight() - yOffset - (playerModel ? 66 : 80);
+                yOffset = mc.getMainWindow().getScaledHeight() - yOffset - (playerModel ? 66 : 80);
                 break;
             case BOTTOM_RIGHT:
-                xOffset = mc.mainWindow.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() - (maxLength));
-                yOffset = mc.mainWindow.getScaledHeight() - yOffset - (playerModel ? 62 : 80);
+                xOffset = mc.getMainWindow().getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() - (maxLength));
+                yOffset = mc.getMainWindow().getScaledHeight() - yOffset - (playerModel ? 62 : 80);
                 break;
             default:
                 throw new RuntimeException("Invalid config option for position: " + FirstAidConfig.CLIENT.pos.get());
@@ -123,11 +124,11 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         boolean enableAlphaBlend = FirstAidConfig.CLIENT.hideOnNoChange.get() && ticker < FADE_TIME;
         int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), FirstAidConfig.CLIENT.alpha.get(), 250) : FirstAidConfig.CLIENT.alpha.get();
 
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(xOffset, yOffset, 0F);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(xOffset, yOffset, 0F);
         if (enableAlphaBlend) {
-            GlStateManager.enableBlend();
-            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            RenderSystem.enableBlend();
+            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         }
         mc.getProfiler().endStartSection("render");
         if (FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.PLAYER_MODEL) {
@@ -141,12 +142,12 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 } else {
                     HealthRenderUtils.drawHealth(part, xTranslation, 0, gui, false);
                 }
-                GlStateManager.translatef(0, 10F, 0F);
+                RenderSystem.translatef(0, 10F, 0F);
             }
         }
         mc.getProfiler().endStartSection("cleanup");
         if (enableAlphaBlend)
-            GlStateManager.disableBlend();
-        GlStateManager.popMatrix();
+            RenderSystem.disableBlend();
+        RenderSystem.popMatrix();
     }
 }

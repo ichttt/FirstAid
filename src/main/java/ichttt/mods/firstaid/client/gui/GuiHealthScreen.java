@@ -18,7 +18,7 @@
 
 package ichttt.mods.firstaid.client.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -36,7 +36,6 @@ import net.minecraft.client.gui.screen.inventory.InventoryScreen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.AbstractButton;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.item.ItemStack;
@@ -174,7 +173,7 @@ public class GuiHealthScreen extends Screen {
             drawCenteredString(this.minecraft.fontRenderer, I18n.format("firstaid.gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
 
         //Health
-        GlStateManager.color4f(1F, 1F, 1F, 1F);
+        RenderSystem.color4f(1F, 1F, 1F, 1F);
         drawHealth(damageModel.HEAD, false, 14);
         drawHealth(damageModel.LEFT_ARM, false, 39);
         drawHealth(damageModel.LEFT_LEG, false, 64);
@@ -185,7 +184,7 @@ public class GuiHealthScreen extends Screen {
         drawHealth(damageModel.RIGHT_FOOT, true, 89);
 
         //Tooltip
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         tooltipButton(head, damageModel.HEAD, mouseX, mouseY);
         tooltipButton(leftArm, damageModel.LEFT_ARM, mouseX, mouseY);
         tooltipButton(leftLeg, damageModel.LEFT_LEG, mouseX, mouseY);
@@ -194,7 +193,7 @@ public class GuiHealthScreen extends Screen {
         tooltipButton(rightArm, damageModel.RIGHT_ARM, mouseX, mouseY);
         tooltipButton(rightLeg, damageModel.RIGHT_LEG, mouseX, mouseY);
         tooltipButton(rightFoot, damageModel.RIGHT_FOOT, mouseX, mouseY);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
 
         //Sleep info setup
         double sleepHealing = FirstAidConfig.SERVER.sleepHealPercentage.get();
@@ -204,17 +203,16 @@ public class GuiHealthScreen extends Screen {
         int bedY = (int) (renderBedY * bedScaleFactor);
 
         //Sleep info icon
-        GlStateManager.pushMatrix();
-        if (sleepHealing > 0D) RenderHelper.enableGUIStandardItemLighting();
-        GlStateManager.scalef(bedScaleFactor, bedScaleFactor, bedScaleFactor);
+        RenderSystem.pushMatrix();
+        RenderSystem.scalef(bedScaleFactor, bedScaleFactor, bedScaleFactor);
         minecraft.getItemRenderer().renderItemAndEffectIntoGUI(null, BED_ITEMSTACK, renderBedX, renderBedY);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
 
         //Sleep info tooltip
         if (mouseX >= bedX && mouseY >= bedY && mouseX < bedX + (16 * bedScaleFactor) && mouseY < bedY + (16 * bedScaleFactor)) {
             String s = sleepHealing == 0D ? I18n.format("gui.no_sleep_heal") : I18n.format("firstaid.gui.sleep_heal_amount", FORMAT.format(sleepHealing * 100));
             renderTooltip(s, mouseX, mouseY);
-            GlStateManager.disableLighting();
+            RenderSystem.disableLighting();
         }
 
         holdButtonMouseCallback(true); //callback: check if buttons are finish
@@ -229,10 +227,10 @@ public class GuiHealthScreen extends Screen {
     }
 
     public void drawHealth(AbstractDamageablePart damageablePart, boolean right, int yOffset) {
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         int xTranslation = guiLeft + (right ? getRightOffset(damageablePart) : 57);
         HealthRenderUtils.drawHealth(damageablePart, xTranslation, guiTop + yOffset, this, true);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     private static int getRightOffset(AbstractDamageablePart damageablePart) {

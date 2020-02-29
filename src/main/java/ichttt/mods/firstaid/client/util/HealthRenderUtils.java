@@ -19,7 +19,7 @@
 package ichttt.mods.firstaid.client.util;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -120,8 +120,8 @@ public class HealthRenderUtils {
         boolean low = (current + absorption) < 1.25F;
 
         mc.getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(xTranslation, yTranslation, 0);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(xTranslation, yTranslation, 0);
         boolean drawSecondLine = allowSecondLine;
         if (allowSecondLine) drawSecondLine = (maxHealth + maxExtraHealth) > 4;
 
@@ -144,20 +144,20 @@ public class HealthRenderUtils {
             int absorption2 = absorption - maxExtraHealth * 2;
             absorption -= absorption2;
 
-            GlStateManager.translatef(0F, 5F, 0F);
-            GlStateManager.pushMatrix();
+            RenderSystem.translatef(0F, 5F, 0F);
+            RenderSystem.pushMatrix();
             renderLine(regen, low, yTexture, maxHealth2, maxExtraHealth2, current2, absorption2, gui, highlight);
             regen -= (maxHealth2 + maxExtraHealth);
-            GlStateManager.popMatrix();
-            GlStateManager.translatef(0F, -10F, 0F);
+            RenderSystem.popMatrix();
+            RenderSystem.translatef(0F, -10F, 0F);
         }
         renderLine(regen, low, yTexture, maxHealth, maxExtraHealth, current, absorption, gui, highlight);
 
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     private static void renderLine(int regen, boolean low, int yTexture, int maxHealth, int maxExtraHearts, int current, int absorption, AbstractGui gui, boolean highlight) {
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         Int2IntMap map = new Int2IntArrayMap();
         if (low) {
             for (int i = 0; i < (maxHealth + maxExtraHearts); i++)
@@ -167,18 +167,18 @@ public class HealthRenderUtils {
         renderMax(regen, map, maxHealth, yTexture, gui, highlight);
         if (maxExtraHearts > 0) { //for absorption
             if (maxHealth != 0) {
-                GlStateManager.translatef(2 + 9 * maxHealth, 0, 0);
+                RenderSystem.translatef(2 + 9 * maxHealth, 0, 0);
             }
             renderMax(regen - maxHealth, map, maxExtraHearts, yTexture, gui, false); //Do not highlight absorption
         }
-        GlStateManager.popMatrix();
-        GlStateManager.translatef(0, 0, 1);
+        RenderSystem.popMatrix();
+        RenderSystem.translatef(0, 0, 1);
 
         renderCurrentHealth(regen, map, current, yTexture, gui);
 
         if (absorption > 0) {
             int offset = maxHealth * 9 + (maxHealth == 0 ? 0 : 2);
-            GlStateManager.translatef(offset, 0, 0);
+            RenderSystem.translatef(offset, 0, 0);
             renderAbsorption(regen - maxHealth, map, absorption, yTexture, gui);
         }
     }

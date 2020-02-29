@@ -423,5 +423,5 @@ public class FirstAidConfig {
 //    @Config.Comment("If true, all usages of setHealth from other mods will be captured. Should not cause any problems, but allow mods like scaling health bandages to apply")
 //    @Config.LangKey("firstaid.config.sethealth")
 //    @ExtraConfig.Advanced
-    public static boolean watchSetHealth = true; //If we need this at all, this is server as well
+    public static final boolean watchSetHealth = true; //If we need this at all, this is server as well
 }

@@ -40,7 +40,7 @@ public class RandomDamageDistribution extends DamageDistribution {
     public static final RandomDamageDistribution ANY_KILL = new RandomDamageDistribution(false, false);
 
     public static RandomDamageDistribution getDefault() {
-        return FirstAidConfig.useFriendlyRandomDistribution ? NEAREST_NOKILL : NEAREST_KILL;
+        return FirstAidConfig.SERVER.useFriendlyRandomDistribution.get() ? NEAREST_NOKILL : NEAREST_KILL;
     }
 
     private static final Random RANDOM = new Random();

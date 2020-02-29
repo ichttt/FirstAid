@@ -81,11 +81,11 @@ public class HealthDistribution {
         }
 
         if (sendChanges) {
-            EntityPlayerMP playerMP = (EntityPlayerMP) player;
+            ServerPlayerEntity playerMP = (ServerPlayerEntity) player;
             if (playerMP.connection == null || playerMP.connection.netManager == null)
                 damageModel.scheduleResync(); //Too early to send changes, keep in mind and do it later
             else
-                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageAddHealth(healingDone));
+                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> playerMP), new MessageAddHealth(healingDone));
         }
     }
 

@@ -28,7 +28,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DirectDamageDistribution;
-import ichttt.mods.firstaid.common.network.MessageReceiveDamage;
+import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -63,11 +63,11 @@ public class DebugDamageCommand {
         } else {
             damageModel.getFromEnum(part).heal(-damage, player, debuff);
         }
-        FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageReceiveDamage(part, damage, 0F));
         if (damageModel.isDead(player)) {
             player.sendMessage(new TranslationTextComponent("death.attack.generic", player.getDisplayName()));
             CommonUtils.killPlayer(player, null);
         }
+        FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(damageModel, false));
         return 1;
     }
 }

@@ -70,7 +70,7 @@ public abstract class FirstAidRegistry {
      * @deprecated Use {@link DamageDistributionBuilderFactory#newStandardBuilder()} instead.
      */
     @Deprecated
-    public abstract void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable);
+    public abstract void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EquipmentSlotType, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable);
 
     /**
      * @deprecated Use {@link DamageDistributionBuilderFactory#newRandomBuilder()} instead.

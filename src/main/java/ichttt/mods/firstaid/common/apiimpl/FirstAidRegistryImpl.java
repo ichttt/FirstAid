@@ -50,7 +50,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -73,7 +72,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             "It should be " + INSTANCE.getClass().getName() + " but it actually is " + registryImpl.getClass().getName());
         INSTANCE.registrationAllowed = false;
         INSTANCE.distributionsDynamic.trimToSize();
-        if (FirstAidConfig.debug) {
+        if (FirstAidConfig.GENERAL.debug.get()) {
             FirstAid.LOGGER.info("REG READOUT:");
             for (Map.Entry<String, IDamageDistribution> entry : INSTANCE.distributionsStatic.entrySet()) {
                 FirstAid.LOGGER.info("{} bound to {}", entry.getKey(), entry.getValue());
@@ -84,9 +83,9 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
     @Deprecated
     @Override
-    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable) {
+    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EquipmentSlotType, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable) {
         IStandardDamageDistributionBuilder builder = DamageDistributionBuilderFactoryImpl.INSTANCE.newStandardBuilder();
-        for (Pair<EntityEquipmentSlot, EnumPlayerPart[]> pair : priorityTable)
+        for (Pair<EquipmentSlotType, EnumPlayerPart[]> pair : priorityTable)
             builder.addDistributionLayer(pair.getLeft(), pair.getRight());
         if (shufflePriorityTable)
             builder.ignoreOrder();

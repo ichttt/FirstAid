@@ -21,6 +21,9 @@ package ichttt.mods.firstaid.common.util;
 import com.google.common.collect.Iterators;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -37,15 +40,15 @@ import javax.annotation.Nonnull;
 public class ArmorUtils {
 
     // Use attributes instead of fields on ItemArmor, these are likely more correct
-    public static double getArmor(ItemStack stack, EntityEquipmentSlot slot) {
+    public static double getArmor(ItemStack stack, EquipmentSlotType slot) {
         return getValueFromAttributes(SharedMonsterAttributes.ARMOR, slot, stack);
     }
 
-    public static double getArmorThoughness(ItemStack stack, EntityEquipmentSlot slot) {
+    public static double getArmorThoughness(ItemStack stack, EquipmentSlotType slot) {
         return getValueFromAttributes(SharedMonsterAttributes.ARMOR_TOUGHNESS, slot, stack);
     }
 
-    public static double applyArmorModifier(EntityEquipmentSlot slot, double rawArmor) {
+    public static double applyArmorModifier(EquipmentSlotType slot, double rawArmor) {
         if (rawArmor <= 0D)
             return 0D;
         rawArmor = rawArmor * getArmorModifier(slot);
@@ -53,7 +56,7 @@ public class ArmorUtils {
         return rawArmor;
     }
 
-    public static float applyToughnessModifier(EquipmentSlotType slot, float rawToughness) {
+    public static double applyToughnessModifier(EquipmentSlotType slot, double rawToughness) {
         if (rawToughness <= 0F)
             return 0F;
         rawToughness = rawToughness * getToughnessModifier(slot);
@@ -88,64 +91,27 @@ public class ArmorUtils {
         }
     }
 
-    private static double getValueFromAttributes(IAttribute attribute, EntityEquipmentSlot slot, ItemStack stack) {
+    private static double getValueFromAttributes(IAttribute attribute, EquipmentSlotType slot, ItemStack stack) {
         return stack.getItem().getAttributeModifiers(slot, stack).get(attribute.getName()).stream().mapToDouble(AttributeModifier::getAmount).sum();
     }
 
     /**
      * Changed copy of ISpecialArmor {@link LivingEntity#applyArmorCalculations(DamageSource, float)}
      */
-    public static float applyArmor(@Nonnull EntityPlayer entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, double damage, @Nonnull EntityEquipmentSlot slot) {
-        if (itemStack.isEmpty()) return (float)damage;
-        NonNullList<ItemStack> inventory = entity.inventory.armorInventory;
-
-        double totalArmor = 0;
-        double totalToughness = 0;
+    @SuppressWarnings("JavadocReference")
+    public static float applyArmor(@Nonnull PlayerEntity entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, float damage, @Nonnull EquipmentSlotType slot) {
+        if (itemStack.isEmpty() || source.isUnblockable()) return damage;
         Item item = itemStack.getItem();
+        if (!(item instanceof ArmorItem)) return damage;
+        ArmorItem armor = (ArmorItem) item;
+        float totalArmor = armor.getDamageReduceAmount();
+        float totalToughness = armor.getToughness();
+        totalArmor = (float) applyArmorModifier(slot, totalArmor);
+        totalToughness = (float) applyToughnessModifier(slot, totalToughness);
 
-        ISpecialArmor.ArmorProperties prop;
-        boolean unblockable = source.isUnblockable();
-        if (item instanceof ISpecialArmor && (!unblockable || ((ISpecialArmor) item).handleUnblockableDamage(entity, itemStack, source, damage, slot.getIndex()))) {
-            ISpecialArmor armor = (ISpecialArmor)item;
-            prop = armor.getProperties(entity, itemStack, source, damage, slot.getIndex()).copy();
-            totalArmor += prop.Armor;
-            totalToughness += prop.Toughness;
-        }  else if (item instanceof ItemArmor && !unblockable) {
-            ItemArmor armor = (ItemArmor)item;
-            prop = new ISpecialArmor.ArmorProperties(0, 0, Integer.MAX_VALUE);
-            prop.Armor = armor.damageReduceAmount;
-            prop.Toughness = armor.toughness;
-        } else {
-            return (float) damage;
-        }
-        if (item instanceof ItemArmor) { //Always add normal armor (even if the item is a special armor), as forge does this as well
-            totalArmor += getArmor(itemStack, slot);
-            totalToughness += getArmorThoughness(itemStack, slot);
-        }
-
-        totalArmor = applyArmorModifier(slot, totalArmor);
-        totalToughness = applyToughnessModifier(slot, totalToughness);
-
-        prop.Slot = slot.getIndex();
-        double ratio = prop.AbsorbRatio * getArmorModifier(slot);
-
-        double absorb = damage * ratio;
-        if (absorb > 0) {
-            ItemStack stack = inventory.get(prop.Slot);
-            int itemDamage = (int) Math.max(1, absorb);
-            if (stack.getItem() instanceof ISpecialArmor) ((ISpecialArmor) stack.getItem()).damageArmor(entity, stack, source, itemDamage, prop.Slot);
-            else stack.damageItem(itemDamage, entity);
-        }
-        damage -= (damage * ratio);
-
-        if (damage > 0 && (totalArmor > 0 || totalToughness > 0)) {
-            double armorDamage = Math.max(1.0F, damage);
-
-            if (item instanceof ItemArmor) itemStack.damageItem((int) armorDamage, entity);
-            damage = CombatRules.getDamageAfterAbsorb((float)damage, (float)totalArmor, (float)totalToughness);
-        }
-
-        return (float)damage;
+        itemStack.damageItem((int) damage, entity, (player) -> player.sendBreakAnimation(slot));
+        damage = CombatRules.getDamageAfterAbsorb(damage, totalArmor, totalToughness);
+        return damage;
     }
 
     /**

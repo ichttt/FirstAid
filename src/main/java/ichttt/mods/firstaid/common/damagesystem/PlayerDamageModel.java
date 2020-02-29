@@ -141,14 +141,14 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         }
         if (newCurrentHealth <= 0F) {
             FirstAid.LOGGER.error("Got {} health left, but isn't marked as dead!", newCurrentHealth);
-            world.profiler.endSection();
+            world.getProfiler().endSection();
             return;
         }
         if (!world.isRemote && resyncTimer != -1) {
             resyncTimer--;
             if (resyncTimer == 0) {
                 resyncTimer = -1;
-                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this, true), (EntityPlayerMP) player);
+                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(this, true));
             }
         }
 
@@ -236,9 +236,9 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         return currentHealth;
     }
 
-    private float calculateNewCurrentHealth(EntityPlayer player) {
+    private float calculateNewCurrentHealth(PlayerEntity player) {
         float currentHealth = 0;
-        switch (FirstAidConfig.vanillaHealthCalculation) {
+        switch (FirstAidConfig.SERVER.vanillaHealthCalculation.get()) {
             case AVERAGE_CRITICAL:
                 int maxHealth = 0;
                 for (AbstractDamageablePart part : this) {
@@ -393,8 +393,8 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             }
         }
         //make sure to resync the client health
-        if (!player.world.isRemote && player instanceof EntityPlayerMP)
-            FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(this, true), (EntityPlayerMP) player); //Upload changes to the client
+        if (!player.world.isRemote && player instanceof ServerPlayerEntity)
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(this, true)); //Upload changes to the client
     }
 
     @Override

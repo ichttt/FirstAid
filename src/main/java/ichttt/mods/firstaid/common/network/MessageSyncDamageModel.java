@@ -51,18 +51,13 @@ public class MessageSyncDamageModel {
         public static void onMessage(MessageSyncDamageModel message, Supplier<NetworkEvent.Context> supplier) {
             NetworkEvent.Context ctx = supplier.get();
             CommonUtils.checkClient(ctx);
-            ctx.enqueueWork(() -> CommonUtils.getDamageModel(Minecraft.getInstance().player).deserializeNBT(message.playerDamageModel));
-        @SideOnly(Side.CLIENT)
-        @Override
-        public IMessage onMessage(MessageSyncDamageModel message, MessageContext ctx) {
-            Minecraft mc = Minecraft.getMinecraft();
-            mc.addScheduledTask(() -> {
-                AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+            ctx.enqueueWork(() -> {
+                Minecraft mc = Minecraft.getInstance();
+                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
                 if (message.scaleMaxHealth)
                     damageModel.runScaleLogic(mc.player);
                 damageModel.deserializeNBT(message.playerDamageModel);
             });
-            return null;
         }
     }
 }

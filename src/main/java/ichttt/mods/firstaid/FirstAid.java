@@ -79,7 +79,7 @@ public class FirstAid {
         }
     };
 
-    private static final String NETWORKING_MAJOR = "2.";
+    private static final String NETWORKING_MAJOR = "3.";
     private static final String NETWORKING_MINOR = "0";
 
     private static final String NETWORKING_VERSION = NETWORKING_MAJOR + NETWORKING_MINOR;
@@ -136,7 +136,7 @@ public class FirstAid {
                 });
 
         int i = 0;
-        NETWORKING.registerMessage(++i, MessageReceiveDamage.class, MessageReceiveDamage::encode, MessageReceiveDamage::new, (message, supplier) -> MessageReceiveDamage.Handler.onMessage(message, supplier));
+        NETWORKING.registerMessage(++i, MessageUpdatePart.class, MessageUpdatePart::encode, MessageUpdatePart::new, (message, supplier) -> MessageUpdatePart.Handler.onMessage(message, supplier));
         NETWORKING.registerMessage(++i, MessageApplyHealingItem.class, MessageApplyHealingItem::encode, MessageApplyHealingItem::new, (message, supplier) -> MessageApplyHealingItem.Handler.onMessage(message, supplier));
         NETWORKING.registerMessage(++i, MessageConfiguration.class, MessageConfiguration::encode, MessageConfiguration::new, (message, supplier) -> MessageConfiguration.Handler.onMessage(message, supplier));
         NETWORKING.registerMessage(++i, MessageApplyAbsorption.class, MessageApplyAbsorption::encode, MessageApplyAbsorption::new, (message, supplier) -> MessageApplyAbsorption.Handler.onMessage(message, supplier));

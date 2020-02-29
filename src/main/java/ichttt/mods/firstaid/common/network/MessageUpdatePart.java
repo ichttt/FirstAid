@@ -18,34 +18,22 @@
 
 package ichttt.mods.firstaid.common.network;
 
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import io.netty.buffer.ByteBuf;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.util.Objects;
+import java.util.function.Supplier;
 
-public class MessageUpdatePart implements IMessage {
-    private byte id;
-    private int maxHealth;
-    private float absorption;
-    private float currentHealth;
+public class MessageUpdatePart {
+    private final byte id;
+    private final int maxHealth;
+    private final float absorption;
+    private final float currentHealth;
 
-    public MessageUpdatePart() {}
-
-    public MessageUpdatePart(AbstractDamageablePart part) {
-        this.id = part.part.id;
-        this.maxHealth = part.getMaxHealth();
-        this.absorption = part.getAbsorption();
-        this.currentHealth = part.currentHealth;
-    }
-
-    @Override
-    public void fromBytes(ByteBuf buf) {
+    public MessageUpdatePart(PacketBuffer buf) {
         this.id = buf.readByte();
         this.maxHealth = buf.readInt();
         this.absorption = buf.readFloat();
@@ -53,8 +41,14 @@ public class MessageUpdatePart implements IMessage {
         validate();
     }
 
-    @Override
-    public void toBytes(ByteBuf buf) {
+    public MessageUpdatePart(AbstractDamageablePart part) {
+        this.id = (byte) part.part.ordinal();
+        this.maxHealth = part.getMaxHealth();
+        this.absorption = part.getAbsorption();
+        this.currentHealth = part.currentHealth;
+    }
+
+    public void encode(PacketBuffer buf) {
         buf.writeByte(id);
         buf.writeInt(maxHealth);
         buf.writeFloat(absorption);
@@ -69,22 +63,21 @@ public class MessageUpdatePart implements IMessage {
             throw new RuntimeException("Negative absorption!");
         if (maxHealth < 0)
             throw new RuntimeException("Negative maxHealth!");
-        if (EnumPlayerPart.fromID(id).id != this.id)
+        if (EnumPlayerPart.VALUES[id].ordinal() != this.id)
             throw new RuntimeException("Wrong player mapping!");
     }
 
-    public static class Handler implements IMessageHandler<MessageUpdatePart, IMessage> {
+    public static class Handler {
 
-        @Override
-        public IMessage onMessage(MessageUpdatePart message, MessageContext ctx) {
-            Minecraft mc = Minecraft.getMinecraft();
-            mc.addScheduledTask(() -> {
-                AbstractDamageablePart damageablePart = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).getFromEnum(EnumPlayerPart.fromID(message.id));
+        public static void onMessage(MessageUpdatePart message, Supplier<NetworkEvent.Context> supplier) {
+            NetworkEvent.Context ctx = supplier.get();
+            CommonUtils.checkClient(ctx);
+            ctx.enqueueWork(() -> {
+                AbstractDamageablePart damageablePart = CommonUtils.getDamageModel(Minecraft.getInstance().player).getFromEnum(EnumPlayerPart.VALUES[message.id]);
                 damageablePart.setMaxHealth(message.maxHealth);
                 damageablePart.setAbsorption(message.absorption);
                 damageablePart.currentHealth = message.currentHealth;
             });
-            return null;
         }
     }
 }

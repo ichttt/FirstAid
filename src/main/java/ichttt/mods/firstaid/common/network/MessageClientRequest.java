@@ -23,8 +23,8 @@ import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
@@ -58,7 +58,7 @@ public class MessageClientRequest {
                 CapProvider.tutorialDone.add(player.getName().getString());
                 ctx.enqueueWork(() -> CommonUtils.getDamageModel(player).hasTutorial = true);
             } else if (message.type == Type.REQUEST_REFRESH) {
-                    FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)), true), player);
+                    FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(CommonUtils.getDamageModel(player), true));
             }
         }
     }

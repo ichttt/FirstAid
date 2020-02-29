@@ -20,7 +20,6 @@ package ichttt.mods.firstaid.common.potion;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
@@ -53,9 +52,9 @@ public class PotionPoisonPatched extends Effect {
     }
 
     @Override
-    public void performEffect(@Nonnull EntityLivingBase entity, int amplifier) {
-        if (entity instanceof EntityPlayer && !(entity instanceof FakePlayer) && (FirstAidConfig.damageSystem.causeDeathBody || FirstAidConfig.damageSystem.causeDeathHead)) {
-            if (entity.world.isRemote || entity.isDead || entity.isEntityInvulnerable(DamageSource.MAGIC))
+    public void performEffect(@Nonnull LivingEntity entity, int amplifier) {
+        if (entity instanceof PlayerEntity && !(entity instanceof FakePlayer) && (FirstAidConfig.SERVER.causeDeathBody.get() || FirstAidConfig.SERVER.causeDeathHead.get())) {
+            if (entity.world.isRemote || !entity.isAlive() || entity.isInvulnerableTo(DamageSource.MAGIC))
                 return;
             if (entity.isSleeping())
                 entity.wakeUp();

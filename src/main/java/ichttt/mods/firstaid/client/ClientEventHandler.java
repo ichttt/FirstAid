@@ -132,6 +132,7 @@ public class ClientEventHandler {
         }
     }
 
+
     @SubscribeEvent
     public static void tooltipItems(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
@@ -140,41 +141,22 @@ public class ClientEventHandler {
             event.getToolTip().add(new TranslationTextComponent("firstaid.tooltip.morphine", "3:30-4:30"));
             return;
         }
-        if (FirstAidConfig.overlay.armorTooltipMode != FirstAidConfig.Overlay.TooltipMode.NONE) {
-            boolean set = false;
-            if (item instanceof ISpecialArmor) {
-                ISpecialArmor armor = (ISpecialArmor) item;
-                EntityPlayer player = event.getEntityPlayer();
-                if (player != null) {
-                    int slot = player.inventory.armorInventory.indexOf(stack);
-                    if (slot == -1 && item instanceof ItemArmor)
-                        slot = ((ItemArmor) item).armorType.getIndex();
-                    if (slot >= 0 && slot <= 3) {
-                        int displayArmor = armor.getArmorDisplay(event.getEntityPlayer(), stack, slot);
-                        if (displayArmor != 0) {
-                            set = true;
-                            double totalArmor = ArmorUtils.applyArmorModifier(CommonUtils.ARMOR_SLOTS[slot], displayArmor);
-                            String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(displayArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
-                            replaceOrAppend(event.getToolTip(), original, makeArmorMsg(totalArmor));
-                        }
-                    }
-                }
-            }
-            if (item instanceof ItemArmor && !set) {
-                ItemArmor armor = (ItemArmor) item;
-                List<String> tooltip = event.getToolTip();
+        if (FirstAidConfig.CLIENT.armorTooltipMode.get() != FirstAidConfig.Client.TooltipMode.NONE) {
+            if (item instanceof ArmorItem) {
+                ArmorItem armor = (ArmorItem) item;
+                List<ITextComponent> tooltip = event.getToolTip();
 
                 double normalArmor = ArmorUtils.getArmor(stack, armor.getEquipmentSlot());
-                double totalArmor = ArmorUtils.applyArmorModifier(armor.armorType, normalArmor);
+                double totalArmor = ArmorUtils.applyArmorModifier(armor.getEquipmentSlot(), normalArmor);
                 if (totalArmor > 0D) {
-                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(normalArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
+                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalArmor), new TranslationTextComponent("attribute.name.generic.armor")).applyTextStyle(TextFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
                 }
 
                 double normalToughness = ArmorUtils.getArmorThoughness(stack, armor.getEquipmentSlot());
-                double totalToughness = ArmorUtils.applyToughnessModifier(armor.armorType, normalToughness);
+                double totalToughness = ArmorUtils.applyToughnessModifier(armor.getEquipmentSlot(), normalToughness);
                 if (totalToughness > 0D) {
-                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(normalToughness), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armorToughness"));
+                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalToughness), new TranslationTextComponent("attribute.name.generic.armorToughness")).applyTextStyle(TextFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
                 }
             }

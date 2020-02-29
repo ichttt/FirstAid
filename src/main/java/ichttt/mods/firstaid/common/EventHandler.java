@@ -88,8 +88,8 @@ public class EventHandler {
 
         if (amountToDamage == Float.MAX_VALUE) {
             damageModel.forEach(damageablePart -> damageablePart.currentHealth = 0F);
-            if (player instanceof EntityPlayerMP)
-                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel, false), (EntityPlayerMP) player);
+            if (player instanceof ServerPlayerEntity)
+                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(damageModel, false));
             event.setCanceled(true);
             CommonUtils.killPlayer(player, source);
             return;
@@ -231,8 +231,9 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (!event.player.world.isRemote && event.player instanceof EntityPlayerMP) //Mojang seems to wipe all caps on teleport
-            FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)), true), (EntityPlayerMP) event.player);
+        PlayerEntity player = event.getPlayer();
+        if (!player.world.isRemote && player instanceof ServerPlayerEntity) //Mojang seems to wipe all caps on teleport
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(CommonUtils.getDamageModel(player), true));
     }
 
     @SubscribeEvent

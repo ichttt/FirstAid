@@ -84,7 +84,7 @@ public class DataManagerWrapper extends EntityDataManager {
             CommonUtils.getDamageModel(player).setAbsorption(floatValue);
         } else if (key == LivingEntity.HEALTH) {
             if (value instanceof Float && !player.world.isRemote) {
-                float aFloat = (float) value;
+                float aFloat = (Float) value;
                 LazyOptional<AbstractPlayerDamageModel> damageModel;
                 if (aFloat > player.getMaxHealth()) {
                     CommonUtils.getDamageModel(player).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());

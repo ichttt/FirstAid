@@ -237,37 +237,41 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     private float calculateNewCurrentHealth(EntityPlayer player) {
-        float currentHealth = 0;
-        switch (FirstAidConfig.vanillaHealthCalculation) {
-            case AVERAGE_CRITICAL:
-                int maxHealth = 0;
-                for (AbstractDamageablePart part : this) {
-                    if (part.canCauseDeath) {
-                        currentHealth += part.currentHealth;
-                        maxHealth += part.getMaxHealth();
-                    }
-                }
-                currentHealth = currentHealth / maxHealth;
-                break;
-            case MIN_CRITICAL:
-                AbstractDamageablePart minimal = null;
-                float lowest = Float.MAX_VALUE;
-                for (AbstractDamageablePart part : this) {
-                    float partMaxHealth = part.currentHealth;
-                    if (partMaxHealth < lowest) {
-                        minimal = part;
-                        lowest = partMaxHealth;
-                    }
-                }
-                Objects.requireNonNull(minimal);
-                currentHealth = minimal.currentHealth / minimal.getMaxHealth();
-                break;
-            case AVERAGE_ALL:
-                for (AbstractDamageablePart part : this)
-                    currentHealth += part.currentHealth;
-                currentHealth = currentHealth / getCurrentMaxHealth();
-                break;
+        float currentHealth = Float.MAX_VALUE;
+        FirstAidConfig.VanillaHealthCalculationMode mode = FirstAidConfig.vanillaHealthCalculation;
+        if (mode == FirstAidConfig.VanillaHealthCalculationMode.AVERAGE_ALL
+                || mode == FirstAidConfig.VanillaHealthCalculationMode.MIN_OF_AVG_ALL_AND_AVG_CRITICAL
+                || mode == FirstAidConfig.VanillaHealthCalculationMode.MIN_OF_AVG_ALL_AND_MIN_CRITICAL) {
+            for (AbstractDamageablePart part : this)
+                currentHealth += part.currentHealth;
+            currentHealth = currentHealth / getCurrentMaxHealth();
         }
+        if (mode == FirstAidConfig.VanillaHealthCalculationMode.AVERAGE_CRITICAL
+                || mode == FirstAidConfig.VanillaHealthCalculationMode.MIN_OF_AVG_ALL_AND_AVG_CRITICAL) {
+            int maxHealth = 0;
+            for (AbstractDamageablePart part : this) {
+                if (part.canCauseDeath) {
+                    currentHealth += part.currentHealth;
+                    maxHealth += part.getMaxHealth();
+                }
+            }
+            currentHealth = Math.min(currentHealth, currentHealth / maxHealth);
+        }
+        if (FirstAidConfig.vanillaHealthCalculation == FirstAidConfig.VanillaHealthCalculationMode.MIN_CRITICAL
+                || mode == FirstAidConfig.VanillaHealthCalculationMode.MIN_OF_AVG_ALL_AND_MIN_CRITICAL) {
+            AbstractDamageablePart minimal = null;
+            float lowest = Float.MAX_VALUE;
+            for (AbstractDamageablePart part : this) {
+                float partMaxHealth = part.currentHealth;
+                if (partMaxHealth < lowest) {
+                    minimal = part;
+                    lowest = partMaxHealth;
+                }
+            }
+            Objects.requireNonNull(minimal);
+            currentHealth = Math.min(currentHealth, minimal.currentHealth / minimal.getMaxHealth());
+        }
+        if (currentHealth == Float.MAX_VALUE) FirstAid.LOGGER.error("Somehow ended up with max value as new health using mode {}", mode);
         return currentHealth * player.getMaxHealth();
     }
 

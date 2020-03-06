@@ -90,7 +90,7 @@ public class FirstAidConfig {
     public static VanillaHealthCalculationMode vanillaHealthCalculation = VanillaHealthCalculationMode.AVERAGE_ALL;
 
     public enum VanillaHealthCalculationMode {
-        AVERAGE_ALL, AVERAGE_CRITICAL, MIN_CRITICAL;
+        AVERAGE_ALL, AVERAGE_CRITICAL, MIN_CRITICAL, MIN_OF_AVG_ALL_AND_AVG_CRITICAL, MIN_OF_AVG_ALL_AND_MIN_CRITICAL
     }
 
     @Config.Comment("Only effects the fallback random distribution.\n" +

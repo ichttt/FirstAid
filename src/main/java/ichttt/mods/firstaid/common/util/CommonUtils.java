@@ -72,15 +72,25 @@ public class CommonUtils {
                 FirstAid.LOGGER.warn("Tried to kill the player on the client! This should only happen on the server! Ignoring...", e);
             }
         }
-        if (source != null && FirstAidConfig.externalHealing.allowOtherHealingItems && player.checkTotemDeathProtection(source)) {
-            //totem protected the player - make sure he actually isn't dead
-            for (AbstractDamageablePart part : damageModel) {
-                if (part.canCauseDeath)
-                    part.currentHealth = Math.max(part.currentHealth, 1F);
+        if (source != null && FirstAidConfig.externalHealing.allowOtherHealingItems) {
+            DataManagerWrapper wrapper = (DataManagerWrapper) player.dataManager;
+            boolean protection;
+            wrapper.toggleTracking(false);
+            try {
+                //totem protected the player - make sure he actually isn't dead
+                protection = player.checkTotemDeathProtection(source);
+            } finally {
+                wrapper.toggleTracking(true);
             }
-            if (player instanceof EntityPlayerMP)
-                FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel, false), (EntityPlayerMP) player);
-            return;
+            if (protection) {
+                for (AbstractDamageablePart part : damageModel) {
+                    if (part.canCauseDeath)
+                        part.currentHealth = Math.max(part.currentHealth, 1F);
+                }
+                if (player instanceof EntityPlayerMP)
+                    FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel, false), (EntityPlayerMP) player);
+                return;
+            }
         }
 
         IRevival revival = getRevivalIfPossible(player);

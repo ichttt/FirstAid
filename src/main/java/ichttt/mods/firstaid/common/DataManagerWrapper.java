@@ -51,6 +51,7 @@ import java.util.Objects;
 public class DataManagerWrapper extends EntityDataManager {
     private final EntityPlayer player;
     private final EntityDataManager parent;
+    private boolean track = true;
 
     public DataManagerWrapper(EntityPlayer player, EntityDataManager parent) {
         super(player);
@@ -73,6 +74,12 @@ public class DataManagerWrapper extends EntityDataManager {
 
     @Override
     public <T> void set(@Nonnull DataParameter<T> key, @Nonnull T value) {
+        if (!track) {
+            if (key != EntityLivingBase.HEALTH)
+                set_impl(key, value);
+            return;
+        }
+
         if (key == EntityPlayer.ABSORPTION) {
             float floatValue = (Float) value;
             if (player instanceof EntityPlayerMP) { //may be EntityOtherPlayerMP as well
@@ -83,17 +90,17 @@ public class DataManagerWrapper extends EntityDataManager {
             Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).setAbsorption(floatValue);
         } else if (key == EntityLivingBase.HEALTH) {
             if (value instanceof Float && !player.world.isRemote) {
-                Float aFloat = (Float) value;
+                float aFloat = (Float) value;
                 AbstractPlayerDamageModel damageModel;
                 if (aFloat > player.getMaxHealth()) {
                     Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
                 } else if ((damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)) != null && damageModel.isWaitingForHelp()) {
                     if (FirstAidConfig.debug)
                         CommonUtils.debugLogStacktrace("SetHealth falltrough");
-                } else if (FirstAidConfig.watchSetHealth && !aFloat.isInfinite() && !aFloat.isNaN() && aFloat > 0 && player instanceof EntityPlayerMP && ((EntityPlayerMP) player).connection != null) {
+                } else if (FirstAidConfig.watchSetHealth && !Float.isInfinite(aFloat) && !Float.isNaN(aFloat) && aFloat > 0 && player instanceof EntityPlayerMP && ((EntityPlayerMP) player).connection != null) {
                     //calculate diff
-                    Float orig = get(EntityLivingBase.HEALTH);
-                    if (orig > 0 && !orig.isNaN() && !orig.isInfinite()) {
+                    float orig = get(EntityLivingBase.HEALTH);
+                    if (orig > 0 && !Float.isNaN(orig) && !Float.isInfinite(orig)) {
                         if (FirstAidConfig.scaleMaxHealth)
                             orig = Math.min(orig, (float) this.player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue());
                         float healed = aFloat - orig;
@@ -116,6 +123,13 @@ public class DataManagerWrapper extends EntityDataManager {
             }
         }
         set_impl(key, value);
+    }
+
+
+    public void toggleTracking(boolean status) {
+        if (FirstAidConfig.debug)
+            CommonUtils.debugLogStacktrace("Tracking status change from " + track + " to " + status);
+        track = status;
     }
 
     // ----------WRAPPER BELOW----------

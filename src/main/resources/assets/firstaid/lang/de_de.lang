@@ -72,8 +72,10 @@ firstaid.config.naturalregenmultiplier=Multiplikator natürlicher Regeneration
 firstaid.config.naturalregenmultiplier.tooltip=Der Wert, mit dem die natürliche Heilung verrechnet wird. Kein Effekt, falls natürliche Regeneration deaktiviert ist.
 firstaid.config.showvanillahealthbar=Zeige die normale Lebensleiste
 firstaid.config.showvanillahealthbar.tooltip=Falls aktiviert wird die normale Lebensleiste dargestellt (zeigt dein durchschnittliches Leben)
-firstaid.config.hideonnochange=Zeige bei Lebensänderung
-firstaid.config.hideonnochange.tooltip=Falls aktiv wird das Leben nur gezeigt wenn sich etwas ändert, also wenn ein Körperteil Schaden bekommt oder geheilt wird
+firstaid.config.visibledurationticks=Overlay sichtbare ticks nach Lebensänderung
+firstaid.config.visibledurationticks.tooltip=Definiert wie viele ticks (20 ticks = 1 Sekunde) das Overlay sichbar sein sollte nachdem das Leben sich verändert hat (Heilung/Schaden).\Wenn auf -1 gesetzt, ist das HUD immer sichtbar
+firstaid.config.flash=Overlay aufblinken nach Lebensänderung
+firstaid.config.flash.tooltip=Wenn aktiviert wird das Overlay ein falls das Leben sich genädert hat. Betrifft nur das PLAYER_MODEL overlay.
 firstaid.config.position=Position
 firstaid.config.position.tooltip=Der relative Punkt des Overlays. 0=oben+links, 1=oben+rechts, 2=unten+links, 3=unten+rechts
 firstaid.config.xoffset=X-Achsenoffset

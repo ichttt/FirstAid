@@ -74,8 +74,7 @@ firstaid.config.naturalregenmultiplier=Множитель естественно
 firstaid.config.naturalregenmultiplier.tooltip=Значение естественной стандартной регенерации будет умножено. Не действует, если «Allownaturalitems» отключен
 firstaid.config.showvanillahealthbar=Показать ванильную полосу здоровья
 firstaid.config.showvanillahealthbar.tooltip=True, если должен отображаться основной столбец здоровья (будет средним уровнем здоровья)
-firstaid.config.hideonnochange=Показать во время изменения здоровья
-firstaid.config.hideonnochange.tooltip=Если true, оверлей будет автоматически скрыт, пока здоровье не изменится. Будет показано при подключении и любых изменениях здоровья
+
 firstaid.config.position=Позиция
 firstaid.config.position.tooltip=Относительная точка наложения. 0 = верхний + левый, 1 = верхний + правый, 2 = нижний + левый, 3 = нижний + правый
 firstaid.config.xoffset=Смещение по оси X

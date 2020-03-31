@@ -24,6 +24,7 @@ import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.client.gui.FlashStateManager;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
@@ -54,12 +55,17 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
     public static final HUDHandler INSTANCE = new HUDHandler();
     private static final int FADE_TIME = 30;
     private final Map<EnumPlayerPart, String> TRANSLATION_MAP = new EnumMap<>(EnumPlayerPart.class);
+    private final FlashStateManager flashStateManager = new FlashStateManager();
     private int maxLength;
     public int ticker = -1;
 
     @Override
     public void onResourceManagerReload(@Nonnull IResourceManager resourceManager, @Nonnull Predicate<IResourceType> resourcePredicate) {
         if (!resourcePredicate.test(VanillaResourceType.LANGUAGES)) return;
+        buildTranslationTable();
+    }
+
+    private synchronized void buildTranslationTable() {
         FirstAid.LOGGER.debug("Building GUI translation table");
         TRANSLATION_MAP.clear();
         maxLength = 0;
@@ -77,24 +83,33 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
     public void renderOverlay(ScaledResolution scaledResolution, float partialTicks) {
         Minecraft mc = Minecraft.getMinecraft();
         mc.profiler.startSection("prepare");
-        if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.OFF || mc.player == null || (GuiHealthScreen.isOpen && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) || !CommonUtils.isSurvivalOrAdventure(mc.player))
+        if (mc.player == null)
             return;
 
         AbstractPlayerDamageModel damageModel = Objects.requireNonNull(mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
         if (!FirstAid.isSynced) //Wait until we receive the remote model
             return;
 
+        if (TRANSLATION_MAP.isEmpty()) buildTranslationTable(); //just to make sure
+
+        int visibleTicks = FirstAidConfig.overlay.displayMode.visibleDurationTicks;
+        if (visibleTicks != -1) visibleTicks += FADE_TIME;
         boolean playerDead = damageModel.isDead(mc.player);
-        if (FirstAidConfig.overlay.hideOnNoChange) {
-            for (AbstractDamageablePart damageablePart : damageModel) {
-                if (HealthRenderUtils.healthChanged(damageablePart, playerDead)) {
-                    ticker = Math.max(ticker, 100);
-                    break;
+        for (AbstractDamageablePart damageablePart : damageModel) {
+            if (HealthRenderUtils.healthChanged(damageablePart, playerDead)) { //Always call healthChanged, it affects the GUI as well
+                if (visibleTicks != -1)
+                    ticker = Math.max(ticker, visibleTicks);
+                if (FirstAidConfig.overlay.displayMode.flash) {
+                    flashStateManager.setActive(Minecraft.getSystemTime());
                 }
             }
-            if (ticker <= 0)
-                return;
         }
+
+        if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.OFF || (GuiHealthScreen.isOpen && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) || !CommonUtils.isSurvivalOrAdventure(mc.player))
+            return;
+
+        if (visibleTicks != -1 && ticker < 0)
+            return;
 
         mc.getTextureManager().bindTexture(Gui.ICONS);
         Gui gui = mc.ingameGUI;
@@ -107,7 +122,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                     xOffset += 1;
                 break;
             case TOP_RIGHT:
-                xOffset = scaledResolution.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() - (maxLength));
+                xOffset = scaledResolution.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() + (maxLength));
                 break;
             case BOTTOM_LEFT:
                 if (playerModel)
@@ -115,7 +130,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 yOffset = scaledResolution.getScaledHeight() - yOffset - (playerModel ? 66 : 80);
                 break;
             case BOTTOM_RIGHT:
-                xOffset = scaledResolution.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() - (maxLength));
+                xOffset = scaledResolution.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() + (maxLength));
                 yOffset = scaledResolution.getScaledHeight() - yOffset - (playerModel ? 62 : 80);
                 break;
             default:
@@ -127,7 +142,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         if (mc.gameSettings.showDebugInfo && FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.TOP_LEFT)
             return;
 
-        boolean enableAlphaBlend = FirstAidConfig.overlay.hideOnNoChange && ticker < FADE_TIME;
+        boolean enableAlphaBlend = visibleTicks != -1 && ticker < FADE_TIME;
         int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), FirstAidConfig.overlay.alpha, 250) : FirstAidConfig.overlay.alpha;
 
         GlStateManager.pushMatrix();
@@ -138,7 +153,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         }
         mc.profiler.endStartSection("render");
         if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) {
-            PlayerModelRenderer.renderPlayerHealth(damageModel, gui, alpha, partialTicks);
+            PlayerModelRenderer.renderPlayerHealth(damageModel, gui, flashStateManager.update(Minecraft.getSystemTime()), alpha, partialTicks);
         } else {
             int xTranslation = maxLength;
             for (AbstractDamageablePart part : damageModel) {

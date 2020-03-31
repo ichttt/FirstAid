@@ -137,6 +137,7 @@ public class FirstAid {
         ExtraConfigManager.scheduleDelete("Overlay.mode");
         ExtraConfigManager.scheduleDelete("ExternalHealing.sleepHealing");
         ExtraConfigManager.scheduleDelete("experimentalSetHealth");
+        ExtraConfigManager.scheduleDelete("Overlay.hideOnNoChange");
         ExtraConfigManager.postProcessConfigs();
 
         int i = 0;

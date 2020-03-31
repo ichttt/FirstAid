@@ -36,7 +36,8 @@ public class PlayerModelRenderer {
     private static int angle = 0;
     private static boolean otherWay = false;
 
-    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, Gui gui, float alpha, float partialTicks) {
+    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, Gui gui, boolean flashState, float alpha, float partialTicks) {
+        int yOffset = flashState ? 128 : 0;
         GlStateManager.pushMatrix();
         GlStateManager.enableBlend();
         GlStateManager.color(1F, 1F, 1F, 1 - (alpha / 255));
@@ -50,14 +51,18 @@ public class PlayerModelRenderer {
                 GlStateManager.translate(angle * 0.5F, 0, 0);
             GlStateManager.rotate(angle, 0, 0, 1);
         }
-        drawPart(gui, damageModel.HEAD, 16, 0, 32, 32);
-        drawPart(gui, damageModel.BODY, 16, 32, 32, 48);
-        drawPart(gui, damageModel.LEFT_ARM, 0, 32, 16, 48);
-        drawPart(gui, damageModel.RIGHT_ARM, 48, 32, 16, 48);
-        drawPart(gui, damageModel.LEFT_LEG, 16, 80, 16, 32);
-        drawPart(gui, damageModel.RIGHT_LEG, 32, 80, 16, 32);
-        drawPart(gui, damageModel.LEFT_FOOT, 16, 112, 16, 16);
-        drawPart(gui, damageModel.RIGHT_FOOT, 32, 112, 16, 16);
+
+        if (yOffset != 0)
+            GlStateManager.translate(0, -yOffset, 0);
+
+        drawPart(gui, damageModel.HEAD, 16, yOffset + 0, 32, 32);
+        drawPart(gui, damageModel.BODY, 16, yOffset + 32, 32, 48);
+        drawPart(gui, damageModel.LEFT_ARM, 0, yOffset + 32, 16, 48);
+        drawPart(gui, damageModel.RIGHT_ARM, 48, yOffset + 32, 16, 48);
+        drawPart(gui, damageModel.LEFT_LEG, 16, yOffset + 80, 16, 32);
+        drawPart(gui, damageModel.RIGHT_LEG, 32, yOffset + 80, 16, 32);
+        drawPart(gui, damageModel.LEFT_FOOT, 16, yOffset + 112, 16, 16);
+        drawPart(gui, damageModel.RIGHT_FOOT, 32, yOffset + 112, 16, 16);
 
         GlStateManager.color(1F, 1F, 1F, 1F);
         GlStateManager.popMatrix();

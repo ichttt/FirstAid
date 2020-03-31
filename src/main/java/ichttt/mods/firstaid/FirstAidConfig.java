@@ -181,14 +181,33 @@ public class FirstAidConfig {
             REPLACE, APPEND, NONE
         }
 
+        public static class DisplayMode {
+            @Config.Comment("Specifies how many ticks (20 ticks = 1 second) the overlay should be visible after health changed (healing/damaging)\n" +
+                    "If set to -1, the HUD is always visible")
+            @Config.LangKey("firstaid.config.visibledurationticks")
+            @Config.RangeInt(min = -1, max = 600)
+            public final int visibleDurationTicks;
+
+            @Config.Comment("If set to true, the overlay will flash for a short moment if the health changed. Only affects PLAYER_MODEL overlay")
+            @Config.LangKey("firstaid.config.flash")
+            public final boolean flash;
+
+            private DisplayMode(int visibleDurationTicks, boolean flash) {
+                this.visibleDurationTicks = visibleDurationTicks;
+                this.flash = flash;
+            }
+        }
+
         @Config.Comment("True if the main health bar should be rendered (Will be average health)")
         @Config.LangKey("firstaid.config.showvanillahealthbar")
         public boolean showVanillaHealthBar = false;
 
-        @Config.Comment("If true the overlay will automatically be hidden while health isn't changing. It will be shown when connecting and any health changes")
-        @Config.LangKey("firstaid.config.hideonnochange")
-        public boolean hideOnNoChange = false;
+        @Config.Comment("Specifies when and how the HUD should be displayed")
+        @Config.LangKey("firstaid.config.displaymode")
+        public DisplayMode displayMode = new DisplayMode(-1, true);
 
+        @Config.Comment("Specifies the type of the overlay HUD.")
+        @Config.LangKey("firstaid.config.overlaymode")
         public OverlayMode overlayMode = OverlayMode.PLAYER_MODEL;
 
         @Config.Comment("The relative point of the overlay")

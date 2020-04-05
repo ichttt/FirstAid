@@ -358,7 +358,6 @@ public class FirstAidConfig {
         }
 
         public final ForgeConfigSpec.BooleanValue showVanillaHealthBar;
-        public final ForgeConfigSpec.BooleanValue hideOnNoChange;
         public final ForgeConfigSpec.EnumValue<OverlayMode> overlayMode;
         public final ForgeConfigSpec.EnumValue<Position> pos;
         public final ForgeConfigSpec.EnumValue<TooltipMode> armorTooltipMode;
@@ -376,11 +375,6 @@ public class FirstAidConfig {
                     .comment("True if the main health bar should be rendered (Will be average health)")
                     .translation("firstaid.config.showvanillahealthbar")
                     .define("showVanillaHealthBar", false);
-
-            hideOnNoChange = builder
-                    .comment("If true the overlay will automatically be hidden while health isn't changing. It will be shown when connecting and any health changes")
-                    .translation("firstaid.config.hideonnochange")
-                    .define("hideOnNoChange", false);
 
             overlayMode = builder
                     .comment("The design to use to visualize the health")

@@ -18,7 +18,7 @@
 
 package ichttt.mods.firstaid.client.util;
 
-import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.platform.GlStateManager;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -80,12 +80,12 @@ public class HealthRenderUtils {
             int prev = prevHealth.getInt(damageablePart.part);
             updatePrev(damageablePart.part, current, playerDead);
             if (prev != current) {
-                activeFlashState.setActive(Minecraft.getSystemTime());
+                activeFlashState.setActive(Util.milliTime());
                 return true;
             }
             return false;
         }
-        activeFlashState.setActive(Minecraft.getSystemTime());
+        activeFlashState.setActive(Util.milliTime());
         updatePrev(damageablePart.part, current, playerDead);
         return true;
     }

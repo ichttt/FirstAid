@@ -238,8 +238,8 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     private float calculateNewCurrentHealth(PlayerEntity player) {
         float currentHealth = 0;
-        FirstAidConfig.VanillaHealthCalculationMode mode = FirstAidConfig.vanillaHealthCalculation;
-        if (noCritical) mode = FirstAidConfig.VanillaHealthCalculationMode.AVERAGE_ALL;
+        FirstAidConfig.Server.VanillaHealthCalculationMode mode = FirstAidConfig.SERVER.vanillaHealthCalculation.get();
+        if (noCritical) mode = FirstAidConfig.Server.VanillaHealthCalculationMode.AVERAGE_ALL;
         switch (mode) {
             case AVERAGE_CRITICAL:
                 int maxHealth = 0;

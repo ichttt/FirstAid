@@ -22,19 +22,24 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
+import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.server.MinecraftServer;
+import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -62,7 +67,7 @@ public class CommonUtils {
         put(EquipmentSlotType.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)).build();
     }
 
-    public static void killPlayer(@Nonnull AbstractPlayerDamageModel damageModel, @Nonnull EntityPlayer player, @Nullable DamageSource source) {
+    public static void killPlayer(@Nonnull AbstractPlayerDamageModel damageModel, @Nonnull PlayerEntity player, @Nullable DamageSource source) {
         if (player.world.isRemote) {
             try {
                 throw new RuntimeException("Tried to kill the player on the client!");
@@ -70,7 +75,7 @@ public class CommonUtils {
                 FirstAid.LOGGER.warn("Tried to kill the player on the client! This should only happen on the server! Ignoring...", e);
             }
         }
-        if (source != null && FirstAidConfig.externalHealing.allowOtherHealingItems) {
+        if (source != null && FirstAidConfig.SERVER.allowOtherHealingItems.get()) {
             DataManagerWrapper wrapper = (DataManagerWrapper) player.dataManager;
             boolean protection;
             wrapper.toggleTracking(false);
@@ -85,8 +90,8 @@ public class CommonUtils {
                     if (part.canCauseDeath)
                         part.currentHealth = Math.max(part.currentHealth, 1F);
                 }
-                if (player instanceof EntityPlayerMP)
-                    FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel, false), (EntityPlayerMP) player);
+                if (player instanceof ServerPlayerEntity)
+                    FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(damageModel, false));
                 return;
             }
         }

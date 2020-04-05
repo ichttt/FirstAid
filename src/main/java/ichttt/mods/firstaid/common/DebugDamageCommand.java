@@ -65,7 +65,7 @@ public class DebugDamageCommand {
         }
         if (damageModel.isDead(player)) {
             player.sendMessage(new TranslationTextComponent("death.attack.generic", player.getDisplayName()));
-            CommonUtils.killPlayer(player, null);
+            CommonUtils.killPlayer(damageModel, player, null);
         }
         FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(damageModel, false));
         return 1;

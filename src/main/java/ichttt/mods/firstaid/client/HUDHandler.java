@@ -34,6 +34,7 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.resources.IResourceManager;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.resource.IResourceType;
 import net.minecraftforge.resource.ISelectiveResourceReloadListener;
@@ -74,9 +75,8 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         return maxLength;
     }
 
-    public void renderOverlay(ScaledResolution scaledResolution, float partialTicks) {
-        Minecraft mc = Minecraft.getMinecraft();
-        mc.profiler.startSection("prepare");
+    public void renderOverlay(Minecraft mc, float partialTicks) {
+        mc.getProfiler().startSection("prepare");
         if (mc.player == null)
             return;
 
@@ -86,20 +86,21 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
 
         if (TRANSLATION_MAP.isEmpty()) buildTranslationTable(); //just to make sure
 
-        int visibleTicks = FirstAidConfig.overlay.displayMode.visibleDurationTicks;
+        int visibleTicks = FirstAidConfig.CLIENT.visibleDurationTicks.get();
         if (visibleTicks != -1) visibleTicks += FADE_TIME;
         boolean playerDead = damageModel.isDead(mc.player);
         for (AbstractDamageablePart damageablePart : damageModel) {
             if (HealthRenderUtils.healthChanged(damageablePart, playerDead)) { //Always call healthChanged, it affects the GUI as well
                 if (visibleTicks != -1)
                     ticker = Math.max(ticker, visibleTicks);
-                if (FirstAidConfig.overlay.displayMode.flash) {
-                    flashStateManager.setActive(Minecraft.getSystemTime());
+                if (FirstAidConfig.CLIENT.flash.get()) {
+                    flashStateManager.setActive(Util.milliTime());
                 }
             }
         }
 
-        if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.OFF || (GuiHealthScreen.isOpen && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) || !CommonUtils.isSurvivalOrAdventure(mc.player))
+        FirstAidConfig.Client.OverlayMode overlayMode = FirstAidConfig.CLIENT.overlayMode.get();
+        if (overlayMode == FirstAidConfig.Client.OverlayMode.OFF || (GuiHealthScreen.isOpen && overlayMode != FirstAidConfig.Client.OverlayMode.PLAYER_MODEL) || !CommonUtils.isSurvivalOrAdventure(mc.player))
             return;
 
         if (visibleTicks != -1 && ticker < 0)
@@ -116,7 +117,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                     xOffset += 1;
                 break;
             case TOP_RIGHT:
-                xOffset = scaledResolution.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() + (maxLength));
+                xOffset = mc.mainWindow.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() + (maxLength));
                 break;
             case BOTTOM_LEFT:
                 if (playerModel)
@@ -124,8 +125,8 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 yOffset = mc.mainWindow.getScaledHeight() - yOffset - (playerModel ? 66 : 80);
                 break;
             case BOTTOM_RIGHT:
-                xOffset = scaledResolution.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() + (maxLength));
-                yOffset = scaledResolution.getScaledHeight() - yOffset - (playerModel ? 62 : 80);
+                xOffset = mc.mainWindow.getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() + (maxLength));
+                yOffset = mc.mainWindow.getScaledHeight() - yOffset - (playerModel ? 62 : 80);
                 break;
             default:
                 throw new RuntimeException("Invalid config option for position: " + FirstAidConfig.CLIENT.pos.get());
@@ -137,7 +138,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
             return;
 
         boolean enableAlphaBlend = visibleTicks != -1 && ticker < FADE_TIME;
-        int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), FirstAidConfig.overlay.alpha, 250) : FirstAidConfig.overlay.alpha;
+        int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), FirstAidConfig.CLIENT.alpha.get(), 250) : FirstAidConfig.CLIENT.alpha.get();
 
         GlStateManager.pushMatrix();
         GlStateManager.translatef(xOffset, yOffset, 0F);
@@ -145,9 +146,9 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
             GlStateManager.enableBlend();
             GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         }
-        mc.profiler.endStartSection("render");
-        if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL) {
-            PlayerModelRenderer.renderPlayerHealth(damageModel, gui, flashStateManager.update(Minecraft.getSystemTime()), alpha, partialTicks);
+        mc.getProfiler().endStartSection("render");
+        if (overlayMode == FirstAidConfig.Client.OverlayMode.PLAYER_MODEL) {
+            PlayerModelRenderer.renderPlayerHealth(damageModel, gui, flashStateManager.update(Util.milliTime()), alpha, partialTicks);
         } else {
             int xTranslation = maxLength;
             for (AbstractDamageablePart part : damageModel) {

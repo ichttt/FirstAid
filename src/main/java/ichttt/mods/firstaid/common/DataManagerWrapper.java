@@ -76,7 +76,7 @@ public class DataManagerWrapper extends EntityDataManager {
     @Override
     public <T> void set(@Nonnull DataParameter<T> key, @Nonnull T value) {
         if (!track) {
-            if (key != EntityLivingBase.HEALTH)
+            if (key != LivingEntity.HEALTH)
                 set_impl(key, value);
             return;
         }
@@ -128,7 +128,7 @@ public class DataManagerWrapper extends EntityDataManager {
 
 
     public void toggleTracking(boolean status) {
-        if (FirstAidConfig.debug)
+        if (FirstAidConfig.GENERAL.debug.get())
             CommonUtils.debugLogStacktrace("Tracking status change from " + track + " to " + status);
         track = status;
     }

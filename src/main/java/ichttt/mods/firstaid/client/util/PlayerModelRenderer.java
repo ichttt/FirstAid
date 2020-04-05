@@ -50,7 +50,7 @@ public class PlayerModelRenderer {
         }
 
         if (yOffset != 0)
-            GlStateManager.translate(0, -yOffset, 0);
+            GlStateManager.translatef(0, -yOffset, 0);
 
         drawPart(gui, damageModel.HEAD, 16, yOffset + 0, 32, 32);
         drawPart(gui, damageModel.BODY, 16, yOffset + 32, 32, 48);

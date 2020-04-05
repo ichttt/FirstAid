@@ -19,7 +19,14 @@ version = '1.7.11'
 group = 'ichttt.mods.firstaid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'firstaid'
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+version = "1.6.14" + (project.hasProperty('betaBuild') ? "-BETA" : "")
+group = "ichttt.mods.firstaid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "firstaid"
+
+sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
 
 minecraft {
     // the mappings can be changed at any time, and must be in the following format.

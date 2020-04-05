@@ -22,15 +22,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.ModContainer;
@@ -64,9 +62,34 @@ public class CommonUtils {
         put(EquipmentSlotType.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)).build();
     }
 
-    public static void killPlayer(@Nonnull PlayerEntity player, @Nullable DamageSource source) {
-        if (source != null && FirstAidConfig.SERVER.allowOtherHealingItems.get() && player.checkTotemDeathProtection(source))
-            return;
+    public static void killPlayer(@Nonnull AbstractPlayerDamageModel damageModel, @Nonnull EntityPlayer player, @Nullable DamageSource source) {
+        if (player.world.isRemote) {
+            try {
+                throw new RuntimeException("Tried to kill the player on the client!");
+            } catch (RuntimeException e) {
+                FirstAid.LOGGER.warn("Tried to kill the player on the client! This should only happen on the server! Ignoring...", e);
+            }
+        }
+        if (source != null && FirstAidConfig.externalHealing.allowOtherHealingItems) {
+            DataManagerWrapper wrapper = (DataManagerWrapper) player.dataManager;
+            boolean protection;
+            wrapper.toggleTracking(false);
+            try {
+                //totem protected the player - make sure he actually isn't dead
+                protection = player.checkTotemDeathProtection(source);
+            } finally {
+                wrapper.toggleTracking(true);
+            }
+            if (protection) {
+                for (AbstractDamageablePart part : damageModel) {
+                    if (part.canCauseDeath)
+                        part.currentHealth = Math.max(part.currentHealth, 1F);
+                }
+                if (player instanceof EntityPlayerMP)
+                    FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel, false), (EntityPlayerMP) player);
+                return;
+            }
+        }
 
 //        IRevival revival = getRevivalIfPossible(player);
 //        if (revival != null)

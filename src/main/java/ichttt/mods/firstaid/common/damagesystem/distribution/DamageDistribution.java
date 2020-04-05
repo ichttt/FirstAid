@@ -81,7 +81,7 @@ public abstract class DamageDistribution implements IDamageDistribution {
         }
 
         if (damageModel.isDead(player))
-            CommonUtils.killPlayer(player, source);
+            CommonUtils.killPlayer(damageModel, player, source);
         return left;
     }
 

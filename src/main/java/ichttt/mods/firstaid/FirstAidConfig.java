@@ -55,7 +55,7 @@ public class FirstAidConfig {
     public static class Server {
 
         public enum VanillaHealthCalculationMode {
-            AVERAGE_ALL, AVERAGE_CRITICAL, MIN_CRITICAL
+            AVERAGE_ALL, AVERAGE_CRITICAL, MIN_CRITICAL, CRITICAL_50_PERCENT_OTHER_50_PERCENT
         }
 
         Server(ForgeConfigSpec.Builder builder) {
@@ -192,6 +192,63 @@ public class FirstAidConfig {
                 builder.pop();
             }
         }
+
+        public static class DisplayMode {
+            @Config.Comment("Specifies how many ticks (20 ticks = 1 second) the overlay should be visible after health changed (healing/damaging)\n" +
+                    "If set to -1, the HUD is always visible")
+            @Config.LangKey("firstaid.config.visibledurationticks")
+            @Config.RangeInt(min = -1, max = 600)
+            public final int visibleDurationTicks;
+
+            @Config.Comment("If set to true, the overlay will flash for a short moment if the health changed. Only affects PLAYER_MODEL overlay")
+            @Config.LangKey("firstaid.config.flash")
+            public final boolean flash;
+
+            private DisplayMode(int visibleDurationTicks, boolean flash) {
+                this.visibleDurationTicks = visibleDurationTicks;
+                this.flash = flash;
+            }
+        }
+
+        @Config.Comment("True if the main health bar should be rendered (Will be average health)")
+        @Config.LangKey("firstaid.config.showvanillahealthbar")
+        public boolean showVanillaHealthBar = false;
+
+        @Config.Comment("Specifies when and how the HUD should be displayed")
+        @Config.LangKey("firstaid.config.displaymode")
+        public DisplayMode displayMode = new DisplayMode(-1, true);
+
+        @Config.Comment("Specifies the type of the overlay HUD.")
+        @Config.LangKey("firstaid.config.overlaymode")
+        public OverlayMode overlayMode = OverlayMode.PLAYER_MODEL;
+
+        @Config.Comment("The relative point of the overlay")
+        @Config.LangKey("firstaid.config.position")
+        public Position pos = Position.TOP_LEFT;
+
+        @Config.Comment("The offset on the x axis")
+        @Config.LangKey("firstaid.config.xoffset")
+        @ExtraConfig.Advanced
+        public int xOffset = 0;
+
+        @Config.Comment("The offset on the y axis")
+        @Config.LangKey("firstaid.config.yoffset")
+        @ExtraConfig.Advanced
+        public int yOffset = 1;
+
+        @Config.Comment("Determines the transparency of the overlay. 200 = Maximum transparency, 0 = Fully opaque")
+        @Config.LangKey("firstaid.config.alpha")
+        @Config.RangeInt(min = 0, max = 200)
+        @ExtraConfig.Advanced
+        public int alpha = 50;
+
+        @Config.Comment("Determines how first aid should display armor on item tooltips.\nREPLACE replaces the vanilla description with the one fitting first aid\nAPPEND will add the first aid values at the bottom\nNONE will show the old vanilla values. Be advised this is purly visual, interally, the first aid value will always be used")
+        @ExtraConfig.Advanced
+        public TooltipMode armorTooltipMode = TooltipMode.REPLACE;
+
+        @Config.Comment("Disables the funny easter eggs on certain events")
+        @ExtraConfig.Advanced
+        public boolean enableEasterEggs = true;
     }
 
     public static class General {

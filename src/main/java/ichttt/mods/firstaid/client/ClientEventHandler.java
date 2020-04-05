@@ -73,7 +73,7 @@ public class ClientEventHandler {
                 mc.player.sendStatusMessage(new StringTextComponent("[FirstAid] " + s), false);
             RegistryManager.debuffConfigErrors.clear();
         }
-        if (HUDHandler.INSTANCE.ticker > 0)
+        if (HUDHandler.INSTANCE.ticker >= 0)
             HUDHandler.INSTANCE.ticker--;
     }
 

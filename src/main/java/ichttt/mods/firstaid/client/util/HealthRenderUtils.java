@@ -18,8 +18,7 @@
 
 package ichttt.mods.firstaid.client.util;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;

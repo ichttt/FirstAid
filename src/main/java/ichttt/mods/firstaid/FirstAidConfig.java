@@ -55,7 +55,7 @@ public class FirstAidConfig {
     public static class Server {
 
         public enum VanillaHealthCalculationMode {
-            AVERAGE_ALL, AVERAGE_CRITICAL, MIN_CRITICAL
+            AVERAGE_ALL, AVERAGE_CRITICAL, MIN_CRITICAL, CRITICAL_50_PERCENT_OTHER_50_PERCENT
         }
 
         Server(ForgeConfigSpec.Builder builder) {
@@ -358,7 +358,6 @@ public class FirstAidConfig {
         }
 
         public final ForgeConfigSpec.BooleanValue showVanillaHealthBar;
-        public final ForgeConfigSpec.BooleanValue hideOnNoChange;
         public final ForgeConfigSpec.EnumValue<OverlayMode> overlayMode;
         public final ForgeConfigSpec.EnumValue<Position> pos;
         public final ForgeConfigSpec.EnumValue<TooltipMode> armorTooltipMode;
@@ -367,6 +366,8 @@ public class FirstAidConfig {
         public final ForgeConfigSpec.IntValue alpha;
         public final ForgeConfigSpec.BooleanValue enableSounds;
         public final ForgeConfigSpec.BooleanValue enableEasterEggs;
+        public final ForgeConfigSpec.IntValue visibleDurationTicks;
+        public final ForgeConfigSpec.BooleanValue flash;
 
         public Client(ForgeConfigSpec.Builder builder) {
             builder.comment("Client only configuration settings").push("Overlay");
@@ -374,11 +375,6 @@ public class FirstAidConfig {
                     .comment("True if the main health bar should be rendered (Will be average health)")
                     .translation("firstaid.config.showvanillahealthbar")
                     .define("showVanillaHealthBar", false);
-
-            hideOnNoChange = builder
-                    .comment("If true the overlay will automatically be hidden while health isn't changing. It will be shown when connecting and any health changes")
-                    .translation("firstaid.config.hideonnochange")
-                    .define("hideOnNoChange", false);
 
             overlayMode = builder
                     .comment("The design to use to visualize the health")
@@ -407,7 +403,20 @@ public class FirstAidConfig {
                     .comment("Determines the transparency of the overlay. 200 = Maximum transparency, 0 = Fully opaque")
                     .translation("firstaid.config.alpha")
                     .defineInRange("alpha", 50, 0 ,200);
+
+            this.visibleDurationTicks = builder
+                    .translation("firstaid.config.visibledurationticks")
+                    .comment("Specifies how many ticks (20 ticks = 1 second) the overlay should be visible after health changed (healing/damaging)",
+                            "If set to -1, the HUD is always visible")
+                    .defineInRange("visibleDurationTicks", -1, -1, 600);
+
+            this.flash = builder
+                    .translation("firstaid.config.flash")
+                    .comment("If set to true, the overlay will flash for a short moment if the health changed. Only affects PLAYER_MODEL overlay")
+                    .define("flash", true);
             builder.pop();
+
+
             builder.push("Misc");
             enableSounds = builder
                     .comment("Set to true to enable the debuff sounds. Only matters when debuffs are enabled")

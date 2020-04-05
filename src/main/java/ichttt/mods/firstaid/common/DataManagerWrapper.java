@@ -50,6 +50,7 @@ import java.util.List;
 public class DataManagerWrapper extends EntityDataManager {
     private final PlayerEntity player;
     private final EntityDataManager parent;
+    private boolean track = true;
 
     public DataManagerWrapper(PlayerEntity player, EntityDataManager parent) {
         super(player);
@@ -72,6 +73,12 @@ public class DataManagerWrapper extends EntityDataManager {
 
     @Override
     public <T> void set(@Nonnull DataParameter<T> key, @Nonnull T value) {
+        if (!track) {
+            if (key != LivingEntity.HEALTH)
+                set_impl(key, value);
+            return;
+        }
+
         if (key == PlayerEntity.ABSORPTION) {
             float floatValue = (Float) value;
             if (player instanceof ServerPlayerEntity) { //may be EntityOtherPlayerMP as well
@@ -115,6 +122,13 @@ public class DataManagerWrapper extends EntityDataManager {
             }
         }
         set_impl(key, value);
+    }
+
+
+    public void toggleTracking(boolean status) {
+        if (FirstAidConfig.GENERAL.debug.get())
+            CommonUtils.debugLogStacktrace("Tracking status change from " + track + " to " + status);
+        track = status;
     }
 
     // ----------WRAPPER BELOW----------

@@ -238,7 +238,9 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     private float calculateNewCurrentHealth(PlayerEntity player) {
         float currentHealth = 0;
-        switch (FirstAidConfig.SERVER.vanillaHealthCalculation.get()) {
+        FirstAidConfig.Server.VanillaHealthCalculationMode mode = FirstAidConfig.SERVER.vanillaHealthCalculation.get();
+        if (noCritical) mode = FirstAidConfig.Server.VanillaHealthCalculationMode.AVERAGE_ALL;
+        switch (mode) {
             case AVERAGE_CRITICAL:
                 int maxHealth = 0;
                 for (AbstractDamageablePart part : this) {
@@ -267,6 +269,26 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                     currentHealth += part.currentHealth;
                 currentHealth = currentHealth / getCurrentMaxHealth();
                 break;
+            case CRITICAL_50_PERCENT_OTHER_50_PERCENT:
+                float currentNormal = 0;
+                int maxNormal = 0;
+                float currentCritical = 0;
+                int maxCritical = 0;
+                for (AbstractDamageablePart part : this) {
+                    if (!part.canCauseDeath) {
+                        currentNormal += part.currentHealth;
+                        maxNormal += part.getMaxHealth();
+                    } else {
+                        currentCritical += part.currentHealth;
+                        maxCritical += part.getMaxHealth();
+                    }
+                }
+                float avgNormal = currentNormal / maxNormal;
+                float avgCritical = currentCritical / maxCritical;
+                currentHealth = (avgCritical + avgNormal) / 2;
+                break;
+            default:
+                throw new RuntimeException("Unknown constant " + mode);
         }
         return currentHealth * player.getMaxHealth();
     }

@@ -44,7 +44,7 @@ public class HealthDistribution {
 
     public static void manageHealth(float health, AbstractPlayerDamageModel damageModel, PlayerEntity player, boolean sendChanges, boolean distribute) {
         if (sendChanges && player.world.isRemote) {
-            FirstAid.LOGGER.catching(new RuntimeException("Someone set flag sendChanges on the client, this is not supported!"));
+            FirstAid.LOGGER.warn("The sendChanges flag was set on the client, it can however only work on the server!" ,new RuntimeException("sendChanges flag set on the client, this is not supported!"));
             sendChanges = false;
         } else if (sendChanges && !(player instanceof ServerPlayerEntity)) { //EntityOtherPlayerMP? log something?
             sendChanges = false;

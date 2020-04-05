@@ -91,7 +91,7 @@ public class EventHandler {
             if (player instanceof ServerPlayerEntity)
                 FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(damageModel, false));
             event.setCanceled(true);
-            CommonUtils.killPlayer(player, source);
+            CommonUtils.killPlayer(damageModel, player, source);
             return;
         }
 
@@ -189,7 +189,7 @@ public class EventHandler {
         if (!CommonUtils.hasDamageModel(entity))
             return;
         event.setCanceled(true);
-        if (!FirstAidConfig.SERVER.allowOtherHealingItems.get())
+        if (entity.world.isRemote || !FirstAidConfig.SERVER.allowOtherHealingItems.get())
             return;
         float amount = event.getAmount();
         //Hacky shit to reduce vanilla regen

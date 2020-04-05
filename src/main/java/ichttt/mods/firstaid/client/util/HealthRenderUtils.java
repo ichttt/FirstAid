@@ -19,7 +19,7 @@
 package ichttt.mods.firstaid.client.util;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.GlStateManager;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -37,20 +37,19 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 
 import java.text.DecimalFormat;
+import java.util.EnumMap;
 import java.util.Objects;
 
 public class HealthRenderUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
     public static final DecimalFormat TEXT_FORMAT = new DecimalFormat("0.0");
     private static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
-    private static final ImmutableMap<EnumPlayerPart, FlashStateManager> flashStates;
+    private static final EnumMap<EnumPlayerPart, FlashStateManager> flashStates = new EnumMap<>(EnumPlayerPart.class);
 
     static {
-        ImmutableMap.Builder<EnumPlayerPart, FlashStateManager> builder = ImmutableMap.builder();
         for (EnumPlayerPart part : EnumPlayerPart.VALUES) {
-            builder.put(part, new FlashStateManager());
+            flashStates.put(part, new FlashStateManager());
         }
-        flashStates = builder.build();
     }
 
     public static void drawHealthString(AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, boolean allowSecondLine) {
@@ -77,11 +76,17 @@ public class HealthRenderUtils {
 
     public static boolean healthChanged(AbstractDamageablePart damageablePart, boolean playerDead) {
         int current = (int) Math.ceil(damageablePart.currentHealth);
+        FlashStateManager activeFlashState = Objects.requireNonNull(flashStates.get(damageablePart.part));
         if (prevHealth.containsKey(damageablePart.part)) {
             int prev = prevHealth.getInt(damageablePart.part);
             updatePrev(damageablePart.part, current, playerDead);
-            return prev != current;
+            if (prev != current) {
+                activeFlashState.setActive(Util.milliTime());
+                return true;
+            }
+            return false;
         }
+        activeFlashState.setActive(Util.milliTime());
         updatePrev(damageablePart.part, current, playerDead);
         return true;
     }
@@ -97,12 +102,6 @@ public class HealthRenderUtils {
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
         int current = (int) Math.ceil(damageablePart.currentHealth);
         FlashStateManager activeFlashState = Objects.requireNonNull(flashStates.get(damageablePart.part));
-
-        if (prevHealth.containsKey(damageablePart.part)) {
-            int prev = prevHealth.getInt(damageablePart.part);
-            if (prev != current)
-                activeFlashState.setActive(Util.milliTime());
-        }
 
         if (drawAsString(damageablePart, allowSecondLine)) {
             drawHealthString(damageablePart, xTranslation, yTranslation, allowSecondLine);

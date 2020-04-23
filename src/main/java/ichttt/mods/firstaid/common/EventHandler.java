@@ -185,6 +185,16 @@ public class EventHandler {
             bandage = 20;
             plaster = 24;
             morphine = 8;
+        } else if (tableName.equals(LootTables.CHESTS_VILLAGE_VILLAGE_BUTCHER)) {
+            pool = event.getTable().getPool("main");
+            bandage = 4;
+            plaster = 16;
+            morphine = 2;
+        } else if (tableName.equals(LootTables.CHESTS_IGLOO_CHEST)) {
+            pool = event.getTable().getPool("main");
+            bandage = 4;
+            plaster = 8;
+            morphine = 2;
         }
 
         if (pool != null) {
@@ -205,7 +215,7 @@ public class EventHandler {
                     .quality(0)
                     .build());
             lootEntries.add(ItemLootEntry.builder(() -> FirstAidItems.MORPHINE)
-                    .acceptFunction(SetCount.builder(new RandomValueRange(0, 2)))
+                    .acceptFunction(SetCount.builder(new RandomValueRange(1, 2)))
                     .weight(morphine)
                     .quality(0)
                     .build());

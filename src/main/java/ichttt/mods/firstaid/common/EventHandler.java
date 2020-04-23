@@ -40,29 +40,41 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.potion.Effect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.loot.ItemLootEntry;
+import net.minecraft.world.storage.loot.LootEntry;
+import net.minecraft.world.storage.loot.LootPool;
+import net.minecraft.world.storage.loot.LootTables;
+import net.minecraft.world.storage.loot.RandomValueRange;
+import net.minecraft.world.storage.loot.functions.SetCount;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.world.SleepFinishedTimeEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.registries.ObjectHolder;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
@@ -75,6 +87,7 @@ public class EventHandler {
     public static final Effect MORPHINE = FirstAidItems.getNull();
 
     public static final Map<PlayerEntity, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
+    private static final Field LOOT_ENTRIES_FIELD = ObfuscationReflectionHelper.findField(LootPool.class, "field_186453_a");
 
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
@@ -148,18 +161,16 @@ public class EventHandler {
     }
 
     @SubscribeEvent
-    public static void tickWorld(TickEvent.WorldTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) return;
-        if (FirstAidConfig.SERVER.sleepHealPercentage.get() <= 0D) return;
-        World world = event.world;
-        if (!world.isRemote && world instanceof ServerWorld && ((ServerWorld) world).allPlayersSleeping && world.getPlayers().stream().noneMatch((player) -> !player.isSpectator() && !player.isPlayerFullyAsleep())) {
-            for (PlayerEntity player : world.getPlayers()) {
+    public static void onSleepFinished(SleepFinishedTimeEvent event) {
+        if (ModList.get().isLoaded("morpheus")) return;
+        for (PlayerEntity player : event.getWorld().getPlayers()) {
+            if (player.isPlayerFullyAsleep())
                 CommonUtils.getDamageModel(player).sleepHeal(player);
-            }
         }
     }
 
-    /*@SubscribeEvent
+    @SuppressWarnings("unchecked")
+    @SubscribeEvent
     public static void onLootTableLoad(LootTableLoadEvent event) {
         ResourceLocation tableName = event.getName();
         LootPool pool = null;
@@ -177,11 +188,29 @@ public class EventHandler {
         }
 
         if (pool != null) {
-            pool.addEntry(new ItemLootEntry(FirstAidItems.BANDAGE, bandage, 0, new SetCount[]{new SetCount(new ILootCondition[0], new RandomValueRange(1, 3))}, new ILootCondition[0], FirstAid.MODID + "bandage"));
-            pool.addEntry(new ItemLootEntry(FirstAidItems.PLASTER, plaster, 0, new SetCount[]{new SetCount(new ILootCondition[0], new RandomValueRange(1, 5))}, new ILootCondition[0], FirstAid.MODID + "plaster"));
-            pool.addEntry(new ItemLootEntry(FirstAidItems.MORPHINE, morphine, 0, new SetCount[]{new SetCount(new ILootCondition[0], new RandomValueRange(1, 2))}, new ILootCondition[0], FirstAid.MODID + "morphine"));
+            List<LootEntry> lootEntries;
+            try {
+                lootEntries = (List<LootEntry>) LOOT_ENTRIES_FIELD.get(pool);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Reflection failed!", e);
+            }
+            lootEntries.add(ItemLootEntry.builder(() -> FirstAidItems.BANDAGE)
+                    .acceptFunction(SetCount.builder(new RandomValueRange(1, 3)))
+                    .weight(bandage)
+                    .quality(0)
+                    .build());
+            lootEntries.add(ItemLootEntry.builder(() -> FirstAidItems.PLASTER)
+                    .acceptFunction(SetCount.builder(new RandomValueRange(1, 5)))
+                    .weight(plaster)
+                    .quality(0)
+                    .build());
+            lootEntries.add(ItemLootEntry.builder(() -> FirstAidItems.MORPHINE)
+                    .acceptFunction(SetCount.builder(new RandomValueRange(0, 2)))
+                    .weight(morphine)
+                    .quality(0)
+                    .build());
         }
-    }*/ //TODO Loot tables
+    }
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onHeal(LivingHealEvent event) {

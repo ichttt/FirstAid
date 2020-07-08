@@ -89,7 +89,7 @@
   "keybinds.show_wounds": "Показать раны",
 
   "subtitles.debuff.heartbeat": "Сердцебиение",
-  "gui.next_heal": "Следующее исцеление: %s секунд",
+  "firstaid.gui.next_heal": "Следующее исцеление: %s секунд",
   "firstaid.specificarmor": " +%s Локальная броня",
   "firstaid.specifictoughness": " +%s Локальная прочность брони"
 }

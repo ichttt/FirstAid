@@ -49,48 +49,39 @@ public class GuiHoldButton extends AbstractButton {
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
-        //TODO progress bar?
-        drawScaledTextButton(mouseX, mouseY);
-    }
-
-    //VANILLA COPY: GuiButton#render
-    private void drawScaledTextButton(int mouseX, int mouseY) {
-        if (this.visible)
-        {
-            Minecraft minecraft = Minecraft.getInstance();
-            FontRenderer fontrenderer = minecraft.fontRenderer;
-            minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
+    public void renderButton(int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
+        Minecraft minecraft = Minecraft.getInstance();
+        FontRenderer fontrenderer = minecraft.fontRenderer;
+        minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
+        if (this.active)
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.alpha);
-            int i = this.getYImage(this.isHovered());
-            RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            this.blit(this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
-            this.blit(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
-            this.renderBg(minecraft, mouseX, mouseY);
-            int j = getFGColor();
+        else
+            RenderSystem.color4f(0.0F, 1.0F, 1.0F, this.alpha);
+        int i = this.getYImage(this.isHovered());
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        this.blit(this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
+        this.blit(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
+        this.renderBg(minecraft, p_renderButton_1_, p_renderButton_2_);
+        int j = 0xFFFFFF;
 
-            //CHANGE: scale text if not fitting
-            if (textScaleFactor != 1F) {
-                RenderSystem.pushMatrix();
-                RenderSystem.scalef(textScaleFactor, textScaleFactor, 1);
-                this.drawCenteredString(fontrenderer, this.getMessage(), Math.round((this.x + this.width / 2F) / textScaleFactor), Math.round((this.y + (this.height - 8) / 2F) / textScaleFactor), j);
-                RenderSystem.popMatrix();
-            } else
-                this.drawCenteredString(fontrenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255.0F) << 24);
-        }
+        //CHANGE: scale text if not fitting
+        if (textScaleFactor != 1F) {
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(textScaleFactor, textScaleFactor, 1);
+            this.drawCenteredString(fontrenderer, this.getMessage(), Math.round((this.x + this.width / 2F) / textScaleFactor), Math.round((this.y + (this.height - 8) / 2F) / textScaleFactor), j);
+            RenderSystem.popMatrix();
+        } else
+            this.drawCenteredString(fontrenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255.0F) << 24);
     }
 
-//    @Override
-//    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-//        if (button != 0) return false;
-//        boolean result = super.isPressable(mouseX, mouseY);
-//        if (result) {
-//            pressStart = Util.milliTime();
-//        }
-//        return result || super.mouseClicked(mouseX, mouseY, button);
-//    }
+    @Override
+    public void mouseMoved(double xPos, double yPos) {
+        super.mouseMoved(xPos, yPos);
+        if (pressStart != -1 && !isMouseOver(xPos, yPos))
+            pressStart = -1;
+    }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {

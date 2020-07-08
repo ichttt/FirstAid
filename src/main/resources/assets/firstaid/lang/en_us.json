@@ -91,7 +91,7 @@
   "keybinds.show_wounds": "Show wounds",
 
   "subtitles.debuff.heartbeat": "Heart beats",
-  "gui.next_heal": "Next heal: %s seconds",
+  "firstaid.gui.next_heal": "Next heal: %s seconds",
   "effect.firstaid.morphine": "Morphine",
   "firstaid.specificarmor": " +%s Locational Armor",
   "firstaid.specifictoughness": " +%s Locational Armor Toughness"

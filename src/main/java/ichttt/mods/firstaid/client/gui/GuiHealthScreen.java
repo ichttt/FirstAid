@@ -210,7 +210,7 @@ public class GuiHealthScreen extends Screen {
 
         //Sleep info tooltip
         if (mouseX >= bedX && mouseY >= bedY && mouseX < bedX + (16 * bedScaleFactor) && mouseY < bedY + (16 * bedScaleFactor)) {
-            String s = sleepHealing == 0D ? I18n.format("gui.no_sleep_heal") : I18n.format("firstaid.gui.sleep_heal_amount", FORMAT.format(sleepHealing * 100));
+            String s = sleepHealing == 0D ? I18n.format("firstaid.gui.no_sleep_heal") : I18n.format("firstaid.gui.sleep_heal_amount", FORMAT.format(sleepHealing * 100));
             renderTooltip(s, mouseX, mouseY);
             RenderSystem.disableLighting();
         }
@@ -220,8 +220,8 @@ public class GuiHealthScreen extends Screen {
 
     private void tooltipButton(AbstractButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
-        if (!enabled && button.isMouseOver(mouseX, mouseY)) {
-            renderTooltip(Arrays.asList(I18n.format("firstaid.gui.active_item") + ": " + I18n.format(part.activeHealer.stack.getTranslationKey() + ".name"), I18n.format("firstaid.gui.next_heal", Math.round((part.activeHealer.ticksPerHeal.getAsInt() - part.activeHealer.getTicksPassed()) / 20F))), mouseX, mouseY);
+        if (!enabled && button.isHovered()) {
+            renderTooltip(Arrays.asList(I18n.format("firstaid.gui.active_item") + ": " + I18n.format(part.activeHealer.stack.getTranslationKey()), I18n.format("firstaid.gui.next_heal", Math.round((part.activeHealer.ticksPerHeal.getAsInt() - part.activeHealer.getTicksPassed()) / 20F))), mouseX, mouseY);
         }
         if (!disableButtons) button.active = enabled;
     }
@@ -253,6 +253,13 @@ public class GuiHealthScreen extends Screen {
     public boolean mouseReleased(double p_mouseReleased_1_, double p_mouseReleased_3_, int p_mouseReleased_5_) {
         holdButtonMouseCallback(false);
         return super.mouseReleased(p_mouseReleased_1_, p_mouseReleased_3_, p_mouseReleased_5_);
+    }
+
+    @Override
+    public void mouseMoved(double xPos, double yPos) {
+        for (GuiHoldButton holdButton : this.holdButtons) {
+            holdButton.mouseMoved(xPos, yPos);
+        }
     }
 
     protected void holdButtonMouseCallback(boolean renderPass) {

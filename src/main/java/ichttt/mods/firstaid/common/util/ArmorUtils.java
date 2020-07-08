@@ -21,9 +21,9 @@ package ichttt.mods.firstaid.common.util;
 import com.google.common.collect.Iterators;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttribute;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -41,11 +41,11 @@ public class ArmorUtils {
 
     // Use attributes instead of fields on ItemArmor, these are likely more correct
     public static double getArmor(ItemStack stack, EquipmentSlotType slot) {
-        return getValueFromAttributes(SharedMonsterAttributes.ARMOR, slot, stack);
+        return getValueFromAttributes(Attributes.ARMOR, slot, stack);
     }
 
     public static double getArmorThoughness(ItemStack stack, EquipmentSlotType slot) {
-        return getValueFromAttributes(SharedMonsterAttributes.ARMOR_TOUGHNESS, slot, stack);
+        return getValueFromAttributes(Attributes.ARMOR_TOUGHNESS, slot, stack);
     }
 
     public static double applyArmorModifier(EquipmentSlotType slot, double rawArmor) {
@@ -91,8 +91,8 @@ public class ArmorUtils {
         }
     }
 
-    private static double getValueFromAttributes(IAttribute attribute, EquipmentSlotType slot, ItemStack stack) {
-        return stack.getItem().getAttributeModifiers(slot, stack).get(attribute.getName()).stream().mapToDouble(AttributeModifier::getAmount).sum();
+    private static double getValueFromAttributes(Attribute attribute, EquipmentSlotType slot, ItemStack stack) {
+        return stack.getItem().getAttributeModifiers(slot, stack).get(attribute).stream().mapToDouble(AttributeModifier::getAmount).sum();
     }
 
     /**

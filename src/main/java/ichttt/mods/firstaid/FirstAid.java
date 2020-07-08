@@ -34,7 +34,6 @@ import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.network.MessageUpdatePart;
 import ichttt.mods.firstaid.common.potion.FirstAidPotion;
 import ichttt.mods.firstaid.common.potion.PotionPoisonPatched;
-import ichttt.mods.firstaid.common.util.MorpheusHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -51,7 +50,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.DeferredWorkQueue;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -147,7 +145,7 @@ public class FirstAid {
 
 
         if (ModList.get().isLoaded("morpheus")) {
-            DeferredWorkQueue.runLater(MorpheusHelper::register);
+//            DeferredWorkQueue.runLater(MorpheusHelper::register); TODO morpheus compat
             morpheusLoaded = true;
         }
 

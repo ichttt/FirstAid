@@ -18,6 +18,7 @@
 
 package ichttt.mods.firstaid.client.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
@@ -25,6 +26,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.button.AbstractButton;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 
 public class GuiHoldButton extends AbstractButton {
     public final int id;
@@ -33,7 +35,7 @@ public class GuiHoldButton extends AbstractButton {
     public final boolean isRightSide;
     private long pressStart = -1;
 
-    public GuiHoldButton(int id, int x, int y, int widthIn, int heightIn, String buttonText, boolean isRightSide) {
+    public GuiHoldButton(int id, int x, int y, int widthIn, int heightIn, ITextComponent buttonText, boolean isRightSide) {
         super(x, y, widthIn, heightIn, buttonText);
         this.id = id;
         this.isRightSide = isRightSide;
@@ -49,7 +51,7 @@ public class GuiHoldButton extends AbstractButton {
     }
 
     @Override
-    public void renderButton(int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
+    public void renderButton(MatrixStack stack, int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
         Minecraft minecraft = Minecraft.getInstance();
         FontRenderer fontrenderer = minecraft.fontRenderer;
         minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
@@ -61,19 +63,19 @@ public class GuiHoldButton extends AbstractButton {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        this.blit(this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
-        this.blit(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
-        this.renderBg(minecraft, p_renderButton_1_, p_renderButton_2_);
+        this.blit(stack, this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
+        this.blit(stack, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
+        this.renderBg(stack, minecraft, p_renderButton_1_, p_renderButton_2_);
         int j = 0xFFFFFF;
 
         //CHANGE: scale text if not fitting
         if (textScaleFactor != 1F) {
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(textScaleFactor, textScaleFactor, 1);
-            this.drawCenteredString(fontrenderer, this.getMessage(), Math.round((this.x + this.width / 2F) / textScaleFactor), Math.round((this.y + (this.height - 8) / 2F) / textScaleFactor), j);
-            RenderSystem.popMatrix();
+            stack.push();
+            stack.scale(textScaleFactor, textScaleFactor, 1);
+            this.drawCenteredString(stack, fontrenderer, this.getMessage(), Math.round((this.x + this.width / 2F) / textScaleFactor), Math.round((this.y + (this.height - 8) / 2F) / textScaleFactor), j);
+            stack.pop();
         } else
-            this.drawCenteredString(fontrenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255.0F) << 24);
+            this.drawCenteredString(stack, fontrenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255.0F) << 24);
     }
 
     @Override

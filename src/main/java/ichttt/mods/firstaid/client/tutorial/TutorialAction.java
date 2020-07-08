@@ -18,6 +18,7 @@
 
 package ichttt.mods.firstaid.client.tutorial;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.resources.I18n;
 
 import java.util.ArrayList;
@@ -35,12 +36,12 @@ public class TutorialAction {
         this.guiContext = guiContext;
     }
 
-    public void draw() {
+    public void draw(MatrixStack stack) {
         if (s2 != null) {
-            guiContext.drawOffsetString(s1, 4);
-            guiContext.drawOffsetString(s2, 16);
+            guiContext.drawOffsetString(stack, s1, 4);
+            guiContext.drawOffsetString(stack, s2, 16);
         } else if (s1 != null) {
-            guiContext.drawOffsetString(s1, 10);
+            guiContext.drawOffsetString(stack, s1, 10);
         }
     }
 

@@ -34,6 +34,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.network.PacketDistributor;
@@ -64,7 +65,7 @@ public class DebugDamageCommand {
             damageModel.getFromEnum(part).heal(-damage, player, debuff);
         }
         if (damageModel.isDead(player)) {
-            player.sendMessage(new TranslationTextComponent("death.attack.generic", player.getDisplayName()));
+            player.sendMessage(new TranslationTextComponent("death.attack.generic", player.getDisplayName()), Util.DUMMY_UUID);
             CommonUtils.killPlayer(damageModel, player, null);
         }
         FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(damageModel, false));

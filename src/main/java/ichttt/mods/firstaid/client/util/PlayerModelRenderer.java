@@ -18,6 +18,7 @@
 
 package ichttt.mods.firstaid.client.util;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
@@ -26,6 +27,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Quaternion;
 
 public class PlayerModelRenderer {
     private static final ResourceLocation HEALTH_RENDER_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health.png");
@@ -33,38 +35,38 @@ public class PlayerModelRenderer {
     private static int angle = 0;
     private static boolean otherWay = false;
 
-    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, AbstractGui gui, boolean flashState, float alpha, float partialTicks) {
+    public static void renderPlayerHealth(MatrixStack stack, AbstractPlayerDamageModel damageModel, AbstractGui gui, boolean flashState, float alpha, float partialTicks) {
         int yOffset = flashState ? 128 : 0;
         RenderSystem.enableAlphaTest();
         RenderSystem.enableBlend();
         RenderSystem.color4f(1F, 1F, 1F, 1 - (alpha / 255));
         Minecraft.getInstance().getTextureManager().bindTexture(HEALTH_RENDER_LOCATION);
-        RenderSystem.scalef(0.5F, 0.5F, 0.5F);
+        stack.scale(0.5F, 0.5F, 0.5F);
         if (FirstAidConfig.CLIENT.enableEasterEggs.get() && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
             float angle = PlayerModelRenderer.angle + ((otherWay ? -partialTicks : partialTicks) * 2);
             if (FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.BOTTOM_LEFT || FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.TOP_LEFT)
-                RenderSystem.translatef(angle * 1.5F, 0, 0);
+                stack.translate(angle * 1.5F, 0, 0);
             else
-                RenderSystem.translatef(angle * 0.5F, 0, 0);
-            RenderSystem.rotatef(angle, 0, 0, 1);
+                stack.translate(angle * 0.5F, 0, 0);
+            stack.rotate(new Quaternion(0, 0, 1, angle)); //TODO validate?
         }
 
         if (yOffset != 0)
-            RenderSystem.translatef(0, -yOffset, 0);
+            stack.translate(0, -yOffset, 0);
 
-        drawPart(gui, damageModel.HEAD, 16, yOffset + 0, 32, 32);
-        drawPart(gui, damageModel.BODY, 16, yOffset + 32, 32, 48);
-        drawPart(gui, damageModel.LEFT_ARM, 0, yOffset + 32, 16, 48);
-        drawPart(gui, damageModel.RIGHT_ARM, 48, yOffset + 32, 16, 48);
-        drawPart(gui, damageModel.LEFT_LEG, 16, yOffset + 80, 16, 32);
-        drawPart(gui, damageModel.RIGHT_LEG, 32, yOffset + 80, 16, 32);
-        drawPart(gui, damageModel.LEFT_FOOT, 16, yOffset + 112, 16, 16);
-        drawPart(gui, damageModel.RIGHT_FOOT, 32, yOffset + 112, 16, 16);
+        drawPart(stack, gui, damageModel.HEAD, 16, yOffset + 0, 32, 32);
+        drawPart(stack, gui, damageModel.BODY, 16, yOffset + 32, 32, 48);
+        drawPart(stack, gui, damageModel.LEFT_ARM, 0, yOffset + 32, 16, 48);
+        drawPart(stack, gui, damageModel.RIGHT_ARM, 48, yOffset + 32, 16, 48);
+        drawPart(stack, gui, damageModel.LEFT_LEG, 16, yOffset + 80, 16, 32);
+        drawPart(stack, gui, damageModel.RIGHT_LEG, 32, yOffset + 80, 16, 32);
+        drawPart(stack, gui, damageModel.LEFT_FOOT, 16, yOffset + 112, 16, 16);
+        drawPart(stack, gui, damageModel.RIGHT_FOOT, 32, yOffset + 112, 16, 16);
 
         RenderSystem.color4f(1F, 1F, 1F, 1F);
     }
 
-    private static void drawPart(AbstractGui gui, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
+    private static void drawPart(MatrixStack stack, AbstractGui gui, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
         int rawTexX = texX;
         int maxHealth = part.getMaxHealth();
         if (part.currentHealth <= 0.001) {
@@ -76,7 +78,7 @@ public class PlayerModelRenderer {
                 throw new RuntimeException(String.format("Calculated invalid health for part %s with current health %s and max health %d. Got value %s", part.part, part.currentHealth, maxHealth, healthPercentage));
             texX += SIZE * (healthPercentage > 0.5 ? 1 : 2);
         }
-        gui.blit(rawTexX, texY, texX, texY, sizeX, sizeY);
+        gui.blit(stack, rawTexX, texY, texX, texY, sizeX, sizeY);
     }
 
     public static void tickFun() {

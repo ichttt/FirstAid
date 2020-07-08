@@ -142,27 +142,27 @@ public class DebuffTimedSound implements ITickableSound {
     }
 
     @Override
-    public float getX() {
+    public double getX() {
         ClientPlayerEntity player = this.player.get();
         if (player == null)
             return 0F;
-        return (float) player.getPosX();
+        return player.getPosX();
     }
 
     @Override
-    public float getY() {
+    public double getY() {
         ClientPlayerEntity player = this.player.get();
         if (player == null)
             return 0F;
-        return (float) player.getPosY();
+        return player.getPosY();
     }
 
     @Override
-    public float getZ() {
+    public double getZ() {
         ClientPlayerEntity player = this.player.get();
         if (player == null)
             return 0F;
-        return (float) player.getPosZ();
+        return player.getPosZ();
     }
 
     @Nonnull

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ichttt.mods.firstaid.common.util;
+/*package ichttt.mods.firstaid.common.util; TODO Morpheus compat
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
@@ -59,4 +59,4 @@ public class MorpheusHelper implements INewDayHandler {
             }
         }
     }
-}
+}*/

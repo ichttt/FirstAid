@@ -18,7 +18,7 @@
 
 package ichttt.mods.firstaid.client.tutorial;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
@@ -32,6 +32,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class GuiTutorial extends Screen {
@@ -72,7 +73,7 @@ public class GuiTutorial extends Screen {
     public void init() {
         parent.init(minecraft, this.width, this.height);
         guiTop = parent.guiTop - 30;
-        addButton(new Button(parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, ">", button -> {
+        addButton(new Button(parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, new StringTextComponent(">"), button -> {
             if (action.hasNext()) GuiTutorial.this.action.next();
             else {
                 FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
@@ -92,22 +93,22 @@ public class GuiTutorial extends Screen {
         parent.getButtons().clear();
     }
 
-    public void drawOffsetString(String s, int yOffset) {
-        drawString(minecraft.fontRenderer, s, parent.guiLeft + 30, guiTop + yOffset, 0xFFFFFF);
+    public void drawOffsetString(MatrixStack stack, String s, int yOffset) {
+        drawString(stack, minecraft.fontRenderer, s, parent.guiLeft + 30, guiTop + yOffset, 0xFFFFFF);
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
-        RenderSystem.pushMatrix();
-        parent.render(mouseX, mouseY, partialTicks);
-        RenderSystem.popMatrix();
+    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        stack.push();
+        parent.render(stack, mouseX, mouseY, partialTicks);
+        stack.pop();
         minecraft.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
-        blit(parent.guiLeft, guiTop, 0, 139, GuiHealthScreen.xSize, 28);
-        RenderSystem.pushMatrix();
-        this.action.draw();
-        RenderSystem.popMatrix();
-        drawCenteredString(minecraft.fontRenderer, I18n.format("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 140, 0xFFFFFF);
-        super.render(mouseX, mouseY, partialTicks);
+        blit(stack, parent.guiLeft, guiTop, 0, 139, GuiHealthScreen.xSize, 28);
+        stack.push();
+        this.action.draw(stack);
+        stack.pop();
+        drawCenteredString(stack, minecraft.fontRenderer, I18n.format("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 140, 0xFFFFFF);
+        super.render(stack, mouseX, mouseY, partialTicks);
     }
 
     @Override

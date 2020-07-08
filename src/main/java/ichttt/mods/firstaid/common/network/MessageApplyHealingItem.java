@@ -30,6 +30,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -66,7 +67,7 @@ public class MessageApplyHealingItem {
                 AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
                 if (healer == null) {
                     FirstAid.LOGGER.warn("Player {} has invalid item in hand {} while it should be an healing item", player.getName(), item.getRegistryName());
-                    player.sendMessage(new StringTextComponent("Unable to apply healing item!"));
+                    player.sendMessage(new StringTextComponent("Unable to apply healing item!"), Util.DUMMY_UUID);
                     return;
                 }
                 stack.shrink(1);

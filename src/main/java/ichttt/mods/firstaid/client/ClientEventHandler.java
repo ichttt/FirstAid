@@ -109,18 +109,18 @@ public class ClientEventHandler {
             if (!mc.player.isAlive()) return;
             mc.getProfiler().startSection("FirstAidOverlay");
             ForgeIngameGui.renderHealth = FirstAidConfig.CLIENT.showVanillaHealthBar.get();
-            HUDHandler.INSTANCE.renderOverlay(mc, event.getPartialTicks());
+            HUDHandler.INSTANCE.renderOverlay(event.getMatrixStack(), mc, event.getPartialTicks());
             mc.getProfiler().endSection();
             mc.getProfiler().endSection();
         }
     }
 
     private static ITextComponent makeArmorMsg(double value) {
-        return new TranslationTextComponent("firstaid.specificarmor", FORMAT.format(value)).applyTextStyle(TextFormatting.BLUE);
+        return new TranslationTextComponent("firstaid.specificarmor", FORMAT.format(value)).func_240699_a_(TextFormatting.BLUE); //applyTextStyle
     }
 
     private static ITextComponent makeToughnessMsg(double value) {
-        return new TranslationTextComponent("firstaid.specifictoughness", FORMAT.format(value)).applyTextStyle(TextFormatting.BLUE);
+        return new TranslationTextComponent("firstaid.specifictoughness", FORMAT.format(value)).func_240699_a_(TextFormatting.BLUE); //applyTextStyle
     }
 
     private static <T> void replaceOrAppend(List<T> list, T search, T replace) {
@@ -149,14 +149,14 @@ public class ClientEventHandler {
                 double normalArmor = ArmorUtils.getArmor(stack, armor.getEquipmentSlot());
                 double totalArmor = ArmorUtils.applyArmorModifier(armor.getEquipmentSlot(), normalArmor);
                 if (totalArmor > 0D) {
-                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalArmor), new TranslationTextComponent("attribute.name.generic.armor")).applyTextStyle(TextFormatting.BLUE);
+                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalArmor), new TranslationTextComponent("attribute.name.generic.armor")).func_240699_a_(TextFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
                 }
 
                 double normalToughness = ArmorUtils.getArmorThoughness(stack, armor.getEquipmentSlot());
                 double totalToughness = ArmorUtils.applyToughnessModifier(armor.getEquipmentSlot(), normalToughness);
                 if (totalToughness > 0D) {
-                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalToughness), new TranslationTextComponent("attribute.name.generic.armorToughness")).applyTextStyle(TextFormatting.BLUE);
+                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalToughness), new TranslationTextComponent("attribute.name.generic.armor_toughness")).func_240699_a_(TextFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
                 }
             }

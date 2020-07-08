@@ -28,7 +28,7 @@ import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistrib
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.datasync.DataParameter;
@@ -101,7 +101,7 @@ public class DataManagerWrapper extends EntityDataManager {
                     float orig = get(LivingEntity.HEALTH);
                     if (orig > 0 && !Float.isNaN(orig) && !Float.isInfinite(orig)) {
                         if (FirstAidConfig.SERVER.scaleMaxHealth.get())
-                            orig = Math.min(orig, (float) this.player.getAttribute(SharedMonsterAttributes.MAX_HEALTH).getValue());
+                            orig = Math.min(orig, (float) this.player.getAttribute(Attributes.MAX_HEALTH).getValue());
                         float healed = aFloat - orig;
                         if (Math.abs(healed) > 0.001) {
                             if (healed < 0) {

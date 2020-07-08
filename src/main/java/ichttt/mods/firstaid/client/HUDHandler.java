@@ -18,6 +18,7 @@
 
 package ichttt.mods.firstaid.client;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import ichttt.mods.firstaid.FirstAid;
@@ -76,7 +77,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         return maxLength;
     }
 
-    public void renderOverlay(Minecraft mc, float partialTicks) {
+    public void renderOverlay(MatrixStack stack, Minecraft mc, float partialTicks) {
         mc.getProfiler().startSection("prepare");
         if (mc.player == null)
             return;
@@ -141,30 +142,30 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         boolean enableAlphaBlend = visibleTicks != -1 && ticker < FADE_TIME;
         int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), FirstAidConfig.CLIENT.alpha.get(), 250) : FirstAidConfig.CLIENT.alpha.get();
 
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(xOffset, yOffset, 0F);
+        stack.push();
+        stack.translate(xOffset, yOffset, 0F);
         if (enableAlphaBlend) {
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         }
         mc.getProfiler().endStartSection("render");
         if (overlayMode == FirstAidConfig.Client.OverlayMode.PLAYER_MODEL) {
-            PlayerModelRenderer.renderPlayerHealth(damageModel, gui, flashStateManager.update(Util.milliTime()), alpha, partialTicks);
+            PlayerModelRenderer.renderPlayerHealth(stack, damageModel, gui, flashStateManager.update(Util.milliTime()), alpha, partialTicks);
         } else {
             int xTranslation = maxLength;
             for (AbstractDamageablePart part : damageModel) {
-                mc.fontRenderer.drawStringWithShadow(TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF - (alpha << 24 & -0xFFFFFF));
+                mc.fontRenderer.drawStringWithShadow(stack, TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF - (alpha << 24 & -0xFFFFFF));
                 if (FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.NUMBERS) {
-                    HealthRenderUtils.drawHealthString(part, xTranslation, 0, false);
+                    HealthRenderUtils.drawHealthString(stack, part, xTranslation, 0, false);
                 } else {
-                    HealthRenderUtils.drawHealth(part, xTranslation, 0, gui, false);
+                    HealthRenderUtils.drawHealth(stack, part, xTranslation, 0, gui, false);
                 }
-                RenderSystem.translatef(0, 10F, 0F);
+                stack.translate(0, 10F, 0F);
             }
         }
         mc.getProfiler().endStartSection("cleanup");
         if (enableAlphaBlend)
             RenderSystem.disableBlend();
-        RenderSystem.popMatrix();
+        stack.pop();
     }
 }

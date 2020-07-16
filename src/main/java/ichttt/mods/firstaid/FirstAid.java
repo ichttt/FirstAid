@@ -102,8 +102,8 @@ public class FirstAid {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FirstAidConfig.generalSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, FirstAidConfig.clientSpec);
 
-        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> bus.addListener(ClientHooks::setup));
-        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> bus.addListener(ClientHooks::lateSetup));
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> bus.addListener(ClientHooks::setup));
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> bus.addListener(ClientHooks::lateSetup));
         //Setup API
         HealingItemApiHelperImpl.init();
         RegistryManager.setupRegistries();

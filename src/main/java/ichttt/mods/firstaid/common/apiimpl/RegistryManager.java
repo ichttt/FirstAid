@@ -20,6 +20,7 @@ package ichttt.mods.firstaid.common.apiimpl;
 
 import com.google.common.primitives.Floats;
 import com.google.common.primitives.Ints;
+import cpw.mods.modlauncher.TransformingClassLoader;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
@@ -48,6 +49,16 @@ public class RegistryManager {
         FirstAidRegistry.setImpl(FirstAidRegistryImpl.INSTANCE);
         DebuffBuilderFactory.setInstance(DebuffBuilderFactoryImpl.INSTANCE);
         DamageDistributionBuilderFactory.setInstance(DamageDistributionBuilderFactoryImpl.INSTANCE);
+        //Validate everything is on the same TCL, otherwise things might break
+        if (RegistryManager.class.getClassLoader() != FirstAidRegistry.class.getClassLoader()) {
+            FirstAid.LOGGER.error("API and normal mod loaded on two different classloaders! Normal mod: {}, First Aid Registry: {}", RegistryManager.class.getName(), FirstAidRegistry.class.getName());
+            throw new RuntimeException("API and normal mod loaded on two different classloaders!");
+        }
+        TransformingClassLoader tcl = (TransformingClassLoader) RegistryManager.class.getClassLoader();
+        if (tcl.getLoadedClass(RegistryManager.class.getName()) != RegistryManager.class) {
+            FirstAid.LOGGER.error("API is not the same as under tcl loaded classes! In TCL cache: {}, actual: {}", tcl.getLoadedClass(RegistryManager.class.getName()), RegistryManager.class);
+            throw new RuntimeException("API is not under loaded classes in the TCL!");
+        }
     }
 
     public static void registerDefaults() {

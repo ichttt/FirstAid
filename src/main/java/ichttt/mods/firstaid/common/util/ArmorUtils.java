@@ -105,7 +105,7 @@ public class ArmorUtils {
         if (!(item instanceof ArmorItem)) return damage;
         ArmorItem armor = (ArmorItem) item;
         float totalArmor = armor.getDamageReduceAmount();
-        float totalToughness = armor.getToughness();
+        float totalToughness = armor.func_234657_f_(); //getToughness
         totalArmor = (float) applyArmorModifier(slot, totalArmor);
         totalToughness = (float) applyToughnessModifier(slot, totalToughness);
 

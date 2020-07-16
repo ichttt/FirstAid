@@ -55,6 +55,7 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
@@ -66,7 +67,6 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.registries.ObjectHolder;
@@ -119,6 +119,8 @@ public class EventHandler {
                 if (slot != null)
                     damageDistribution = new PreferredDamageDistribution(slot);
             }
+        } else if (source.getImmediateSource() instanceof PlayerEntity) {
+            System.out.println("BARF");
         }
         DamageDistribution.handleDamageTaken(damageDistribution, damageModel, amountToDamage, player, source, addStat, true);
 
@@ -276,15 +278,15 @@ public class EventHandler {
     }
 
     @SubscribeEvent
-    public static void beforeServerStart(FMLServerStartingEvent event) {
-        DebugDamageCommand.register(event.getCommandDispatcher());
-    }
-
-    @SubscribeEvent
     public static void onServerStop(FMLServerStoppedEvent event) {
         FirstAid.LOGGER.debug("Cleaning up");
         CapProvider.tutorialDone.clear();
         EventHandler.hitList.clear();
+    }
+
+    @SubscribeEvent
+    public static void registerCommands(RegisterCommandsEvent event) {
+        DebugDamageCommand.register(event.getDispatcher());
     }
 //
 //    @SubscribeEvent TODO PR comapt

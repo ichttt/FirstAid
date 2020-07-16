@@ -22,18 +22,13 @@ package ichttt.mods.firstaid.api;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
-import ichttt.mods.firstaid.api.distribution.DamageDistributionBuilderFactory;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -65,24 +60,6 @@ public abstract class FirstAidRegistry {
     public static FirstAidRegistry getImpl() {
         return instance;
     }
-
-    /**
-     * @deprecated Use {@link DamageDistributionBuilderFactory#newStandardBuilder()} instead.
-     */
-    @Deprecated
-    public abstract void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EquipmentSlotType, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable);
-
-    /**
-     * @deprecated Use {@link DamageDistributionBuilderFactory#newRandomBuilder()} instead.
-     */
-    @Deprecated
-    public abstract void bindDamageSourceRandom(@Nonnull DamageSource damageType, boolean nearestFirst, boolean tryNoKill);
-
-    /**
-     * @deprecated Use {@link DamageDistributionBuilderFactory#newCustomBuilder(IDamageDistribution)} instead.
-     */
-    @Deprecated
-    public abstract void bindDamageSourceCustom(@Nonnull DamageSource damageType, @Nonnull IDamageDistribution distributionTable);
 
     /**
      * Registers your debuff to the FirstAid mod.

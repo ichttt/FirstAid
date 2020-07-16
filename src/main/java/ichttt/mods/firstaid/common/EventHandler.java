@@ -119,8 +119,6 @@ public class EventHandler {
                 if (slot != null)
                     damageDistribution = new PreferredDamageDistribution(slot);
             }
-        } else if (source.getImmediateSource() instanceof PlayerEntity) {
-            System.out.println("BARF");
         }
         DamageDistribution.handleDamageTaken(damageDistribution, damageModel, amountToDamage, player, source, addStat, true);
 

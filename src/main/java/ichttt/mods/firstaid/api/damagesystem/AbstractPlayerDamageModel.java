@@ -94,9 +94,6 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
     @Deprecated
     public abstract int getMorphineTicks();
 
-    @Deprecated
-    public abstract float getCurrentHealth();
-
     /**
      * Checks if the player is dead.
      * This does not mean that the player cannot be revived.
@@ -126,12 +123,6 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
      * Internal for PlayerRevive compat
      */
     public abstract boolean isWaitingForHelp();
-
-    @Deprecated
-    public abstract void onNotHelped(PlayerEntity player);
-
-    @Deprecated
-    public abstract void onHelpedUp(PlayerEntity player);
 
     public abstract void revivePlayer(PlayerEntity player);
 

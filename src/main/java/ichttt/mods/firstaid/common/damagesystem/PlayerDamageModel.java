@@ -227,15 +227,6 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         };
     }
 
-    @Deprecated
-    @Override
-    public float getCurrentHealth() {
-        float currentHealth = 0;
-        for (AbstractDamageablePart part : this)
-            currentHealth += part.currentHealth;
-        return currentHealth;
-    }
-
     private float calculateNewCurrentHealth(PlayerEntity player) {
         float currentHealth = 0;
         FirstAidConfig.Server.VanillaHealthCalculationMode mode = FirstAidConfig.SERVER.vanillaHealthCalculation.get();
@@ -388,19 +379,6 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     @Override
     public boolean isWaitingForHelp() {
         return this.waitingForHelp;
-    }
-
-    @Deprecated
-    @Override
-    public void onNotHelped(PlayerEntity player) {
-        stopWaitingForHelp(player);
-    }
-
-    @Deprecated
-    @Override
-    public void onHelpedUp(PlayerEntity player) {
-        stopWaitingForHelp(player);
-        revivePlayer(player);
     }
 
     @Override

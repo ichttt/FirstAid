@@ -28,17 +28,12 @@ import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
-import ichttt.mods.firstaid.api.distribution.IRandomDamageDistributionBuilder;
-import ichttt.mods.firstaid.api.distribution.IStandardDamageDistributionBuilder;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.apiimpl.distribution.DamageDistributionBuilderFactoryImpl;
 import ichttt.mods.firstaid.common.damagesystem.debuff.ConstantDebuff;
 import ichttt.mods.firstaid.common.damagesystem.debuff.OnHitDebuff;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -48,7 +43,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
@@ -79,34 +73,6 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
             }
             FirstAid.LOGGER.info("+{} additional dynamic distributions", INSTANCE.distributionsDynamic.size());
         }
-    }
-
-    @Deprecated
-    @Override
-    public void bindDamageSourceStandard(@Nonnull DamageSource damageType, @Nonnull List<Pair<EquipmentSlotType, EnumPlayerPart[]>> priorityTable, boolean shufflePriorityTable) {
-        IStandardDamageDistributionBuilder builder = DamageDistributionBuilderFactoryImpl.INSTANCE.newStandardBuilder();
-        for (Pair<EquipmentSlotType, EnumPlayerPart[]> pair : priorityTable)
-            builder.addDistributionLayer(pair.getLeft(), pair.getRight());
-        if (shufflePriorityTable)
-            builder.ignoreOrder();
-        builder.registerStatic(damageType);
-    }
-
-    @Deprecated
-    @Override
-    public void bindDamageSourceRandom(@Nonnull DamageSource damageType, boolean nearestFirst, boolean tryNoKill) {
-        IRandomDamageDistributionBuilder builder = DamageDistributionBuilderFactoryImpl.INSTANCE.newRandomBuilder();
-        if (nearestFirst)
-            builder.useNearestFirst();
-        if (tryNoKill)
-            builder.tryNoKill();
-        builder.registerStatic(damageType);
-    }
-
-    @Deprecated
-    @Override
-    public void bindDamageSourceCustom(@Nonnull DamageSource damageType, @Nonnull IDamageDistribution distributionTable) {
-        DamageDistributionBuilderFactoryImpl.INSTANCE.newCustomBuilder(distributionTable).registerStatic(damageType);
     }
 
     @Override

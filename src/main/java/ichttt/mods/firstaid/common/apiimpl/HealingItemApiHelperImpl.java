@@ -44,9 +44,9 @@ public class HealingItemApiHelperImpl extends HealingItemApiHelper {
     @Nonnull
     @Override
     public ActionResult<ItemStack> onItemRightClick(ItemHealing itemHealing, World world, PlayerEntity player, Hand hand) {
-        if (world.isRemote)
+        if (world.isClientSide)
             DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> ClientHooks.showGuiApplyHealth(hand));
-        return new ActionResult<>(ActionResultType.SUCCESS, player.getHeldItem(hand));
+        return new ActionResult<>(ActionResultType.SUCCESS, player.getItemInHand(hand));
     }
 
     @Nonnull

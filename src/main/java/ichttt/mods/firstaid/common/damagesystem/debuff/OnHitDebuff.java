@@ -49,7 +49,7 @@ public class OnHitDebuff extends AbstractDebuff {
         for (Float2IntMap.Entry entry : map.float2IntEntrySet()) {
             if (damage >= entry.getFloatKey()) {
                 value = Math.max(value, entry.getIntValue());
-                player.addPotionEffect(new EffectInstance(effect, entry.getIntValue(), 0, false, false));
+                player.addEffect(new EffectInstance(effect, entry.getIntValue(), 0, false, false));
             }
         }
         if (value != -1 && sound != null)

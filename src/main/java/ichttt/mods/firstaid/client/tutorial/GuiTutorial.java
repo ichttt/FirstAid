@@ -63,7 +63,7 @@ public class GuiTutorial extends Screen {
         this.action.addTextWrapper("firstaid.tutorial.line6");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.HEAD.damage(16F, null, false));
         this.action.addTextWrapper("firstaid.tutorial.line7");
-        this.action.addTextWrapper("firstaid.tutorial.line8", I18n.format(ClientHooks.showWounds.getTranslationKey()));
+        this.action.addTextWrapper("firstaid.tutorial.line8", I18n.get(ClientHooks.showWounds.saveString()));
         this.action.addTextWrapper("firstaid.tutorial.end");
 
         this.action.next();
@@ -77,14 +77,14 @@ public class GuiTutorial extends Screen {
             if (action.hasNext()) GuiTutorial.this.action.next();
             else {
                 FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
-                minecraft.displayGuiScreen(new GuiHealthScreen(CommonUtils.getDamageModel(minecraft.player)));
+                minecraft.setScreen(new GuiHealthScreen(CommonUtils.getDamageModel(minecraft.player)));
             }
         }));
         for (Widget button : parent.getButtons()) {
             if (button == parent.cancelButton) {
                 addButton(new Button(button.x, button.y, button.getWidth(), button.getHeight(), button.getMessage(), ignored -> {
                     FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
-                    minecraft.displayGuiScreen(null);
+                    minecraft.setScreen(null);
                 }));
                 continue;
             }
@@ -94,20 +94,20 @@ public class GuiTutorial extends Screen {
     }
 
     public void drawOffsetString(MatrixStack stack, String s, int yOffset) {
-        drawString(stack, minecraft.fontRenderer, s, parent.guiLeft + 30, guiTop + yOffset, 0xFFFFFF);
+        drawString(stack, minecraft.font, s, parent.guiLeft + 30, guiTop + yOffset, 0xFFFFFF);
     }
 
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-        stack.push();
+        stack.pushPose();
         parent.render(stack, mouseX, mouseY, partialTicks);
-        stack.pop();
-        minecraft.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
+        stack.popPose();
+        minecraft.getTextureManager().bind(HealthRenderUtils.GUI_LOCATION);
         blit(stack, parent.guiLeft, guiTop, 0, 139, GuiHealthScreen.xSize, 28);
-        stack.push();
+        stack.pushPose();
         this.action.draw(stack);
-        stack.pop();
-        drawCenteredString(stack, minecraft.fontRenderer, I18n.format("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 140, 0xFFFFFF);
+        stack.popPose();
+        drawCenteredString(stack, minecraft.font, I18n.get("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 140, 0xFFFFFF);
         super.render(stack, mouseX, mouseY, partialTicks);
     }
 

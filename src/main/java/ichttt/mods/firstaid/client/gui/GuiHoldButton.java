@@ -53,8 +53,8 @@ public class GuiHoldButton extends AbstractButton {
     @Override
     public void renderButton(MatrixStack stack, int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
         Minecraft minecraft = Minecraft.getInstance();
-        FontRenderer fontrenderer = minecraft.fontRenderer;
-        minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
+        FontRenderer fontrenderer = minecraft.font;
+        minecraft.getTextureManager().bind(WIDGETS_LOCATION);
         if (this.active)
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.alpha);
         else
@@ -70,10 +70,10 @@ public class GuiHoldButton extends AbstractButton {
 
         //CHANGE: scale text if not fitting
         if (textScaleFactor != 1F) {
-            stack.push();
+            stack.pushPose();
             stack.scale(textScaleFactor, textScaleFactor, 1);
             this.drawCenteredString(stack, fontrenderer, this.getMessage(), Math.round((this.x + this.width / 2F) / textScaleFactor), Math.round((this.y + (this.height - 8) / 2F) / textScaleFactor), j);
-            stack.pop();
+            stack.popPose();
         } else
             this.drawCenteredString(stack, fontrenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255.0F) << 24);
     }
@@ -101,7 +101,7 @@ public class GuiHoldButton extends AbstractButton {
     public int getTimeLeft() {
         if (pressStart == -1)
             return -1;
-        return (int) Math.max(0L, holdTime - (Util.milliTime() - pressStart));
+        return (int) Math.max(0L, holdTime - (Util.getMillis() - pressStart));
     }
 
     public void reset() {
@@ -110,6 +110,6 @@ public class GuiHoldButton extends AbstractButton {
 
     @Override
     public void onPress() {
-        pressStart = Util.milliTime();
+        pressStart = Util.getMillis();
     }
 }

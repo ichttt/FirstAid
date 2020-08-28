@@ -19,7 +19,6 @@
 package ichttt.mods.firstaid.client.util;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -58,13 +57,13 @@ public class HealthRenderUtils {
         if (absorption > 0) {
             String line2 = "+ " + TEXT_FORMAT.format(absorption);
             if (allowSecondLine) {
-                Minecraft.getInstance().fontRenderer.drawStringWithShadow(stack, line2, xTranslation, yTranslation + 5, 0xFFFFFF);
+                Minecraft.getInstance().font.drawShadow(stack, line2, xTranslation, yTranslation + 5, 0xFFFFFF);
                 yTranslation -= 5;
             } else {
                 text += " " + line2;
             }
         }
-        Minecraft.getInstance().fontRenderer.drawStringWithShadow(stack, text, xTranslation, yTranslation, 0xFFFFFF);
+        Minecraft.getInstance().font.drawShadow(stack, text, xTranslation, yTranslation, 0xFFFFFF);
     }
 
     private static void updatePrev(EnumPlayerPart part, int current, boolean playerDead) {
@@ -81,12 +80,12 @@ public class HealthRenderUtils {
             int prev = prevHealth.getInt(damageablePart.part);
             updatePrev(damageablePart.part, current, playerDead);
             if (prev != current) {
-                activeFlashState.setActive(Util.milliTime());
+                activeFlashState.setActive(Util.getMillis());
                 return true;
             }
             return false;
         }
-        activeFlashState.setActive(Util.milliTime());
+        activeFlashState.setActive(Util.getMillis());
         updatePrev(damageablePart.part, current, playerDead);
         return true;
     }
@@ -110,16 +109,16 @@ public class HealthRenderUtils {
 
         int yTexture = damageablePart.canCauseDeath ? 45 : 0;
         int absorption = (int) Math.ceil(damageablePart.getAbsorption());
-        boolean highlight = activeFlashState.update(Util.milliTime());
+        boolean highlight = activeFlashState.update(Util.getMillis());
 
         Minecraft mc = Minecraft.getInstance();
         int regen = -1;
-        if (FirstAidConfig.SERVER.allowOtherHealingItems.get() && mc.player.isPotionActive(Effects.REGENERATION))
-            regen = (int) ((mc.ingameGUI.healthUpdateCounter / 2) % 15);
+        if (FirstAidConfig.SERVER.allowOtherHealingItems.get() && mc.player.hasEffect(Effects.REGENERATION))
+            regen = (int) ((mc.gui.healthBlinkTime / 2) % 15);
         boolean low = (current + absorption) < 1.25F;
 
-        mc.getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
-        stack.push();
+        mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
+        stack.pushPose();
         stack.translate(xTranslation, yTranslation, 0);
         boolean drawSecondLine = allowSecondLine;
         if (allowSecondLine) drawSecondLine = (maxHealth + maxExtraHealth) > 4;
@@ -144,19 +143,19 @@ public class HealthRenderUtils {
             absorption -= absorption2;
 
             stack.translate(0F, 5F, 0F);
-            stack.push();
+            stack.pushPose();
             renderLine(stack, regen, low, yTexture, maxHealth2, maxExtraHealth2, current2, absorption2, gui, highlight);
             regen -= (maxHealth2 + maxExtraHealth);
-            stack.pop();
+            stack.popPose();
             stack.translate(0F, -10F, 0F);
         }
         renderLine(stack, regen, low, yTexture, maxHealth, maxExtraHealth, current, absorption, gui, highlight);
 
-        stack.pop();
+        stack.popPose();
     }
 
     private static void renderLine(MatrixStack stack, int regen, boolean low, int yTexture, int maxHealth, int maxExtraHearts, int current, int absorption, AbstractGui gui, boolean highlight) {
-        stack.push();
+        stack.pushPose();
         Int2IntMap map = new Int2IntArrayMap();
         if (low) {
             for (int i = 0; i < (maxHealth + maxExtraHearts); i++)
@@ -166,11 +165,11 @@ public class HealthRenderUtils {
         renderMax(stack, regen, map, maxHealth, yTexture, gui, highlight);
         if (maxExtraHearts > 0) { //for absorption
             if (maxHealth != 0) {
-                RenderSystem.translatef(2 + 9 * maxHealth, 0, 0);
+                stack.translate(2 + 9 * maxHealth, 0, 0);
             }
             renderMax(stack, regen - maxHealth, map, maxExtraHearts, yTexture, gui, false); //Do not highlight absorption
         }
-        stack.pop();
+        stack.popPose();
         stack.translate(0, 0, 1);
 
         renderCurrentHealth(stack, regen, map, current, yTexture, gui);

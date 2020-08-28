@@ -27,7 +27,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3f;
 
 public class PlayerModelRenderer {
     private static final ResourceLocation HEALTH_RENDER_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health.png");
@@ -40,7 +40,7 @@ public class PlayerModelRenderer {
         RenderSystem.enableAlphaTest();
         RenderSystem.enableBlend();
         RenderSystem.color4f(1F, 1F, 1F, 1 - (alpha / 255));
-        Minecraft.getInstance().getTextureManager().bindTexture(HEALTH_RENDER_LOCATION);
+        Minecraft.getInstance().getTextureManager().bind(HEALTH_RENDER_LOCATION);
         stack.scale(0.5F, 0.5F, 0.5F);
         if (FirstAidConfig.CLIENT.enableEasterEggs.get() && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
             float angle = PlayerModelRenderer.angle + ((otherWay ? -partialTicks : partialTicks) * 2);
@@ -48,7 +48,7 @@ public class PlayerModelRenderer {
                 stack.translate(angle * 1.5F, 0, 0);
             else
                 stack.translate(angle * 0.5F, 0, 0);
-            stack.rotate(new Quaternion(0, 0, 1, angle)); //TODO validate?
+            stack.mulPose(Vector3f.ZP.rotationDegrees(angle));
         }
 
         if (yOffset != 0)

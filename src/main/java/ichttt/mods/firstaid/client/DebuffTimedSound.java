@@ -51,10 +51,10 @@ public class DebuffTimedSound implements ITickableSound {
     public static void playHurtSound(SoundEvent event, int duration) {
         if (!FirstAidConfig.CLIENT.enableSounds.get())
             return;
-        SoundHandler soundHandler = Minecraft.getInstance().getSoundHandler();
+        SoundHandler soundHandler = Minecraft.getInstance().getSoundManager();
         DebuffTimedSound matchingSound = activeSounds.get(event);
         if (matchingSound != null) {
-            if (!matchingSound.isDonePlaying())
+            if (!matchingSound.isStopped())
                 soundHandler.stop(matchingSound);
             activeSounds.remove(event);
         }
@@ -65,14 +65,14 @@ public class DebuffTimedSound implements ITickableSound {
 
     public DebuffTimedSound(SoundEvent event, int debuffDuration) {
         this.event = event;
-        this.soundLocation = event.getName();
+        this.soundLocation = event.getLocation();
         this.player = new WeakReference<>(Minecraft.getInstance().player);
         this.debuffDuration = Integer.min(15 * 20, debuffDuration);
         this.minusPerTick = (1F / this.debuffDuration) * volumeMultiplier;
     }
 
     @Override
-    public boolean isDonePlaying() {
+    public boolean isStopped() {
         ClientPlayerEntity player = this.player.get();
         boolean done = player == null || ticks >= debuffDuration || player.getHealth() <= 0;
         if (done)
@@ -82,23 +82,23 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Nonnull
     @Override
-    public ResourceLocation getSoundLocation() {
+    public ResourceLocation getLocation() {
         return soundLocation;
     }
 
     @Nullable
     @Override
-    public SoundEventAccessor createAccessor(@Nonnull SoundHandler handler) {
-        SoundEventAccessor soundEventAccessor = handler.getAccessor(this.soundLocation);
+    public SoundEventAccessor resolve(@Nonnull SoundHandler handler) {
+        SoundEventAccessor soundEventAccessor = handler.getSoundEvent(this.soundLocation);
 
         if (soundEventAccessor == null)
         {
             FirstAid.LOGGER.warn("Missing sound for location " + this.soundLocation);
-            this.sound = SoundHandler.MISSING_SOUND;
+            this.sound = SoundHandler.EMPTY_SOUND;
         }
         else
         {
-            this.sound = soundEventAccessor.cloneEntry();
+            this.sound = soundEventAccessor.getSound();
         }
 
         return soundEventAccessor;
@@ -112,22 +112,22 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Nonnull
     @Override
-    public SoundCategory getCategory() {
+    public SoundCategory getSource() {
         return SoundCategory.PLAYERS;
     }
 
     @Override
-    public boolean canRepeat() {
+    public boolean isLooping() {
         return false;
     }
 
     @Override
-    public boolean isGlobal() {
+    public boolean isRelative() {
         return false;
     }
 
     @Override
-    public int getRepeatDelay() {
+    public int getDelay() {
         return 0;
     }
 
@@ -146,7 +146,7 @@ public class DebuffTimedSound implements ITickableSound {
         ClientPlayerEntity player = this.player.get();
         if (player == null)
             return 0F;
-        return player.getPosX();
+        return player.getX();
     }
 
     @Override
@@ -154,7 +154,7 @@ public class DebuffTimedSound implements ITickableSound {
         ClientPlayerEntity player = this.player.get();
         if (player == null)
             return 0F;
-        return player.getPosY();
+        return player.getY();
     }
 
     @Override
@@ -162,12 +162,12 @@ public class DebuffTimedSound implements ITickableSound {
         ClientPlayerEntity player = this.player.get();
         if (player == null)
             return 0F;
-        return player.getPosZ();
+        return player.getZ();
     }
 
     @Nonnull
     @Override
-    public AttenuationType getAttenuationType() {
+    public AttenuationType getAttenuation() {
         return AttenuationType.NONE;
     }
 

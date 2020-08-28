@@ -62,12 +62,12 @@ public class MessageApplyHealingItem {
             ServerPlayerEntity player = CommonUtils.checkServer(ctx);
             ctx.enqueueWork(() -> {
                 AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
-                ItemStack stack = player.getHeldItem(message.hand);
+                ItemStack stack = player.getItemInHand(message.hand);
                 Item item = stack.getItem();
                 AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
                 if (healer == null) {
                     FirstAid.LOGGER.warn("Player {} has invalid item in hand {} while it should be an healing item", player.getName(), item.getRegistryName());
-                    player.sendMessage(new StringTextComponent("Unable to apply healing item!"), Util.DUMMY_UUID);
+                    player.sendMessage(new StringTextComponent("Unable to apply healing item!"), Util.NIL_UUID);
                     return;
                 }
                 stack.shrink(1);

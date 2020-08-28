@@ -43,11 +43,11 @@ public class MessageConfiguration {
     }
 
     public MessageConfiguration(PacketBuffer buffer) {
-        this(buffer.readCompoundTag());
+        this(buffer.readNbt());
     }
 
     public void encode(PacketBuffer buf) {
-        buf.writeCompoundTag(playerDamageModel);
+        buf.writeNbt(playerDamageModel);
     }
 
     public static class Handler {
@@ -63,7 +63,7 @@ public class MessageConfiguration {
                 if (damageModel.hasTutorial)
                     CapProvider.tutorialDone.add(Minecraft.getInstance().player.getName().getString());
                 else
-                    Minecraft.getInstance().player.sendMessage(new StringTextComponent("[First Aid] " + I18n.format("firstaid.tutorial.hint", ClientHooks.showWounds.getTranslationKey())), Util.DUMMY_UUID);
+                    Minecraft.getInstance().player.sendMessage(new StringTextComponent("[First Aid] " + I18n.get("firstaid.tutorial.hint", ClientHooks.showWounds.saveString())), Util.NIL_UUID);
                 HUDHandler.INSTANCE.ticker = 200;
                 FirstAid.isSynced = true;
             });

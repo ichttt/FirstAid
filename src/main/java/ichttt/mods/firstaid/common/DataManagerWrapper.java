@@ -62,7 +62,7 @@ public class DataManagerWrapper extends EntityDataManager {
     @Override
     @Nonnull
     public <T> T get(@Nonnull DataParameter<T> key) {
-        if (key == PlayerEntity.ABSORPTION && player.isAlive())
+        if (key == PlayerEntity.DATA_PLAYER_ABSORPTION_ID && player.isAlive())
             parent.set(key, (T) CommonUtils.getDamageModel(player).getAbsorption());
         return parent.get(key);
     }
@@ -74,12 +74,12 @@ public class DataManagerWrapper extends EntityDataManager {
     @Override
     public <T> void set(@Nonnull DataParameter<T> key, @Nonnull T value) {
         if (!track) {
-            if (key != LivingEntity.HEALTH)
+            if (key != LivingEntity.DATA_HEALTH_ID)
                 set_impl(key, value);
             return;
         }
 
-        if (key == PlayerEntity.ABSORPTION) {
+        if (key == PlayerEntity.DATA_PLAYER_ABSORPTION_ID) {
             float floatValue = (Float) value;
             if (player instanceof ServerPlayerEntity) { //may be EntityOtherPlayerMP as well
                 ServerPlayerEntity playerMP = (ServerPlayerEntity) player;
@@ -87,8 +87,8 @@ public class DataManagerWrapper extends EntityDataManager {
                     FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> playerMP), new MessageApplyAbsorption(floatValue));
             }
             CommonUtils.getDamageModel(player).setAbsorption(floatValue);
-        } else if (key == LivingEntity.HEALTH) {
-            if (value instanceof Float && !player.world.isRemote) {
+        } else if (key == LivingEntity.DATA_HEALTH_ID) {
+            if (value instanceof Float && !player.level.isClientSide) {
                 float aFloat = (Float) value;
                 LazyOptional<AbstractPlayerDamageModel> damageModel;
                 if (aFloat > player.getMaxHealth()) {
@@ -98,7 +98,7 @@ public class DataManagerWrapper extends EntityDataManager {
                         CommonUtils.debugLogStacktrace("SetHealth falltrough");
                 } else if (FirstAidConfig.watchSetHealth && !Float.isInfinite(aFloat) && !Float.isNaN(aFloat) && aFloat > 0 && player instanceof ServerPlayerEntity && ((ServerPlayerEntity) player).connection != null) {
                     //calculate diff
-                    float orig = get(LivingEntity.HEALTH);
+                    float orig = get(LivingEntity.DATA_HEALTH_ID);
                     if (orig > 0 && !Float.isNaN(orig) && !Float.isInfinite(orig)) {
                         if (FirstAidConfig.SERVER.scaleMaxHealth.get())
                             orig = Math.min(orig, (float) this.player.getAttribute(Attributes.MAX_HEALTH).getValue());
@@ -140,8 +140,8 @@ public class DataManagerWrapper extends EntityDataManager {
 
     @Override
     @Nullable
-    public List<DataEntry<?>> getDirty() {
-        return parent.getDirty();
+    public List<DataEntry<?>> packDirty() {
+        return parent.packDirty();
     }
 
     @Override
@@ -152,14 +152,14 @@ public class DataManagerWrapper extends EntityDataManager {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void setEntryValues(List<DataEntry<?>> entriesIn) {
-        parent.setEntryValues(entriesIn);
+    public void assignValues(List<DataEntry<?>> entriesIn) {
+        parent.assignValues(entriesIn);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public <T> void setEntryValue(DataEntry<T> target, DataEntry<?> source) {
-        parent.setEntryValue(target, source);
+    public <T> void assignValue(DataEntry<T> target, DataEntry<?> source) {
+        parent.assignValue(target, source);
     }
 
     @Override
@@ -168,18 +168,18 @@ public class DataManagerWrapper extends EntityDataManager {
     }
 
     @Override
-    public void setClean() {
-        parent.setClean();
+    public void clearDirty() {
+        parent.clearDirty();
     }
 
     @Override
-    public <T> void register(DataParameter<T> key, @Nonnull T value) {
-        parent.register(key, value);
+    public <T> void define(DataParameter<T> key, @Nonnull T value) {
+        parent.define(key, value);
     }
 
     @Nonnull
     @Override
-    public <T> DataEntry<T> getEntry(DataParameter<T> key) {
-        return parent.getEntry(key);
+    public <T> DataEntry<T> getItem(DataParameter<T> key) {
+        return parent.getItem(key);
     }
 }

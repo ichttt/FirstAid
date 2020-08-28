@@ -60,17 +60,17 @@ public class ClientEventHandler {
     public static void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
-        if (mc.world == null || mc.player == null || mc.player.connection == null || mc.isGamePaused()) return;
+        if (mc.level == null || mc.player == null || mc.player.connection == null || mc.isPaused()) return;
         if (EventCalendar.isGuiFun()) {
-            GuiHealthScreen.BED_ITEMSTACK.setDamage(id);
-            if (mc.world != null && mc.world.getGameTime() % 3 == 0) id++;
+            GuiHealthScreen.BED_ITEMSTACK.setDamageValue(id);
+            if (mc.level != null && mc.level.getGameTime() % 3 == 0) id++;
             if (id > 15) id = 0;
             PlayerModelRenderer.tickFun();
         }
-        if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.world != null && mc.world.isRemote) {
-            mc.player.sendStatusMessage(new StringTextComponent("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
+        if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.level != null && mc.level.isClientSide) {
+            mc.player.displayClientMessage(new StringTextComponent("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
             for (String s : RegistryManager.debuffConfigErrors)
-                mc.player.sendStatusMessage(new StringTextComponent("[FirstAid] " + s), false);
+                mc.player.displayClientMessage(new StringTextComponent("[FirstAid] " + s), false);
             RegistryManager.debuffConfigErrors.clear();
         }
         if (HUDHandler.INSTANCE.ticker >= 0)
@@ -79,16 +79,16 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public static void onKeyPress(InputEvent event) {
-        if (ClientHooks.showWounds.isPressed()) {
+        if (ClientHooks.showWounds.consumeClick()) {
             Minecraft mc = Minecraft.getInstance();
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
             if (!damageModel.hasTutorial) {
                 damageModel.hasTutorial = true;
                 CapProvider.tutorialDone.add(mc.player.getName().getString());
-                Minecraft.getInstance().displayGuiScreen(new GuiTutorial());
+                Minecraft.getInstance().setScreen(new GuiTutorial());
             }
             else {
-                mc.displayGuiScreen(new GuiHealthScreen(damageModel));
+                mc.setScreen(new GuiHealthScreen(damageModel));
             }
         }
     }
@@ -107,20 +107,20 @@ public class ClientEventHandler {
         if (type == RenderGameOverlayEvent.ElementType.ALL || (type == RenderGameOverlayEvent.ElementType.TEXT && FirstAidConfig.CLIENT.overlayMode.get() != FirstAidConfig.Client.OverlayMode.OFF && FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.BOTTOM_LEFT)) {
             Minecraft mc = Minecraft.getInstance();
             if (!mc.player.isAlive()) return;
-            mc.getProfiler().startSection("FirstAidOverlay");
+            mc.getProfiler().push("FirstAidOverlay");
             ForgeIngameGui.renderHealth = FirstAidConfig.CLIENT.showVanillaHealthBar.get();
             HUDHandler.INSTANCE.renderOverlay(event.getMatrixStack(), mc, event.getPartialTicks());
-            mc.getProfiler().endSection();
-            mc.getProfiler().endSection();
+            mc.getProfiler().pop();
+            mc.getProfiler().pop();
         }
     }
 
     private static ITextComponent makeArmorMsg(double value) {
-        return new TranslationTextComponent("firstaid.specificarmor", FORMAT.format(value)).func_240699_a_(TextFormatting.BLUE); //applyTextStyle
+        return new TranslationTextComponent("firstaid.specificarmor", FORMAT.format(value)).withStyle(TextFormatting.BLUE); //applyTextStyle
     }
 
     private static ITextComponent makeToughnessMsg(double value) {
-        return new TranslationTextComponent("firstaid.specifictoughness", FORMAT.format(value)).func_240699_a_(TextFormatting.BLUE); //applyTextStyle
+        return new TranslationTextComponent("firstaid.specifictoughness", FORMAT.format(value)).withStyle(TextFormatting.BLUE); //applyTextStyle
     }
 
     private static <T> void replaceOrAppend(List<T> list, T search, T replace) {
@@ -146,17 +146,17 @@ public class ClientEventHandler {
                 ArmorItem armor = (ArmorItem) item;
                 List<ITextComponent> tooltip = event.getToolTip();
 
-                double normalArmor = ArmorUtils.getArmor(stack, armor.getEquipmentSlot());
-                double totalArmor = ArmorUtils.applyArmorModifier(armor.getEquipmentSlot(), normalArmor);
+                double normalArmor = ArmorUtils.getArmor(stack, armor.getSlot());
+                double totalArmor = ArmorUtils.applyArmorModifier(armor.getSlot(), normalArmor);
                 if (totalArmor > 0D) {
-                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalArmor), new TranslationTextComponent("attribute.name.generic.armor")).func_240699_a_(TextFormatting.BLUE);
+                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalArmor), new TranslationTextComponent("attribute.name.generic.armor")).withStyle(TextFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
                 }
 
-                double normalToughness = ArmorUtils.getArmorThoughness(stack, armor.getEquipmentSlot());
-                double totalToughness = ArmorUtils.applyToughnessModifier(armor.getEquipmentSlot(), normalToughness);
+                double normalToughness = ArmorUtils.getArmorThoughness(stack, armor.getSlot());
+                double totalToughness = ArmorUtils.applyToughnessModifier(armor.getSlot(), normalToughness);
                 if (totalToughness > 0D) {
-                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalToughness), new TranslationTextComponent("attribute.name.generic.armor_toughness")).func_240699_a_(TextFormatting.BLUE);
+                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalToughness), new TranslationTextComponent("attribute.name.generic.armor_toughness")).withStyle(TextFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
                 }
             }
@@ -164,7 +164,7 @@ public class ClientEventHandler {
 
         AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
         if (healer != null && event.getPlayer() != null) {
-            event.getToolTip().add(new TranslationTextComponent("firstaid.tooltip.healer", healer.maxHeal.getAsInt() / 2, StringUtils.ticksToElapsedTime(healer.ticksPerHeal.getAsInt())));
+            event.getToolTip().add(new TranslationTextComponent("firstaid.tooltip.healer", healer.maxHeal.getAsInt() / 2, StringUtils.formatTickDuration(healer.ticksPerHeal.getAsInt())));
         }
     }
 

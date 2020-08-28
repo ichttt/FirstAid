@@ -52,25 +52,25 @@ public class PotionPoisonPatched extends Effect {
     }
 
     @Override
-    public void performEffect(@Nonnull LivingEntity entity, int amplifier) {
+    public void applyEffectTick(@Nonnull LivingEntity entity, int amplifier) {
         if (entity instanceof PlayerEntity && !(entity instanceof FakePlayer) && (FirstAidConfig.SERVER.causeDeathBody.get() || FirstAidConfig.SERVER.causeDeathHead.get())) {
-            if (entity.world.isRemote || !entity.isAlive() || entity.isInvulnerableTo(DamageSource.MAGIC))
+            if (entity.level.isClientSide || !entity.isAlive() || entity.isInvulnerableTo(DamageSource.MAGIC))
                 return;
             if (entity.isSleeping())
-                entity.wakeUp();
+                entity.stopSleeping();
             PlayerEntity player = (PlayerEntity) entity;
             AbstractPlayerDamageModel playerDamageModel = CommonUtils.getDamageModel(player);
             if (DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false) != 1.0F) {
                 try {
                     SoundEvent sound = (SoundEvent) getHurtSound.invoke(player, DamageSource.MAGIC);
-                    player.world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), sound, player.getSoundCategory(), (float) getSoundVolume.invoke(player), (float) getSoundPitch.invoke(player));
+                    player.level.playSound(null, player.getX(), player.getY(), player.getZ(), sound, player.getSoundSource(), (float) getSoundVolume.invoke(player), (float) getSoundPitch.invoke(player));
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     FirstAid.LOGGER.error("Could not play hurt sound!", e);
                 }
             }
         }
         else {
-            super.performEffect(entity, amplifier);
+            super.applyEffectTick(entity, amplifier);
         }
     }
 }

@@ -128,7 +128,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     public void tick(World world, PlayerEntity player) {
         if (isDead(player))
             return;
-        world.getProfiler().startSection("FirstAidPlayerModel");
+        world.getProfiler().push("FirstAidPlayerModel");
         if (sleepBlockTicks > 0)
             sleepBlockTicks--;
         else if (sleepBlockTicks < 0)
@@ -141,10 +141,10 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         }
         if (newCurrentHealth <= 0F) {
             FirstAid.LOGGER.error("Got {} health left, but isn't marked as dead!", newCurrentHealth);
-            world.getProfiler().endSection();
+            world.getProfiler().pop();
             return;
         }
-        if (!world.isRemote && resyncTimer != -1) {
+        if (!world.isClientSide && resyncTimer != -1) {
             resyncTimer--;
             if (resyncTimer == 0) {
                 resyncTimer = -1;
@@ -156,7 +156,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             FirstAid.LOGGER.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe
         } else {
             if (newCurrentHealth != prevHealthCurrent)
-                ((DataManagerWrapper) player.dataManager).set_impl(PlayerEntity.HEALTH, newCurrentHealth);
+                ((DataManagerWrapper) player.entityData).set_impl(PlayerEntity.DATA_HEALTH_ID, newCurrentHealth);
             prevHealthCurrent = newCurrentHealth;
         }
 
@@ -167,21 +167,21 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
         //morphine update
         if (this.needsMorphineUpdate) {
-            player.addPotionEffect(new EffectInstance(EventHandler.MORPHINE, this.morphineTicksLeft, 0, false, false));
+            player.addEffect(new EffectInstance(EventHandler.MORPHINE, this.morphineTicksLeft, 0, false, false));
         }
-        EffectInstance morphine = player.getActivePotionEffect(EventHandler.MORPHINE);
+        EffectInstance morphine = player.getEffect(EventHandler.MORPHINE);
         if (!this.needsMorphineUpdate) {
             this.morphineTicksLeft = morphine == null ? 0 : morphine.getDuration();
         }
         this.needsMorphineUpdate = false;
 
         //Debuff and part ticking
-        world.getProfiler().startSection("PartDebuffs");
+        world.getProfiler().push("PartDebuffs");
         forEach(part -> part.tick(world, player, morphine == null));
-        if (morphine == null && !world.isRemote)
+        if (morphine == null && !world.isClientSide)
             sharedDebuffs.forEach(sharedDebuff -> sharedDebuff.tick(player));
-        world.getProfiler().endSection();
-        world.getProfiler().endSection();
+        world.getProfiler().pop();
+        world.getProfiler().pop();
     }
 
     public static int getRandMorphineDuration() { //Tweak tooltip event when changing as well
@@ -197,7 +197,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public void applyMorphine(PlayerEntity player) {
-        player.addPotionEffect(new EffectInstance(EventHandler.MORPHINE, getRandMorphineDuration(), 0, false, false));
+        player.addEffect(new EffectInstance(EventHandler.MORPHINE, getRandMorphineDuration(), 0, false, false));
     }
 
     @Deprecated
@@ -341,7 +341,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         for (AbstractDamageablePart part : this) {
             int newMax;
             if (FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.NUMBERS)
-                newMax = Minecraft.getInstance().fontRenderer.getStringWidth(HealthRenderUtils.TEXT_FORMAT.format(part.currentHealth) + "/" + part.getMaxHealth()) + 1;
+                newMax = Minecraft.getInstance().font.width(HealthRenderUtils.TEXT_FORMAT.format(part.currentHealth) + "/" + part.getMaxHealth()) + 1;
             else
                 newMax = (int) (((((int) (part.getMaxHealth() + part.getAbsorption() + 0.9999F)) + 1) / 2F) * 9F);
             max = Math.max(max, newMax);
@@ -393,20 +393,20 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             }
         }
         //make sure to resync the client health
-        if (!player.world.isRemote && player instanceof ServerPlayerEntity)
+        if (!player.level.isClientSide && player instanceof ServerPlayerEntity)
             FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(this, true)); //Upload changes to the client
     }
 
     @Override
     public void runScaleLogic(PlayerEntity player) {
         if (FirstAidConfig.SERVER.scaleMaxHealth.get()) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
-            player.world.getProfiler().startSection("healthscaling");
+            player.level.getProfiler().push("healthscaling");
             float globalFactor = player.getMaxHealth() / 20F;
             if (prevScaleFactor != globalFactor) {
                 if (FirstAidConfig.GENERAL.debug.get()) {
                     FirstAid.LOGGER.info("Starting health scaling factor {} -> {} (max health {})", prevScaleFactor, globalFactor, player.getMaxHealth());
                 }
-                player.world.getProfiler().startSection("distribution");
+                player.level.getProfiler().push("distribution");
                 int reduced = 0;
                 int added = 0;
                 float expectedNewMaxHealth = 0F;
@@ -437,7 +437,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                     }
                     part.setMaxHealth(result);
                 }
-                player.world.getProfiler().endStartSection("correcting");
+                player.level.getProfiler().popPush("correcting");
                 if (Math.abs(expectedNewMaxHealth - newMaxHealth) >= 2F) {
                     if (FirstAidConfig.GENERAL.debug.get()) {
                         FirstAid.LOGGER.info("Entering second stage - diff {}", Math.abs(expectedNewMaxHealth - newMaxHealth));
@@ -464,10 +464,10 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                         }
                     }
                 }
-                player.world.getProfiler().endSection();
+                player.level.getProfiler().pop();
             }
             prevScaleFactor = globalFactor;
-            player.world.getProfiler().endSection();
+            player.level.getProfiler().pop();
         }
     }
 

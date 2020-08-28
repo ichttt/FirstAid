@@ -43,8 +43,8 @@ public class FirstAidItems {
 
     public static void registerItems(IForgeRegistry<Item> registry) {
         FirstAidConfig.Server server = FirstAidConfig.SERVER;
-        registry.register(ItemHealing.create(new Item.Properties().maxStackSize(16), new ResourceLocation(FirstAid.MODID, "bandage"), stack -> new PartHealer(() -> server.bandage.secondsPerHeal.get() * 20, server.bandage.totalHeals::get, stack), stack -> server.bandage.applyTime.get()));
-        registry.register(ItemHealing.create(new Item.Properties().maxStackSize(16), new ResourceLocation(FirstAid.MODID, "plaster"), stack -> new PartHealer(() -> server.plaster.secondsPerHeal.get() * 20, server.plaster.totalHeals::get, stack), stack -> server.plaster.applyTime.get()));
+        registry.register(ItemHealing.create(new Item.Properties().stacksTo(16), new ResourceLocation(FirstAid.MODID, "bandage"), stack -> new PartHealer(() -> server.bandage.secondsPerHeal.get() * 20, server.bandage.totalHeals::get, stack), stack -> server.bandage.applyTime.get()));
+        registry.register(ItemHealing.create(new Item.Properties().stacksTo(16), new ResourceLocation(FirstAid.MODID, "plaster"), stack -> new PartHealer(() -> server.plaster.secondsPerHeal.get() * 20, server.plaster.totalHeals::get, stack), stack -> server.plaster.applyTime.get()));
         registry.register(new ItemMorphine());
     }
 }

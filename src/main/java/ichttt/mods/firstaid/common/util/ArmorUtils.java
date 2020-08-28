@@ -100,16 +100,16 @@ public class ArmorUtils {
      */
     @SuppressWarnings("JavadocReference")
     public static float applyArmor(@Nonnull PlayerEntity entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, float damage, @Nonnull EquipmentSlotType slot) {
-        if (itemStack.isEmpty() || source.isUnblockable()) return damage;
+        if (itemStack.isEmpty() || source.isBypassArmor()) return damage;
         Item item = itemStack.getItem();
         if (!(item instanceof ArmorItem)) return damage;
         ArmorItem armor = (ArmorItem) item;
-        float totalArmor = armor.getDamageReduceAmount();
-        float totalToughness = armor.func_234657_f_(); //getToughness
+        float totalArmor = armor.getDefense();
+        float totalToughness = armor.getToughness(); //getToughness
         totalArmor = (float) applyArmorModifier(slot, totalArmor);
         totalToughness = (float) applyToughnessModifier(slot, totalToughness);
 
-        itemStack.damageItem((int) damage, entity, (player) -> player.sendBreakAnimation(slot));
+        itemStack.hurtAndBreak((int) damage, entity, (player) -> player.broadcastBreakEvent(slot));
         damage = CombatRules.getDamageAfterAbsorb(damage, totalArmor, totalToughness);
         return damage;
     }
@@ -119,11 +119,11 @@ public class ArmorUtils {
      */
     @SuppressWarnings("JavadocReference")
     public static float applyGlobalPotionModifiers(PlayerEntity player, DamageSource source, float damage) {
-        if (source.isDamageAbsolute())
+        if (source.isBypassMagic())
             return damage;
-        if (player.isPotionActive(Effects.RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
+        if (player.hasEffect(Effects.DAMAGE_RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
             @SuppressWarnings("ConstantConditions")
-            int i = (player.getActivePotionEffect(Effects.RESISTANCE).getAmplifier() + 1) * 5;
+            int i = (player.getEffect(Effects.DAMAGE_RESISTANCE).getAmplifier() + 1) * 5;
             int j = 25 - i;
             float f = damage * (float) j;
             float f1 = damage;
@@ -131,9 +131,9 @@ public class ArmorUtils {
             float f2 = f1 - damage;
             if (f2 > 0.0F && f2 < 3.4028235E37F) {
                 if (player instanceof ServerPlayerEntity) {
-                    player.addStat(Stats.DAMAGE_RESISTED, Math.round(f2 * 10.0F));
-                } else if (source.getTrueSource() instanceof ServerPlayerEntity) {
-                    ((ServerPlayerEntity) source.getTrueSource()).addStat(Stats.DAMAGE_DEALT_RESISTED, Math.round(f2 * 10.0F));
+                    player.awardStat(Stats.DAMAGE_RESISTED, Math.round(f2 * 10.0F));
+                } else if (source.getEntity() instanceof ServerPlayerEntity) {
+                    ((ServerPlayerEntity) source.getEntity()).awardStat(Stats.DAMAGE_DEALT_RESISTED, Math.round(f2 * 10.0F));
                 }
             }
         }
@@ -146,7 +146,7 @@ public class ArmorUtils {
      */
     @SuppressWarnings("JavadocReference")
     public static float applyEnchantmentModifiers(ItemStack stack, DamageSource source, float damage) {
-        int k = EnchantmentHelper.getEnchantmentModifierDamage(() -> Iterators.singletonIterator(stack), source);
+        int k = EnchantmentHelper.getDamageProtection(() -> Iterators.singletonIterator(stack), source);
         k *= 4;
 
         if (k > 0)

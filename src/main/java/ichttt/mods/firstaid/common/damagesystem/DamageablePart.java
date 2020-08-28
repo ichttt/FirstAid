@@ -98,12 +98,12 @@ public class DamageablePart extends AbstractDamageablePart {
     public void tick(World world, PlayerEntity player, boolean tickDebuffs) {
         if (activeHealer != null) {
             if (activeHealer.tick()) {
-                heal(1F, player, !world.isRemote);
+                heal(1F, player, !world.isClientSide);
             }
             if (activeHealer.hasFinished())
                 activeHealer = null;
         }
-        if (!world.isRemote && tickDebuffs)
+        if (!world.isClientSide && tickDebuffs)
             Arrays.stream(debuffs).forEach(debuff -> debuff.update(player, currentHealth / maxHealth));
     }
 
@@ -134,7 +134,7 @@ public class DamageablePart extends AbstractDamageablePart {
         if (nbt.contains("healingItem"))
             stack = new ItemStack(nbt.getByte("healingItem") == 1 ? FirstAidItems.PLASTER : FirstAidItems.BANDAGE);
         else if (nbt.contains("healer"))
-            stack = ItemStack.read((CompoundNBT) Objects.requireNonNull(nbt.get("healer")));
+            stack = ItemStack.of((CompoundNBT) Objects.requireNonNull(nbt.get("healer")));
 
         if (stack != null) {
             AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);

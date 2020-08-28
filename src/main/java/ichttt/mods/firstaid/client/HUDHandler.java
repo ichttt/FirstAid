@@ -67,8 +67,8 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         TRANSLATION_MAP.clear();
         maxLength = 0;
         for (EnumPlayerPart part : EnumPlayerPart.VALUES) {
-            String translated = I18n.format("firstaid.gui." + part.toString().toLowerCase(Locale.ENGLISH));
-            maxLength = Math.max(maxLength, Minecraft.getInstance().fontRenderer.getStringWidth(translated));
+            String translated = I18n.get("firstaid.gui." + part.toString().toLowerCase(Locale.ENGLISH));
+            maxLength = Math.max(maxLength, Minecraft.getInstance().font.width(translated));
             TRANSLATION_MAP.put(part, translated);
         }
     }
@@ -78,7 +78,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
     }
 
     public void renderOverlay(MatrixStack stack, Minecraft mc, float partialTicks) {
-        mc.getProfiler().startSection("prepare");
+        mc.getProfiler().push("prepare");
         if (mc.player == null)
             return;
 
@@ -96,7 +96,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 if (visibleTicks != -1)
                     ticker = Math.max(ticker, visibleTicks);
                 if (FirstAidConfig.CLIENT.flash.get()) {
-                    flashStateManager.setActive(Util.milliTime());
+                    flashStateManager.setActive(Util.getMillis());
                 }
             }
         }
@@ -108,8 +108,8 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         if (visibleTicks != -1 && ticker < 0)
             return;
 
-        mc.getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
-        AbstractGui gui = mc.ingameGUI;
+        mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
+        AbstractGui gui = mc.gui;
         int xOffset = FirstAidConfig.CLIENT.xOffset.get();
         int yOffset = FirstAidConfig.CLIENT.yOffset.get();
         boolean playerModel = FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.PLAYER_MODEL;
@@ -119,42 +119,42 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                     xOffset += 1;
                 break;
             case TOP_RIGHT:
-                xOffset = mc.getMainWindow().getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() + (maxLength));
+                xOffset = mc.getWindow().getGuiScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() + (maxLength));
                 break;
             case BOTTOM_LEFT:
                 if (playerModel)
                     xOffset += 1;
-                yOffset = mc.getMainWindow().getScaledHeight() - yOffset - (playerModel ? 66 : 80);
+                yOffset = mc.getWindow().getGuiScaledHeight() - yOffset - (playerModel ? 66 : 80);
                 break;
             case BOTTOM_RIGHT:
-                xOffset = mc.getMainWindow().getScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() + (maxLength));
-                yOffset = mc.getMainWindow().getScaledHeight() - yOffset - (playerModel ? 62 : 80);
+                xOffset = mc.getWindow().getGuiScaledWidth() - xOffset - (playerModel ? 34 : damageModel.getMaxRenderSize() + (maxLength));
+                yOffset = mc.getWindow().getGuiScaledHeight() - yOffset - (playerModel ? 62 : 80);
                 break;
             default:
                 throw new RuntimeException("Invalid config option for position: " + FirstAidConfig.CLIENT.pos.get());
         }
 
-        if (mc.currentScreen instanceof ChatScreen && FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.BOTTOM_LEFT)
+        if (mc.screen instanceof ChatScreen && FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.BOTTOM_LEFT)
             return;
-        if (mc.gameSettings.showDebugInfo && FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.TOP_LEFT)
+        if (mc.options.renderDebug && FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.TOP_LEFT)
             return;
 
         boolean enableAlphaBlend = visibleTicks != -1 && ticker < FADE_TIME;
         int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), FirstAidConfig.CLIENT.alpha.get(), 250) : FirstAidConfig.CLIENT.alpha.get();
 
-        stack.push();
+        stack.pushPose();
         stack.translate(xOffset, yOffset, 0F);
         if (enableAlphaBlend) {
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         }
-        mc.getProfiler().endStartSection("render");
+        mc.getProfiler().popPush("render");
         if (overlayMode == FirstAidConfig.Client.OverlayMode.PLAYER_MODEL) {
-            PlayerModelRenderer.renderPlayerHealth(stack, damageModel, gui, flashStateManager.update(Util.milliTime()), alpha, partialTicks);
+            PlayerModelRenderer.renderPlayerHealth(stack, damageModel, gui, flashStateManager.update(Util.getMillis()), alpha, partialTicks);
         } else {
             int xTranslation = maxLength;
             for (AbstractDamageablePart part : damageModel) {
-                mc.fontRenderer.drawStringWithShadow(stack, TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF - (alpha << 24 & -0xFFFFFF));
+                mc.font.drawShadow(stack, TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF - (alpha << 24 & -0xFFFFFF));
                 if (FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.NUMBERS) {
                     HealthRenderUtils.drawHealthString(stack, part, xTranslation, 0, false);
                 } else {
@@ -163,9 +163,9 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 stack.translate(0, 10F, 0F);
             }
         }
-        mc.getProfiler().endStartSection("cleanup");
+        mc.getProfiler().popPush("cleanup");
         if (enableAlphaBlend)
             RenderSystem.disableBlend();
-        stack.pop();
+        stack.popPose();
     }
 }

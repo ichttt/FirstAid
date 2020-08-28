@@ -68,7 +68,7 @@ public class CommonUtils {
     }
 
     public static void killPlayer(@Nonnull AbstractPlayerDamageModel damageModel, @Nonnull PlayerEntity player, @Nullable DamageSource source) {
-        if (player.world.isRemote) {
+        if (player.level.isClientSide) {
             try {
                 throw new RuntimeException("Tried to kill the player on the client!");
             } catch (RuntimeException e) {
@@ -76,7 +76,7 @@ public class CommonUtils {
             }
         }
         if (source != null && FirstAidConfig.SERVER.allowOtherHealingItems.get()) {
-            DataManagerWrapper wrapper = (DataManagerWrapper) player.dataManager;
+            DataManagerWrapper wrapper = (DataManagerWrapper) player.entityData;
             boolean protection;
             wrapper.toggleTracking(false);
             try {
@@ -100,7 +100,7 @@ public class CommonUtils {
 //        if (revival != null)
 //            revival.startBleeding(player, source);
 //        else
-            ((DataManagerWrapper) player.dataManager).set_impl(PlayerEntity.HEALTH, 0F);
+            ((DataManagerWrapper) player.entityData).set_impl(PlayerEntity.DATA_HEALTH_ID, 0F);
     }
 
 //    /**
@@ -123,7 +123,7 @@ public class CommonUtils {
 //    }
 
     public static boolean isValidArmorSlot(EquipmentSlotType slot) {
-        return slot.getSlotType() == EquipmentSlotType.Group.ARMOR;
+        return slot.getType() == EquipmentSlotType.Group.ARMOR;
     }
 
     public static boolean isSurvivalOrAdventure(PlayerEntity player) {

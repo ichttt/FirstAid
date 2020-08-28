@@ -38,13 +38,13 @@ import java.util.Objects;
 public class ItemMorphine extends Item {
 
     public ItemMorphine() {
-        super(new Item.Properties().group(FirstAid.ITEM_GROUP).maxStackSize(16));
+        super(new Item.Properties().tab(FirstAid.ITEM_GROUP).stacksTo(16));
         setRegistryName(new ResourceLocation(FirstAid.MODID, "morphine"));
     }
 
     @Override
     @Nonnull
-    public ItemStack onItemUseFinish(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull LivingEntity entityLiving) {
+    public ItemStack finishUsingItem(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull LivingEntity entityLiving) {
         if (CommonUtils.hasDamageModel(entityLiving)) {
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel((PlayerEntity) entityLiving);
             Objects.requireNonNull(damageModel).applyMorphine((PlayerEntity) entityLiving);
@@ -55,15 +55,15 @@ public class ItemMorphine extends Item {
 
     @Override
     @Nonnull
-    public UseAction getUseAction(ItemStack stack) {
+    public UseAction getUseAnimation(ItemStack stack) {
         return UseAction.EAT;
     }
 
     @Override
     @Nonnull
-    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, @Nonnull Hand hand) {
-        ItemStack itemstack = player.getHeldItem(hand);
-        player.setActiveHand(hand);
+    public ActionResult<ItemStack> use(World world, PlayerEntity player, @Nonnull Hand hand) {
+        ItemStack itemstack = player.getItemInHand(hand);
+        player.startUsingItem(hand);
         return new ActionResult<>(ActionResultType.SUCCESS, itemstack);
     }
 

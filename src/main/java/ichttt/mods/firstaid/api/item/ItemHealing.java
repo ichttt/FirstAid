@@ -46,7 +46,7 @@ public class ItemHealing extends Item {
      * @param healerFunction The function to create a new healer from the GUI
      */
     public static ItemHealing create(Item.Properties builder, ResourceLocation registryName, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
-        builder.group(HealingItemApiHelper.INSTANCE.getFirstAidTab());
+        builder.tab(HealingItemApiHelper.INSTANCE.getFirstAidTab());
         return createNoTab(builder, registryName, healerFunction, time);
     }
 
@@ -69,7 +69,7 @@ public class ItemHealing extends Item {
 
     @Nonnull
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, @Nonnull Hand handIn) {
+    public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, @Nonnull Hand handIn) {
         return HealingItemApiHelper.INSTANCE.onItemRightClick(this, worldIn, playerIn, handIn);
     }
 }

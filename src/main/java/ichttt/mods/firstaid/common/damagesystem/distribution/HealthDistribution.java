@@ -43,7 +43,7 @@ public class HealthDistribution {
     }
 
     public static void manageHealth(float health, AbstractPlayerDamageModel damageModel, PlayerEntity player, boolean sendChanges, boolean distribute) {
-        if (sendChanges && player.world.isRemote) {
+        if (sendChanges && player.level.isClientSide) {
             FirstAid.LOGGER.warn("The sendChanges flag was set on the client, it can however only work on the server!" ,new RuntimeException("sendChanges flag set on the client, this is not supported!"));
             sendChanges = false;
         } else if (sendChanges && !(player instanceof ServerPlayerEntity)) { //EntityOtherPlayerMP? log something?
@@ -51,7 +51,7 @@ public class HealthDistribution {
         }
 
         float toHeal = distribute ? health / 8F : health;
-        Collections.shuffle(parts, player.world.rand);
+        Collections.shuffle(parts, player.level.random);
         List<AbstractDamageablePart> damageableParts = new ArrayList<>(parts.size());
 
         for (EnumPlayerPart part : parts) {
@@ -64,7 +64,7 @@ public class HealthDistribution {
 
         for (int i = 0; i < 8; i++) {
             AbstractDamageablePart part = damageableParts.get(i);
-            float diff = toHeal - part.heal(toHeal, player, !player.world.isRemote);
+            float diff = toHeal - part.heal(toHeal, player, !player.level.isClientSide);
             //prevent inaccuracy
             diff = Math.round(diff * 10000.0F) / 10000.0F;
             healingDone[part.part.ordinal()] = diff;
@@ -82,7 +82,7 @@ public class HealthDistribution {
 
         if (sendChanges) {
             ServerPlayerEntity playerMP = (ServerPlayerEntity) player;
-            if (playerMP.connection == null || playerMP.connection.netManager == null)
+            if (playerMP.connection == null || playerMP.connection.connection == null)
                 damageModel.scheduleResync(); //Too early to send changes, keep in mind and do it later
             else
                 FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> playerMP), new MessageAddHealth(healingDone));

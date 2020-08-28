@@ -38,7 +38,7 @@ import org.lwjgl.glfw.GLFW;
 
 
 public class ClientHooks {
-    public static final KeyBinding showWounds = new KeyBinding("keybinds.show_wounds", KeyConflictContext.UNIVERSAL, InputMappings.Type.KEYSYM.getOrMakeInput(GLFW.GLFW_KEY_H), "First Aid");
+    public static final KeyBinding showWounds = new KeyBinding("keybinds.show_wounds", KeyConflictContext.UNIVERSAL, InputMappings.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_H), "First Aid");
 
     public static void setup(FMLClientSetupEvent event) {
         FirstAid.LOGGER.debug("Loading ClientHooks");
@@ -49,12 +49,12 @@ public class ClientHooks {
     }
 
     public static void lateSetup(FMLLoadCompleteEvent event) { //register after the reload listener for language has registered
-        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(HUDHandler.INSTANCE);
+        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(HUDHandler.INSTANCE);
     }
 
     public static void showGuiApplyHealth(Hand activeHand) {
         Minecraft mc = Minecraft.getInstance();
         GuiHealthScreen.INSTANCE = new GuiHealthScreen(CommonUtils.getDamageModel(mc.player), activeHand);
-        mc.displayGuiScreen(GuiHealthScreen.INSTANCE);
+        mc.setScreen(GuiHealthScreen.INSTANCE);
     }
 }

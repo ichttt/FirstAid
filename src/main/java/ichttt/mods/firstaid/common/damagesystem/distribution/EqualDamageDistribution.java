@@ -57,7 +57,7 @@ public class EqualDamageDistribution implements IDamageDistribution {
         //As we damage all, also go through each armor slot
         float damage = originalDamage;
         for (EquipmentSlotType slot : CommonUtils.ARMOR_SLOTS) {
-            ItemStack armor = player.getItemStackFromSlot(slot);
+            ItemStack armor = player.getItemBySlot(slot);
             damage = ArmorUtils.applyArmor(player, armor, source, damage, slot);
             if (damage <= 0F) return 0F;
         }
@@ -91,7 +91,7 @@ public class EqualDamageDistribution implements IDamageDistribution {
 
             for (AbstractDamageablePart part : damageModel) {
                 if (part.currentHealth > 0F) {
-                    damageLeft += part.damage(toDamage, player, !player.isPotionActive(EventHandler.MORPHINE), tryNoKillThisRound ? 1F : 0F);
+                    damageLeft += part.damage(toDamage, player, !player.hasEffect(EventHandler.MORPHINE), tryNoKillThisRound ? 1F : 0F);
                     divCount++;
                 }
             }
@@ -120,7 +120,7 @@ public class EqualDamageDistribution implements IDamageDistribution {
         FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(damageModel, false));
         float effectiveDmg = damage - damageLeft;
         if (effectiveDmg < 3.4028235E37F) {
-            player.addStat(Stats.DAMAGE_TAKEN, Math.round(effectiveDmg * 10.0F));
+            player.awardStat(Stats.DAMAGE_TAKEN, Math.round(effectiveDmg * 10.0F));
         }
         return damageLeft;
     }

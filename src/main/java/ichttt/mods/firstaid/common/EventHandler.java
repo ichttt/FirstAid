@@ -92,7 +92,7 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
         LivingEntity entity = event.getEntityLiving();
-        if (entity.world.isRemote || !CommonUtils.hasDamageModel(entity))
+        if (entity.level.isClientSide || !CommonUtils.hasDamageModel(entity))
             return;
         float amountToDamage = event.getAmount();
         PlayerEntity player = (PlayerEntity) entity;
@@ -134,7 +134,7 @@ public class EventHandler {
             return;
 
         Entity entity = ((EntityRayTraceResult) result).getEntity();
-        if (!entity.world.isRemote && entity instanceof PlayerEntity) {
+        if (!entity.level.isClientSide && entity instanceof PlayerEntity) {
             hitList.put((PlayerEntity) entity, Pair.of(event.getEntity(), event.getRayTraceResult()));
         }
     }
@@ -147,7 +147,7 @@ public class EventHandler {
             AbstractPlayerDamageModel damageModel = PlayerDamageModel.create();
             event.addCapability(CapProvider.IDENTIFIER, new CapProvider(damageModel));
             //replace the data manager with our wrapper to grab absorption
-            player.dataManager = new DataManagerWrapper(player, player.dataManager);
+            player.entityData = new DataManagerWrapper(player, player.entityData);
         }
     }
 
@@ -155,7 +155,7 @@ public class EventHandler {
     public static void tickPlayers(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END && CommonUtils.isSurvivalOrAdventure(event.player)) {
             if (!event.player.isAlive()) return;
-            CommonUtils.getDamageModel(event.player).tick(event.player.world, event.player);
+            CommonUtils.getDamageModel(event.player).tick(event.player.level, event.player);
             hitList.remove(event.player); //Damage should be done in the same tick as the hit was noted, otherwise we got a false-positive
         }
     }
@@ -163,8 +163,8 @@ public class EventHandler {
     @SubscribeEvent
     public static void onSleepFinished(SleepFinishedTimeEvent event) {
         if (ModList.get().isLoaded("morpheus")) return;
-        for (PlayerEntity player : event.getWorld().getPlayers()) {
-            if (player.isPlayerFullyAsleep())
+        for (PlayerEntity player : event.getWorld().players()) {
+            if (player.isSleepingLongEnough())
                 CommonUtils.getDamageModel(player).sleepHeal(player);
         }
     }
@@ -175,22 +175,22 @@ public class EventHandler {
         ResourceLocation tableName = event.getName();
         LootPool pool = null;
         int bandage = 0, plaster = 0, morphine = 0;
-        if (tableName.equals(LootTables.CHESTS_SPAWN_BONUS_CHEST)) {
+        if (tableName.equals(LootTables.SPAWN_BONUS_CHEST)) {
             pool = event.getTable().getPool("main");
             bandage = 8;
             plaster = 16;
             morphine = 4;
-        } else if (tableName.equals(LootTables.CHESTS_STRONGHOLD_CORRIDOR) || tableName.equals(LootTables.CHESTS_STRONGHOLD_CROSSING) || tableName.equals(LootTables.CHESTS_ABANDONED_MINESHAFT)) {
+        } else if (tableName.equals(LootTables.STRONGHOLD_CORRIDOR) || tableName.equals(LootTables.STRONGHOLD_CROSSING) || tableName.equals(LootTables.ABANDONED_MINESHAFT)) {
             pool = event.getTable().getPool("main");
             bandage = 20;
             plaster = 24;
             morphine = 8;
-        } else if (tableName.equals(LootTables.CHESTS_VILLAGE_VILLAGE_BUTCHER)) {
+        } else if (tableName.equals(LootTables.VILLAGE_BUTCHER)) {
             pool = event.getTable().getPool("main");
             bandage = 4;
             plaster = 16;
             morphine = 2;
-        } else if (tableName.equals(LootTables.CHESTS_IGLOO_CHEST)) {
+        } else if (tableName.equals(LootTables.IGLOO_CHEST)) {
             pool = event.getTable().getPool("main");
             bandage = 4;
             plaster = 8;
@@ -204,20 +204,20 @@ public class EventHandler {
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("Reflection failed!", e);
             }
-            lootEntries.add(ItemLootEntry.builder(() -> FirstAidItems.BANDAGE)
-                    .acceptFunction(SetCount.builder(new RandomValueRange(1, 3)))
-                    .weight(bandage)
-                    .quality(0)
+            lootEntries.add(ItemLootEntry.lootTableItem(() -> FirstAidItems.BANDAGE)
+                    .apply(SetCount.setCount(new RandomValueRange(1, 3)))
+                    .setWeight(bandage)
+                    .setQuality(0)
                     .build());
-            lootEntries.add(ItemLootEntry.builder(() -> FirstAidItems.PLASTER)
-                    .acceptFunction(SetCount.builder(new RandomValueRange(1, 5)))
-                    .weight(plaster)
-                    .quality(0)
+            lootEntries.add(ItemLootEntry.lootTableItem(() -> FirstAidItems.PLASTER)
+                    .apply(SetCount.setCount(new RandomValueRange(1, 5)))
+                    .setWeight(plaster)
+                    .setQuality(0)
                     .build());
-            lootEntries.add(ItemLootEntry.builder(() -> FirstAidItems.MORPHINE)
-                    .acceptFunction(SetCount.builder(new RandomValueRange(1, 2)))
-                    .weight(morphine)
-                    .quality(0)
+            lootEntries.add(ItemLootEntry.lootTableItem(() -> FirstAidItems.MORPHINE)
+                    .apply(SetCount.setCount(new RandomValueRange(1, 2)))
+                    .setWeight(morphine)
+                    .setQuality(0)
                     .build());
         }
     }
@@ -228,7 +228,7 @@ public class EventHandler {
         if (!CommonUtils.hasDamageModel(entity))
             return;
         event.setCanceled(true);
-        if (entity.world.isRemote || !FirstAidConfig.SERVER.allowOtherHealingItems.get())
+        if (entity.level.isClientSide || !FirstAidConfig.SERVER.allowOtherHealingItems.get())
             return;
         float amount = event.getAmount();
         //Hacky shit to reduce vanilla regen
@@ -246,7 +246,7 @@ public class EventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (!event.getPlayer().world.isRemote) {
+        if (!event.getPlayer().level.isClientSide) {
             FirstAid.LOGGER.debug("Sending damage model to " + event.getPlayer().getName());
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(event.getPlayer());
             if (damageModel.hasTutorial)
@@ -264,14 +264,14 @@ public class EventHandler {
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event) {
         IWorld world = event.getWorld();
-        if (!world.isRemote() && world instanceof World)
-            ((World) world).getGameRules().get(GameRules.NATURAL_REGENERATION).set(FirstAidConfig.SERVER.allowNaturalRegeneration.get(), ((World) world).getServer());
+        if (!world.isClientSide() && world instanceof World)
+            ((World) world).getGameRules().getRule(GameRules.RULE_NATURAL_REGENERATION).set(FirstAidConfig.SERVER.allowNaturalRegeneration.get(), ((World) world).getServer());
     }
 
     @SubscribeEvent
     public static void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
         PlayerEntity player = event.getPlayer();
-        if (!player.world.isRemote && player instanceof ServerPlayerEntity) //Mojang seems to wipe all caps on teleport
+        if (!player.level.isClientSide && player instanceof ServerPlayerEntity) //Mojang seems to wipe all caps on teleport
             FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(CommonUtils.getDamageModel(player), true));
     }
 
@@ -311,7 +311,7 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         PlayerEntity player = event.getPlayer();
-        if (!event.isEndConquered() && !player.world.isRemote && player instanceof ServerPlayerEntity) {
+        if (!event.isEndConquered() && !player.level.isClientSide && player instanceof ServerPlayerEntity) {
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
             damageModel.runScaleLogic(player);
             damageModel.forEach(damageablePart -> damageablePart.heal(damageablePart.getMaxHealth(), player, false));

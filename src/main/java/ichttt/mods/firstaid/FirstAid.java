@@ -72,7 +72,7 @@ public class FirstAid {
 
     public static final ItemGroup ITEM_GROUP = new ItemGroup(FirstAid.MODID) {
         @Override
-        public ItemStack createIcon() {
+        public ItemStack makeIcon() {
             return new ItemStack(FirstAidItems.BANDAGE);
         }
     };

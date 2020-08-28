@@ -51,16 +51,16 @@ public abstract class DamageDistribution implements IDamageDistribution {
 
     public static float handleDamageTaken(IDamageDistribution damageDistribution, AbstractPlayerDamageModel damageModel, float damage, @Nonnull PlayerEntity player, @Nonnull DamageSource source, boolean addStat, boolean redistributeIfLeft) {
         if (FirstAidConfig.GENERAL.debug.get()) {
-            FirstAid.LOGGER.info("Damaging {} using {} for dmg source {}, redistribute {}, addStat {}", damage, damageDistribution.toString(), source.damageType, redistributeIfLeft, addStat);
+            FirstAid.LOGGER.info("Damaging {} using {} for dmg source {}, redistribute {}, addStat {}", damage, damageDistribution.toString(), source.msgId, redistributeIfLeft, addStat);
         }
         CompoundNBT beforeCache = damageModel.serializeNBT();
         if (!damageDistribution.skipGlobalPotionModifiers())
             damage = ArmorUtils.applyGlobalPotionModifiers(player, source, damage);
         //VANILLA COPY - combat tracker and exhaustion
         if (damage != 0.0F) {
-            player.addExhaustion(source.getHungerDamage());
+            player.causeFoodExhaustion(source.getFoodExhaustion());
             float currentHealth = player.getHealth();
-            player.getCombatTracker().trackDamage(source, currentHealth, damage);
+            player.getCombatTracker().recordDamage(source, currentHealth, damage);
         }
 
         float left = damageDistribution.distributeDamage(damage, player, source, addStat);
@@ -97,10 +97,10 @@ public abstract class DamageDistribution implements IDamageDistribution {
         Collections.shuffle(damageableParts);
         for (AbstractDamageablePart part : damageableParts) {
             float minHealth = minHealth(player, part);
-            float dmgDone = damage - part.damage(damage, player, !player.isPotionActive(EventHandler.MORPHINE), minHealth);
+            float dmgDone = damage - part.damage(damage, player, !player.hasEffect(EventHandler.MORPHINE), minHealth);
             FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageUpdatePart(part));
             if (addStat)
-                player.addStat(Stats.DAMAGE_TAKEN, Math.round(dmgDone * 10.0F));
+                player.awardStat(Stats.DAMAGE_TAKEN, Math.round(dmgDone * 10.0F));
             damage -= dmgDone;
             if (damage == 0)
                 break;
@@ -122,10 +122,10 @@ public abstract class DamageDistribution implements IDamageDistribution {
             EquipmentSlotType slot = pair.getLeft();
             EnumPlayerPart[] parts = pair.getRight();
             if (Arrays.stream(parts).map(damageModel::getFromEnum).anyMatch(part -> part.currentHealth > minHealth(player, part))) {
-                damage = ArmorUtils.applyArmor(player, player.getItemStackFromSlot(slot), source, damage, slot);
+                damage = ArmorUtils.applyArmor(player, player.getItemBySlot(slot), source, damage, slot);
                 if (damage <= 0F)
                     return 0F;
-                damage = ArmorUtils.applyEnchantmentModifiers(player.getItemStackFromSlot(slot), source, damage);
+                damage = ArmorUtils.applyEnchantmentModifiers(player.getItemBySlot(slot), source, damage);
                 if (damage <= 0F)
                     return 0F;
                 damage = ForgeHooks.onLivingDamage(player, source, damage); //we post every time we damage a part, make it so other mods can modify

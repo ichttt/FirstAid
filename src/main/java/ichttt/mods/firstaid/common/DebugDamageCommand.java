@@ -43,14 +43,14 @@ public class DebugDamageCommand {
     private static final SimpleCommandExceptionType TYPE = new SimpleCommandExceptionType(new StringTextComponent("0 is invalid as damage"));
 
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
-        LiteralArgumentBuilder<CommandSource> builder = Commands.literal("damagePart").requires((source) -> source.hasPermissionLevel(2));
+        LiteralArgumentBuilder<CommandSource> builder = Commands.literal("damagePart").requires((source) -> source.hasPermission(2));
 
         for(EnumPlayerPart part : EnumPlayerPart.VALUES) {
             builder.then(Commands.literal(part.name())
                     .then(Commands.argument("damage", FloatArgumentType.floatArg())
-                    .executes(context -> damage(part, FloatArgumentType.getFloat(context, "damage"), true, context.getSource().asPlayer()))
+                    .executes(context -> damage(part, FloatArgumentType.getFloat(context, "damage"), true, context.getSource().getPlayerOrException()))
                     .then(Commands.literal("nodebuff")
-                    .executes(context -> damage(part, FloatArgumentType.getFloat(context, "damage"), false, context.getSource().asPlayer())))));
+                    .executes(context -> damage(part, FloatArgumentType.getFloat(context, "damage"), false, context.getSource().getPlayerOrException())))));
         }
         dispatcher.register(builder);
     }
@@ -65,7 +65,7 @@ public class DebugDamageCommand {
             damageModel.getFromEnum(part).heal(-damage, player, debuff);
         }
         if (damageModel.isDead(player)) {
-            player.sendMessage(new TranslationTextComponent("death.attack.generic", player.getDisplayName()), Util.DUMMY_UUID);
+            player.sendMessage(new TranslationTextComponent("death.attack.generic", player.getDisplayName()), Util.NIL_UUID);
             CommonUtils.killPlayer(damageModel, player, null);
         }
         FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(damageModel, false));

@@ -82,7 +82,7 @@ public class TutorialAction {
 
     public void addTextWrapper(String i18nKey, String... format) {
         //noinspection RedundantCast - cast is needed to avoid ambigious call
-        queue.add(new TextWrapper(I18n.format(i18nKey, (Object[]) format)));
+        queue.add(new TextWrapper(I18n.get(i18nKey, (Object[]) format)));
     }
 
     public void addActionCallable(Consumer<GuiTutorial> callable) {

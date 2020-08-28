@@ -32,7 +32,7 @@ public class MessageSyncDamageModel {
     private final boolean scaleMaxHealth;
 
     public MessageSyncDamageModel(PacketBuffer buffer) {
-        this.playerDamageModel = buffer.readCompoundTag();
+        this.playerDamageModel = buffer.readNbt();
         this.scaleMaxHealth = buffer.readBoolean();
     }
 
@@ -42,7 +42,7 @@ public class MessageSyncDamageModel {
     }
 
     public void encode(PacketBuffer buffer) {
-        buffer.writeCompoundTag(this.playerDamageModel);
+        buffer.writeNbt(this.playerDamageModel);
         buffer.writeBoolean(scaleMaxHealth);
     }
 

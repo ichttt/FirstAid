@@ -79,7 +79,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public static void onKeyPress(InputEvent event) {
-        if (ClientHooks.showWounds.consumeClick()) {
+        if (ClientHooks.SHOW_WOUNDS.consumeClick()) {
             Minecraft mc = Minecraft.getInstance();
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
             if (!damageModel.hasTutorial) {

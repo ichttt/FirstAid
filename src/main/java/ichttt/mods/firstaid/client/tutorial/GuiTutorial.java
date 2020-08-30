@@ -63,7 +63,7 @@ public class GuiTutorial extends Screen {
         this.action.addTextWrapper("firstaid.tutorial.line6");
         this.action.addActionCallable(guiTutorial -> guiTutorial.demoModel.HEAD.damage(16F, null, false));
         this.action.addTextWrapper("firstaid.tutorial.line7");
-        this.action.addTextWrapper("firstaid.tutorial.line8", I18n.get(ClientHooks.showWounds.saveString()));
+        this.action.addTextWrapper("firstaid.tutorial.line8", ClientHooks.SHOW_WOUNDS.getTranslatedKeyMessage().getString());
         this.action.addTextWrapper("firstaid.tutorial.end");
 
         this.action.next();

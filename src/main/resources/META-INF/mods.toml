@@ -5,17 +5,12 @@ issueTrackerURL="https://github.com/ichttft/firstaid"
 displayURL="https://minecraft.curseforge.com/projects/first-aid"
 logoFile="firstaid_logo.png"
 authors="ichttt"
+license="LGPL v2.1"
 [[mods]]
     modId="firstaid"
     version="${file.jarVersion}"
     displayName="First Aid"
     description="First Aid is a game changing mod focused around a new health system"
-[[dependencies.firstaid]]
-    modId="forge"
-    mandatory=true
-    versionRange="[32.0.67,)"
-    ordering="NONE"
-    side="BOTH"
 [[dependencies.firstaid]]
     modId="minecraft"
     mandatory=true

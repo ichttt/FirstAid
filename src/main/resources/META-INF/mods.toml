@@ -5,7 +5,7 @@ issueTrackerURL="https://github.com/ichttft/firstaid"
 displayURL="https://minecraft.curseforge.com/projects/first-aid"
 logoFile="firstaid_logo.png"
 authors="ichttt"
-license="LGPL v2.1"
+license="Main Mod: GPLv3, API: LGPL v2.1"
 [[mods]]
     modId="firstaid"
     version="${file.jarVersion}"

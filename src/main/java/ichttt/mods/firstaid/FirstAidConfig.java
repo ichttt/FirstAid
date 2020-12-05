@@ -22,7 +22,7 @@ import ichttt.mods.firstaid.common.config.ExtraConfig;
 import net.minecraftforge.common.config.Config;
 
 @SuppressWarnings("CanBeFinal")
-@Config(modid = FirstAid.MODID, name = FirstAid.NAME)
+@Config(modid = FirstAid.MODID, name = FirstAid.MODID)
 @ExtraConfig
 public class FirstAidConfig {
 

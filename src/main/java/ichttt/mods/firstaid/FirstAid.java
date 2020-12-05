@@ -63,6 +63,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 @Mod(modid = FirstAid.MODID,
@@ -93,6 +97,20 @@ public class FirstAid {
     };
     public static SimpleNetworkWrapper NETWORKING;
     public static boolean morpheusLoaded = false;
+
+    static {
+        File configDir = Loader.instance().getConfigDir();
+        Path oldConfigPath = configDir.toPath().resolve(NAME + ".cfg");
+        Path newConfigPath = configDir.toPath().resolve(MODID + ".cfg");
+        if (Files.exists(oldConfigPath) && !Files.isDirectory(oldConfigPath) && !Files.exists(newConfigPath)) {
+            try {
+                Files.move(oldConfigPath, newConfigPath);
+                LOGGER.info("Moved config file to new home");
+            } catch (IOException e) {
+                LOGGER.error("Failed to move config file to new correct location!", e);
+            }
+        }
+    }
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -172,15 +190,15 @@ public class FirstAid {
     public void wrongFingerprint(FMLFingerprintViolationEvent event) {
         if (!event.getExpectedFingerprint().equals(FINGERPRINT)) return;
         if (event.getFingerprints().isEmpty()) {
-            LOGGER.error("NO VALID FINGERPRINT FOR FIRST AID! EXPECTED " + event.getExpectedFingerprint() + " BUT FOUND NONE!");
+            LOGGER.warn("NO VALID FINGERPRINT FOR FIRST AID! EXPECTED " + event.getExpectedFingerprint() + " BUT FOUND NONE!");
         } else {
-            LOGGER.error("FOUND AN INVALID FINGERPRINT FOR FIRST AID! EXPECTED " + event.getExpectedFingerprint() + " BUT GOT THE FOLLOWING:");
+            LOGGER.warn("FOUND AN INVALID FINGERPRINT FOR FIRST AID! EXPECTED " + event.getExpectedFingerprint() + " BUT GOT THE FOLLOWING:");
             for (String fingerprint : event.getFingerprints()) {
-                LOGGER.error(fingerprint);
+                LOGGER.warn(fingerprint);
             }
         }
-        LOGGER.error("THIS IS NOT AN OFFICIAL BUILD OF FIRST AID!");
-        LOGGER.error("Please download the official version from CurseForge");
+        LOGGER.warn("THIS IS NOT AN OFFICIAL BUILD OF FIRST AID!");
+        LOGGER.warn("Please download the official version from CurseForge");
     }
 
     private static void checkEarlyExit() {

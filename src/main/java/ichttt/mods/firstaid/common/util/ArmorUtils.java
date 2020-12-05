@@ -19,6 +19,9 @@
 package ichttt.mods.firstaid.common.util;
 
 import com.google.common.collect.Iterators;
+import com.google.common.math.DoubleMath;
+import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -49,16 +52,14 @@ public class ArmorUtils {
     }
 
     public static double applyArmorModifier(EntityEquipmentSlot slot, double rawArmor) {
-        if (rawArmor <= 0D)
-            return 0D;
+        if (rawArmor <= 0D) return 0D;
         rawArmor = rawArmor * getArmorModifier(slot);
         if (slot == EntityEquipmentSlot.HEAD) rawArmor += 1D;
         return rawArmor;
     }
 
     public static double applyToughnessModifier(EntityEquipmentSlot slot, double rawToughness) {
-        if (rawToughness <= 0D)
-            return 0D;
+        if (rawToughness <= 0D) return 0D;
         rawToughness = rawToughness * getToughnessModifier(slot);
         return rawToughness;
     }
@@ -95,78 +96,101 @@ public class ArmorUtils {
         return stack.getItem().getAttributeModifiers(slot, stack).get(attribute.getName()).stream().mapToDouble(AttributeModifier::getAmount).sum();
     }
 
+    private static double getGlobalRestAttribute(EntityPlayer player, IAttribute attribute) {
+        double sumOfAllAttributes = 0.0D;
+        for (EntityEquipmentSlot slot : CommonUtils.ARMOR_SLOTS) {
+            ItemStack otherStack = player.getItemStackFromSlot(slot);
+            sumOfAllAttributes += getValueFromAttributes(attribute, slot, otherStack);
+        }
+        double all = player.getEntityAttribute(attribute).getAttributeValue();
+        if (!DoubleMath.fuzzyEquals(sumOfAllAttributes, all, 0.001D)) {
+            double diff = all - sumOfAllAttributes;
+            if (FirstAidConfig.debug) {
+                FirstAid.LOGGER.info("Attribute value does not match sum! Diff is " + diff + ", distributing to all!");
+            }
+            return diff;
+        }
+        return 0.0D;
+    }
+
     /**
      * Changed copy of ISpecialArmor{@link ISpecialArmor.ArmorProperties#applyArmor(EntityLivingBase, NonNullList, DamageSource, double)}
      */
     public static float applyArmor(@Nonnull EntityPlayer entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, double damage, @Nonnull EntityEquipmentSlot slot) {
-        if (itemStack.isEmpty()) return (float)damage;
+        //TODO retest
+        if (itemStack.isEmpty()) return (float) damage;
         NonNullList<ItemStack> inventory = entity.inventory.armorInventory;
 
         double totalArmor = 0;
         double totalToughness = 0;
         Item item = itemStack.getItem();
 
-        ISpecialArmor.ArmorProperties prop;
+        ISpecialArmor.ArmorProperties prop = null;
         boolean unblockable = source.isUnblockable();
-        if (item instanceof ISpecialArmor && (!unblockable || ((ISpecialArmor) item).handleUnblockableDamage(entity, itemStack, source, damage, slot.getIndex()))) {
-            ISpecialArmor armor = (ISpecialArmor)item;
+        if (unblockable && item instanceof ISpecialArmor)
+            unblockable = ((ISpecialArmor) item).handleUnblockableDamage(entity, itemStack, source, damage, slot.getIndex());
+        if (unblockable)
+            return (float) damage;
+        if (item instanceof ISpecialArmor) {
+            ISpecialArmor armor = (ISpecialArmor) item;
             prop = armor.getProperties(entity, itemStack, source, damage, slot.getIndex()).copy();
             totalArmor += prop.Armor;
             totalToughness += prop.Toughness;
-        }  else if (item instanceof ItemArmor && !unblockable) {
-            ItemArmor armor = (ItemArmor)item;
+        } else if (item instanceof ItemArmor) {
+            ItemArmor armor = (ItemArmor) item;
             prop = new ISpecialArmor.ArmorProperties(0, 0, Integer.MAX_VALUE);
             prop.Armor = armor.damageReduceAmount;
             prop.Toughness = armor.toughness;
-        } else {
-            return (float) damage;
         }
         if (item instanceof ItemArmor) { //Always add normal armor (even if the item is a special armor), as forge does this as well
             totalArmor += getArmor(itemStack, slot);
             totalToughness += getArmorThoughness(itemStack, slot);
         }
 
-        totalArmor = applyArmorModifier(slot, totalArmor);
-        totalToughness = applyToughnessModifier(slot, totalToughness);
+        if (prop != null) {
+            totalArmor = applyArmorModifier(slot, totalArmor);
+            totalToughness = applyToughnessModifier(slot, totalToughness);
 
-        prop.Slot = slot.getIndex();
-        double ratio = prop.AbsorbRatio * getArmorModifier(slot);
+            prop.Slot = slot.getIndex();
 
-        double absorb = damage * ratio;
-        if (absorb > 0) {
-            ItemStack stack = inventory.get(prop.Slot);
-            int itemDamage = (int) Math.max(1, absorb);
-            if (stack.getItem() instanceof ISpecialArmor) ((ISpecialArmor) stack.getItem()).damageArmor(entity, stack, source, itemDamage, prop.Slot);
-            else stack.damageItem(itemDamage, entity);
+            double ratio = prop.AbsorbRatio * getArmorModifier(slot);
+
+            double absorb = damage * ratio;
+            if (absorb > 0) {
+                ItemStack stack = inventory.get(prop.Slot);
+                int itemDamage = (int) Math.max(1, absorb);
+                if (stack.getItem() instanceof ISpecialArmor)
+                    ((ISpecialArmor) stack.getItem()).damageArmor(entity, stack, source, itemDamage, prop.Slot);
+                else stack.damageItem(itemDamage, entity);
+            }
+            damage -= (damage * ratio);
         }
-        damage -= (damage * ratio);
+        totalArmor += getGlobalRestAttribute(entity, SharedMonsterAttributes.ARMOR);
+        totalToughness += getGlobalRestAttribute(entity, SharedMonsterAttributes.ARMOR_TOUGHNESS);
 
         if (damage > 0 && (totalArmor > 0 || totalToughness > 0)) {
             double armorDamage = Math.max(1.0F, damage);
 
             if (item instanceof ItemArmor) itemStack.damageItem((int) armorDamage, entity);
-            damage = CombatRules.getDamageAfterAbsorb((float)damage, (float)totalArmor, (float)totalToughness);
+            damage = CombatRules.getDamageAfterAbsorb((float) damage, (float) totalArmor, (float) totalToughness);
         }
 
-        return (float)damage;
+        return (float) damage;
     }
 
     /**
      * Changed copy of the first part from {@link EnchantmentHelper#applyEnchantmentModifier(EnchantmentHelper.IModifier, ItemStack)}
      */
     public static float applyGlobalPotionModifiers(EntityPlayer player, DamageSource source, float damage) {
-        if (source.isDamageAbsolute())
-            return damage;
+        if (source.isDamageAbsolute()) return damage;
         if (player.isPotionActive(MobEffects.RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
-            @SuppressWarnings("ConstantConditions")
-            int i = (player.getActivePotionEffect(MobEffects.RESISTANCE).getAmplifier() + 1) * 5;
+            @SuppressWarnings("ConstantConditions") int i = (player.getActivePotionEffect(MobEffects.RESISTANCE).getAmplifier() + 1) * 5;
             int j = 25 - i;
             float f = damage * (float) j;
             damage = f / 25.0F;
         }
 
-        if (damage <= 0.0F)
-            return 0.0F;
+        if (damage <= 0.0F) return 0.0F;
 
         return damage;
     }
@@ -178,8 +202,7 @@ public class ArmorUtils {
         int k = EnchantmentHelper.getEnchantmentModifierDamage(() -> Iterators.singletonIterator(stack), source);
         k *= 4;
 
-        if (k > 0)
-            damage = CombatRules.getDamageAfterMagicAbsorb(damage, (float) k);
+        if (k > 0) damage = CombatRules.getDamageAfterMagicAbsorb(damage, (float) k);
         return damage;
     }
 }

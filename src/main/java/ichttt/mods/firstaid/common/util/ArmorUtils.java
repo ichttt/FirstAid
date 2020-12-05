@@ -19,6 +19,9 @@
 package ichttt.mods.firstaid.common.util;
 
 import com.google.common.collect.Iterators;
+import com.google.common.math.DoubleMath;
+import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
@@ -57,8 +60,8 @@ public class ArmorUtils {
     }
 
     public static double applyToughnessModifier(EquipmentSlotType slot, double rawToughness) {
-        if (rawToughness <= 0F)
-            return 0F;
+        if (rawToughness <= 0D)
+            return 0D;
         rawToughness = rawToughness * getToughnessModifier(slot);
         return rawToughness;
     }
@@ -95,6 +98,23 @@ public class ArmorUtils {
         return stack.getItem().getAttributeModifiers(slot, stack).get(attribute).stream().mapToDouble(AttributeModifier::getAmount).sum();
     }
 
+    private static double getGlobalRestAttribute(PlayerEntity player, Attribute attribute) {
+        double sumOfAllAttributes = 0.0D;
+        for (EntityEquipmentSlot slot : CommonUtils.ARMOR_SLOTS) {
+            ItemStack otherStack = player.getItemStackFromSlot(slot);
+            sumOfAllAttributes += getValueFromAttributes(attribute, slot, otherStack);
+        }
+        double all = player.getEntityAttribute(attribute).getAttributeValue();
+        if (!DoubleMath.fuzzyEquals(sumOfAllAttributes, all, 0.001D)) {
+            double diff = all - sumOfAllAttributes;
+            if (FirstAidConfig.debug) {
+                FirstAid.LOGGER.info("Attribute value does not match sum! Diff is " + diff + ", distributing to all!");
+            }
+            return diff;
+        }
+        return 0.0D;
+    }
+
     /**
      * Changed copy of ISpecialArmor {@link LivingEntity#applyArmorCalculations(DamageSource, float)}
      */
@@ -102,15 +122,23 @@ public class ArmorUtils {
     public static float applyArmor(@Nonnull PlayerEntity entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, float damage, @Nonnull EquipmentSlotType slot) {
         if (itemStack.isEmpty() || source.isBypassArmor()) return damage;
         Item item = itemStack.getItem();
-        if (!(item instanceof ArmorItem)) return damage;
-        ArmorItem armor = (ArmorItem) item;
-        float totalArmor = armor.getDefense();
-        float totalToughness = armor.getToughness(); //getToughness
-        totalArmor = (float) applyArmorModifier(slot, totalArmor);
-        totalToughness = (float) applyToughnessModifier(slot, totalToughness);
+        float totalArmor = 0F;
+        float totalToughness = 0F;
+        if (item instanceof ArmorItem) {
+            ArmorItem armor = (ArmorItem) item;
+            totalArmor = armor.getDefense();
+            totalToughness = armor.getToughness(); //getToughness
+            totalArmor = (float) applyArmorModifier(slot, totalArmor);
+            totalToughness = (float) applyToughnessModifier(slot, totalToughness);
+        }
+        totalArmor += getGlobalRestAttribute(entity, Attributes.ARMOR);
+        totalToughness += getGlobalRestAttribute(entity, Attributes.ARMOR_TOUGHNESS);
 
-        itemStack.hurtAndBreak((int) damage, entity, (player) -> player.broadcastBreakEvent(slot));
-        damage = CombatRules.getDamageAfterAbsorb(damage, totalArmor, totalToughness);
+        if (damage > 0 && (totalArmor > 0 || totalToughness > 0)) {
+            if (item instanceof ArmorItem)
+                itemStack.hurtAndBreak((int) damage, entity, (player) -> player.broadcastBreakEvent(slot));
+            damage = CombatRules.getDamageAfterAbsorb(damage, totalArmor, totalToughness);
+        }
         return damage;
     }
 

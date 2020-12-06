@@ -117,8 +117,6 @@ public class ArmorUtils {
      * Changed copy of ISpecialArmor{@link ISpecialArmor.ArmorProperties#applyArmor(EntityLivingBase, NonNullList, DamageSource, double)}
      */
     public static float applyArmor(@Nonnull EntityPlayer entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, double damage, @Nonnull EntityEquipmentSlot slot) {
-        //TODO retest
-        if (itemStack.isEmpty()) return (float) damage;
         NonNullList<ItemStack> inventory = entity.inventory.armorInventory;
 
         double totalArmor = 0;

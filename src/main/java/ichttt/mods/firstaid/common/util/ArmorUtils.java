@@ -196,9 +196,17 @@ public class ArmorUtils {
     /**
      * Changed copy of the second part from {@link EnchantmentHelper#applyEnchantmentModifier(EnchantmentHelper.IModifier, ItemStack)}
      */
-    public static float applyEnchantmentModifiers(ItemStack stack, DamageSource source, float damage) {
-        int k = EnchantmentHelper.getEnchantmentModifierDamage(() -> Iterators.singletonIterator(stack), source);
-        k *= 4;
+    public static float applyEnchantmentModifiers(EntityPlayer player, EntityEquipmentSlot slot, DamageSource source, float damage) {
+        if (source.isDamageAbsolute()) return damage;
+        int k;
+        if (FirstAidConfig.armorEnchantmentMode == FirstAidConfig.ArmorEnchantmentMode.LOCAL_ENCHANTMENTS) {
+            k = EnchantmentHelper.getEnchantmentModifierDamage(() -> Iterators.singletonIterator(player.getItemStackFromSlot(slot)), source);
+            k *= 4;
+        } else if (FirstAidConfig.armorEnchantmentMode == FirstAidConfig.ArmorEnchantmentMode.GLOBAL_ENCHANTMENTS){
+            k = EnchantmentHelper.getEnchantmentModifierDamage(player.getArmorInventoryList(), source);
+        } else {
+            throw new RuntimeException("What dark magic is " + FirstAidConfig.armorEnchantmentMode);
+        }
 
         if (k > 0) damage = CombatRules.getDamageAfterMagicAbsorb(damage, (float) k);
         return damage;

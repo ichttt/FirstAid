@@ -98,6 +98,15 @@ public class FirstAidConfig {
             "When there is too much damage, the damage will still kill the player. Other distributions that defined are not affected by this.")
     public static boolean useFriendlyRandomDistribution = false;
 
+    @Config.Comment("If set to LOCAL_ENCHANTMENTS, only the enchantments for the armor for the body part that is currently being damaged is taken into account. The strength of the armor is multiplied by 4, so it matches the vanilla default\n" +
+            "If set to GLOBAL_ENCHANTMENTS, the enchantments of all armor pieces are taken into account for all body parts that have any kind of armor.")
+    public static ArmorEnchantmentMode armorEnchantmentMode = ArmorEnchantmentMode.LOCAL_ENCHANTMENTS;
+
+
+    public enum ArmorEnchantmentMode {
+        GLOBAL_ENCHANTMENTS, LOCAL_ENCHANTMENTS
+    }
+
     @Config.Comment("Enabled additional debug logs - May slow down the game and will increase log file size\nOnly enable for special purposes")
     @Config.LangKey("firstaid.config.debug")
     @Config.RequiresMcRestart

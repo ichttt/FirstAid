@@ -136,7 +136,7 @@ public abstract class DamageDistribution implements IDamageDistribution {
                 damage = ArmorUtils.applyArmor(player, player.getItemStackFromSlot(slot), source, damage, slot);
                 if (damage <= 0F)
                     return 0F;
-                damage = ArmorUtils.applyEnchantmentModifiers(player.getItemStackFromSlot(slot), source, damage);
+                damage = ArmorUtils.applyEnchantmentModifiers(player, slot, source, damage);
                 if (damage <= 0F)
                     return 0F;
                 damage = ForgeHooks.onLivingDamage(player, source, damage); //we post every time we damage a part, make it so other mods can modify

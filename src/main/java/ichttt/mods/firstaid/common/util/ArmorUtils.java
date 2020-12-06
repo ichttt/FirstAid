@@ -106,7 +106,7 @@ public class ArmorUtils {
         if (!DoubleMath.fuzzyEquals(sumOfAllAttributes, all, 0.001D)) {
             double diff = all - sumOfAllAttributes;
             if (FirstAidConfig.debug) {
-                FirstAid.LOGGER.info("Attribute value does not match sum! Diff is " + diff + ", distributing to all!");
+                FirstAid.LOGGER.info("Attribute value for {} does not match sum! Diff is {}, distributing to all!", attribute.getName(), diff);
             }
             return diff;
         }

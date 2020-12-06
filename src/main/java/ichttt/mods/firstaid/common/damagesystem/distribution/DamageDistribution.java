@@ -52,7 +52,7 @@ public abstract class DamageDistribution implements IDamageDistribution {
 
     public static float handleDamageTaken(IDamageDistribution damageDistribution, AbstractPlayerDamageModel damageModel, float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat, boolean redistributeIfLeft) {
         if (FirstAidConfig.debug) {
-            FirstAid.LOGGER.info("Damaging {} using {} for dmg source {}, redistribute {}, addStat {}", damage, damageDistribution.toString(), source.damageType, redistributeIfLeft, addStat);
+            FirstAid.LOGGER.info("--- Damaging {} using {} for dmg source {}, redistribute {}, addStat {} ---", damage, damageDistribution.toString(), source.damageType, redistributeIfLeft, addStat);
         }
         NBTTagCompound beforeCache = damageModel.serializeNBT();
         if (!damageDistribution.skipGlobalPotionModifiers())
@@ -78,11 +78,17 @@ public abstract class DamageDistribution implements IDamageDistribution {
         before.deserializeNBT(beforeCache);
         if (MinecraftForge.EVENT_BUS.post(new FirstAidLivingDamageEvent(player, damageModel, before, source, left))) {
             damageModel.deserializeNBT(beforeCache); //restore prev state
+            if (FirstAidConfig.debug) {
+                FirstAid.LOGGER.info("--- DONE! Event got canceled ---");
+            }
             return 0F;
         }
 
         if (damageModel.isDead(player))
             CommonUtils.killPlayer(damageModel, player, source);
+        if (FirstAidConfig.debug) {
+            FirstAid.LOGGER.info("--- DONE! {} still left ---", left);
+        }
         return left;
     }
 
@@ -119,10 +125,14 @@ public abstract class DamageDistribution implements IDamageDistribution {
     @Override
     public float distributeDamage(float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat) {
         AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
+        if (FirstAidConfig.debug) {
+            FirstAid.LOGGER.info("Starting distribution of {} damage...", damage);
+        }
         for (Pair<EntityEquipmentSlot, EnumPlayerPart[]> pair : getPartList()) {
             EntityEquipmentSlot slot = pair.getLeft();
             EnumPlayerPart[] parts = pair.getRight();
             if (Arrays.stream(parts).map(damageModel::getFromEnum).anyMatch(part -> part.currentHealth > minHealth(player, part))) {
+                final float originalDamage = damage;
                 damage = ArmorUtils.applyArmor(player, player.getItemStackFromSlot(slot), source, damage, slot);
                 if (damage <= 0F)
                     return 0F;
@@ -131,12 +141,19 @@ public abstract class DamageDistribution implements IDamageDistribution {
                     return 0F;
                 damage = ForgeHooks.onLivingDamage(player, source, damage); //we post every time we damage a part, make it so other mods can modify
                 if (damage <= 0F) return 0F;
+                final float dmgAfterReduce = damage;
 
                 damage = distributeDamageOnParts(damage, damageModel, parts, player, addStat);
                 if (damage == 0F)
                     break;
+                final float absorbFactor = originalDamage / dmgAfterReduce;
+                final float damageDistributed = dmgAfterReduce - damage;
+                damage = originalDamage - (damageDistributed * absorbFactor);
+                if (FirstAidConfig.debug) {
+                    FirstAid.LOGGER.info("Distribution round: Not done yet, going to next round. Needed to distribute {} damage (reduced to {}) to {}, but only distributed {}. New damage to be distributed is {}, based on absorb factor {}", originalDamage, dmgAfterReduce, slot, damageDistributed, damage, absorbFactor);
+                }
             } else if (FirstAidConfig.debug) {
-                FirstAid.LOGGER.info("Skipping {}, no health <in parts!", slot);
+                FirstAid.LOGGER.info("Skipping {}, no health >min in parts!", slot);
             }
         }
         return damage;

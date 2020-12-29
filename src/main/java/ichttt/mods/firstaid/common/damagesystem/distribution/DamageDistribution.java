@@ -77,7 +77,7 @@ public abstract class DamageDistribution implements IDamageDistribution {
         before.deserializeNBT(beforeCache);
         if (MinecraftForge.EVENT_BUS.post(new FirstAidLivingDamageEvent(player, damageModel, before, source, left))) {
             damageModel.deserializeNBT(beforeCache); //restore prev state
-            if (FirstAidConfig.debug) {
+            if (FirstAidConfig.GENERAL.debug.get()) {
                 FirstAid.LOGGER.info("--- DONE! Event got canceled ---");
             }
             return 0F;
@@ -85,7 +85,7 @@ public abstract class DamageDistribution implements IDamageDistribution {
 
         if (damageModel.isDead(player))
             CommonUtils.killPlayer(damageModel, player, source);
-        if (FirstAidConfig.debug) {
+        if (FirstAidConfig.GENERAL.debug.get()) {
             FirstAid.LOGGER.info("--- DONE! {} still left ---", left);
         }
         return left;
@@ -135,7 +135,7 @@ public abstract class DamageDistribution implements IDamageDistribution {
                 damage = ArmorUtils.applyArmor(player, player.getItemBySlot(slot), source, damage, slot);
                 if (damage <= 0F)
                     return 0F;
-                damage = ArmorUtils.applyEnchantmentModifiers(player.getItemBySlot(slot), source, damage);
+                damage = ArmorUtils.applyEnchantmentModifiers(player, slot, source, damage);
                 if (damage <= 0F)
                     return 0F;
                 damage = ForgeHooks.onLivingDamage(player, source, damage); //we post every time we damage a part, make it so other mods can modify

@@ -58,6 +58,10 @@ public class FirstAidConfig {
             AVERAGE_ALL, AVERAGE_CRITICAL, MIN_CRITICAL, CRITICAL_50_PERCENT_OTHER_50_PERCENT
         }
 
+        public enum ArmorEnchantmentMode {
+            GLOBAL_ENCHANTMENTS, LOCAL_ENCHANTMENTS
+        }
+
         Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Server to Client synced configuration settings").push("Damage System");
 
@@ -135,6 +139,11 @@ public class FirstAidConfig {
                             "When there is too much damage, the damage will still kill the player. Other distributions that defined are not affected by this.")
                     .define("useFriendlyRandomDistribution", false);
 
+            armorEnchantmentMode = builder
+                    .comment("If set to LOCAL_ENCHANTMENTS, only the enchantments for the armor for the body part that is currently being damaged is taken into account. The strength of the armor is multiplied by 4, so it matches the vanilla default",
+                            "If set to GLOBAL_ENCHANTMENTS, the enchantments of all armor pieces are taken into account for all body parts that have any kind of armor.")
+                    .defineEnum("armorEnchantmentMode", ArmorEnchantmentMode.LOCAL_ENCHANTMENTS);
+
             builder.pop();
         }
 
@@ -162,6 +171,7 @@ public class FirstAidConfig {
         public final ForgeConfigSpec.BooleanValue capMaxHealth;
         public final ForgeConfigSpec.EnumValue<VanillaHealthCalculationMode> vanillaHealthCalculation;
         public final ForgeConfigSpec.BooleanValue useFriendlyRandomDistribution;
+        public final ForgeConfigSpec.EnumValue<ArmorEnchantmentMode> armorEnchantmentMode;
 
 
         private static ForgeConfigSpec.IntValue healthEntry(ForgeConfigSpec.Builder builder, String name, int defaultVal) {

@@ -173,9 +173,18 @@ public class ArmorUtils {
      * Changed copy of the second part from {@link LivingEntity#applyPotionDamageCalculations(DamageSource, float)}
      */
     @SuppressWarnings("JavadocReference")
-    public static float applyEnchantmentModifiers(ItemStack stack, DamageSource source, float damage) {
-        int k = EnchantmentHelper.getDamageProtection(() -> Iterators.singletonIterator(stack), source);
-        k *= 4;
+    public static float applyEnchantmentModifiers(PlayerEntity player, EquipmentSlotType slot, DamageSource source, float damage) {
+        if (source.isBypassArmor()) return damage;
+        int k;
+        FirstAidConfig.Server.ArmorEnchantmentMode enchantmentMode = FirstAidConfig.SERVER.armorEnchantmentMode.get();
+        if (enchantmentMode == FirstAidConfig.Server.ArmorEnchantmentMode.LOCAL_ENCHANTMENTS) {
+            k = EnchantmentHelper.getDamageProtection(() -> Iterators.singletonIterator(player.getItemBySlot(slot)), source);
+            k *= 4;
+        } else if (enchantmentMode == FirstAidConfig.Server.ArmorEnchantmentMode.GLOBAL_ENCHANTMENTS) {
+            k = EnchantmentHelper.getDamageProtection(player.getArmorSlots(), source);
+        } else {
+            throw new RuntimeException("What dark magic is " + enchantmentMode);
+        }
 
         if (k > 0)
             damage = CombatRules.getDamageAfterMagicAbsorb(damage, (float) k);

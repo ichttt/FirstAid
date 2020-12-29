@@ -100,14 +100,14 @@ public class ArmorUtils {
 
     private static double getGlobalRestAttribute(PlayerEntity player, Attribute attribute) {
         double sumOfAllAttributes = 0.0D;
-        for (EntityEquipmentSlot slot : CommonUtils.ARMOR_SLOTS) {
-            ItemStack otherStack = player.getItemStackFromSlot(slot);
+        for (EquipmentSlotType slot : CommonUtils.ARMOR_SLOTS) {
+            ItemStack otherStack = player.getItemBySlot(slot);
             sumOfAllAttributes += getValueFromAttributes(attribute, slot, otherStack);
         }
-        double all = player.getEntityAttribute(attribute).getAttributeValue();
+        double all = player.getAttributeValue(attribute);
         if (!DoubleMath.fuzzyEquals(sumOfAllAttributes, all, 0.001D)) {
             double diff = all - sumOfAllAttributes;
-            if (FirstAidConfig.debug) {
+            if (FirstAidConfig.GENERAL.debug.get()) {
                 FirstAid.LOGGER.info("Attribute value does not match sum! Diff is " + diff + ", distributing to all!");
             }
             return diff;
@@ -120,7 +120,7 @@ public class ArmorUtils {
      */
     @SuppressWarnings("JavadocReference")
     public static float applyArmor(@Nonnull PlayerEntity entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, float damage, @Nonnull EquipmentSlotType slot) {
-        if (itemStack.isEmpty() || source.isBypassArmor()) return damage;
+        if (source.isBypassArmor()) return damage;
         Item item = itemStack.getItem();
         float totalArmor = 0F;
         float totalToughness = 0F;

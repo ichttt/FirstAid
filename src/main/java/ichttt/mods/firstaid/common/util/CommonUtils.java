@@ -40,16 +40,19 @@ import net.minecraftforge.fml.common.ModContainer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class CommonUtils {
     @Nonnull
     public static final EntityEquipmentSlot[] ARMOR_SLOTS;
     @Nonnull
-    public static final ImmutableMap<EntityEquipmentSlot, List<EnumPlayerPart>> slotToParts;
+    private static final Map<EntityEquipmentSlot, List<EnumPlayerPart>> slotToParts;
 
     static {
         ARMOR_SLOTS = new EntityEquipmentSlot[4];
@@ -57,11 +60,19 @@ public class CommonUtils {
         ARMOR_SLOTS[2] = EntityEquipmentSlot.CHEST;
         ARMOR_SLOTS[1] = EntityEquipmentSlot.LEGS;
         ARMOR_SLOTS[0] = EntityEquipmentSlot.FEET;
-        slotToParts = ImmutableMap.<EntityEquipmentSlot, List<EnumPlayerPart>>builder().
-        put(EntityEquipmentSlot.HEAD, Collections.singletonList(EnumPlayerPart.HEAD)).
-        put(EntityEquipmentSlot.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY)).
-        put(EntityEquipmentSlot.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)).
-        put(EntityEquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)).build();
+        slotToParts = new EnumMap<>(EntityEquipmentSlot.class);
+        slotToParts.put(EntityEquipmentSlot.HEAD, Collections.singletonList(EnumPlayerPart.HEAD));
+        slotToParts.put(EntityEquipmentSlot.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY));
+        slotToParts.put(EntityEquipmentSlot.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG));
+        slotToParts.put(EntityEquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT));
+    }
+
+    public static List<EnumPlayerPart> getPartListForSlot(EntityEquipmentSlot slot) {
+        return new ArrayList<>(slotToParts.get(slot));
+    }
+
+    public static EnumPlayerPart[] getPartArrayForSlot(EntityEquipmentSlot slot) {
+        return getPartListForSlot(slot).toArray(new EnumPlayerPart[0]);
     }
 
     public static void killPlayer(@Nonnull AbstractPlayerDamageModel damageModel, @Nonnull EntityPlayer player, @Nullable DamageSource source) {

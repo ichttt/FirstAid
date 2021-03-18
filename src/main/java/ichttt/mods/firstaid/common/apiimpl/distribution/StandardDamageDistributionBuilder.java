@@ -31,6 +31,7 @@ import java.util.ArrayList;
 public class StandardDamageDistributionBuilder extends BaseDamageDistributionBuilder implements IStandardDamageDistributionBuilder {
     private final ArrayList<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList = new ArrayList<>();
     private boolean ignoreOrder;
+    private boolean disableNeighbourRestDistribution;
 
     @Nonnull
     @Override
@@ -46,9 +47,16 @@ public class StandardDamageDistributionBuilder extends BaseDamageDistributionBui
         return this;
     }
 
+    @Nonnull
+    @Override
+    public IStandardDamageDistributionBuilder disableNeighbourRestDistribution() {
+        disableNeighbourRestDistribution = true;
+        return this;
+    }
+
     public IDamageDistribution build() {
         partList.trimToSize();
         if (partList.size() == 0) throw new IllegalArgumentException("Missing parts!");
-        return new StandardDamageDistribution(partList, ignoreOrder);
+        return new StandardDamageDistribution(partList, ignoreOrder, disableNeighbourRestDistribution);
     }
 }

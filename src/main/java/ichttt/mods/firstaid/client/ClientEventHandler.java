@@ -27,6 +27,7 @@ import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
+import ichttt.mods.firstaid.common.AABBAlignedBoundingBox;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
@@ -35,6 +36,7 @@ import ichttt.mods.firstaid.common.config.ExtraConfig;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
+import ichttt.mods.firstaid.common.util.PlayerSizeHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.I18n;
@@ -59,6 +61,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.text.DecimalFormat;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -129,6 +132,41 @@ public class ClientEventHandler {
             HUDHandler.INSTANCE.renderOverlay(event.getResolution(), event.getPartialTicks());
             mc.profiler.endSection();
             mc.profiler.endSection();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLivingRender(RenderLivingEvent.Post<EntityPlayer, ModelPlayer> event) {
+        Entity entity = event.getEntity();
+        if (entity instanceof EntityPlayer) {
+            RenderManager renderDispatcher = Minecraft.getMinecraft().getRenderManager();
+            if (renderDispatcher.isDebugBoundingBox()) {
+                GlStateManager.pushMatrix();
+                //See PlayerRenderer.getRenderOffset
+                if (entity.isSneaking()) {
+                    GlStateManager.translate(0D, 0.125D, 0D);
+                }
+                AxisAlignedBB aabb = entity.getEntityBoundingBox();
+
+
+                Collection<AABBAlignedBoundingBox> allBoxes = PlayerSizeHelper.getBoxes(entity).values();
+                float r = 0.25F;
+                float g = 1.0F;
+                float b = 1.0F;
+
+                for (AABBAlignedBoundingBox box : allBoxes) {
+                    AxisAlignedBB bbox = box.createAABB(aabb);
+                    RenderGlobal.drawSelectionBoundingBox(bbox.inflate(0.02D).move(-entity.posX, -entity.posY, -entity.posZ), r, g, b, 1.0F);
+                    r += 0.25F;
+                    g += 0.5F;
+                    b += 0.1F;
+
+                    r %= 1.0F;
+                    g %= 1.0F;
+                    b %= 1.0F;
+                }
+                GlStateManager.popMatrix();
+            }
         }
     }
 

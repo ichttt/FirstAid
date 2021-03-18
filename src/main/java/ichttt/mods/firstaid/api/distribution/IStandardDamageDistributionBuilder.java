@@ -44,4 +44,13 @@ public interface IStandardDamageDistributionBuilder extends IDamageDistributionB
      */
     @Nonnull
     IStandardDamageDistributionBuilder ignoreOrder();
+
+    /**
+     * If called, the distribution will not build a list of neighbours to the last body part.
+     * Otherwise, a list of neighbours for the last distribution layer will be build to have a predictable
+     * Region when the affected body part is dead.
+     * @return
+     */
+    @Nonnull
+    IStandardDamageDistributionBuilder disableNeighbourRestDistribution();
 }

@@ -153,6 +153,8 @@ public enum EnumPlayerPart {
                 return singletonList(LEFT_LEG);
             case RIGHT_FOOT:
                 return singletonList(LEFT_FOOT);
+            case BODY:
+                return singletonList(LEFT_ARM);
             default:
                 return emptyList();
         }
@@ -167,6 +169,8 @@ public enum EnumPlayerPart {
                 return singletonList(RIGHT_LEG);
             case LEFT_FOOT:
                 return singletonList(RIGHT_FOOT);
+            case BODY:
+                return singletonList(RIGHT_ARM);
             default:
                 return emptyList();
         }

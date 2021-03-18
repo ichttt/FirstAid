@@ -1,6 +1,6 @@
 /*
  * FirstAid API
- * Copyright (c) 2017-2020
+ * Copyright (c) 2017-2021
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

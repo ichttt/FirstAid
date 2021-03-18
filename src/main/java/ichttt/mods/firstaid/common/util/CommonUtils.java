@@ -18,7 +18,6 @@
 
 package ichttt.mods.firstaid.common.util;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
@@ -43,16 +42,19 @@ import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class CommonUtils {
     @Nonnull
     public static final EquipmentSlotType[] ARMOR_SLOTS;
     @Nonnull
-    public static final ImmutableMap<EquipmentSlotType, List<EnumPlayerPart>> slotToParts;
+    private static final Map<EquipmentSlotType, List<EnumPlayerPart>> slotToParts;
 
     static {
         ARMOR_SLOTS = new EquipmentSlotType[4];
@@ -60,11 +62,19 @@ public class CommonUtils {
         ARMOR_SLOTS[2] = EquipmentSlotType.CHEST;
         ARMOR_SLOTS[1] = EquipmentSlotType.LEGS;
         ARMOR_SLOTS[0] = EquipmentSlotType.FEET;
-        slotToParts = ImmutableMap.<EquipmentSlotType, List<EnumPlayerPart>>builder().
-        put(EquipmentSlotType.HEAD, Collections.singletonList(EnumPlayerPart.HEAD)).
-        put(EquipmentSlotType.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY)).
-        put(EquipmentSlotType.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)).
-        put(EquipmentSlotType.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)).build();
+        slotToParts = new EnumMap<>(EquipmentSlotType.class);
+        slotToParts.put(EquipmentSlotType.HEAD, Collections.singletonList(EnumPlayerPart.HEAD));
+        slotToParts.put(EquipmentSlotType.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY));
+        slotToParts.put(EquipmentSlotType.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG));
+        slotToParts.put(EquipmentSlotType.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT));
+    }
+
+    public static List<EnumPlayerPart> getPartListForSlot(EquipmentSlotType slot) {
+        return new ArrayList<>(slotToParts.get(slot));
+    }
+
+    public static EnumPlayerPart[] getPartArrayForSlot(EquipmentSlotType slot) {
+        return getPartListForSlot(slot).toArray(new EnumPlayerPart[0]);
     }
 
     public static void killPlayer(@Nonnull AbstractPlayerDamageModel damageModel, @Nonnull PlayerEntity player, @Nullable DamageSource source) {
@@ -153,7 +163,7 @@ public class CommonUtils {
 
     @Nonnull
     public static AbstractPlayerDamageModel getDamageModel(PlayerEntity player) {
-        return player.getCapability(CapabilityExtendedHealthSystem.INSTANCE).orElseThrow(() -> new IllegalArgumentException("Player " + player.getName() + " is missing a damage model!"));
+        return player.getCapability(CapabilityExtendedHealthSystem.INSTANCE).orElseThrow(() -> new IllegalArgumentException("Player " + player.getName().getContents() + " is missing a damage model!"));
     }
 
     public static boolean hasDamageModel(Entity entity) {

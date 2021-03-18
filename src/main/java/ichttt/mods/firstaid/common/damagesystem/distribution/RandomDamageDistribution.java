@@ -72,7 +72,7 @@ public class RandomDamageDistribution extends DamageDistribution {
             for (EquipmentSlotType slot : slots) {
                 if (!CommonUtils.isValidArmorSlot(slot))
                     continue;
-                List<EnumPlayerPart> parts = CommonUtils.slotToParts.get(slot);
+                List<EnumPlayerPart> parts = CommonUtils.getPartListForSlot(slot);
                 Collections.shuffle(parts);
                 partList.add(Pair.of(slot, parts.toArray(new EnumPlayerPart[0])));
             }
@@ -87,7 +87,7 @@ public class RandomDamageDistribution extends DamageDistribution {
             if (posInArray > 3)
                 posInArray -= 4;
             EquipmentSlotType slot = CommonUtils.ARMOR_SLOTS[posInArray];
-            List<EnumPlayerPart> parts = CommonUtils.slotToParts.get(slot);
+            List<EnumPlayerPart> parts = CommonUtils.getPartListForSlot(slot);
             Collections.shuffle(parts);
             partList.add(Pair.of(slot, parts.toArray(new EnumPlayerPart[0])));
         }

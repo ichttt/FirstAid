@@ -26,17 +26,26 @@ import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
+import ichttt.mods.firstaid.common.AABBAlignedBoundingBox;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
+import ichttt.mods.firstaid.common.util.PlayerSizeHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StringUtils;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -44,12 +53,14 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.text.DecimalFormat;
+import java.util.Collection;
 import java.util.List;
 
 public class ClientEventHandler {
@@ -112,6 +123,41 @@ public class ClientEventHandler {
             HUDHandler.INSTANCE.renderOverlay(event.getMatrixStack(), mc, event.getPartialTicks());
             mc.getProfiler().pop();
             mc.getProfiler().pop();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLivingRender(RenderLivingEvent.Post<PlayerEntity, PlayerModel<PlayerEntity>> event) {
+        Entity entity = event.getEntity();
+        if (entity instanceof PlayerEntity) {
+            EntityRendererManager renderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+            if (renderDispatcher.shouldRenderHitBoxes()) {
+                event.getMatrixStack().pushPose();
+                //See PlayerRenderer.getRenderOffset
+                if (entity.isCrouching()) {
+                    event.getMatrixStack().translate(0D, 0.125D, 0D);
+                }
+                AxisAlignedBB aabb = entity.getBoundingBox();
+
+
+                Collection<AABBAlignedBoundingBox> allBoxes = PlayerSizeHelper.getBoxes(entity).values();
+                float r = 0.25F;
+                float g = 1.0F;
+                float b = 1.0F;
+
+                for (AABBAlignedBoundingBox box : allBoxes) {
+                    AxisAlignedBB bbox = box.createAABB(aabb);
+                    WorldRenderer.renderLineBox(event.getMatrixStack(), event.getBuffers().getBuffer(RenderType.lines()), bbox.inflate(0.02D).move(-entity.getX(), -entity.getY(), -entity.getZ()), r, g, b, 1.0F);
+                    r += 0.25F;
+                    g += 0.5F;
+                    b += 0.1F;
+
+                    r %= 1.0F;
+                    g %= 1.0F;
+                    b %= 1.0F;
+                }
+                event.getMatrixStack().popPose();
+            }
         }
     }
 

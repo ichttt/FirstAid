@@ -123,6 +123,7 @@ public abstract class DamageDistribution implements IDamageDistribution {
 
     @Override
     public float distributeDamage(float damage, @Nonnull PlayerEntity player, @Nonnull DamageSource source, boolean addStat) {
+        if (damage <= 0F) return 0F;
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
         if (FirstAidConfig.GENERAL.debug.get()) {
             FirstAid.LOGGER.info("Starting distribution of {} damage...", damage);
@@ -152,7 +153,7 @@ public abstract class DamageDistribution implements IDamageDistribution {
                     FirstAid.LOGGER.info("Distribution round: Not done yet, going to next round. Needed to distribute {} damage (reduced to {}) to {}, but only distributed {}. New damage to be distributed is {}, based on absorb factor {}", originalDamage, dmgAfterReduce, slot, damageDistributed, damage, absorbFactor);
                 }
             } else if (FirstAidConfig.GENERAL.debug.get()) {
-                FirstAid.LOGGER.info("Skipping {}, no health >min in parts!", slot);
+                FirstAid.LOGGER.info("Skipping {}, no health > min in parts!", slot);
             }
         }
         return damage;

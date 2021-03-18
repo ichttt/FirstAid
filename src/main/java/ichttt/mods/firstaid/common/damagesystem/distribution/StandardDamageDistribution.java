@@ -34,8 +34,9 @@ import java.util.stream.Collectors;
 public class StandardDamageDistribution extends DamageDistribution {
     private final List<Pair<EquipmentSlotType, EnumPlayerPart[]>> partList;
     private final boolean shuffle;
+    private final boolean doNeighbours;
 
-    public StandardDamageDistribution(List<Pair<EquipmentSlotType, EnumPlayerPart[]>> partList, boolean shuffle) {
+    public StandardDamageDistribution(List<Pair<EquipmentSlotType, EnumPlayerPart[]>> partList, boolean shuffle, boolean doNeighbours) {
         this.partList = partList;
         for (Pair<EquipmentSlotType, EnumPlayerPart[]> pair : partList) {
             for (EnumPlayerPart part : pair.getRight()) {
@@ -44,6 +45,7 @@ public class StandardDamageDistribution extends DamageDistribution {
             }
         }
         this.shuffle = shuffle;
+        this.doNeighbours = doNeighbours;
     }
 
     @Override
@@ -56,7 +58,7 @@ public class StandardDamageDistribution extends DamageDistribution {
     @Override
     public float distributeDamage(float damage, @Nonnull PlayerEntity player, @Nonnull DamageSource source, boolean addStat) {
         float rest = super.distributeDamage(damage, player, source, addStat);
-        if (rest > 0) {
+        if (rest > 0 && doNeighbours) {
             EnumPlayerPart[] parts = partList.get(partList.size() - 1).getRight();
             Optional<EnumPlayerPart> playerPart = Arrays.stream(parts).filter(enumPlayerPart -> !enumPlayerPart.getNeighbours().isEmpty()).findAny();
             if (playerPart.isPresent()) {

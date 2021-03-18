@@ -22,16 +22,17 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
-import ichttt.mods.firstaid.common.damagesystem.distribution.PreferredDamageDistribution;
+import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistribution;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.MessageConfiguration;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import ichttt.mods.firstaid.common.util.ProjectileHelper;
+import ichttt.mods.firstaid.common.util.PlayerSizeHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -74,6 +75,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -115,9 +117,11 @@ public class EventHandler {
             Pair<Entity, RayTraceResult> rayTraceResult = hitList.remove(player);
             if (rayTraceResult != null) {
                 Entity entityProjectile = rayTraceResult.getLeft();
-                EquipmentSlotType slot = ProjectileHelper.getPartByPosition(entityProjectile, player);
-                if (slot != null)
-                    damageDistribution = new PreferredDamageDistribution(slot);
+                EquipmentSlotType slot = PlayerSizeHelper.getSlotTypeForProjectileHit(entityProjectile, player);
+                if (slot != null) {
+                    EnumPlayerPart[] possibleParts = CommonUtils.getPartArrayForSlot(slot);
+                    damageDistribution = new StandardDamageDistribution(Collections.singletonList(Pair.of(slot, possibleParts)), false, true);
+                }
             }
         }
         DamageDistribution.handleDamageTaken(damageDistribution, damageModel, amountToDamage, player, source, addStat, true);

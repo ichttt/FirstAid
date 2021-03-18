@@ -32,7 +32,7 @@ public class PreferredDamageDistribution extends DamageDistribution {
 
     public PreferredDamageDistribution(EnumPlayerPart preferred) {
         this.slot = preferred.slot;
-        if (!CommonUtils.slotToParts.get(slot).contains(preferred)) //assertion
+        if (!CommonUtils.getPartListForSlot(slot).contains(preferred)) //assertion
             throw new IllegalArgumentException("ArmorSlot " + slot + " is not for PlayerPart " + preferred);
     }
 
@@ -45,7 +45,7 @@ public class PreferredDamageDistribution extends DamageDistribution {
     protected List<Pair<EquipmentSlotType, EnumPlayerPart[]>> getPartList() {
         int posInArray = slot.getIndex();
         EquipmentSlotType slot = CommonUtils.ARMOR_SLOTS[posInArray];
-        List<EnumPlayerPart> parts = CommonUtils.slotToParts.get(slot);
+        List<EnumPlayerPart> parts = CommonUtils.getPartListForSlot(slot);
         Collections.shuffle(parts);
         return Collections.singletonList(Pair.of(slot, parts.toArray(new EnumPlayerPart[0])));
     }

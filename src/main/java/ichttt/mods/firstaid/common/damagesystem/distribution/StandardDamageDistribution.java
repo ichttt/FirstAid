@@ -25,16 +25,19 @@ import net.minecraft.util.DamageSource;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 public class StandardDamageDistribution extends DamageDistribution {
     private final List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList;
     private final boolean shuffle;
     private final boolean doNeighbours;
+    private final EnumSet<EnumPlayerPart> blockedParts;
 
     public StandardDamageDistribution(List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList, boolean shuffle, boolean doNeighbours) {
         this.partList = partList;
@@ -46,6 +49,16 @@ public class StandardDamageDistribution extends DamageDistribution {
         }
         this.shuffle = shuffle;
         this.doNeighbours = doNeighbours;
+        this.blockedParts = EnumSet.noneOf(EnumPlayerPart.class);
+    }
+
+    // Private constructor, no validation required
+    // This is done for speed, as these are temp distributions for the redistribution
+    private StandardDamageDistribution(List<Pair<EquipmentSlotType, EnumPlayerPart[]>> partList, boolean shuffle, boolean doNeighbours, EnumSet<EnumPlayerPart> blockedParts) {
+        this.partList = partList;
+        this.shuffle = shuffle;
+        this.doNeighbours = doNeighbours;
+        this.blockedParts = blockedParts;
     }
 
     @Override
@@ -59,13 +72,48 @@ public class StandardDamageDistribution extends DamageDistribution {
     public float distributeDamage(float damage, @Nonnull EntityPlayer player, @Nonnull DamageSource source, boolean addStat) {
         float rest = super.distributeDamage(damage, player, source, addStat);
         if (rest > 0 && doNeighbours) {
-            EnumPlayerPart[] parts = partList.get(partList.size() - 1).getRight();
-            Optional<EnumPlayerPart> playerPart = Arrays.stream(parts).filter(enumPlayerPart -> !enumPlayerPart.getNeighbours().isEmpty()).findAny();
-            if (playerPart.isPresent()) {
-                List<EnumPlayerPart> neighbours = playerPart.get().getNeighbours();
-                neighbours = neighbours.stream().filter(part -> partList.stream().noneMatch(pair -> Arrays.stream(pair.getRight()).anyMatch(p2 -> p2 == part))).collect(Collectors.toList());
-                for (EnumPlayerPart part : neighbours)
-                    rest = new PreferredDamageDistribution(part).distributeDamage(rest, player, source, addStat);
+            EnumSet<EnumPlayerPart> neighboursSet = EnumSet.noneOf(EnumPlayerPart.class);
+
+            // Calculate the set of blocked parts that don't need to be considered for redistribution
+            EnumSet<EnumPlayerPart> blockedParts = EnumSet.copyOf(this.blockedParts);
+            for (Pair<EquipmentSlotType, EnumPlayerPart[]> pair : this.partList) {
+                blockedParts.addAll(Arrays.asList(pair.getRight()));
+            }
+
+            for (int i = partList.size() - 1; i >= 0; i--) {
+                // We still need to distribute some damage. Start with last element of the distribution, and search for possible neighbours
+                // Then, if there is still some damage that needs redistribution, go to the next layer
+                EnumPlayerPart[] parts = partList.get(i).getRight();
+                for (EnumPlayerPart part : parts) {
+                    neighboursSet.addAll(part.getNeighbours());
+                }
+
+                neighboursSet.removeIf(blockedParts::contains);
+                if (!neighboursSet.isEmpty()) {
+                    // Found allowed neighbours for this distribution layer. Try to redistribute
+                    List<EnumPlayerPart> neighbours = new ArrayList<>(neighboursSet);
+                    Collections.shuffle(neighbours);
+                    Map<EquipmentSlotType, List<EnumPlayerPart>> neighbourMapping = new LinkedHashMap<>();
+                    for (EnumPlayerPart neighbour : neighbours) {
+                        neighbourMapping.computeIfAbsent(neighbour.slot, type -> new ArrayList<>(3)).add(neighbour);
+                    }
+
+                    List<Pair<EquipmentSlotType, EnumPlayerPart[]>> neighbourDistributions = new ArrayList<>();
+                    for (Map.Entry<EquipmentSlotType, List<EnumPlayerPart>> entry : neighbourMapping.entrySet()) {
+                        neighbourDistributions.add(Pair.of(entry.getKey(), entry.getValue().toArray(new EnumPlayerPart[0])));
+                    }
+
+
+                    // shuffle can be false, we already shuffle above. Always do neighbours to have a predictable order
+                    StandardDamageDistribution remainingDistribution = new StandardDamageDistribution(neighbourDistributions, false, true, blockedParts);
+                    rest = remainingDistribution.distributeDamage(rest, player, source, addStat);
+                    if (rest <= 0F) break; //Check if we actually need to do next layer or if it is fine with this iteration
+
+                    // Still got some damage left. Add the now drained parts to the blocked list. Take the block list from the temp distribution
+                    // This is based on the old block list, so we can just replace instead of add it
+                    blockedParts = remainingDistribution.blockedParts;
+                    neighboursSet.clear();
+                }
             }
         }
         return rest;

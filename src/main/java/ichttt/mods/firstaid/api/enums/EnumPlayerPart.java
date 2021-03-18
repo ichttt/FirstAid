@@ -24,7 +24,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,15 +44,15 @@ public enum EnumPlayerPart {
                 throw new RuntimeException(value + " contains itself as a neighbour!");
             if (neighbours.isEmpty())
                 throw new RuntimeException(value + " does not have any neighbours!");
-            if (new HashSet<>(neighbours).size() != neighbours.size())
+            if (EnumSet.copyOf(neighbours).size() != neighbours.size())
                 throw new RuntimeException(value + " neighbours contain the same part multiple times!");
 
             // Check that the parts can be reached by calling neighbours recursively
-            Set<EnumPlayerPart> hopefullyAllParts = new HashSet<>(neighbours);
+            Set<EnumPlayerPart> hopefullyAllParts = EnumSet.copyOf(neighbours);
             int oldSize = -1;
             while (oldSize != hopefullyAllParts.size()) {
                 oldSize = hopefullyAllParts.size();
-                Set<EnumPlayerPart> neighboursOfNeighbours = new HashSet<>();
+                Set<EnumPlayerPart> neighboursOfNeighbours = EnumSet.noneOf(EnumPlayerPart.class);
                 for (EnumPlayerPart part : hopefullyAllParts) {
                     neighboursOfNeighbours.addAll(part.getNeighbours());
                 }
@@ -109,23 +109,6 @@ public enum EnumPlayerPart {
                 return RIGHT_FOOT;
         }
         throw new IndexOutOfBoundsException("Invalid id " + id);
-    }
-
-    @Nonnull
-    private List<EnumPlayerPart> getNeighboursUp() {
-        switch (this) {
-            case BODY:
-                return singletonList(HEAD);
-            case LEFT_LEG:
-            case RIGHT_LEG:
-                return singletonList(BODY);
-            case LEFT_FOOT:
-                return singletonList(LEFT_LEG);
-            case RIGHT_FOOT:
-                return singletonList(RIGHT_LEG);
-            default:
-                return emptyList();
-        }
     }
 
     @Nonnull

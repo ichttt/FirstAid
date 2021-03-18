@@ -33,7 +33,7 @@ public interface IEqualDamageDistributionBuilder extends IDamageDistributionBuil
 
     /**
      * The amount that the reduction will be multiplied with.
-     * Example: 10 input damage, reduced to 5 hearts. With multiplier=0.8, it would only be reduced to 4 hearts.
+     * Example: 10 input damage, reduction is 5 hearts. With multiplier=0.8, it would only reduce 4 hearts, so still 6 hearts of damage will be dealt
      * If no reduction takes place, the damage will stay the same
      * @param multiplier The multiplier for the reduction
      * @return The current builder

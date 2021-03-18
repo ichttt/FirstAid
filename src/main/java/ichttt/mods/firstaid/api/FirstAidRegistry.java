@@ -94,8 +94,12 @@ public abstract class FirstAidRegistry {
 
     public abstract Integer getPartHealingTime(@Nonnull ItemStack itemStack);
 
+    @Deprecated // use nullable variant below, which returns null if nothing is registered instead of the default distribution
     @Nonnull
     public abstract IDamageDistribution getDamageDistribution(@Nonnull DamageSource source);
+
+    @Nullable
+    public abstract IDamageDistribution getDamageDistributionForSource(@Nonnull DamageSource source);
 
     @Nonnull
     public abstract IDebuff[] getDebuffs(@Nonnull EnumDebuffSlot slot);

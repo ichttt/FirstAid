@@ -86,12 +86,14 @@ public class RegistryManager {
         if (FirstAidConfig.GENERAL.hardMode.get()) {
             distributionBuilderFactory.newStandardBuilder()
                     .addDistributionLayer(EquipmentSlotType.CHEST, EnumPlayerPart.BODY)
+                    .disableNeighbourRestDistribution()
                     .registerStatic(DamageSource.STARVE);
 
             distributionBuilderFactory.newStandardBuilder()
                     .addDistributionLayer(EquipmentSlotType.CHEST, EnumPlayerPart.BODY)
                     .addDistributionLayer(EquipmentSlotType.HEAD, EnumPlayerPart.HEAD)
                     .ignoreOrder()
+                    .disableNeighbourRestDistribution()
                     .registerStatic(DamageSource.DROWN);
         } else {
             distributionBuilderFactory.newRandomBuilder().tryNoKill().registerStatic(DamageSource.STARVE, DamageSource.DROWN);

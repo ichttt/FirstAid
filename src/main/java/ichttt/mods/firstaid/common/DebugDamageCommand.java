@@ -39,26 +39,45 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class DebugDamageCommand {
     private static final SimpleCommandExceptionType TYPE = new SimpleCommandExceptionType(new StringTextComponent("0 is invalid as damage"));
 
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         LiteralArgumentBuilder<CommandSource> builder = Commands.literal("damagePart").requires((source) -> source.hasPermission(2));
+        List<EnumPlayerPart> allowedValues = new ArrayList<>(Arrays.asList(EnumPlayerPart.VALUES));
+        allowedValues.add(null);
 
-        for(EnumPlayerPart part : EnumPlayerPart.VALUES) {
-            builder.then(Commands.literal(part.name())
+        for(EnumPlayerPart part : allowedValues) {
+            builder.then(Commands.literal(part == null ? "ALL" : part.name())
                     .then(Commands.argument("damage", FloatArgumentType.floatArg())
-                    .executes(context -> damage(part, FloatArgumentType.getFloat(context, "damage"), true, context.getSource().getPlayerOrException()))
+                    .executes(context -> handleCommand(part, FloatArgumentType.getFloat(context, "damage"), true, context.getSource().getPlayerOrException()))
                     .then(Commands.literal("nodebuff")
-                    .executes(context -> damage(part, FloatArgumentType.getFloat(context, "damage"), false, context.getSource().getPlayerOrException())))));
+                    .executes(context -> handleCommand(part, FloatArgumentType.getFloat(context, "damage"), false, context.getSource().getPlayerOrException())))));
         }
         dispatcher.register(builder);
     }
 
-    private static int damage(EnumPlayerPart part, float damage, boolean debuff, ServerPlayerEntity player) throws CommandSyntaxException {
+    private static int handleCommand(EnumPlayerPart part, float damage, boolean debuff, ServerPlayerEntity player) throws CommandSyntaxException {
         if (damage == 0F)
             throw TYPE.create();
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+        if (part == null) {
+            for (EnumPlayerPart aPart : EnumPlayerPart.VALUES) {
+                doDamage(aPart, damage, debuff, player, damageModel);
+            }
+        } else {
+            doDamage(part, damage, debuff, player, damageModel);
+        }
+
+        FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(damageModel, false));
+        return 1;
+    }
+
+    private static void doDamage(EnumPlayerPart part, float damage, boolean debuff, ServerPlayerEntity player, AbstractPlayerDamageModel damageModel) {
         if (damage > 0F) {
             DamageDistribution.handleDamageTaken(new DirectDamageDistribution(part, debuff), damageModel, damage, player, DamageSource.OUT_OF_WORLD, false, false);
         } else {
@@ -68,7 +87,5 @@ public class DebugDamageCommand {
             player.sendMessage(new TranslationTextComponent("death.attack.generic", player.getDisplayName()), Util.NIL_UUID);
             CommonUtils.killPlayer(damageModel, player, null);
         }
-        FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(damageModel, false));
-        return 1;
     }
 }

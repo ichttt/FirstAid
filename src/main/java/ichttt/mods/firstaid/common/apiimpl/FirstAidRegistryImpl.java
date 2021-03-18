@@ -142,6 +142,15 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Nonnull
     @Override
     public IDamageDistribution getDamageDistribution(@Nonnull DamageSource source) {
+        IDamageDistribution distribution = getDamageDistributionForSource(source);
+        if (distribution == null)
+            distribution = RandomDamageDistribution.getDefault();
+        return distribution;
+    }
+
+    @Nullable
+    @Override
+    public IDamageDistribution getDamageDistributionForSource(@Nonnull DamageSource source) {
         IDamageDistribution distribution = distributionsStatic.get(source.msgId);
         if (distribution == null) {
             //lookup if we have any matching dynamic distribution
@@ -152,8 +161,6 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
                 }
             }
         }
-        if (distribution == null)
-            distribution = RandomDamageDistribution.getDefault();
         return distribution;
     }
 

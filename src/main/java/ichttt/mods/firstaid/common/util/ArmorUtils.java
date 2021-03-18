@@ -135,8 +135,10 @@ public class ArmorUtils {
         totalToughness += getGlobalRestAttribute(entity, Attributes.ARMOR_TOUGHNESS);
 
         if (damage > 0 && (totalArmor > 0 || totalToughness > 0)) {
-            if (item instanceof ArmorItem)
-                itemStack.hurtAndBreak((int) damage, entity, (player) -> player.broadcastBreakEvent(slot));
+            if (item instanceof ArmorItem && (!source.isFire() || !item.isFireResistant())) {
+                int itemDamage = Math.max((int) damage, 1);
+                itemStack.hurtAndBreak(itemDamage, entity, (player) -> player.broadcastBreakEvent(slot));
+            }
             damage = CombatRules.getDamageAfterAbsorb(damage, totalArmor, totalToughness);
         }
         return damage;

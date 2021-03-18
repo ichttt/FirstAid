@@ -27,6 +27,7 @@ import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
+import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistribution;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.MessageConfiguration;
@@ -111,7 +112,7 @@ public class EventHandler {
         }
 
         boolean addStat = amountToDamage < 3.4028235E37F;
-        IDamageDistribution damageDistribution = FirstAidRegistryImpl.INSTANCE.getDamageDistribution(source);
+        IDamageDistribution damageDistribution = FirstAidRegistryImpl.INSTANCE.getDamageDistributionForSource(source);
 
         if (source.isProjectile()) {
             Pair<Entity, RayTraceResult> rayTraceResult = hitList.remove(player);
@@ -124,6 +125,14 @@ public class EventHandler {
                 }
             }
         }
+        if (damageDistribution == null) {
+            // No given distribution found, and no projectile distribution either. Let's check if we can tell by the source where we should apply the damage, otherwise fall back to random
+            damageDistribution = PlayerSizeHelper.getMeleeDistribution(player, source);
+            if (damageDistribution == null) {
+                damageDistribution = RandomDamageDistribution.getDefault();
+            }
+        }
+
         DamageDistribution.handleDamageTaken(damageDistribution, damageModel, amountToDamage, player, source, addStat, true);
 
         event.setCanceled(true);

@@ -1,23 +1,34 @@
 package ichttt.mods.firstaid.common.util;
 
-import com.google.common.base.Stopwatch;
+import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
+import ichttt.mods.firstaid.api.IDamageDistribution;
+import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.AABBAlignedBoundingBox;
+import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistribution;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Vector3d;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 public class PlayerSizeHelper {
     private static final Map<EquipmentSlotType, AABBAlignedBoundingBox> NORMAL_BOXES;
     private static final Map<EquipmentSlotType, AABBAlignedBoundingBox> SNEAKING_BOXES;
+
 
     static {
         Map<EquipmentSlotType, AABBAlignedBoundingBox> builder = new LinkedHashMap<>();
@@ -54,7 +65,6 @@ public class PlayerSizeHelper {
     }
 
     public static EquipmentSlotType getSlotTypeForProjectileHit(Entity hittingObject, PlayerEntity toTest) {
-        Stopwatch stopwatch = Stopwatch.createStarted();
         Map<EquipmentSlotType, AABBAlignedBoundingBox> toUse = getBoxes(toTest);
         Vector3d oldPosition = hittingObject.position();
         Vector3d newPosition = oldPosition.add(hittingObject.getDeltaMovement());
@@ -77,15 +87,56 @@ public class PlayerSizeHelper {
                 }
             }
             if (bestSlot != null) {
-                stopwatch.stop();
-                System.out.println("Inflation: " + inflation + " best slot: " + bestSlot);
-                System.out.println("Took " + stopwatch.elapsed(TimeUnit.MICROSECONDS) + " us");
+                if (FirstAidConfig.GENERAL.debug.get()) {
+                    FirstAid.LOGGER.info("getSlotTypeForProjectileHit: Inflation: " + inflation + " best slot: " + bestSlot);
+                }
                 return bestSlot;
             }
         }
-        stopwatch.stop();
-        System.out.println("Not found!");
-        System.out.println("Took " + stopwatch.elapsed(TimeUnit.MICROSECONDS) + " us");
+        if (FirstAidConfig.GENERAL.debug.get()) {
+            FirstAid.LOGGER.info("getSlotTypeForProjectileHit: Not found!");
+        }
+        return null;
+    }
+
+
+    public static IDamageDistribution getMeleeDistribution(PlayerEntity player, DamageSource source) {
+        Entity causingEntity = source.getEntity();
+        if (causingEntity != null && causingEntity == source.getDirectEntity() && causingEntity instanceof MobEntity) {
+            MobEntity mobEntity = (MobEntity) causingEntity;
+            if (mobEntity.getTarget() == player && mobEntity.goalSelector.getRunningGoals().anyMatch(prioritizedGoal -> prioritizedGoal.getGoal() instanceof MeleeAttackGoal)) {
+                Map<EquipmentSlotType, AABBAlignedBoundingBox> boxes = PlayerSizeHelper.getBoxes(player);
+                if (!boxes.isEmpty()) {
+                    List<EquipmentSlotType> allowedParts = new ArrayList<>();
+                    AxisAlignedBB modAABB = mobEntity.getBoundingBox().inflate(mobEntity.getBbWidth() * 2F + player.getBbWidth(), 0, mobEntity.getBbWidth() * 2F + player.getBbWidth());
+                    for (Map.Entry<EquipmentSlotType, AABBAlignedBoundingBox> entry : boxes.entrySet()) {
+                        AxisAlignedBB partAABB = entry.getValue().createAABB(player.getBoundingBox());
+                        if (modAABB.intersects(partAABB)) {
+                            allowedParts.add(entry.getKey());
+                        }
+                    }
+                    if (FirstAidConfig.GENERAL.debug.get()) {
+                        FirstAid.LOGGER.info("getMeleeDistribution: Has distribution with {}", allowedParts);
+                    }
+                    if (allowedParts.isEmpty() && player.getY() > mobEntity.getY() && (player.getY() - mobEntity.getY()) < mobEntity.getBbHeight() * 2F) {
+                        // HACK: y is at the bottom of the aabb of mobs, so the range of mobs to your feet is larger than the range of them to your head
+                        // If no matching region can be found, but the y difference is within 2 times the bb height of the attacking mob
+                        // This should be accurate enough (in theory)
+                        if (FirstAidConfig.GENERAL.debug.get()) {
+                            FirstAid.LOGGER.info("Hack adding feet");
+                        }
+                        allowedParts.add(EquipmentSlotType.FEET);
+                    }
+                    if (!allowedParts.isEmpty() && !allowedParts.containsAll(Arrays.asList(CommonUtils.ARMOR_SLOTS))) {
+                        List<Pair<EquipmentSlotType, EnumPlayerPart[]>> list = new ArrayList<>();
+                        for (EquipmentSlotType allowedPart : allowedParts) {
+                            list.add(Pair.of(allowedPart, CommonUtils.getPartArrayForSlot(allowedPart)));
+                        }
+                        return new StandardDamageDistribution(list, true, true);
+                    }
+                }
+            }
+        }
         return null;
     }
 

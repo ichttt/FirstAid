@@ -166,8 +166,6 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 GlStateManager.translate(0, 10F, 0F);
             }
         }
-        mc.profiler.endSection();
-        mc.profiler.startSection("cleanup");
         if (enableAlphaBlend)
             GlStateManager.disableBlend();
         GlStateManager.popMatrix();

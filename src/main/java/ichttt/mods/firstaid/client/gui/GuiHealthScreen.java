@@ -119,7 +119,7 @@ public class GuiHealthScreen extends GuiScreen {
             rightFoot.enabled = false;
         }
 
-        GuiButton buttonCancel = new GuiButton(9, this.width / 2 - 100, this.height - 50, I18n.format("gui.cancel"));
+        GuiButton buttonCancel = new GuiButton(9, this.width / 2 - 100, this.height - 50, I18n.format(disableButtons ? "gui.done" : "gui.cancel"));
         this.buttonList.add(buttonCancel);
 
         if (this.mc.gameSettings.showDebugInfo) {

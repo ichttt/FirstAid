@@ -122,7 +122,7 @@ public class GuiHealthScreen extends Screen {
             rightFoot.active = false;
         }
 
-        cancelButton = new Button(this.width / 2 - 100, this.height - 50, 200, 20, new TranslationTextComponent("gui.cancel"), button -> onClose());
+        cancelButton = new Button(this.width / 2 - 100, this.height - 50, 200, 20, new TranslationTextComponent(disableButtons ? "gui.done" : "gui.cancel"), button -> onClose());
         addButton(cancelButton);
 
         if (this.minecraft.options.renderDebug) {

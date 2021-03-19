@@ -19,7 +19,6 @@
 package ichttt.mods.firstaid.client;
 
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.util.CommonUtils;
@@ -28,7 +27,6 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.util.Hand;
-import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -44,7 +42,6 @@ public class ClientHooks {
         FirstAid.LOGGER.debug("Loading ClientHooks");
         MinecraftForge.EVENT_BUS.register(ClientEventHandler.class);
         ClientRegistry.registerKeyBinding(SHOW_WOUNDS);
-        ForgeIngameGui.renderHealth = FirstAidConfig.CLIENT.showVanillaHealthBar.get();
         EventCalendar.checkDate();
     }
 

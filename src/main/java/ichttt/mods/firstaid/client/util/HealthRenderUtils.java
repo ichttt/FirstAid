@@ -114,7 +114,7 @@ public class HealthRenderUtils {
         Minecraft mc = Minecraft.getInstance();
         int regen = -1;
         if (FirstAidConfig.SERVER.allowOtherHealingItems.get() && mc.player.hasEffect(Effects.REGENERATION))
-            regen = (int) ((mc.gui.healthBlinkTime / 2) % 15);
+            regen = (int) ((mc.gui.getGuiTicks() / 2) % 15);
         boolean low = (current + absorption) < 1.25F;
 
         mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);

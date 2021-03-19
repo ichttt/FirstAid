@@ -163,7 +163,6 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
                 stack.translate(0, 10F, 0F);
             }
         }
-        mc.getProfiler().popPush("cleanup");
         if (enableAlphaBlend)
             RenderSystem.disableBlend();
         stack.popPose();

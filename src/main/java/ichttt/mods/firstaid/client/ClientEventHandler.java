@@ -54,7 +54,6 @@ import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -119,7 +118,6 @@ public class ClientEventHandler {
             Minecraft mc = Minecraft.getInstance();
             if (!mc.player.isAlive()) return;
             mc.getProfiler().push("FirstAidOverlay");
-            ForgeIngameGui.renderHealth = FirstAidConfig.CLIENT.showVanillaHealthBar.get();
             HUDHandler.INSTANCE.renderOverlay(event.getMatrixStack(), mc, event.getPartialTicks());
             mc.getProfiler().pop();
             mc.getProfiler().pop();

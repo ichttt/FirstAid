@@ -34,6 +34,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.network.NetworkDirection;
@@ -163,7 +164,12 @@ public class CommonUtils {
 
     @Nonnull
     public static AbstractPlayerDamageModel getDamageModel(PlayerEntity player) {
-        return player.getCapability(CapabilityExtendedHealthSystem.INSTANCE).orElseThrow(() -> new IllegalArgumentException("Player " + player.getName().getContents() + " is missing a damage model!"));
+        return getOptionalDamageModel(player).orElseThrow(() -> new IllegalArgumentException("Player " + player.getName().getContents() + " is missing a damage model!"));
+    }
+
+    @Nonnull
+    public static LazyOptional<AbstractPlayerDamageModel> getOptionalDamageModel(PlayerEntity player) {
+        return player.getCapability(CapabilityExtendedHealthSystem.INSTANCE);
     }
 
     public static boolean hasDamageModel(Entity entity) {

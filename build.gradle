@@ -15,6 +15,16 @@ apply plugin: 'net.minecraftforge.gradle'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 
+repositories {
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    mavenLocal()
+}
+
 version = '1.9.6-BETA'
 group = 'ichttt.mods.firstaid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'firstaid'
@@ -69,6 +79,8 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.16.5-36.0.58'
+
+    // runtimeOnly fg.deobf("curse.maven:spiceoflife-277616:3174886")
 
     //compileOnly(files('libs/Morpheus-deobf.jar'))
 

@@ -107,7 +107,7 @@ public class GuiTutorial extends Screen {
         stack.pushPose();
         this.action.draw(stack);
         stack.popPose();
-        drawCenteredString(stack, minecraft.font, I18n.get("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 140, 0xFFFFFF);
+        drawCenteredString(stack, minecraft.font, I18n.get("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 128, 0xFFFFFF);
         super.render(stack, mouseX, mouseY, partialTicks);
     }
 

@@ -31,19 +31,22 @@ import net.minecraft.util.math.vector.Vector3f;
 
 public class PlayerModelRenderer {
     private static final ResourceLocation HEALTH_RENDER_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health.png");
-    private static final int SIZE = 64;
+    private static final int SIZE = 32;
     private static int angle = 0;
     private static boolean otherWay = false;
+    private static int cooldown = 0;
 
-    public static void renderPlayerHealth(MatrixStack stack, AbstractPlayerDamageModel damageModel, AbstractGui gui, boolean flashState, float alpha, float partialTicks) {
-        int yOffset = flashState ? 128 : 0;
+    public static void renderPlayerHealth(MatrixStack stack, AbstractPlayerDamageModel damageModel, boolean fourColors, AbstractGui gui, boolean flashState, float alpha, float partialTicks) {
+        int yOffset = flashState ? 64 : 0;
         RenderSystem.enableAlphaTest();
         RenderSystem.enableBlend();
         RenderSystem.color4f(1F, 1F, 1F, 1 - (alpha / 255));
         Minecraft.getInstance().getTextureManager().bind(HEALTH_RENDER_LOCATION);
-        stack.scale(0.5F, 0.5F, 0.5F);
         if (FirstAidConfig.CLIENT.enableEasterEggs.get() && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
-            float angle = PlayerModelRenderer.angle + ((otherWay ? -partialTicks : partialTicks) * 2);
+            float angle = PlayerModelRenderer.angle;
+            if (cooldown == 0) {
+                angle += ((otherWay ? -partialTicks : partialTicks) * 2);
+            }
             if (FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.BOTTOM_LEFT || FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.TOP_LEFT)
                 stack.translate(angle * 1.5F, 0, 0);
             else
@@ -54,37 +57,60 @@ public class PlayerModelRenderer {
         if (yOffset != 0)
             stack.translate(0, -yOffset, 0);
 
-        drawPart(stack, gui, damageModel.HEAD, 16, yOffset + 0, 32, 32);
-        drawPart(stack, gui, damageModel.BODY, 16, yOffset + 32, 32, 48);
-        drawPart(stack, gui, damageModel.LEFT_ARM, 0, yOffset + 32, 16, 48);
-        drawPart(stack, gui, damageModel.RIGHT_ARM, 48, yOffset + 32, 16, 48);
-        drawPart(stack, gui, damageModel.LEFT_LEG, 16, yOffset + 80, 16, 32);
-        drawPart(stack, gui, damageModel.RIGHT_LEG, 32, yOffset + 80, 16, 32);
-        drawPart(stack, gui, damageModel.LEFT_FOOT, 16, yOffset + 112, 16, 16);
-        drawPart(stack, gui, damageModel.RIGHT_FOOT, 32, yOffset + 112, 16, 16);
+        drawPart(stack, gui, fourColors, damageModel.HEAD, 8, yOffset + 0, 16, 16);
+        drawPart(stack, gui, fourColors, damageModel.BODY, 8, yOffset + 16, 16, 24);
+        drawPart(stack, gui, fourColors, damageModel.LEFT_ARM, 0, yOffset + 16, 8, 24);
+        drawPart(stack, gui, fourColors, damageModel.RIGHT_ARM, 24, yOffset + 16, 8, 24);
+        drawPart(stack, gui, fourColors, damageModel.LEFT_LEG, 8, yOffset + 40, 8, 16);
+        drawPart(stack, gui, fourColors, damageModel.RIGHT_LEG, 16, yOffset + 40, 8, 16);
+        drawPart(stack, gui, fourColors, damageModel.LEFT_FOOT, 8, yOffset + 56, 8, 8);
+        drawPart(stack, gui, fourColors, damageModel.RIGHT_FOOT, 16, yOffset + 56, 8, 8);
 
         RenderSystem.color4f(1F, 1F, 1F, 1F);
     }
 
-    private static void drawPart(MatrixStack stack, AbstractGui gui, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
+    private static void drawPart(MatrixStack stack, AbstractGui gui, boolean fourColors, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
         int rawTexX = texX;
-        int maxHealth = part.getMaxHealth();
-        if (part.currentHealth <= 0.001) {
-            texX += SIZE * 3;
-        }
-        else if (Math.abs(part.currentHealth - maxHealth) > 0.001) {
-            float healthPercentage = part.currentHealth / maxHealth;
-            if (healthPercentage >= 1 || healthPercentage <= 0)
-                throw new RuntimeException(String.format("Calculated invalid health for part %s with current health %s and max health %d. Got value %s", part.part, part.currentHealth, maxHealth, healthPercentage));
-            texX += SIZE * (healthPercentage > 0.5 ? 1 : 2);
-        }
+        texX += SIZE * getState(part, fourColors);
         gui.blit(stack, rawTexX, texY, texX, texY, sizeX, sizeY);
     }
 
+    private static int getState(AbstractDamageablePart part, boolean fourColors) {
+        if (part.currentHealth <= 0.001F) {
+            return 5;
+        }
+        int maxHealth = part.getMaxHealth();
+        if (Math.abs(part.currentHealth - maxHealth) < 0.001F) {
+            return 0;
+        }
+        float healthPercentage = part.currentHealth / maxHealth;
+        if (healthPercentage >= 1 || healthPercentage <= 0)
+            throw new RuntimeException(String.format("Calculated invalid health for part %s with current health %s and max health %d. Got value %s", part.part, part.currentHealth, maxHealth, healthPercentage));
+        if (!fourColors && healthPercentage > 0.75F) {
+            return 1;
+        }
+        if (healthPercentage > 0.5F) {
+            return 2;
+        }
+        if (!fourColors && healthPercentage > 0.25F) {
+            return 3;
+        }
+        return 4;
+    }
+
     public static void tickFun() {
+        if (cooldown > 0) {
+            cooldown--;
+            return;
+        }
         angle += otherWay ? -2 : 2;
         if (angle >= 90 || angle <= 0) {
             otherWay = !otherWay;
+            if (!otherWay) {
+                cooldown = 200;
+            } else {
+                cooldown = 30;
+            }
         }
     }
 }

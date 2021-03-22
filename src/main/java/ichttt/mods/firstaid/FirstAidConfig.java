@@ -82,6 +82,30 @@ public class FirstAidConfig {
                     .translation("firstaid.config.causedeath.body")
                     .define("causeDeathBody", true);
 
+            builder.pop().push("Locational Armor").push("Armor");
+
+            headArmorMultiplier = multiplierEntry(builder, "Head", 6D);
+            chestArmorMultiplier = multiplierEntry(builder, "Chest", 2.5D);
+            legsArmorMultiplier = multiplierEntry(builder, "Legs", 3D);
+            feetArmorMultiplier = multiplierEntry(builder, "Feet", 6D);
+
+            headArmorOffset = offsetEntry(builder, "Head", 1D);
+            chestArmorOffset = offsetEntry(builder, "Chest", 0D);
+            legsArmorOffset = offsetEntry(builder, "Legs", 0D);
+            feetArmorOffset = offsetEntry(builder, "Feet", 0D);
+
+            builder.pop().push("Toughness");
+
+            headThoughnessMultiplier = multiplierEntry(builder, "Head", 4D);
+            chestThoughnessMultiplier = multiplierEntry(builder, "Chest", 3D);
+            legsThoughnessMultiplier = multiplierEntry(builder, "Legs", 3D);
+            feetThoughnessMultiplier = multiplierEntry(builder, "Feet", 3.5D);
+
+            headThoughnessOffset = offsetEntry(builder, "Head", 0D);
+            chestThoughnessOffset = offsetEntry(builder, "Chest", 0D);
+            legsThoughnessOffset = offsetEntry(builder, "Legs", 0D);
+            feetThoughnessOffset = offsetEntry(builder, "Feet", 0D);
+
             builder.pop().push("Internal Healing");
 
             bandage = new IEEntry(builder, "bandage", 4, 18, 2500);
@@ -127,7 +151,7 @@ public class FirstAidConfig {
                     .define("capMaxHealth", true);
 
             vanillaHealthCalculation = builder
-                    .comment("Specifies how the vanilla health is calculated. Affects the visual health bar, as well as the value other mods get when they query the player health.",
+                    .comment("Specifies how the vanilla health is calculated. Affects the vanilla visual health bar, as well as the value other mods get to see when they query the player health.",
                             "AVERAGE_ALL simply takes all limbs and calculates the average of it.",
                             "AVERAGE_CRITICAL takes all critical limbs and calculates the average of it.",
                             "MIN_CRITICAl takes the smallest health value of all critical limb.",
@@ -158,6 +182,26 @@ public class FirstAidConfig {
         public final ForgeConfigSpec.IntValue maxHealthRightLeg;
         public final ForgeConfigSpec.IntValue maxHealthRightFoot;
 
+        public final ForgeConfigSpec.DoubleValue headArmorMultiplier;
+        public final ForgeConfigSpec.DoubleValue chestArmorMultiplier;
+        public final ForgeConfigSpec.DoubleValue legsArmorMultiplier;
+        public final ForgeConfigSpec.DoubleValue feetArmorMultiplier;
+
+        public final ForgeConfigSpec.DoubleValue headArmorOffset;
+        public final ForgeConfigSpec.DoubleValue chestArmorOffset;
+        public final ForgeConfigSpec.DoubleValue legsArmorOffset;
+        public final ForgeConfigSpec.DoubleValue feetArmorOffset;
+
+        public final ForgeConfigSpec.DoubleValue headThoughnessMultiplier;
+        public final ForgeConfigSpec.DoubleValue chestThoughnessMultiplier;
+        public final ForgeConfigSpec.DoubleValue legsThoughnessMultiplier;
+        public final ForgeConfigSpec.DoubleValue feetThoughnessMultiplier;
+
+        public final ForgeConfigSpec.DoubleValue headThoughnessOffset;
+        public final ForgeConfigSpec.DoubleValue chestThoughnessOffset;
+        public final ForgeConfigSpec.DoubleValue legsThoughnessOffset;
+        public final ForgeConfigSpec.DoubleValue feetThoughnessOffset;
+
         public final IEEntry bandage;
         public final IEEntry plaster;
 
@@ -177,6 +221,14 @@ public class FirstAidConfig {
         private static ForgeConfigSpec.IntValue healthEntry(ForgeConfigSpec.Builder builder, String name, int defaultVal) {
             String noSpaceName = name.replace(' ', '_');
             return builder.comment("Max health of the " + name).translation("firstaid.config.maxhealth." + noSpaceName.toLowerCase(Locale.ENGLISH)).defineInRange("maxHealth" + noSpaceName, defaultVal, 2, 12);
+        }
+
+        private static ForgeConfigSpec.DoubleValue multiplierEntry(ForgeConfigSpec.Builder builder, String name, double defaultVal) {
+            return builder.comment("The multiplier for local armor for every armor of slot " + name).translation("firstaid.config.multiplier." + name.toLowerCase(Locale.ROOT)).defineInRange("multiplier" + name, defaultVal, 1D, 16D);
+        }
+
+        private static ForgeConfigSpec.DoubleValue offsetEntry(ForgeConfigSpec.Builder builder, String name, double defaultVal) {
+            return builder.comment("The static offset applied to any armor piece with a value greater than zero of slot " + name).translation("firstaid.config.offset." + name.toLowerCase(Locale.ROOT)).defineInRange("offset" + name, defaultVal, 0D, 4D);
         }
 
         public static class IEEntry {
@@ -356,7 +408,7 @@ public class FirstAidConfig {
     public static class Client {
 
         public enum OverlayMode {
-            OFF, NUMBERS, HEARTS, PLAYER_MODEL
+            OFF, NUMBERS, HEARTS, PLAYER_MODEL, PLAYER_MODEL_4_COLORS
         }
 
         public enum Position {
@@ -367,7 +419,11 @@ public class FirstAidConfig {
             REPLACE, APPEND, NONE
         }
 
-        public final ForgeConfigSpec.BooleanValue showVanillaHealthBar;
+        public enum VanillaHealthbarMode {
+            NORMAL, HIGHLIGHT_CRITICAL_PATH, HIDE
+        }
+
+        public final ForgeConfigSpec.EnumValue<VanillaHealthbarMode> vanillaHealthBarMode;
         public final ForgeConfigSpec.EnumValue<OverlayMode> overlayMode;
         public final ForgeConfigSpec.EnumValue<Position> pos;
         public final ForgeConfigSpec.EnumValue<TooltipMode> armorTooltipMode;
@@ -381,10 +437,13 @@ public class FirstAidConfig {
 
         public Client(ForgeConfigSpec.Builder builder) {
             builder.comment("Client only configuration settings").push("Overlay");
-            showVanillaHealthBar = builder
-                    .comment("True if the main health bar should be rendered (Will be average health)")
-                    .translation("firstaid.config.showvanillahealthbar")
-                    .define("showVanillaHealthBar", false);
+            vanillaHealthBarMode = builder
+                    .comment("The mode how to show the mc vanilla health bar.",
+                            "NORMAL shows the vanilla health value that calculated the way vanillaHealthCalculation is specified (server config)",
+                            "HIGHLIGHT_CRITICAL_PATH show the vanilla health value and highlights the health value of the most damaged critical limb (by default head or body) using the hardcore-styled hearts for them and the normal hearts for the rest of the health. Only works if vanillaHealthCalculation is set to AVERAGE_ALL",
+                            "HIDE just doesn't display the vanilla health bar at all.")
+                    .translation("firstaid.config.vanillahealthbarmode")
+                    .defineEnum("showVanillaHealthBar", VanillaHealthbarMode.HIDE);
 
             overlayMode = builder
                     .comment("The design to use to visualize the health")

@@ -52,41 +52,79 @@ public class ArmorUtils {
     }
 
     public static double applyArmorModifier(EntityEquipmentSlot slot, double rawArmor) {
-        if (rawArmor <= 0D) return 0D;
-        rawArmor = rawArmor * getArmorModifier(slot);
-        if (slot == EntityEquipmentSlot.HEAD) rawArmor += 1D;
+        if (rawArmor <= 0D)
+            return 0D;
+        rawArmor = rawArmor * getArmorMultiplier(slot);
+        rawArmor += getArmorOffset(slot);
         return rawArmor;
     }
 
     public static double applyToughnessModifier(EntityEquipmentSlot slot, double rawToughness) {
         if (rawToughness <= 0D) return 0D;
-        rawToughness = rawToughness * getToughnessModifier(slot);
+        rawToughness = rawToughness * getToughnessMultiplier(slot);
+        rawToughness += getToughnessOffset(slot);
         return rawToughness;
     }
 
-    private static double getArmorModifier(EntityEquipmentSlot slot) {
+    private static double getArmorMultiplier(EquipmentSlotType slot) {
+        FirstAidConfig.Server config = FirstAidConfig.SERVER;
         switch (slot) {
-            case CHEST:
-                return 2.5D;
-            case LEGS:
-                return 3D;
-            case FEET:
             case HEAD:
-                return 6D;
+                return config.headArmorMultiplier.get();
+            case CHEST:
+                return config.chestArmorMultiplier.get();
+            case LEGS:
+                return config.legsArmorMultiplier.get();
+            case FEET:
+                return config.feetArmorMultiplier.get();
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
     }
 
-    private static double getToughnessModifier(EntityEquipmentSlot slot) {
+    private static double getArmorOffset(EquipmentSlotType slot) {
+        FirstAidConfig.Server config = FirstAidConfig.SERVER;
         switch (slot) {
-            case CHEST:
-            case LEGS:
-                return 3D;
-            case FEET:
-                return 3.5D;
             case HEAD:
-                return 4D;
+                return config.headArmorOffset.get();
+            case CHEST:
+                return config.chestArmorOffset.get();
+            case LEGS:
+                return config.legsArmorOffset.get();
+            case FEET:
+                return config.feetArmorOffset.get();
+            default:
+                throw new IllegalArgumentException("Invalid slot " + slot);
+        }
+    }
+
+    private static double getToughnessMultiplier(EquipmentSlotType slot) {
+        FirstAidConfig.Server config = FirstAidConfig.SERVER;
+        switch (slot) {
+            case HEAD:
+                return config.headThoughnessMultiplier.get();
+            case CHEST:
+                return config.chestThoughnessMultiplier.get();
+            case LEGS:
+                return config.legsThoughnessMultiplier.get();
+            case FEET:
+                return config.feetThoughnessMultiplier.get();
+            default:
+                throw new IllegalArgumentException("Invalid slot " + slot);
+        }
+    }
+
+    private static double getToughnessOffset(EquipmentSlotType slot) {
+        FirstAidConfig.Server config = FirstAidConfig.SERVER;
+        switch (slot) {
+            case HEAD:
+                return config.headThoughnessOffset.get();
+            case CHEST:
+                return config.chestThoughnessOffset.get();
+            case LEGS:
+                return config.legsThoughnessOffset.get();
+            case FEET:
+                return config.feetThoughnessOffset.get();
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }

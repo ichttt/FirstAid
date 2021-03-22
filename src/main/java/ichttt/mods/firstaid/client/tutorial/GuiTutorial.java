@@ -106,7 +106,7 @@ public class GuiTutorial extends GuiScreen {
         GlStateManager.pushMatrix();
         this.action.draw();
         GlStateManager.popMatrix();
-        drawCenteredString(mc.fontRenderer, I18n.format("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 140, 0xFFFFFF);
+        drawCenteredString(mc.fontRenderer, I18n.format("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 128, 0xFFFFFF);
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 

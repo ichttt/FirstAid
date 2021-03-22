@@ -32,21 +32,24 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class PlayerModelRenderer {
     private static final ResourceLocation HEALTH_RENDER_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health.png");
-    private static final int SIZE = 64;
+    private static final int SIZE = 32;
     private static int angle = 0;
     private static boolean otherWay = false;
+    private static int cooldown = 0;
 
-    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, Gui gui, boolean flashState, float alpha, float partialTicks) {
-        int yOffset = flashState ? 128 : 0;
-        GlStateManager.pushMatrix();
-        GlStateManager.enableBlend();
-        GlStateManager.color(1F, 1F, 1F, 1 - (alpha / 255));
-        Minecraft.getMinecraft().getTextureManager().bindTexture(HEALTH_RENDER_LOCATION);
-        GlStateManager.scale(0.5F, 0.5F, 0.5F);
-        if (FirstAidConfig.overlay.enableEasterEggs && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
-            float angle = PlayerModelRenderer.angle + ((otherWay ? -partialTicks : partialTicks) * 2);
-            if (FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT || FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.TOP_LEFT)
-                GlStateManager.translate(angle * 1.5F, 0, 0);
+    public static void renderPlayerHealth(MatrixStack stack, AbstractPlayerDamageModel damageModel, boolean fourColors, AbstractGui gui, boolean flashState, float alpha, float partialTicks) {
+        int yOffset = flashState ? 64 : 0;
+        RenderSystem.enableAlphaTest();
+        RenderSystem.enableBlend();
+        RenderSystem.color4f(1F, 1F, 1F, 1 - (alpha / 255));
+        Minecraft.getInstance().getTextureManager().bind(HEALTH_RENDER_LOCATION);
+        if (FirstAidConfig.CLIENT.enableEasterEggs.get() && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
+            float angle = PlayerModelRenderer.angle;
+            if (cooldown == 0) {
+                angle += ((otherWay ? -partialTicks : partialTicks) * 2);
+            }
+            if (FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.BOTTOM_LEFT || FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.TOP_LEFT)
+                stack.translate(angle * 1.5F, 0, 0);
             else
                 GlStateManager.translate(angle * 0.5F, 0, 0);
             GlStateManager.rotate(angle, 0, 0, 1);
@@ -55,38 +58,61 @@ public class PlayerModelRenderer {
         if (yOffset != 0)
             GlStateManager.translate(0, -yOffset, 0);
 
-        drawPart(gui, damageModel.HEAD, 16, yOffset + 0, 32, 32);
-        drawPart(gui, damageModel.BODY, 16, yOffset + 32, 32, 48);
-        drawPart(gui, damageModel.LEFT_ARM, 0, yOffset + 32, 16, 48);
-        drawPart(gui, damageModel.RIGHT_ARM, 48, yOffset + 32, 16, 48);
-        drawPart(gui, damageModel.LEFT_LEG, 16, yOffset + 80, 16, 32);
-        drawPart(gui, damageModel.RIGHT_LEG, 32, yOffset + 80, 16, 32);
-        drawPart(gui, damageModel.LEFT_FOOT, 16, yOffset + 112, 16, 16);
-        drawPart(gui, damageModel.RIGHT_FOOT, 32, yOffset + 112, 16, 16);
+        drawPart(gui, fourColors, damageModel.HEAD, 8, yOffset + 0, 16, 16);
+        drawPart(gui, fourColors, damageModel.BODY, 8, yOffset + 16, 16, 24);
+        drawPart(gui, fourColors, damageModel.LEFT_ARM, 0, yOffset + 16, 8, 24);
+        drawPart(gui, fourColors, damageModel.RIGHT_ARM, 24, yOffset + 16, 8, 24);
+        drawPart(gui, fourColors, damageModel.LEFT_LEG, 8, yOffset + 40, 8, 16);
+        drawPart(gui, fourColors, damageModel.RIGHT_LEG, 16, yOffset + 40, 8, 16);
+        drawPart(gui, fourColors, damageModel.LEFT_FOOT, 8, yOffset + 56, 8, 8);
+        drawPart(gui, fourColors, damageModel.RIGHT_FOOT, 16, yOffset + 56, 8, 8);
 
         GlStateManager.color(1F, 1F, 1F, 1F);
         GlStateManager.popMatrix();
     }
 
-    private static void drawPart(Gui gui, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
+    private static void drawPart(Gui gui, boolean fourColors, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
         int rawTexX = texX;
+        texX += SIZE * getState(part, fourColors);
+        gui.blit(stack, rawTexX, texY, texX, texY, sizeX, sizeY);
+    }
+
+    private static int getState(AbstractDamageablePart part, boolean fourColors) {
+        if (part.currentHealth <= 0.001F) {
+            return 5;
+        }
         int maxHealth = part.getMaxHealth();
-        if (part.currentHealth <= 0.001) {
-            texX += SIZE * 3;
+        if (Math.abs(part.currentHealth - maxHealth) < 0.001F) {
+            return 0;
         }
-        else if (Math.abs(part.currentHealth - maxHealth) > 0.001) {
-            float healthPercentage = part.currentHealth / maxHealth;
-            if (healthPercentage >= 1 || healthPercentage <= 0)
-                throw new RuntimeException(String.format("Calculated invalid health for part %s with current health %s and max health %d. Got value %s", part.part, part.currentHealth, maxHealth, healthPercentage));
-            texX += SIZE * (healthPercentage > 0.5 ? 1 : 2);
+        float healthPercentage = part.currentHealth / maxHealth;
+        if (healthPercentage >= 1 || healthPercentage <= 0)
+            throw new RuntimeException(String.format("Calculated invalid health for part %s with current health %s and max health %d. Got value %s", part.part, part.currentHealth, maxHealth, healthPercentage));
+        if (!fourColors && healthPercentage > 0.75F) {
+            return 1;
         }
-        gui.drawTexturedModalRect(rawTexX, texY, texX, texY, sizeX, sizeY);
+        if (healthPercentage > 0.5F) {
+            return 2;
+        }
+        if (!fourColors && healthPercentage > 0.25F) {
+            return 3;
+        }
+        return 4;
     }
 
     public static void tickFun() {
+        if (cooldown > 0) {
+            cooldown--;
+            return;
+        }
         angle += otherWay ? -2 : 2;
         if (angle >= 90 || angle <= 0) {
             otherWay = !otherWay;
+            if (!otherWay) {
+                cooldown = 200;
+            } else {
+                cooldown = 30;
+            }
         }
     }
 }

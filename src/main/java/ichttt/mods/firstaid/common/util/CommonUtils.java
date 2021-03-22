@@ -35,6 +35,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.common.ModContainer;
 
 import javax.annotation.Nonnull;

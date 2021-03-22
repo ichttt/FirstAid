@@ -23,6 +23,7 @@ import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.client.gui.FirstaidIngameGui;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
 import ichttt.mods.firstaid.client.util.EventCalendar;
@@ -123,8 +124,14 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void preRender(RenderGameOverlayEvent.Pre event) {
         RenderGameOverlayEvent.ElementType type = event.getType();
-        if (type == RenderGameOverlayEvent.ElementType.HEALTH && !FirstAidConfig.overlay.showVanillaHealthBar) {
-            event.setCanceled(true);
+        if (type == RenderGameOverlayEvent.ElementType.HEALTH) {
+            FirstAidConfig.Client.VanillaHealthbarMode vanillaHealthBarMode = FirstAidConfig.CLIENT.vanillaHealthBarMode.get();
+            if (vanillaHealthBarMode != FirstAidConfig.Client.VanillaHealthbarMode.NORMAL) {
+                event.setCanceled(true);
+                if (vanillaHealthBarMode == FirstAidConfig.Client.VanillaHealthbarMode.HIGHLIGHT_CRITICAL_PATH && FirstAidConfig.SERVER.vanillaHealthCalculation.get() == FirstAidConfig.Server.VanillaHealthCalculationMode.AVERAGE_ALL) {
+                    FirstaidIngameGui.renderHealth(Minecraft.getInstance().gui, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), event.getMatrixStack());
+                }
+            }
         }
     }
 

@@ -56,7 +56,6 @@ public class ClientProxy implements IProxy {
 
     @Override
     public void init() {
-        GuiIngameForge.renderHealth = FirstAidConfig.overlay.showVanillaHealthBar;
         EventCalendar.checkDate();
         ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(HUDHandler.INSTANCE);
         advancedConfigOptions = ExtraConfigManager.getAnnotatedFields(ExtraConfig.Advanced.class, FirstAidConfig.class);

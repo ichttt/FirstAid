@@ -20,9 +20,9 @@ public class AABBAlignedBoundingBox {
     }
 
     public AxisAlignedBB createAABB(AxisAlignedBB original) {
-        double sizeX = original.getXsize();
-        double sizeY = original.getYsize();
-        double sizeZ = original.getZsize();
+        double sizeX = original.maxX - original.minX;
+        double sizeY = original.maxY - original.minY;
+        double sizeZ = original.maxZ - original.minZ;
         double newMinX = original.minX + (sizeX * minX);
         double newMinY = original.minY + (sizeY * minY);
         double newMinZ = original.minZ + (sizeZ * minZ);

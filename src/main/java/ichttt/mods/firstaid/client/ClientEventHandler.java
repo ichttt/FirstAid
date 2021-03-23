@@ -38,7 +38,6 @@ import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.PlayerSizeHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -143,7 +142,7 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
-    public static void onLivingRender(RenderLivingEvent.Post<EntityPlayer, ModelPlayer> event) {
+    public static void onLivingRender(RenderLivingEvent.Post<EntityPlayer> event) {
         Entity entity = event.getEntity();
         if (entity instanceof EntityPlayer) {
             RenderManager renderDispatcher = Minecraft.getMinecraft().getRenderManager();
@@ -163,7 +162,7 @@ public class ClientEventHandler {
 
                 for (AABBAlignedBoundingBox box : allBoxes) {
                     AxisAlignedBB bbox = box.createAABB(aabb);
-                    RenderGlobal.drawSelectionBoundingBox(bbox.inflate(0.02D).move(-entity.posX, -entity.posY, -entity.posZ), r, g, b, 1.0F);
+                    RenderGlobal.drawSelectionBoundingBox(bbox.grow(0.02D).offset(-entity.posX, -entity.posY, -entity.posZ), r, g, b, 1.0F);
                     r += 0.25F;
                     g += 0.5F;
                     b += 0.1F;

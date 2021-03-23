@@ -112,6 +112,23 @@ public enum EnumPlayerPart {
     }
 
     @Nonnull
+    private List<EnumPlayerPart> getNeighboursUp() {
+        switch (this) {
+            case BODY:
+                return singletonList(HEAD);
+            case LEFT_LEG:
+            case RIGHT_LEG:
+                return singletonList(BODY);
+            case LEFT_FOOT:
+                return singletonList(LEFT_LEG);
+            case RIGHT_FOOT:
+                return singletonList(RIGHT_LEG);
+            default:
+                return emptyList();
+        }
+    }
+
+    @Nonnull
     private List<EnumPlayerPart> getNeighboursDown() {
         switch (this) {
             case HEAD:

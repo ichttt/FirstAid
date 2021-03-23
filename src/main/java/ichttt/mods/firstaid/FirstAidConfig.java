@@ -443,7 +443,7 @@ public class FirstAidConfig {
                             "HIGHLIGHT_CRITICAL_PATH show the vanilla health value and highlights the health value of the most damaged critical limb (by default head or body) using the hardcore-styled hearts for them and the normal hearts for the rest of the health. Only works if vanillaHealthCalculation is set to AVERAGE_ALL",
                             "HIDE just doesn't display the vanilla health bar at all.")
                     .translation("firstaid.config.vanillahealthbarmode")
-                    .defineEnum("showVanillaHealthBar", VanillaHealthbarMode.HIDE);
+                    .defineEnum("vanillaHealthBarMode", VanillaHealthbarMode.HIDE);
 
             overlayMode = builder
                     .comment("The design to use to visualize the health")

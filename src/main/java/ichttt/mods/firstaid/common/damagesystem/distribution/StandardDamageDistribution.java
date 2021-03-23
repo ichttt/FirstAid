@@ -54,7 +54,7 @@ public class StandardDamageDistribution extends DamageDistribution {
 
     // Private constructor, no validation required
     // This is done for speed, as these are temp distributions for the redistribution
-    private StandardDamageDistribution(List<Pair<EquipmentSlotType, EnumPlayerPart[]>> partList, boolean shuffle, boolean doNeighbours, EnumSet<EnumPlayerPart> blockedParts) {
+    private StandardDamageDistribution(List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> partList, boolean shuffle, boolean doNeighbours, EnumSet<EnumPlayerPart> blockedParts) {
         this.partList = partList;
         this.shuffle = shuffle;
         this.doNeighbours = doNeighbours;
@@ -76,7 +76,7 @@ public class StandardDamageDistribution extends DamageDistribution {
 
             // Calculate the set of blocked parts that don't need to be considered for redistribution
             EnumSet<EnumPlayerPart> blockedParts = EnumSet.copyOf(this.blockedParts);
-            for (Pair<EquipmentSlotType, EnumPlayerPart[]> pair : this.partList) {
+            for (Pair<EntityEquipmentSlot, EnumPlayerPart[]> pair : this.partList) {
                 blockedParts.addAll(Arrays.asList(pair.getRight()));
             }
 
@@ -93,13 +93,13 @@ public class StandardDamageDistribution extends DamageDistribution {
                     // Found allowed neighbours for this distribution layer. Try to redistribute
                     List<EnumPlayerPart> neighbours = new ArrayList<>(neighboursSet);
                     Collections.shuffle(neighbours);
-                    Map<EquipmentSlotType, List<EnumPlayerPart>> neighbourMapping = new LinkedHashMap<>();
+                    Map<EntityEquipmentSlot, List<EnumPlayerPart>> neighbourMapping = new LinkedHashMap<>();
                     for (EnumPlayerPart neighbour : neighbours) {
                         neighbourMapping.computeIfAbsent(neighbour.slot, type -> new ArrayList<>(3)).add(neighbour);
                     }
 
-                    List<Pair<EquipmentSlotType, EnumPlayerPart[]>> neighbourDistributions = new ArrayList<>();
-                    for (Map.Entry<EquipmentSlotType, List<EnumPlayerPart>> entry : neighbourMapping.entrySet()) {
+                    List<Pair<EntityEquipmentSlot, EnumPlayerPart[]>> neighbourDistributions = new ArrayList<>();
+                    for (Map.Entry<EntityEquipmentSlot, List<EnumPlayerPart>> entry : neighbourMapping.entrySet()) {
                         neighbourDistributions.add(Pair.of(entry.getKey(), entry.getValue().toArray(new EnumPlayerPart[0])));
                     }
 

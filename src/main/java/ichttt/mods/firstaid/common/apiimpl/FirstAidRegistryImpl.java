@@ -185,7 +185,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Nullable
     @Override
     public IDamageDistribution getDamageDistributionForSource(@Nonnull DamageSource source) {
-        IDamageDistribution distribution = distributionsStatic.get(source.msgId);
+        IDamageDistribution distribution = distributionsStatic.get(source.damageType);
         if (distribution == null) {
             //lookup if we have any matching dynamic distribution
             for (Pair<Predicate<DamageSource>, IDamageDistribution> pair : distributionsDynamic) {

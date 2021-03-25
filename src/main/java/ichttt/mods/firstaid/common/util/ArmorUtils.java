@@ -66,65 +66,65 @@ public class ArmorUtils {
         return rawToughness;
     }
 
-    private static double getArmorMultiplier(EquipmentSlotType slot) {
-        FirstAidConfig.Server config = FirstAidConfig.SERVER;
+    private static double getArmorMultiplier(EntityEquipmentSlot slot) {
+        FirstAidConfig.LocationalArmor.Armor config = FirstAidConfig.locationalArmor.armor;
         switch (slot) {
             case HEAD:
-                return config.headArmorMultiplier.get();
+                return config.headArmorMultiplier;
             case CHEST:
-                return config.chestArmorMultiplier.get();
+                return config.chestArmorMultiplier;
             case LEGS:
-                return config.legsArmorMultiplier.get();
+                return config.legsArmorMultiplier;
             case FEET:
-                return config.feetArmorMultiplier.get();
+                return config.feetArmorMultiplier;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
     }
 
-    private static double getArmorOffset(EquipmentSlotType slot) {
-        FirstAidConfig.Server config = FirstAidConfig.SERVER;
+    private static double getArmorOffset(EntityEquipmentSlot slot) {
+        FirstAidConfig.LocationalArmor.Armor config = FirstAidConfig.locationalArmor.armor;
         switch (slot) {
             case HEAD:
-                return config.headArmorOffset.get();
+                return config.headArmorOffset;
             case CHEST:
-                return config.chestArmorOffset.get();
+                return config.chestArmorOffset;
             case LEGS:
-                return config.legsArmorOffset.get();
+                return config.legsArmorOffset;
             case FEET:
-                return config.feetArmorOffset.get();
+                return config.feetArmorOffset;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
     }
 
-    private static double getToughnessMultiplier(EquipmentSlotType slot) {
-        FirstAidConfig.Server config = FirstAidConfig.SERVER;
+    private static double getToughnessMultiplier(EntityEquipmentSlot slot) {
+        FirstAidConfig.LocationalArmor.Thoughness config = FirstAidConfig.locationalArmor.thoughness;
         switch (slot) {
             case HEAD:
-                return config.headThoughnessMultiplier.get();
+                return config.headThoughnessMultiplier;
             case CHEST:
-                return config.chestThoughnessMultiplier.get();
+                return config.chestThoughnessMultiplier;
             case LEGS:
-                return config.legsThoughnessMultiplier.get();
+                return config.legsThoughnessMultiplier;
             case FEET:
-                return config.feetThoughnessMultiplier.get();
+                return config.feetThoughnessMultiplier;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
     }
 
-    private static double getToughnessOffset(EquipmentSlotType slot) {
-        FirstAidConfig.Server config = FirstAidConfig.SERVER;
+    private static double getToughnessOffset(EntityEquipmentSlot slot) {
+        FirstAidConfig.LocationalArmor.Thoughness config = FirstAidConfig.locationalArmor.thoughness;
         switch (slot) {
             case HEAD:
-                return config.headThoughnessOffset.get();
+                return config.headThoughnessOffset;
             case CHEST:
-                return config.chestThoughnessOffset.get();
+                return config.chestThoughnessOffset;
             case LEGS:
-                return config.legsThoughnessOffset.get();
+                return config.legsThoughnessOffset;
             case FEET:
-                return config.feetThoughnessOffset.get();
+                return config.feetThoughnessOffset;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
@@ -189,7 +189,7 @@ public class ArmorUtils {
 
             prop.Slot = slot.getIndex();
 
-            double ratio = prop.AbsorbRatio * getArmorModifier(slot);
+            double ratio = prop.AbsorbRatio * getArmorMultiplier(slot);
 
             double absorb = damage * ratio;
             if (absorb > 0) {

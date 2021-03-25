@@ -37,19 +37,19 @@ public class PlayerModelRenderer {
     private static boolean otherWay = false;
     private static int cooldown = 0;
 
-    public static void renderPlayerHealth(MatrixStack stack, AbstractPlayerDamageModel damageModel, boolean fourColors, AbstractGui gui, boolean flashState, float alpha, float partialTicks) {
+    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, boolean fourColors, Gui gui, boolean flashState, float alpha, float partialTicks) {
         int yOffset = flashState ? 64 : 0;
-        RenderSystem.enableAlphaTest();
-        RenderSystem.enableBlend();
-        RenderSystem.color4f(1F, 1F, 1F, 1 - (alpha / 255));
-        Minecraft.getInstance().getTextureManager().bind(HEALTH_RENDER_LOCATION);
-        if (FirstAidConfig.CLIENT.enableEasterEggs.get() && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
+        GlStateManager.pushMatrix();
+        GlStateManager.enableBlend();
+        GlStateManager.color(1F, 1F, 1F, 1 - (alpha / 255));
+        Minecraft.getMinecraft().getTextureManager().bindTexture(HEALTH_RENDER_LOCATION);
+        if (FirstAidConfig.overlay.enableEasterEggs && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
             float angle = PlayerModelRenderer.angle;
             if (cooldown == 0) {
                 angle += ((otherWay ? -partialTicks : partialTicks) * 2);
             }
-            if (FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.BOTTOM_LEFT || FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.TOP_LEFT)
-                stack.translate(angle * 1.5F, 0, 0);
+            if (FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.BOTTOM_LEFT || FirstAidConfig.overlay.pos == FirstAidConfig.Overlay.Position.TOP_LEFT)
+                GlStateManager.translate(angle * 1.5F, 0, 0);
             else
                 GlStateManager.translate(angle * 0.5F, 0, 0);
             GlStateManager.rotate(angle, 0, 0, 1);
@@ -74,7 +74,7 @@ public class PlayerModelRenderer {
     private static void drawPart(Gui gui, boolean fourColors, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
         int rawTexX = texX;
         texX += SIZE * getState(part, fourColors);
-        gui.blit(stack, rawTexX, texY, texX, texY, sizeX, sizeY);
+        gui.drawTexturedModalRect(rawTexX, texY, texX, texY, sizeX, sizeY);
     }
 
     private static int getState(AbstractDamageablePart part, boolean fourColors) {

@@ -125,11 +125,11 @@ public class ClientEventHandler {
     public static void preRender(RenderGameOverlayEvent.Pre event) {
         RenderGameOverlayEvent.ElementType type = event.getType();
         if (type == RenderGameOverlayEvent.ElementType.HEALTH) {
-            FirstAidConfig.Client.VanillaHealthbarMode vanillaHealthBarMode = FirstAidConfig.CLIENT.vanillaHealthBarMode.get();
-            if (vanillaHealthBarMode != FirstAidConfig.Client.VanillaHealthbarMode.NORMAL) {
+            FirstAidConfig.Overlay.VanillaHealthbarMode vanillaHealthBarMode = FirstAidConfig.overlay.vanillaHealthBarMode;
+            if (vanillaHealthBarMode != FirstAidConfig.Overlay.VanillaHealthbarMode.NORMAL) {
                 event.setCanceled(true);
-                if (vanillaHealthBarMode == FirstAidConfig.Client.VanillaHealthbarMode.HIGHLIGHT_CRITICAL_PATH && FirstAidConfig.SERVER.vanillaHealthCalculation.get() == FirstAidConfig.Server.VanillaHealthCalculationMode.AVERAGE_ALL) {
-                    FirstaidIngameGui.renderHealth(Minecraft.getInstance().gui, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), event.getMatrixStack());
+                if (vanillaHealthBarMode == FirstAidConfig.Overlay.VanillaHealthbarMode.HIGHLIGHT_CRITICAL_PATH && FirstAidConfig.vanillaHealthCalculation == FirstAidConfig.VanillaHealthCalculationMode.AVERAGE_ALL) {
+                    FirstaidIngameGui.renderHealth(Minecraft.getMinecraft().ingameGUI, event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight());
                 }
             }
         }

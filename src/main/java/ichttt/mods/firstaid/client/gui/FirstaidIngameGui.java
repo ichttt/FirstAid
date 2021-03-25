@@ -18,30 +18,50 @@
 
 package ichttt.mods.firstaid.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
+import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.IngameGui;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.Util;
+import net.minecraft.client.gui.GuiIngame;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.client.gui.ForgeIngameGui;
+import net.minecraftforge.client.GuiIngameForge;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.lang.reflect.Field;
+
+import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HEALTH;
+
+@SideOnly(Side.CLIENT)
 public class FirstaidIngameGui {
+    private static final Field eventParentField;
 
-    // Copy of ForgeIngameGui#renderHealth, modified to fit being called from an event listener and to support different textures for different parts of the texture
-    public static void renderHealth(IngameGui gui, int width, int height, MatrixStack mStack) {
+    static {
+        Field f;
+        try {
+            f = GuiIngameForge.class.getDeclaredField("eventParent");
+            f.setAccessible(true);
+        } catch (ReflectiveOperationException e) {
+            FirstAid.LOGGER.error("Failed to get eventParent", e);
+            f = null;
+        }
+        eventParentField = f;
+    }
+
+    public static void renderHealth(GuiIngame gui, int width, int height) {
         // Firstaid: No pre event, we get called from this
-        Minecraft minecraft = Minecraft.getInstance();
-        minecraft.getProfiler().push("health");
+        Minecraft mc = Minecraft.getMinecraft();
+        mc.profiler.startSection("health");
         // Firstaid: calculate criticalDamage
-        AbstractPlayerDamageModel damageModel = CommonUtils.getOptionalDamageModel(minecraft.player).orElse(null);
+        AbstractPlayerDamageModel damageModel = mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
         int criticalHalfHearts;
         if (damageModel != null) {
             float criticalHealth = Float.MAX_VALUE;
@@ -50,62 +70,62 @@ public class FirstaidIngameGui {
                     criticalHealth = Math.min(criticalHealth, part.currentHealth);
                 }
             }
-            criticalHealth = (criticalHealth / (float) damageModel.getCurrentMaxHealth()) * minecraft.player.getMaxHealth();
+            criticalHealth = (criticalHealth / (float) damageModel.getCurrentMaxHealth()) * mc.player.getMaxHealth();
             criticalHalfHearts = MathHelper.ceil(criticalHealth);
         } else {
             criticalHalfHearts = 0;
         }
-        RenderSystem.enableBlend();
+        GlStateManager.enableBlend();
 
-        PlayerEntity player = (PlayerEntity)minecraft.getCameraEntity();
+        EntityPlayer player = (EntityPlayer)mc.getRenderViewEntity();
         int health = MathHelper.ceil(player.getHealth());
-        boolean highlight = gui.healthBlinkTime > (long)gui.tickCount && (gui.healthBlinkTime - (long)gui.tickCount) / 3L %2L == 1L;
+        boolean highlight = gui.healthUpdateCounter > (long)gui.updateCounter && (gui.healthUpdateCounter - (long)gui.updateCounter) / 3L %2L == 1L;
 
-        if (health < gui.lastHealth && player.invulnerableTime > 0)
+        if (health < gui.playerHealth && player.hurtResistantTime > 0)
         {
-            gui.lastHealthTime = Util.getMillis();
-            gui.healthBlinkTime = (long)(gui.tickCount + 20);
+            gui.lastSystemTime = Minecraft.getSystemTime();
+            gui.healthUpdateCounter = (long)(gui.updateCounter + 20);
         }
-        else if (health > gui.lastHealth && player.invulnerableTime > 0)
+        else if (health > gui.playerHealth && player.hurtResistantTime > 0)
         {
-            gui.lastHealthTime = Util.getMillis();
-            gui.healthBlinkTime = (long)(gui.tickCount + 10);
-        }
-
-        if (Util.getMillis() - gui.lastHealthTime > 1000L)
-        {
-            gui.lastHealth = health;
-            gui.displayHealth = health;
-            gui.lastHealthTime = Util.getMillis();
+            gui.lastSystemTime = Minecraft.getSystemTime();
+            gui.healthUpdateCounter = (long)(gui.updateCounter + 10);
         }
 
-        gui.lastHealth = health;
-        int healthLast = gui.displayHealth;
+        if (Minecraft.getSystemTime() - gui.lastSystemTime > 1000L)
+        {
+            gui.playerHealth = health;
+            gui.lastPlayerHealth = health;
+            gui.lastSystemTime = Minecraft.getSystemTime();
+        }
 
-        ModifiableAttributeInstance attrMaxHealth = player.getAttribute(Attributes.MAX_HEALTH);
-        float healthMax = (float)attrMaxHealth.getValue();
+        gui.playerHealth = health;
+        int healthLast = gui.lastPlayerHealth;
+
+        IAttributeInstance attrMaxHealth = player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
+        float healthMax = (float)attrMaxHealth.getAttributeValue();
         float absorb = MathHelper.ceil(player.getAbsorptionAmount());
 
         int healthRows = MathHelper.ceil((healthMax + absorb) / 2.0F / 10.0F);
         int rowHeight = Math.max(10 - (healthRows - 2), 3);
 
-        gui.random.setSeed((long)(gui.tickCount * 312871));
+        gui.rand.setSeed((long)(gui.updateCounter * 312871));
 
         int left = width / 2 - 91;
-        int top = height - ForgeIngameGui.left_height;
-        ForgeIngameGui.left_height += (healthRows * rowHeight);
-        if (rowHeight != 10) ForgeIngameGui.left_height += 10 - rowHeight;
+        int top = height - GuiIngameForge.left_height;
+        GuiIngameForge.left_height += (healthRows * rowHeight);
+        if (rowHeight != 10) GuiIngameForge.left_height += 10 - rowHeight;
 
         int regen = -1;
-        if (player.hasEffect(Effects.REGENERATION))
+        if (player.isPotionActive(MobEffects.REGENERATION))
         {
-            regen = gui.tickCount % 25;
+            regen = gui.updateCounter % 25;
         }
 
         final int BACKGROUND = (highlight ? 25 : 16);
         int MARGIN = 16;
-        if (player.hasEffect(Effects.POISON))      MARGIN += 36;
-        else if (player.hasEffect(Effects.WITHER)) MARGIN += 72;
+        if (player.isPotionActive(MobEffects.POISON))      MARGIN += 36;
+        else if (player.isPotionActive(MobEffects.WITHER)) MARGIN += 72;
         float absorbRemaining = absorb;
 
         for (int i = MathHelper.ceil((healthMax + absorb) / 2.0F) - 1; i >= 0; --i)
@@ -117,54 +137,66 @@ public class FirstaidIngameGui {
             int x = left + i % 10 * 8;
             int y = top - row * rowHeight;
 
-            if (health <= 4) y += gui.random.nextInt(2);
+            if (health <= 4) y += gui.rand.nextInt(2);
             if (i == regen) y -= 2;
 
-            gui.blit(mStack, x, y, BACKGROUND, TOP, 9, 9);
+            gui.drawTexturedModalRect(x, y, BACKGROUND, TOP, 9, 9);
 
             if (highlight)
             {
                 if (thisHalfCritical) {
-                    int oldBlitOffset = gui.getBlitOffset();
-                    gui.setBlitOffset(oldBlitOffset + 1000);
-                    gui.blit(mStack, x, y, MARGIN + 63, 9 * 5, 9, 9);
-                    gui.setBlitOffset(oldBlitOffset);
+                    float oldBlitOffset = gui.zLevel;
+                    gui.zLevel += 1000;
+                    gui.drawTexturedModalRect(x, y, MARGIN + 63, 9 * 5, 9, 9);
+                    gui.zLevel = oldBlitOffset;
                 }
                 if (i * 2 + 1 < healthLast)
-                    gui.blit(mStack, x + (thisHalfCritical ? 5 : 0), y, MARGIN + 54 + (thisHalfCritical ? 5 : 0), TOP, 9 - (thisHalfCritical ? 5 : 0), 9); //6
+                    gui.drawTexturedModalRect(x + (thisHalfCritical ? 5 : 0), y, MARGIN + 54 + (thisHalfCritical ? 5 : 0), TOP, 9 - (thisHalfCritical ? 5 : 0), 9); //6
                 else if (i * 2 + 1 == healthLast)
-                    gui.blit(mStack, x, y, MARGIN + 63, TOP, 9, 9); //7
+                    gui.drawTexturedModalRect(x, y, MARGIN + 63, TOP, 9, 9); //7
             }
 
             if (absorbRemaining > 0.0F)
             {
                 if (absorbRemaining == absorb && absorb % 2.0F == 1.0F)
                 {
-                    gui.blit(mStack, x, y, MARGIN + 153, TOP, 9, 9); //17
+                    gui.drawTexturedModalRect(x, y, MARGIN + 153, TOP, 9, 9); //17
                     absorbRemaining -= 1.0F;
                 }
                 else
                 {
-                    gui.blit(mStack, x, y, MARGIN + 144, TOP, 9, 9); //16
+                    gui.drawTexturedModalRect(x, y, MARGIN + 144, TOP, 9, 9); //16
                     absorbRemaining -= 2.0F;
                 }
             }
             else
             {
                 if (thisHalfCritical) {
-                    int oldBlitOffset = gui.getBlitOffset();
-                    gui.setBlitOffset(oldBlitOffset + 10);
-                    gui.blit(mStack, x, y, MARGIN + 45, 9 * 5, 9, 9);
-                    gui.setBlitOffset(oldBlitOffset);
+                    float oldBlitOffset = gui.zLevel;
+                    gui.zLevel += 1000;
+                    gui.drawTexturedModalRect(x, y, MARGIN + 45, 9 * 5, 9, 9);
+                    gui.zLevel = oldBlitOffset;
                 }
                 if (i * 2 + 1 < health)
-                    gui.blit(mStack, x + (thisHalfCritical ? 5 : 0), y, MARGIN + 36 + (thisHalfCritical ? 5 : 0), TOP, 9 - (thisHalfCritical ? 5 : 0), 9); //4
+                    gui.drawTexturedModalRect(x + (thisHalfCritical ? 5 : 0), y, MARGIN + 36 + (thisHalfCritical ? 5 : 0), TOP, 9 - (thisHalfCritical ? 5 : 0), 9); //4
                 else if (i * 2 + 1 == health && !thisHalfCritical)
-                    gui.blit(mStack, x, y, MARGIN + 45, TOP, 9, 9); //5
+                    gui.drawTexturedModalRect(x, y, MARGIN + 45, TOP, 9, 9); //5
             }
         }
 
-        RenderSystem.disableBlend();
-        minecraft.getProfiler().pop();
+        GlStateManager.disableBlend();
+        mc.profiler.endSection();
+        if (eventParentField != null) {
+            RenderGameOverlayEvent event;
+            try {
+                 event = (RenderGameOverlayEvent) eventParentField.get(gui);
+            } catch (IllegalAccessException e) {
+                FirstAid.LOGGER.error("Failed to access eventParentField", e);
+                event = null;
+            }
+            if (event != null) {
+                MinecraftForge.EVENT_BUS.post(new RenderGameOverlayEvent.Post(event, HEALTH));
+            }
+        }
     }
 }

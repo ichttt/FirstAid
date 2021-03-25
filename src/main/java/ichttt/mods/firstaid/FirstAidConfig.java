@@ -53,6 +53,13 @@ public class FirstAidConfig {
     @ExtraConfig.Advanced
     public static final Debuffs debuffs = new Debuffs();
 
+    @Config.Comment("Specify how the locational armor is calculated")
+    @Config.LangKey("firstaid.config.locationalarmor")
+    @Config.RequiresWorldRestart
+    @ExtraConfig.Advanced
+    @ExtraConfig.Sync
+    public static final LocationalArmor locationalArmor = new LocationalArmor();
+
     @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
     @Config.LangKey("firstaid.config.enablesoundsystem")
     @ExtraConfig.Advanced
@@ -80,7 +87,7 @@ public class FirstAidConfig {
     @Config.RequiresMcRestart
     public static boolean hardMode = false;
 
-    @Config.Comment("Specifies how the vanilla health is calculated. Affects the visual health bar, as well as the value other mods get when they query the player health.\n" +
+    @Config.Comment("Specifies how the vanilla health is calculated. Affects the vanilla visual health bar, as well as the value other mods get to see when they query the player health.\n" +
             "AVERAGE_ALL simply takes all limbs and calculates the average of it.\n" +
             "AVERAGE_CRITICAL takes all critical limbs and calculates the average of it\n" +
             "MIN_CRITICAl takes the smallest health value of all critical limb\n" +
@@ -179,7 +186,7 @@ public class FirstAidConfig {
     public static class Overlay {
 
         public enum OverlayMode {
-            OFF, NUMBERS, HEARTS, PLAYER_MODEL
+            OFF, NUMBERS, HEARTS, PLAYER_MODEL, PLAYER_MODEL_4_COLORS
         }
 
         public enum Position {
@@ -188,6 +195,10 @@ public class FirstAidConfig {
 
         public enum TooltipMode {
             REPLACE, APPEND, NONE
+        }
+
+        public enum VanillaHealthbarMode {
+            NORMAL, HIGHLIGHT_CRITICAL_PATH, HIDE
         }
 
         public static class DisplayMode {
@@ -207,9 +218,12 @@ public class FirstAidConfig {
             }
         }
 
-        @Config.Comment("True if the main health bar should be rendered (Will be average health)")
-        @Config.LangKey("firstaid.config.showvanillahealthbar")
-        public boolean showVanillaHealthBar = false;
+        @Config.Comment({"The mode how to show the mc vanilla health bar.\n" +
+                "NORMAL shows the vanilla health value that calculated the way vanillaHealthCalculation is specified (server config)\n" +
+                "HIGHLIGHT_CRITICAL_PATH show the vanilla health value and highlights the health value of the most damaged critical limb (by default head or body) using the hardcore-styled hearts for them and the normal hearts for the rest of the health. Only works if vanillaHealthCalculation is set to AVERAGE_ALL\n" +
+                "HIDE just doesn't display the vanilla health bar at all."})
+        @Config.LangKey("firstaid.config.vanillahealthbarmode")
+        public VanillaHealthbarMode vanillaHealthBarMode = VanillaHealthbarMode.HIDE;
 
         @Config.Comment("Specifies when and how the HUD should be displayed")
         @Config.LangKey("firstaid.config.displaymode")
@@ -351,6 +365,62 @@ public class FirstAidConfig {
             @Config.Comment("How strong the potion effect should stay. If the first condition from the healthPercentageLeft config is met, the first value in this list will be taken")
             @Config.RangeInt(min = 0, max = Byte.MAX_VALUE)
             public int[] debuffStrength;
+        }
+    }
+
+    public static class LocationalArmor {
+        public final Armor armor = new Armor();
+        public final Thoughness thoughness = new Thoughness();
+
+        public static class Armor {
+            @Config.RangeDouble(min = 1D, max = 16D)
+            public double headArmorMultiplier = 6D;
+
+            @Config.RangeDouble(min = 1D, max = 16D)
+            public double chestArmorMultiplier = 2.5D;
+
+            @Config.RangeDouble(min = 1D, max = 16D)
+            public double legsArmorMultiplier = 3D;
+
+            @Config.RangeDouble(min = 1D, max = 16D)
+            public double feetArmorMultiplier = 6D;
+
+
+            @Config.RangeDouble(min = 0D, max = 4D)
+            public double headArmorOffset = 1D;
+            @Config.RangeDouble(min = 0D, max = 4D)
+            public double chestArmorOffset = 0D;
+            @Config.RangeDouble(min = 0D, max = 4D)
+            public double legsArmorOffset = 0D;
+            @Config.RangeDouble(min = 0D, max = 4D)
+            public double feetArmorOffset = 0D;
+        }
+
+        public static class Thoughness {
+            @Config.RangeDouble(min = 1D, max = 16D)
+            public double headThoughnessMultiplier = 4D;
+
+            @Config.RangeDouble(min = 1D, max = 16D)
+            public double chestThoughnessMultiplier = 3D;
+
+            @Config.RangeDouble(min = 1D, max = 16D)
+            public double legsThoughnessMultiplier = 3D;
+
+            @Config.RangeDouble(min = 1D, max = 16D)
+            public double feetThoughnessMultiplier = 3.5D;
+
+
+            @Config.RangeDouble(min = 0D, max = 4D)
+            public double headThoughnessOffset = 0D;
+
+            @Config.RangeDouble(min = 0D, max = 4D)
+            public double chestThoughnessOffset = 0D;
+
+            @Config.RangeDouble(min = 0D, max = 4D)
+            public double legsThoughnessOffset = 0D;
+
+            @Config.RangeDouble(min = 0D, max = 4D)
+            public double feetThoughnessOffset = 0D;
         }
     }
 }

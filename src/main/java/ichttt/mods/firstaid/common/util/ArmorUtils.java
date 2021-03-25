@@ -47,7 +47,7 @@ public class ArmorUtils {
         return getValueFromAttributes(SharedMonsterAttributes.ARMOR, slot, stack);
     }
 
-    public static double getArmorThoughness(ItemStack stack, EntityEquipmentSlot slot) {
+    public static double getArmorToughness(ItemStack stack, EntityEquipmentSlot slot) {
         return getValueFromAttributes(SharedMonsterAttributes.ARMOR_TOUGHNESS, slot, stack);
     }
 
@@ -99,32 +99,32 @@ public class ArmorUtils {
     }
 
     private static double getToughnessMultiplier(EntityEquipmentSlot slot) {
-        FirstAidConfig.LocationalArmor.Thoughness config = FirstAidConfig.locationalArmor.thoughness;
+        FirstAidConfig.LocationalArmor.Toughness config = FirstAidConfig.locationalArmor.toughness;
         switch (slot) {
             case HEAD:
-                return config.headThoughnessMultiplier;
+                return config.headToughnessMultiplier;
             case CHEST:
-                return config.chestThoughnessMultiplier;
+                return config.chestToughnessMultiplier;
             case LEGS:
-                return config.legsThoughnessMultiplier;
+                return config.legsToughnessMultiplier;
             case FEET:
-                return config.feetThoughnessMultiplier;
+                return config.feetToughnessMultiplier;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
     }
 
     private static double getToughnessOffset(EntityEquipmentSlot slot) {
-        FirstAidConfig.LocationalArmor.Thoughness config = FirstAidConfig.locationalArmor.thoughness;
+        FirstAidConfig.LocationalArmor.Toughness config = FirstAidConfig.locationalArmor.toughness;
         switch (slot) {
             case HEAD:
-                return config.headThoughnessOffset;
+                return config.headToughnessOffset;
             case CHEST:
-                return config.chestThoughnessOffset;
+                return config.chestToughnessOffset;
             case LEGS:
-                return config.legsThoughnessOffset;
+                return config.legsToughnessOffset;
             case FEET:
-                return config.feetThoughnessOffset;
+                return config.feetToughnessOffset;
             default:
                 throw new IllegalArgumentException("Invalid slot " + slot);
         }
@@ -180,7 +180,7 @@ public class ArmorUtils {
         }
         if (item instanceof ItemArmor) { //Always add normal armor (even if the item is a special armor), as forge does this as well
             totalArmor += getArmor(itemStack, slot);
-            totalToughness += getArmorThoughness(itemStack, slot);
+            totalToughness += getArmorToughness(itemStack, slot);
         }
 
         if (prop != null) {

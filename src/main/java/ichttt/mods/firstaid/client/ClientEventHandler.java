@@ -53,7 +53,6 @@ import net.minecraft.util.StringUtils;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
@@ -127,6 +126,7 @@ public class ClientEventHandler {
         if (type == RenderGameOverlayEvent.ElementType.HEALTH) {
             FirstAidConfig.Overlay.VanillaHealthbarMode vanillaHealthBarMode = FirstAidConfig.overlay.vanillaHealthBarMode;
             if (vanillaHealthBarMode != FirstAidConfig.Overlay.VanillaHealthbarMode.NORMAL) {
+                //TODO hunger texture?
                 event.setCanceled(true);
                 if (vanillaHealthBarMode == FirstAidConfig.Overlay.VanillaHealthbarMode.HIGHLIGHT_CRITICAL_PATH && FirstAidConfig.vanillaHealthCalculation == FirstAidConfig.VanillaHealthCalculationMode.AVERAGE_ALL) {
                     FirstaidIngameGui.renderHealth(Minecraft.getMinecraft().ingameGUI, event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight());
@@ -239,7 +239,7 @@ public class ClientEventHandler {
                     replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
                 }
 
-                double normalToughness = ArmorUtils.getArmorThoughness(stack, armor.getEquipmentSlot());
+                double normalToughness = ArmorUtils.getArmorToughness(stack, armor.getEquipmentSlot());
                 double totalToughness = ArmorUtils.applyToughnessModifier(armor.armorType, normalToughness);
                 if (totalToughness > 0D) {
                     String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(normalToughness), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armorToughness"));

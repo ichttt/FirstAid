@@ -105,7 +105,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
             }
         }
 
-        if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.OFF || (GuiHealthScreen.isOpen && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL && FirstAidConfig.overlay.overlayMode != FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL_4_COLORS) || !CommonUtils.isSurvivalOrAdventure(mc.player))
+        if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.OFF || (GuiHealthScreen.isOpen && !FirstAidConfig.overlay.overlayMode.isPlayerModel()) || !CommonUtils.isSurvivalOrAdventure(mc.player))
             return;
 
         if (visibleTicks != -1 && ticker < 0)
@@ -115,7 +115,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         Gui gui = mc.ingameGUI;
         int xOffset = FirstAidConfig.overlay.xOffset;
         int yOffset = FirstAidConfig.overlay.yOffset;
-        boolean playerModel = FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL || FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL_4_COLORS;
+        boolean playerModel = FirstAidConfig.overlay.overlayMode.isPlayerModel();
         switch (FirstAidConfig.overlay.pos) {
             case TOP_LEFT:
                 if (playerModel)
@@ -152,8 +152,10 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
             GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         }
         mc.profiler.endStartSection("render");
-        if (FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL || FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL_4_COLORS) {
-            PlayerModelRenderer.renderPlayerHealth(damageModel, FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL_4_COLORS, gui, flashStateManager.update(Minecraft.getSystemTime()), alpha, partialTicks);
+        if (FirstAidConfig.overlay.overlayMode.isPlayerModel()) {
+            boolean fourColors = FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL_4_COLORS || FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL_OLD_4_COLORS;
+            boolean oldModel = FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL_OLD_4_COLORS || FirstAidConfig.overlay.overlayMode == FirstAidConfig.Overlay.OverlayMode.PLAYER_MODEL_OLD_COLORS;
+            PlayerModelRenderer.renderPlayerHealth(damageModel, fourColors, oldModel, gui, flashStateManager.update(Minecraft.getSystemTime()), alpha, partialTicks);
         } else {
             int xTranslation = maxLength;
             for (AbstractDamageablePart part : damageModel) {

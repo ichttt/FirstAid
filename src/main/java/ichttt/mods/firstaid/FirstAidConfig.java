@@ -186,7 +186,11 @@ public class FirstAidConfig {
     public static class Overlay {
 
         public enum OverlayMode {
-            OFF, NUMBERS, HEARTS, PLAYER_MODEL, PLAYER_MODEL_4_COLORS
+            OFF, NUMBERS, HEARTS, PLAYER_MODEL, PLAYER_MODEL_4_COLORS, PLAYER_MODEL_OLD_COLORS, PLAYER_MODEL_OLD_4_COLORS;
+
+            public boolean isPlayerModel() {
+                return this == PLAYER_MODEL || this == PLAYER_MODEL_4_COLORS || this == PLAYER_MODEL_OLD_COLORS || this == PLAYER_MODEL_OLD_4_COLORS;
+            }
         }
 
         public enum Position {
@@ -370,7 +374,7 @@ public class FirstAidConfig {
 
     public static class LocationalArmor {
         public final Armor armor = new Armor();
-        public final Thoughness thoughness = new Thoughness();
+        public final Toughness toughness = new Toughness();
 
         public static class Armor {
             @Config.RangeDouble(min = 1D, max = 16D)
@@ -396,31 +400,31 @@ public class FirstAidConfig {
             public double feetArmorOffset = 0D;
         }
 
-        public static class Thoughness {
+        public static class Toughness {
             @Config.RangeDouble(min = 1D, max = 16D)
-            public double headThoughnessMultiplier = 4D;
+            public double headToughnessMultiplier = 4D;
 
             @Config.RangeDouble(min = 1D, max = 16D)
-            public double chestThoughnessMultiplier = 3D;
+            public double chestToughnessMultiplier = 3D;
 
             @Config.RangeDouble(min = 1D, max = 16D)
-            public double legsThoughnessMultiplier = 3D;
+            public double legsToughnessMultiplier = 3D;
 
             @Config.RangeDouble(min = 1D, max = 16D)
-            public double feetThoughnessMultiplier = 3.5D;
+            public double feetToughnessMultiplier = 3.5D;
 
 
             @Config.RangeDouble(min = 0D, max = 4D)
-            public double headThoughnessOffset = 0D;
+            public double headToughnessOffset = 0D;
 
             @Config.RangeDouble(min = 0D, max = 4D)
-            public double chestThoughnessOffset = 0D;
+            public double chestToughnessOffset = 0D;
 
             @Config.RangeDouble(min = 0D, max = 4D)
-            public double legsThoughnessOffset = 0D;
+            public double legsToughnessOffset = 0D;
 
             @Config.RangeDouble(min = 0D, max = 4D)
-            public double feetThoughnessOffset = 0D;
+            public double feetToughnessOffset = 0D;
         }
     }
 }

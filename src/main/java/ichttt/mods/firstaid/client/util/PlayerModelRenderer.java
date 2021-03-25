@@ -32,17 +32,18 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class PlayerModelRenderer {
     private static final ResourceLocation HEALTH_RENDER_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health.png");
+    private static final ResourceLocation HEALTH_RENDER_LOCATION_OLD = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health_old.png");
     private static final int SIZE = 32;
     private static int angle = 0;
     private static boolean otherWay = false;
     private static int cooldown = 0;
 
-    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, boolean fourColors, Gui gui, boolean flashState, float alpha, float partialTicks) {
+    public static void renderPlayerHealth(AbstractPlayerDamageModel damageModel, boolean fourColors, boolean oldModel, Gui gui, boolean flashState, float alpha, float partialTicks) {
         int yOffset = flashState ? 64 : 0;
         GlStateManager.pushMatrix();
         GlStateManager.enableBlend();
         GlStateManager.color(1F, 1F, 1F, 1 - (alpha / 255));
-        Minecraft.getMinecraft().getTextureManager().bindTexture(HEALTH_RENDER_LOCATION);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(oldModel ? HEALTH_RENDER_LOCATION_OLD : HEALTH_RENDER_LOCATION);
         if (FirstAidConfig.overlay.enableEasterEggs && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
             float angle = PlayerModelRenderer.angle;
             if (cooldown == 0) {

@@ -14,7 +14,7 @@ import java.util.concurrent.CountDownLatch
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
         maven { url = "http://files.minecraftforge.net/maven" }
     }
     dependencies {

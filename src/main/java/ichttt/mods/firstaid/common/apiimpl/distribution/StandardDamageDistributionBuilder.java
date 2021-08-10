@@ -57,6 +57,6 @@ public class StandardDamageDistributionBuilder extends BaseDamageDistributionBui
     public IDamageDistribution build() {
         partList.trimToSize();
         if (partList.size() == 0) throw new IllegalArgumentException("Missing parts!");
-        return new StandardDamageDistribution(partList, ignoreOrder, disableNeighbourRestDistribution);
+        return new StandardDamageDistribution(partList, ignoreOrder, !disableNeighbourRestDistribution);
     }
 }

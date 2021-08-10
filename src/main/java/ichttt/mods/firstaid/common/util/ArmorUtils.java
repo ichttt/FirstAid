@@ -33,22 +33,39 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.ISpecialArmor;
+import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.Loader;
 
 import javax.annotation.Nonnull;
 
 public class ArmorUtils {
+    public static final boolean QUALITY_TOOLS_PRESENT = Loader.isModLoaded("qualitytools");
 
-    // Use attributes instead of fields on ItemArmor, these are likely more correct
-    public static double getArmor(ItemStack stack, EntityEquipmentSlot slot) {
-        return getValueFromAttributes(SharedMonsterAttributes.ARMOR, slot, stack);
+    static {
+        if (QUALITY_TOOLS_PRESENT)
+            FirstAid.LOGGER.info("Quality Tools mod present. Enabling compat...");
     }
 
-    public static double getArmorToughness(ItemStack stack, EntityEquipmentSlot slot) {
-        return getValueFromAttributes(SharedMonsterAttributes.ARMOR_TOUGHNESS, slot, stack);
+    // Use attributes instead of fields on ItemArmor, these are likely more correct
+    public static double getArmor(ItemStack stack, EntityEquipmentSlot slot, boolean includeQualityTools) {
+        double attributeVal = getValueFromAttributes(SharedMonsterAttributes.ARMOR, slot, stack);
+        if (includeQualityTools)
+            attributeVal += getValueFromQualityTools(SharedMonsterAttributes.ARMOR, stack);
+        return attributeVal;
+    }
+
+    public static double getArmorToughness(ItemStack stack, EntityEquipmentSlot slot, boolean includeQualityTools) {
+        double attributeVal = getValueFromAttributes(SharedMonsterAttributes.ARMOR_TOUGHNESS, slot, stack);
+        if (includeQualityTools)
+            attributeVal += getValueFromQualityTools(SharedMonsterAttributes.ARMOR_TOUGHNESS, stack);
+        return attributeVal;
     }
 
     public static double applyArmorModifier(EntityEquipmentSlot slot, double rawArmor) {
@@ -66,7 +83,7 @@ public class ArmorUtils {
         return rawToughness;
     }
 
-    private static double getArmorMultiplier(EntityEquipmentSlot slot) {
+    public static double getArmorMultiplier(EntityEquipmentSlot slot) {
         FirstAidConfig.LocationalArmor.Armor config = FirstAidConfig.locationalArmor.armor;
         switch (slot) {
             case HEAD:
@@ -98,7 +115,7 @@ public class ArmorUtils {
         }
     }
 
-    private static double getToughnessMultiplier(EntityEquipmentSlot slot) {
+    public static double getToughnessMultiplier(EntityEquipmentSlot slot) {
         FirstAidConfig.LocationalArmor.Toughness config = FirstAidConfig.locationalArmor.toughness;
         switch (slot) {
             case HEAD:
@@ -134,11 +151,35 @@ public class ArmorUtils {
         return stack.getItem().getAttributeModifiers(slot, stack).get(attribute.getName()).stream().mapToDouble(AttributeModifier::getAmount).sum();
     }
 
+    public static double getValueFromQualityTools(IAttribute attribute, ItemStack stack) {
+        double ret = 0.0D;
+        if (QUALITY_TOOLS_PRESENT) {
+            NBTTagCompound tagCompound = stack.getTagCompound();
+            if (tagCompound != null && tagCompound.hasKey("Quality", Constants.NBT.TAG_COMPOUND)) {
+                NBTTagCompound quality = tagCompound.getCompoundTag("Quality");
+                if (quality.hasKey("AttributeModifiers", Constants.NBT.TAG_LIST)) {
+                    NBTTagList attributeModifiers = quality.getTagList("AttributeModifiers", Constants.NBT.TAG_COMPOUND);
+                    for (NBTBase attributeModifierRaw : attributeModifiers) {
+                        if (attributeModifierRaw instanceof NBTTagCompound) {
+                            NBTTagCompound attributeModifier = (NBTTagCompound) attributeModifierRaw;
+                            String attributeName = attributeModifier.getString("AttributeName");
+                            if (attributeName.equalsIgnoreCase(attribute.getName())) {
+                                ret += attributeModifier.getDouble("Amount");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+
     private static double getGlobalRestAttribute(EntityPlayer player, IAttribute attribute) {
         double sumOfAllAttributes = 0.0D;
         for (EntityEquipmentSlot slot : CommonUtils.ARMOR_SLOTS) {
             ItemStack otherStack = player.getItemStackFromSlot(slot);
             sumOfAllAttributes += getValueFromAttributes(attribute, slot, otherStack);
+            sumOfAllAttributes += getValueFromQualityTools(attribute, otherStack);
         }
         double all = player.getEntityAttribute(attribute).getAttributeValue();
         if (!DoubleMath.fuzzyEquals(sumOfAllAttributes, all, 0.001D)) {
@@ -179,8 +220,8 @@ public class ArmorUtils {
             prop.Toughness = armor.toughness;
         }
         if (item instanceof ItemArmor) { //Always add normal armor (even if the item is a special armor), as forge does this as well
-            totalArmor += getArmor(itemStack, slot);
-            totalToughness += getArmorToughness(itemStack, slot);
+            totalArmor += getArmor(itemStack, slot, true);
+            totalToughness += getArmorToughness(itemStack, slot, true);
         }
 
         if (prop != null) {

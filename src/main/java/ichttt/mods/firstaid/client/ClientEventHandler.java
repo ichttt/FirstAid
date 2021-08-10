@@ -45,6 +45,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
@@ -232,18 +233,34 @@ public class ClientEventHandler {
                 ItemArmor armor = (ItemArmor) item;
                 List<String> tooltip = event.getToolTip();
 
-                double normalArmor = ArmorUtils.getArmor(stack, armor.getEquipmentSlot());
+                double normalArmor = ArmorUtils.getArmor(stack, armor.getEquipmentSlot(), false);
                 double totalArmor = ArmorUtils.applyArmorModifier(armor.armorType, normalArmor);
                 if (totalArmor > 0D) {
                     String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(normalArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
                     replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
                 }
 
-                double normalToughness = ArmorUtils.getArmorToughness(stack, armor.getEquipmentSlot());
+                double normalToughness = ArmorUtils.getArmorToughness(stack, armor.getEquipmentSlot(), false);
                 double totalToughness = ArmorUtils.applyToughnessModifier(armor.armorType, normalToughness);
                 if (totalToughness > 0D) {
                     String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(normalToughness), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armorToughness"));
                     replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
+                }
+
+                if (ArmorUtils.QUALITY_TOOLS_PRESENT) {
+                    double qualityToolsNormalArmor = ArmorUtils.getValueFromQualityTools(SharedMonsterAttributes.ARMOR, stack);
+                    double qualityToolsTotalArmor = qualityToolsNormalArmor * ArmorUtils.getArmorMultiplier(armor.armorType);
+                    if (qualityToolsTotalArmor > 0D) {
+                        String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(qualityToolsNormalArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
+                        replaceOrAppend(tooltip, original, makeArmorMsg(qualityToolsTotalArmor));
+                    }
+
+                    double qualityToolsNormalToughness = ArmorUtils.getValueFromQualityTools(SharedMonsterAttributes.ARMOR_TOUGHNESS, stack);
+                    double qualityToolsTotalToughness = qualityToolsNormalToughness * ArmorUtils.getToughnessMultiplier(armor.armorType);
+                    if (qualityToolsTotalToughness > 0D) {
+                        String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(qualityToolsNormalToughness), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armorToughness"));
+                        replaceOrAppend(tooltip, original, makeToughnessMsg(qualityToolsTotalToughness));
+                    }
                 }
             }
         }

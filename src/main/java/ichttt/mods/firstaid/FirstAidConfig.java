@@ -408,7 +408,11 @@ public class FirstAidConfig {
     public static class Client {
 
         public enum OverlayMode {
-            OFF, NUMBERS, HEARTS, PLAYER_MODEL, PLAYER_MODEL_4_COLORS
+            OFF, NUMBERS, HEARTS, PLAYER_MODEL, PLAYER_MODEL_4_COLORS, PLAYER_MODEL_OLD_COLORS, PLAYER_MODEL_OLD_4_COLORS;
+
+            public boolean isPlayerModel() {
+                return this == PLAYER_MODEL || this == PLAYER_MODEL_4_COLORS || this == PLAYER_MODEL_OLD_COLORS || this == PLAYER_MODEL_OLD_4_COLORS;
+            }
         }
 
         public enum Position {

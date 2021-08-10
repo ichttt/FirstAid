@@ -204,7 +204,7 @@ public class ClientEventHandler {
                     replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
                 }
 
-                double normalToughness = ArmorUtils.getArmorThoughness(stack, armor.getSlot());
+                double normalToughness = ArmorUtils.getArmorToughness(stack, armor.getSlot());
                 double totalToughness = ArmorUtils.applyToughnessModifier(armor.getSlot(), normalToughness);
                 if (totalToughness > 0D) {
                     ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalToughness), new TranslationTextComponent("attribute.name.generic.armor_toughness")).withStyle(TextFormatting.BLUE);

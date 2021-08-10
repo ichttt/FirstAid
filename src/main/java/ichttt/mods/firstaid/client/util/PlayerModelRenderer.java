@@ -31,17 +31,18 @@ import net.minecraft.util.math.vector.Vector3f;
 
 public class PlayerModelRenderer {
     private static final ResourceLocation HEALTH_RENDER_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health.png");
+    private static final ResourceLocation HEALTH_RENDER_LOCATION_OLD = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health_old.png");
     private static final int SIZE = 32;
     private static int angle = 0;
     private static boolean otherWay = false;
     private static int cooldown = 0;
 
-    public static void renderPlayerHealth(MatrixStack stack, AbstractPlayerDamageModel damageModel, boolean fourColors, AbstractGui gui, boolean flashState, float alpha, float partialTicks) {
+    public static void renderPlayerHealth(MatrixStack stack, AbstractPlayerDamageModel damageModel, boolean fourColors, boolean oldModel, AbstractGui gui, boolean flashState, float alpha, float partialTicks) {
         int yOffset = flashState ? 64 : 0;
         RenderSystem.enableAlphaTest();
         RenderSystem.enableBlend();
         RenderSystem.color4f(1F, 1F, 1F, 1 - (alpha / 255));
-        Minecraft.getInstance().getTextureManager().bind(HEALTH_RENDER_LOCATION);
+        Minecraft.getInstance().getTextureManager().bind(oldModel ? HEALTH_RENDER_LOCATION_OLD : HEALTH_RENDER_LOCATION);
         if (FirstAidConfig.CLIENT.enableEasterEggs.get() && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
             float angle = PlayerModelRenderer.angle;
             if (cooldown == 0) {

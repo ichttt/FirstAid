@@ -47,7 +47,7 @@ public class ArmorUtils {
         return getValueFromAttributes(Attributes.ARMOR, slot, stack);
     }
 
-    public static double getArmorThoughness(ItemStack stack, EquipmentSlotType slot) {
+    public static double getArmorToughness(ItemStack stack, EquipmentSlotType slot) {
         return getValueFromAttributes(Attributes.ARMOR_TOUGHNESS, slot, stack);
     }
 

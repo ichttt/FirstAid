@@ -24,9 +24,9 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.network.MessageAddHealth;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,11 +42,11 @@ public class HealthDistribution {
         parts.addAll(Arrays.asList(partArray));
     }
 
-    public static void manageHealth(float health, AbstractPlayerDamageModel damageModel, PlayerEntity player, boolean sendChanges, boolean distribute) {
+    public static void manageHealth(float health, AbstractPlayerDamageModel damageModel, Player player, boolean sendChanges, boolean distribute) {
         if (sendChanges && player.level.isClientSide) {
             FirstAid.LOGGER.warn("The sendChanges flag was set on the client, it can however only work on the server!" ,new RuntimeException("sendChanges flag set on the client, this is not supported!"));
             sendChanges = false;
-        } else if (sendChanges && !(player instanceof ServerPlayerEntity)) { //EntityOtherPlayerMP? log something?
+        } else if (sendChanges && !(player instanceof ServerPlayer)) { //EntityOtherPlayerMP? log something?
             sendChanges = false;
         }
 
@@ -81,7 +81,7 @@ public class HealthDistribution {
         }
 
         if (sendChanges) {
-            ServerPlayerEntity playerMP = (ServerPlayerEntity) player;
+            ServerPlayer playerMP = (ServerPlayer) player;
             if (playerMP.connection == null || playerMP.connection.connection == null)
                 damageModel.scheduleResync(); //Too early to send changes, keep in mind and do it later
             else
@@ -89,12 +89,12 @@ public class HealthDistribution {
         }
     }
 
-    public static void distributeHealth(float health, PlayerEntity player, boolean sendChanges) {
+    public static void distributeHealth(float health, Player player, boolean sendChanges) {
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
         manageHealth(health, damageModel, player, sendChanges, true);
     }
 
-    public static void addRandomHealth(float health, PlayerEntity player, boolean sendChanges) {
+    public static void addRandomHealth(float health, Player player, boolean sendChanges) {
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
         manageHealth(health, damageModel, player, sendChanges, false);
     }

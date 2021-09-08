@@ -18,7 +18,8 @@
 
 package ichttt.mods.firstaid.client.tutorial;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
@@ -28,12 +29,13 @@ import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class GuiTutorial extends Screen {
     private final GuiHealthScreen parent;
@@ -43,7 +45,7 @@ public class GuiTutorial extends Screen {
 
     @SuppressWarnings("deprecation") // we still need this method
     public GuiTutorial() {
-        super(new TranslationTextComponent("firstaid.tutorial"));
+        super(new TranslatableComponent("firstaid.tutorial"));
         this.demoModel = PlayerDamageModel.create();
         this.parent = new GuiHealthScreen(demoModel);
         this.action = new TutorialAction(this);
@@ -73,36 +75,36 @@ public class GuiTutorial extends Screen {
     public void init() {
         parent.init(minecraft, this.width, this.height);
         guiTop = parent.guiTop - 30;
-        addButton(new Button(parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, new StringTextComponent(">"), button -> {
+        addRenderableWidget(new Button(parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, new TextComponent(">"), button -> {
             if (action.hasNext()) GuiTutorial.this.action.next();
             else {
                 FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
                 minecraft.setScreen(new GuiHealthScreen(CommonUtils.getDamageModel(minecraft.player)));
             }
         }));
-        for (Widget button : parent.getButtons()) {
+        for (AbstractWidget button : parent.getButtons()) {
             if (button == parent.cancelButton) {
-                addButton(new Button(button.x, button.y, button.getWidth(), button.getHeight(), button.getMessage(), ignored -> {
+                addRenderableWidget(new Button(button.x, button.y, button.getWidth(), button.getHeight(), button.getMessage(), ignored -> {
                     FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
                     minecraft.setScreen(null);
                 }));
                 continue;
             }
-            addButton(button);
+            addRenderableWidget(button);
         }
         parent.getButtons().clear();
     }
 
-    public void drawOffsetString(MatrixStack stack, String s, int yOffset) {
+    public void drawOffsetString(PoseStack stack, String s, int yOffset) {
         drawString(stack, minecraft.font, s, parent.guiLeft + 30, guiTop + yOffset, 0xFFFFFF);
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         stack.pushPose();
         parent.render(stack, mouseX, mouseY, partialTicks);
         stack.popPose();
-        minecraft.getTextureManager().bind(HealthRenderUtils.GUI_LOCATION);
+        RenderSystem.setShaderTexture(0, HealthRenderUtils.GUI_LOCATION);
         blit(stack, parent.guiLeft, guiTop, 0, 139, GuiHealthScreen.xSize, 28);
         stack.pushPose();
         this.action.draw(stack);

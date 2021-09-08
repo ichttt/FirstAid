@@ -23,20 +23,20 @@ import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.client.util.InputMappings;
-import net.minecraft.resources.IReloadableResourceManager;
-import net.minecraft.util.Hand;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.world.InteractionHand;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fmlclient.registry.ClientRegistry;
 import org.lwjgl.glfw.GLFW;
 
 
 public class ClientHooks {
-    public static final KeyBinding SHOW_WOUNDS = new KeyBinding("keybinds.show_wounds", KeyConflictContext.UNIVERSAL, InputMappings.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_H), "First Aid");
+    public static final KeyMapping SHOW_WOUNDS = new KeyMapping("keybinds.show_wounds", KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_H), "First Aid");
 
     public static void setup(FMLClientSetupEvent event) {
         FirstAid.LOGGER.debug("Loading ClientHooks");
@@ -46,10 +46,10 @@ public class ClientHooks {
     }
 
     public static void lateSetup(FMLLoadCompleteEvent event) { //register after the reload listener for language has registered
-        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(HUDHandler.INSTANCE);
+        ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(HUDHandler.INSTANCE);
     }
 
-    public static void showGuiApplyHealth(Hand activeHand) {
+    public static void showGuiApplyHealth(InteractionHand activeHand) {
         Minecraft mc = Minecraft.getInstance();
         GuiHealthScreen.INSTANCE = new GuiHealthScreen(CommonUtils.getDamageModel(mc.player), activeHand);
         mc.setScreen(GuiHealthScreen.INSTANCE);

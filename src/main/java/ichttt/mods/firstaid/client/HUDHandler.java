@@ -18,7 +18,7 @@
 
 package ichttt.mods.firstaid.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import ichttt.mods.firstaid.FirstAid;
@@ -32,23 +32,23 @@ import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.Util;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.util.Mth;
 import net.minecraftforge.resource.IResourceType;
-import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 import net.minecraftforge.resource.VanillaResourceType;
 
 import javax.annotation.Nonnull;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Predicate;
 
-public class HUDHandler implements ISelectiveResourceReloadListener {
+public class HUDHandler implements ResourceManagerReloadListener {
     public static final HUDHandler INSTANCE = new HUDHandler();
     private static final int FADE_TIME = 30;
     private final Map<EnumPlayerPart, String> TRANSLATION_MAP = new EnumMap<>(EnumPlayerPart.class);
@@ -57,8 +57,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
     public int ticker = -1;
 
     @Override
-    public void onResourceManagerReload(@Nonnull IResourceManager resourceManager, @Nonnull Predicate<IResourceType> resourcePredicate) {
-        if (!resourcePredicate.test(VanillaResourceType.LANGUAGES)) return;
+    public void onResourceManagerReload(@Nonnull ResourceManager resourceManager) {
         buildTranslationTable();
     }
 
@@ -77,7 +76,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         return maxLength;
     }
 
-    public void renderOverlay(MatrixStack stack, Minecraft mc, float partialTicks) {
+    public void renderOverlay(PoseStack stack, Minecraft mc, float partialTicks) {
         mc.getProfiler().push("prepare");
         if (mc.player == null)
             return;
@@ -108,8 +107,8 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
         if (visibleTicks != -1 && ticker < 0)
             return;
 
-        mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
-        AbstractGui gui = mc.gui;
+        RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
+        GuiComponent gui = mc.gui;
         int xOffset = FirstAidConfig.CLIENT.xOffset.get();
         int yOffset = FirstAidConfig.CLIENT.yOffset.get();
         boolean playerModel = overlayMode.isPlayerModel();
@@ -140,7 +139,7 @@ public class HUDHandler implements ISelectiveResourceReloadListener {
             return;
 
         boolean enableAlphaBlend = visibleTicks != -1 && ticker < FADE_TIME;
-        int alpha = enableAlphaBlend ? MathHelper.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), FirstAidConfig.CLIENT.alpha.get(), 250) : FirstAidConfig.CLIENT.alpha.get();
+        int alpha = enableAlphaBlend ? Mth.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), FirstAidConfig.CLIENT.alpha.get(), 250) : FirstAidConfig.CLIENT.alpha.get();
 
         stack.pushPose();
         stack.translate(xOffset, yOffset, 0F);

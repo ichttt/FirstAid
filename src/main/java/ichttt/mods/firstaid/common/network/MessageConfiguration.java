@@ -25,28 +25,28 @@ import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.Util;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class MessageConfiguration {
 
-    private final CompoundNBT playerDamageModel;
+    private final CompoundTag playerDamageModel;
 
-    public MessageConfiguration(CompoundNBT model) {
+    public MessageConfiguration(CompoundTag model) {
         this.playerDamageModel = model;
     }
 
-    public MessageConfiguration(PacketBuffer buffer) {
+    public MessageConfiguration(FriendlyByteBuf buffer) {
         this(buffer.readNbt());
     }
 
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeNbt(playerDamageModel);
     }
 
@@ -63,7 +63,7 @@ public class MessageConfiguration {
                 if (damageModel.hasTutorial)
                     CapProvider.tutorialDone.add(Minecraft.getInstance().player.getName().getString());
                 else
-                    Minecraft.getInstance().player.sendMessage(new StringTextComponent("[First Aid] " + I18n.get("firstaid.tutorial.hint", ClientHooks.SHOW_WOUNDS.getTranslatedKeyMessage().getString())), Util.NIL_UUID);
+                    Minecraft.getInstance().player.sendMessage(new TextComponent("[First Aid] " + I18n.get("firstaid.tutorial.hint", ClientHooks.SHOW_WOUNDS.getTranslatedKeyMessage().getString())), Util.NIL_UUID);
                 HUDHandler.INSTANCE.ticker = 200;
                 FirstAid.isSynced = true;
             });

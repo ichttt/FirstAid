@@ -31,9 +31,9 @@ import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.distribution.DamageDistributionBuilderFactoryImpl;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.sounds.SoundEvent;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
@@ -67,17 +67,17 @@ public class RegistryManager {
 
         //---DAMAGE SOURCES---
         distributionBuilderFactory.newStandardBuilder()
-                .addDistributionLayer(EquipmentSlotType.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
-                .addDistributionLayer(EquipmentSlotType.LEGS, EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)
+                .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
+                .addDistributionLayer(EquipmentSlot.LEGS, EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)
                 .registerStatic(DamageSource.FALL, DamageSource.HOT_FLOOR);
 
         distributionBuilderFactory.newStandardBuilder()
-                .addDistributionLayer(EquipmentSlotType.HEAD, EnumPlayerPart.HEAD)
+                .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
                 .registerStatic(DamageSource.ANVIL);
 
         distributionBuilderFactory.newStandardBuilder()
-                .addDistributionLayer(EquipmentSlotType.HEAD, EnumPlayerPart.HEAD)
-                .addDistributionLayer(EquipmentSlotType.CHEST, EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM)
+                .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
+                .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM)
                 .ignoreOrder()
                 .registerStatic(DamageSource.LIGHTNING_BOLT);
 
@@ -85,13 +85,13 @@ public class RegistryManager {
 
         if (FirstAidConfig.GENERAL.hardMode.get()) {
             distributionBuilderFactory.newStandardBuilder()
-                    .addDistributionLayer(EquipmentSlotType.CHEST, EnumPlayerPart.BODY)
+                    .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.BODY)
                     .disableNeighbourRestDistribution()
                     .registerStatic(DamageSource.STARVE);
 
             distributionBuilderFactory.newStandardBuilder()
-                    .addDistributionLayer(EquipmentSlotType.CHEST, EnumPlayerPart.BODY)
-                    .addDistributionLayer(EquipmentSlotType.HEAD, EnumPlayerPart.HEAD)
+                    .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.BODY)
+                    .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
                     .ignoreOrder()
                     .disableNeighbourRestDistribution()
                     .registerStatic(DamageSource.DROWN);

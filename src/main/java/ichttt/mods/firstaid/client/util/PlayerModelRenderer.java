@@ -18,16 +18,16 @@
 
 package ichttt.mods.firstaid.client.util;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.resources.ResourceLocation;
+import com.mojang.math.Vector3f;
 
 public class PlayerModelRenderer {
     private static final ResourceLocation HEALTH_RENDER_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health.png");
@@ -37,12 +37,11 @@ public class PlayerModelRenderer {
     private static boolean otherWay = false;
     private static int cooldown = 0;
 
-    public static void renderPlayerHealth(MatrixStack stack, AbstractPlayerDamageModel damageModel, boolean fourColors, boolean oldModel, AbstractGui gui, boolean flashState, float alpha, float partialTicks) {
+    public static void renderPlayerHealth(PoseStack stack, AbstractPlayerDamageModel damageModel, boolean fourColors, boolean oldModel, GuiComponent gui, boolean flashState, float alpha, float partialTicks) {
         int yOffset = flashState ? 64 : 0;
-        RenderSystem.enableAlphaTest();
         RenderSystem.enableBlend();
-        RenderSystem.color4f(1F, 1F, 1F, 1 - (alpha / 255));
-        Minecraft.getInstance().getTextureManager().bind(oldModel ? HEALTH_RENDER_LOCATION_OLD : HEALTH_RENDER_LOCATION);
+        RenderSystem.setShaderColor(1F, 1F, 1F, 1 - (alpha / 255));
+        RenderSystem.setShaderTexture(0, oldModel ? HEALTH_RENDER_LOCATION_OLD : HEALTH_RENDER_LOCATION);
         if (FirstAidConfig.CLIENT.enableEasterEggs.get() && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
             float angle = PlayerModelRenderer.angle;
             if (cooldown == 0) {
@@ -67,10 +66,10 @@ public class PlayerModelRenderer {
         drawPart(stack, gui, fourColors, damageModel.LEFT_FOOT, 8, yOffset + 56, 8, 8);
         drawPart(stack, gui, fourColors, damageModel.RIGHT_FOOT, 16, yOffset + 56, 8, 8);
 
-        RenderSystem.color4f(1F, 1F, 1F, 1F);
+        RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
     }
 
-    private static void drawPart(MatrixStack stack, AbstractGui gui, boolean fourColors, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
+    private static void drawPart(PoseStack stack, GuiComponent gui, boolean fourColors, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
         int rawTexX = texX;
         texX += SIZE * getState(part, fourColors);
         gui.blit(stack, rawTexX, texY, texX, texY, sizeX, sizeY);

@@ -21,17 +21,17 @@ package ichttt.mods.firstaid.common.network;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
 public class MessageClientRequest {
     private final Type type;
 
-    public MessageClientRequest(PacketBuffer buffer) {
+    public MessageClientRequest(FriendlyByteBuf buffer) {
         this.type = Type.TYPES[buffer.readByte()];
     }
 
@@ -39,7 +39,7 @@ public class MessageClientRequest {
         this.type = type;
     }
 
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeByte(type.ordinal());
     }
 
@@ -53,7 +53,7 @@ public class MessageClientRequest {
 
         public static void onMessage(MessageClientRequest message, Supplier<NetworkEvent.Context> supplier) {
             NetworkEvent.Context ctx = supplier.get();
-            ServerPlayerEntity player = CommonUtils.checkServer(ctx);
+            ServerPlayer player = CommonUtils.checkServer(ctx);
             if (message.type == Type.TUTORIAL_COMPLETE) {
                 CapProvider.tutorialDone.add(player.getName().getString());
                 ctx.enqueueWork(() -> CommonUtils.getDamageModel(player).hasTutorial = true);

@@ -27,32 +27,34 @@ import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
+import net.minecraft.network.syncher.SynchedEntityData.DataItem;
+
 /**
  * This is a hack to intervene all calls to absorption. It's not optimal but it's the best I could come up with without a coremod
  * This should be compatible with other mods which do so as I respect the parent in any other case.
  */
-public class DataManagerWrapper extends EntityDataManager {
-    private final PlayerEntity player;
-    private final EntityDataManager parent;
+public class DataManagerWrapper extends SynchedEntityData {
+    private final Player player;
+    private final SynchedEntityData parent;
     private boolean track = true;
 
-    public DataManagerWrapper(PlayerEntity player, EntityDataManager parent) {
+    public DataManagerWrapper(Player player, SynchedEntityData parent) {
         super(player);
         this.player = player;
         this.parent = parent;
@@ -61,28 +63,28 @@ public class DataManagerWrapper extends EntityDataManager {
     @SuppressWarnings("unchecked")
     @Override
     @Nonnull
-    public <T> T get(@Nonnull DataParameter<T> key) {
-        if (key == PlayerEntity.DATA_PLAYER_ABSORPTION_ID && player.isAlive())
+    public <T> T get(@Nonnull EntityDataAccessor<T> key) {
+        if (key == Player.DATA_PLAYER_ABSORPTION_ID && player.isAlive())
             parent.set(key, (T) CommonUtils.getDamageModel(player).getAbsorption());
         return parent.get(key);
     }
 
-    public <T> void set_impl(@Nonnull DataParameter<T> key, @Nonnull T value) {
+    public <T> void set_impl(@Nonnull EntityDataAccessor<T> key, @Nonnull T value) {
         parent.set(key, value);
     }
 
     @Override
-    public <T> void set(@Nonnull DataParameter<T> key, @Nonnull T value) {
+    public <T> void set(@Nonnull EntityDataAccessor<T> key, @Nonnull T value) {
         if (!track) {
             if (key != LivingEntity.DATA_HEALTH_ID)
                 set_impl(key, value);
             return;
         }
 
-        if (key == PlayerEntity.DATA_PLAYER_ABSORPTION_ID) {
+        if (key == Player.DATA_PLAYER_ABSORPTION_ID) {
             float floatValue = (Float) value;
-            if (player instanceof ServerPlayerEntity) { //may be EntityOtherPlayerMP as well
-                ServerPlayerEntity playerMP = (ServerPlayerEntity) player;
+            if (player instanceof ServerPlayer) { //may be EntityOtherPlayerMP as well
+                ServerPlayer playerMP = (ServerPlayer) player;
                 if (playerMP.connection != null) //also fired when connecting, ignore(otherwise the net handler would crash)
                     FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> playerMP), new MessageApplyAbsorption(floatValue));
             }
@@ -96,7 +98,7 @@ public class DataManagerWrapper extends EntityDataManager {
                 } else if ((damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).isPresent() && damageModel.orElseThrow(RuntimeException::new).isWaitingForHelp()) {
                     if (FirstAidConfig.GENERAL.debug.get())
                         CommonUtils.debugLogStacktrace("SetHealth falltrough");
-                } else if (FirstAidConfig.watchSetHealth && !Float.isInfinite(aFloat) && !Float.isNaN(aFloat) && aFloat > 0 && player instanceof ServerPlayerEntity && ((ServerPlayerEntity) player).connection != null) {
+                } else if (FirstAidConfig.watchSetHealth && !Float.isInfinite(aFloat) && !Float.isNaN(aFloat) && aFloat > 0 && player instanceof ServerPlayer && ((ServerPlayer) player).connection != null) {
                     //calculate diff
                     float orig = get(LivingEntity.DATA_HEALTH_ID);
                     if (orig > 0 && !Float.isNaN(orig) && !Float.isInfinite(orig)) {
@@ -140,25 +142,25 @@ public class DataManagerWrapper extends EntityDataManager {
 
     @Override
     @Nullable
-    public List<DataEntry<?>> packDirty() {
+    public List<DataItem<?>> packDirty() {
         return parent.packDirty();
     }
 
     @Override
     @Nullable
-    public List<DataEntry<?>> getAll() {
+    public List<DataItem<?>> getAll() {
         return parent.getAll();
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void assignValues(List<DataEntry<?>> entriesIn) {
+    public void assignValues(List<DataItem<?>> entriesIn) {
         parent.assignValues(entriesIn);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public <T> void assignValue(DataEntry<T> target, DataEntry<?> source) {
+    public <T> void assignValue(DataItem<T> target, DataItem<?> source) {
         parent.assignValue(target, source);
     }
 
@@ -173,13 +175,13 @@ public class DataManagerWrapper extends EntityDataManager {
     }
 
     @Override
-    public <T> void define(DataParameter<T> key, @Nonnull T value) {
+    public <T> void define(EntityDataAccessor<T> key, @Nonnull T value) {
         parent.define(key, value);
     }
 
     @Nonnull
     @Override
-    public <T> DataEntry<T> getItem(DataParameter<T> key) {
+    public <T> DataItem<T> getItem(EntityDataAccessor<T> key) {
         return parent.getItem(key);
     }
 }

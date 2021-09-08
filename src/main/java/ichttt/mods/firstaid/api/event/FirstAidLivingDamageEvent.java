@@ -20,8 +20,8 @@
 package ichttt.mods.firstaid.api.event;
 
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.Cancelable;
 
@@ -36,7 +36,7 @@ public class FirstAidLivingDamageEvent extends PlayerEvent {
     private final DamageSource source;
     private final float undistributedDamage;
 
-    public FirstAidLivingDamageEvent(PlayerEntity entity, AbstractPlayerDamageModel afterDamageDone, AbstractPlayerDamageModel beforeDamageDone, DamageSource source, float undistributedDamage) {
+    public FirstAidLivingDamageEvent(Player entity, AbstractPlayerDamageModel afterDamageDone, AbstractPlayerDamageModel beforeDamageDone, DamageSource source, float undistributedDamage) {
         super(entity);
         this.afterDamageDone = afterDamageDone;
         this.beforeDamageDone = beforeDamageDone;

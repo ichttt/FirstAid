@@ -20,7 +20,7 @@
 package ichttt.mods.firstaid.api.enums;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.world.entity.EquipmentSlot;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -32,8 +32,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 public enum EnumPlayerPart {
-    HEAD(EquipmentSlotType.HEAD), LEFT_ARM(EquipmentSlotType.CHEST), LEFT_LEG(EquipmentSlotType.LEGS), LEFT_FOOT(EquipmentSlotType.FEET),
-    BODY(EquipmentSlotType.CHEST), RIGHT_ARM(EquipmentSlotType.CHEST), RIGHT_LEG(EquipmentSlotType.LEGS), RIGHT_FOOT(EquipmentSlotType.FEET);
+    HEAD(EquipmentSlot.HEAD), LEFT_ARM(EquipmentSlot.CHEST), LEFT_LEG(EquipmentSlot.LEGS), LEFT_FOOT(EquipmentSlot.FEET),
+    BODY(EquipmentSlot.CHEST), RIGHT_ARM(EquipmentSlot.CHEST), RIGHT_LEG(EquipmentSlot.LEGS), RIGHT_FOOT(EquipmentSlot.FEET);
 
     public static final EnumPlayerPart[] VALUES = values();
 
@@ -65,9 +65,9 @@ public enum EnumPlayerPart {
     }
 
     private ImmutableList<EnumPlayerPart> neighbours;
-    public final EquipmentSlotType slot;
+    public final EquipmentSlot slot;
 
-    EnumPlayerPart(EquipmentSlotType slot) {
+    EnumPlayerPart(EquipmentSlot slot) {
         this.slot = slot;
     }
 
@@ -150,30 +150,6 @@ public enum EnumPlayerPart {
             default:
                 return emptyList();
         }
-    }
-
-    @Deprecated //TODO remove in 1.17. This never worked as one expected
-    public EnumPlayerPart getUp() {
-        if (this == BODY)
-            throw new RuntimeException("There is no part up from " + this);
-        return VALUES[this.ordinal() - 1];
-    }
-
-    @Deprecated //TODO remove in 1.17. This never worked as one expected
-    public EnumPlayerPart getDown() {
-        if (this == LEFT_FOOT)
-            throw new RuntimeException("There is no part down from " + this);
-        return VALUES[this.ordinal() + 1];
-    }
-
-    @Deprecated //TODO remove in 1.17. This never worked as one expected
-    public EnumPlayerPart getLeft() {
-        return VALUES[this.ordinal() - 4];
-    }
-
-    @Deprecated //TODO remove in 1.17. This never worked as one expected
-    public EnumPlayerPart getRight() {
-        return VALUES[this.ordinal() + 4];
     }
 
 }

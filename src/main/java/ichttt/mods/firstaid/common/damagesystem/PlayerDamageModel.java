@@ -35,14 +35,14 @@ import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -92,8 +92,8 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT tagCompound = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag tagCompound = new CompoundTag();
         tagCompound.put("head", HEAD.serializeNBT());
         tagCompound.put("leftArm", LEFT_ARM.serializeNBT());
         tagCompound.put("leftLeg", LEFT_LEG.serializeNBT());
@@ -107,15 +107,15 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
-        HEAD.deserializeNBT((CompoundNBT) nbt.get("head"));
-        LEFT_ARM.deserializeNBT((CompoundNBT) nbt.get("leftArm"));
-        LEFT_LEG.deserializeNBT((CompoundNBT) nbt.get("leftLeg"));
-        LEFT_FOOT.deserializeNBT((CompoundNBT) nbt.get("leftFoot"));
-        BODY.deserializeNBT((CompoundNBT) nbt.get("body"));
-        RIGHT_ARM.deserializeNBT((CompoundNBT) nbt.get("rightArm"));
-        RIGHT_LEG.deserializeNBT((CompoundNBT) nbt.get("rightLeg"));
-        RIGHT_FOOT.deserializeNBT((CompoundNBT) nbt.get("rightFoot"));
+    public void deserializeNBT(CompoundTag nbt) {
+        HEAD.deserializeNBT((CompoundTag) nbt.get("head"));
+        LEFT_ARM.deserializeNBT((CompoundTag) nbt.get("leftArm"));
+        LEFT_LEG.deserializeNBT((CompoundTag) nbt.get("leftLeg"));
+        LEFT_FOOT.deserializeNBT((CompoundTag) nbt.get("leftFoot"));
+        BODY.deserializeNBT((CompoundTag) nbt.get("body"));
+        RIGHT_ARM.deserializeNBT((CompoundTag) nbt.get("rightArm"));
+        RIGHT_LEG.deserializeNBT((CompoundTag) nbt.get("rightLeg"));
+        RIGHT_FOOT.deserializeNBT((CompoundTag) nbt.get("rightFoot"));
         if (nbt.contains("morphineTicks")) { //legacy - we still have to write it
             morphineTicksLeft = nbt.getInt("morphineTicks");
             needsMorphineUpdate = true;
@@ -125,7 +125,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     @Override
-    public void tick(World world, PlayerEntity player) {
+    public void tick(Level world, Player player) {
         if (isDead(player))
             return;
         world.getProfiler().push("FirstAidPlayerModel");
@@ -148,7 +148,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             resyncTimer--;
             if (resyncTimer == 0) {
                 resyncTimer = -1;
-                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(this, true));
+                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncDamageModel(this, true));
             }
         }
 
@@ -156,7 +156,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             FirstAid.LOGGER.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe
         } else {
             if (newCurrentHealth != prevHealthCurrent)
-                ((DataManagerWrapper) player.entityData).set_impl(PlayerEntity.DATA_HEALTH_ID, newCurrentHealth);
+                ((DataManagerWrapper) player.entityData).set_impl(Player.DATA_HEALTH_ID, newCurrentHealth);
             prevHealthCurrent = newCurrentHealth;
         }
 
@@ -167,9 +167,9 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
         //morphine update
         if (this.needsMorphineUpdate) {
-            player.addEffect(new EffectInstance(EventHandler.MORPHINE, this.morphineTicksLeft, 0, false, false));
+            player.addEffect(new MobEffectInstance(EventHandler.MORPHINE, this.morphineTicksLeft, 0, false, false));
         }
-        EffectInstance morphine = player.getEffect(EventHandler.MORPHINE);
+        MobEffectInstance morphine = player.getEffect(EventHandler.MORPHINE);
         if (!this.needsMorphineUpdate) {
             this.morphineTicksLeft = morphine == null ? 0 : morphine.getDuration();
         }
@@ -196,8 +196,8 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     @Override
-    public void applyMorphine(PlayerEntity player) {
-        player.addEffect(new EffectInstance(EventHandler.MORPHINE, getRandMorphineDuration(), 0, false, false));
+    public void applyMorphine(Player player) {
+        player.addEffect(new MobEffectInstance(EventHandler.MORPHINE, getRandMorphineDuration(), 0, false, false));
     }
 
     @Deprecated
@@ -227,7 +227,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         };
     }
 
-    private float calculateNewCurrentHealth(PlayerEntity player) {
+    private float calculateNewCurrentHealth(Player player) {
         float currentHealth = 0;
         FirstAidConfig.Server.VanillaHealthCalculationMode mode = FirstAidConfig.SERVER.vanillaHealthCalculation.get();
         if (noCritical) mode = FirstAidConfig.Server.VanillaHealthCalculationMode.AVERAGE_ALL;
@@ -287,7 +287,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     @Override
-    public boolean isDead(@Nullable PlayerEntity player) {
+    public boolean isDead(@Nullable Player player) {
 //        IRevival revival = CommonUtils.getRevivalIfPossible(player); TODO PR COMPAT
 //        if (revival != null) {
 //            if (!revival.isHealty() && !revival.isDead()) {
@@ -352,7 +352,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     @Override
-    public void sleepHeal(PlayerEntity player) {
+    public void sleepHeal(Player player) {
         if (sleepBlockTicks > 0)
             return;
         CommonUtils.healPlayerByPercentage(FirstAidConfig.SERVER.sleepHealPercentage.get(), this, player);
@@ -369,7 +369,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     @Override
-    public void stopWaitingForHelp(PlayerEntity player) {
+    public void stopWaitingForHelp(Player player) {
         if (FirstAidConfig.GENERAL.debug.get()) {
             FirstAid.LOGGER.info("Help waiting done!");
         }
@@ -384,7 +384,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     @Override
-    public void revivePlayer(PlayerEntity player) {
+    public void revivePlayer(Player player) {
         if (FirstAidConfig.GENERAL.debug.get()) {
             CommonUtils.debugLogStacktrace("Reviving player");
         }
@@ -395,12 +395,12 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             }
         }
         //make sure to resync the client health
-        if (!player.level.isClientSide && player instanceof ServerPlayerEntity)
-            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(this, true)); //Upload changes to the client
+        if (!player.level.isClientSide && player instanceof ServerPlayer)
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncDamageModel(this, true)); //Upload changes to the client
     }
 
     @Override
-    public void runScaleLogic(PlayerEntity player) {
+    public void runScaleLogic(Player player) {
         if (FirstAidConfig.SERVER.scaleMaxHealth.get()) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
             player.level.getProfiler().push("healthscaling");
             float globalFactor = player.getMaxHealth() / 20F;

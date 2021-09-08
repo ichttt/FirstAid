@@ -19,7 +19,7 @@
 package ichttt.mods.firstaid.common.damagesystem;
 
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.function.IntSupplier;
 

@@ -34,9 +34,9 @@ import ichttt.mods.firstaid.common.damagesystem.debuff.OnHitDebuff;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.damagesource.DamageSource;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;

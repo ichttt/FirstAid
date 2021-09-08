@@ -21,7 +21,7 @@ package ichttt.mods.firstaid.common.apiimpl.distribution;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.distribution.IDamageDistributionBuilder;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.damagesource.DamageSource;
 
 import java.util.function.Predicate;
 

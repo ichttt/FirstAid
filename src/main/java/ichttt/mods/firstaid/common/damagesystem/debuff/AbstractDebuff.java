@@ -20,8 +20,8 @@ package ichttt.mods.firstaid.common.damagesystem.debuff;
 
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
-import net.minecraft.potion.Effect;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
@@ -30,14 +30,14 @@ import java.util.function.BooleanSupplier;
 
 public abstract class AbstractDebuff implements IDebuff {
     @Nonnull
-    public final Effect effect;
+    public final MobEffect effect;
     @Nonnull
     public final BooleanSupplier isEnabled;
     @Nonnull
     protected final Float2IntLinkedOpenHashMap map;
 
     public AbstractDebuff(@Nonnull String potionName, @Nonnull Float2IntLinkedOpenHashMap map, @Nonnull BooleanSupplier isEnabled) {
-        this.effect = Objects.requireNonNull(ForgeRegistries.POTIONS.getValue(new ResourceLocation(potionName)));
+        this.effect = Objects.requireNonNull(ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(potionName)));
         this.isEnabled = isEnabled;
         this.map = map;
     }

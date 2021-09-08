@@ -19,9 +19,9 @@
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.damagesource.DamageSource;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -34,14 +34,14 @@ import java.util.List;
 import java.util.Map;
 
 public class StandardDamageDistribution extends DamageDistribution {
-    private final List<Pair<EquipmentSlotType, EnumPlayerPart[]>> partList;
+    private final List<Pair<EquipmentSlot, EnumPlayerPart[]>> partList;
     private final boolean shuffle;
     private final boolean doNeighbours;
     private final EnumSet<EnumPlayerPart> blockedParts;
 
-    public StandardDamageDistribution(List<Pair<EquipmentSlotType, EnumPlayerPart[]>> partList, boolean shuffle, boolean doNeighbours) {
+    public StandardDamageDistribution(List<Pair<EquipmentSlot, EnumPlayerPart[]>> partList, boolean shuffle, boolean doNeighbours) {
         this.partList = partList;
-        for (Pair<EquipmentSlotType, EnumPlayerPart[]> pair : partList) {
+        for (Pair<EquipmentSlot, EnumPlayerPart[]> pair : partList) {
             for (EnumPlayerPart part : pair.getRight()) {
                 if (part.slot != pair.getLeft())
                     throw new RuntimeException(part + " is not a member of " + pair.getLeft());
@@ -54,7 +54,7 @@ public class StandardDamageDistribution extends DamageDistribution {
 
     // Private constructor, no validation required
     // This is done for speed, as these are temp distributions for the redistribution
-    private StandardDamageDistribution(List<Pair<EquipmentSlotType, EnumPlayerPart[]>> partList, boolean shuffle, boolean doNeighbours, EnumSet<EnumPlayerPart> blockedParts) {
+    private StandardDamageDistribution(List<Pair<EquipmentSlot, EnumPlayerPart[]>> partList, boolean shuffle, boolean doNeighbours, EnumSet<EnumPlayerPart> blockedParts) {
         this.partList = partList;
         this.shuffle = shuffle;
         this.doNeighbours = doNeighbours;
@@ -63,20 +63,20 @@ public class StandardDamageDistribution extends DamageDistribution {
 
     @Override
     @Nonnull
-    protected List<Pair<EquipmentSlotType, EnumPlayerPart[]>> getPartList() {
+    protected List<Pair<EquipmentSlot, EnumPlayerPart[]>> getPartList() {
         if (this.shuffle) Collections.shuffle(this.partList);
         return this.partList;
     }
 
     @Override
-    public float distributeDamage(float damage, @Nonnull PlayerEntity player, @Nonnull DamageSource source, boolean addStat) {
+    public float distributeDamage(float damage, @Nonnull Player player, @Nonnull DamageSource source, boolean addStat) {
         float rest = super.distributeDamage(damage, player, source, addStat);
         if (rest > 0 && doNeighbours) {
             EnumSet<EnumPlayerPart> neighboursSet = EnumSet.noneOf(EnumPlayerPart.class);
 
             // Calculate the set of blocked parts that don't need to be considered for redistribution
             EnumSet<EnumPlayerPart> blockedParts = EnumSet.copyOf(this.blockedParts);
-            for (Pair<EquipmentSlotType, EnumPlayerPart[]> pair : this.partList) {
+            for (Pair<EquipmentSlot, EnumPlayerPart[]> pair : this.partList) {
                 blockedParts.addAll(Arrays.asList(pair.getRight()));
             }
 
@@ -93,13 +93,13 @@ public class StandardDamageDistribution extends DamageDistribution {
                     // Found allowed neighbours for this distribution layer. Try to redistribute
                     List<EnumPlayerPart> neighbours = new ArrayList<>(neighboursSet);
                     Collections.shuffle(neighbours);
-                    Map<EquipmentSlotType, List<EnumPlayerPart>> neighbourMapping = new LinkedHashMap<>();
+                    Map<EquipmentSlot, List<EnumPlayerPart>> neighbourMapping = new LinkedHashMap<>();
                     for (EnumPlayerPart neighbour : neighbours) {
                         neighbourMapping.computeIfAbsent(neighbour.slot, type -> new ArrayList<>(3)).add(neighbour);
                     }
 
-                    List<Pair<EquipmentSlotType, EnumPlayerPart[]>> neighbourDistributions = new ArrayList<>();
-                    for (Map.Entry<EquipmentSlotType, List<EnumPlayerPart>> entry : neighbourMapping.entrySet()) {
+                    List<Pair<EquipmentSlot, EnumPlayerPart[]>> neighbourDistributions = new ArrayList<>();
+                    for (Map.Entry<EquipmentSlot, List<EnumPlayerPart>> entry : neighbourMapping.entrySet()) {
                         neighbourDistributions.add(Pair.of(entry.getKey(), entry.getValue().toArray(new EnumPlayerPart[0])));
                     }
 

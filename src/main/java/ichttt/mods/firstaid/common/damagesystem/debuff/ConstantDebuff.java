@@ -20,9 +20,9 @@ package ichttt.mods.firstaid.common.damagesystem.debuff;
 
 import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.floats.Float2IntMap;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.potion.EffectInstance;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
 
 import javax.annotation.Nonnull;
 import java.util.function.BooleanSupplier;
@@ -52,22 +52,22 @@ public class ConstantDebuff extends AbstractDebuff {
     }
 
     @Override
-    public void handleDamageTaken(float damage, float healthPerMax, ServerPlayerEntity player) {
+    public void handleDamageTaken(float damage, float healthPerMax, ServerPlayer player) {
         syncMultiplier(healthPerMax);
     }
 
     @Override
-    public void handleHealing(float healingDone, float healthPerMax, ServerPlayerEntity player) {
+    public void handleHealing(float healingDone, float healthPerMax, ServerPlayer player) {
         syncMultiplier(healthPerMax);
     }
 
     @Override
-    public void update(PlayerEntity player) {
+    public void update(Player player) {
         this.update(player, -1);
     }
 
     @Override
-    public void update(PlayerEntity player, float healthPerMax) {
+    public void update(Player player, float healthPerMax) {
         if (!this.isEnabled.getAsBoolean()) return;
         if (activeMultiplier == 0) {
             ticks = 0;
@@ -76,7 +76,7 @@ public class ConstantDebuff extends AbstractDebuff {
                 if (healthPerMax != -1)
                     syncMultiplier(healthPerMax); //There are apparently some cases where the multiplier does not sync up right... fix this
                 if (activeMultiplier != 0)
-                    player.addEffect(new EffectInstance(effect, 169, activeMultiplier - 1, false, false));
+                    player.addEffect(new MobEffectInstance(effect, 169, activeMultiplier - 1, false, false));
             }
             ticks++;
             if (ticks >= 79) ticks = 0;

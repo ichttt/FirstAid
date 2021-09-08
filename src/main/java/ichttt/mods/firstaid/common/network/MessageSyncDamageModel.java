@@ -21,17 +21,17 @@ package ichttt.mods.firstaid.common.network;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class MessageSyncDamageModel {
-    private final CompoundNBT playerDamageModel;
+    private final CompoundTag playerDamageModel;
     private final boolean scaleMaxHealth;
 
-    public MessageSyncDamageModel(PacketBuffer buffer) {
+    public MessageSyncDamageModel(FriendlyByteBuf buffer) {
         this.playerDamageModel = buffer.readNbt();
         this.scaleMaxHealth = buffer.readBoolean();
     }
@@ -41,7 +41,7 @@ public class MessageSyncDamageModel {
         this.scaleMaxHealth = scaleMaxHealth;
     }
 
-    public void encode(PacketBuffer buffer) {
+    public void encode(FriendlyByteBuf buffer) {
         buffer.writeNbt(this.playerDamageModel);
         buffer.writeBoolean(scaleMaxHealth);
     }

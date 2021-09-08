@@ -20,15 +20,15 @@ package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class MessageApplyAbsorption {
     private final float amount;
 
-    public MessageApplyAbsorption(PacketBuffer buffer) {
+    public MessageApplyAbsorption(FriendlyByteBuf buffer) {
         amount = buffer.readFloat();
     }
 
@@ -36,7 +36,7 @@ public class MessageApplyAbsorption {
         this.amount = amount;
     }
 
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeFloat(amount);
     }
 

@@ -34,20 +34,21 @@ import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.network.MessageUpdatePart;
 import ichttt.mods.firstaid.common.potion.FirstAidPotion;
 import ichttt.mods.firstaid.common.potion.PotionPoisonPatched;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
@@ -58,8 +59,8 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.fmllegacy.network.NetworkRegistry;
+import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,7 +71,7 @@ public class FirstAid {
     public static final String MODID = "firstaid";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
-    public static final ItemGroup ITEM_GROUP = new ItemGroup(FirstAid.MODID) {
+    public static final CreativeModeTab ITEM_GROUP = new CreativeModeTab(FirstAid.MODID) {
         @Override
         public ItemStack makeIcon() {
             return new ItemStack(FirstAidItems.BANDAGE);
@@ -96,8 +97,9 @@ public class FirstAid {
         bus.addListener(this::init);
         bus.addListener(this::loadComplete);
         bus.addGenericListener(Item.class, this::registerItems);
-        bus.addGenericListener(Effect.class, this::registerPotion);
+        bus.addGenericListener(MobEffect.class, this::registerPotion);
         bus.addGenericListener(SoundEvent.class, this::registerSound);
+        bus.addListener(this::registerCapability);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FirstAidConfig.serverSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FirstAidConfig.generalSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, FirstAidConfig.clientSpec);
@@ -117,21 +119,6 @@ public class FirstAid {
             LOGGER.warn("FirstAid may be slower than usual and will produce much noisier logs if debug mode is enabled");
             LOGGER.warn("Disable debug in firstaid config");
         }
-        CapabilityManager.INSTANCE.register(AbstractPlayerDamageModel.class, new Capability.IStorage<AbstractPlayerDamageModel>() {
-                    @Nullable
-                    @Override
-                    public INBT writeNBT(Capability<AbstractPlayerDamageModel> capability, AbstractPlayerDamageModel instance, Direction side) {
-                        return instance.serializeNBT();
-                    }
-
-                    @Override
-                    public void readNBT(Capability<AbstractPlayerDamageModel> capability, AbstractPlayerDamageModel instance, Direction side, INBT nbt) {
-                        instance.deserializeNBT((CompoundNBT) nbt);
-                    }
-                }
-                , () -> {
-                    throw new UnsupportedOperationException("No default implementation");
-                });
 
         int i = 0;
         NETWORKING.registerMessage(++i, MessageUpdatePart.class, MessageUpdatePart::encode, MessageUpdatePart::new, (message, supplier) -> MessageUpdatePart.Handler.onMessage(message, supplier));
@@ -160,13 +147,17 @@ public class FirstAid {
         FirstAidItems.registerItems(event.getRegistry());
     }
 
-    public void registerPotion(RegistryEvent.Register<Effect> event) {
-        event.getRegistry().register(new FirstAidPotion(EffectType.BENEFICIAL, 0xDDD, FirstAidItems.MORPHINE));
+    public void registerPotion(RegistryEvent.Register<MobEffect> event) {
+        event.getRegistry().register(new FirstAidPotion(MobEffectCategory.BENEFICIAL, 0xDDD, FirstAidItems.MORPHINE));
         event.getRegistry().register(PotionPoisonPatched.INSTANCE);
     }
 
     public void registerSound(RegistryEvent.Register<SoundEvent> event) {
         ResourceLocation res = new ResourceLocation(FirstAid.MODID, "debuff.heartbeat");
         event.getRegistry().register(new SoundEvent(res).setRegistryName(res));
+    }
+
+    public void registerCapability(RegisterCapabilitiesEvent event) {
+        event.register(AbstractPlayerDamageModel.class);
     }
 }

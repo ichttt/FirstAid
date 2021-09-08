@@ -23,9 +23,9 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.damagesource.DamageSource;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

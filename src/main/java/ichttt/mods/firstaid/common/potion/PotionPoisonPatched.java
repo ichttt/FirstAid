@@ -24,28 +24,28 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectType;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 @SuppressWarnings("unused")
-public class PotionPoisonPatched extends Effect {
-    public static final PotionPoisonPatched INSTANCE = new PotionPoisonPatched(EffectType.HARMFUL, 5149489);
-    private static final Method getHurtSound = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_184601_bQ", DamageSource.class);
-    private static final Method getSoundVolume = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_70599_aP");
-    private static final Method getSoundPitch = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_70647_i");
+public class PotionPoisonPatched extends MobEffect {
+    public static final PotionPoisonPatched INSTANCE = new PotionPoisonPatched(MobEffectCategory.HARMFUL, 5149489);
+    private static final Method getHurtSound = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "m_7975_", DamageSource.class);
+    private static final Method getSoundVolume = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "m_6121_");
+    private static final Method getVoicePitch = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "m_6100_");
 
-    protected PotionPoisonPatched(EffectType type, int liquidColorIn) {
+    protected PotionPoisonPatched(MobEffectCategory type, int liquidColorIn) {
         super(type, liquidColorIn);
         this.setRegistryName(new ResourceLocation("minecraft", "poison"));
         FirstAid.LOGGER.info("Don't worry, the minecraft poison override IS intended.");
@@ -53,17 +53,17 @@ public class PotionPoisonPatched extends Effect {
 
     @Override
     public void applyEffectTick(@Nonnull LivingEntity entity, int amplifier) {
-        if (entity instanceof PlayerEntity && !(entity instanceof FakePlayer) && (FirstAidConfig.SERVER.causeDeathBody.get() || FirstAidConfig.SERVER.causeDeathHead.get())) {
+        if (entity instanceof Player && !(entity instanceof FakePlayer) && (FirstAidConfig.SERVER.causeDeathBody.get() || FirstAidConfig.SERVER.causeDeathHead.get())) {
             if (entity.level.isClientSide || !entity.isAlive() || entity.isInvulnerableTo(DamageSource.MAGIC))
                 return;
             if (entity.isSleeping())
                 entity.stopSleeping();
-            PlayerEntity player = (PlayerEntity) entity;
+            Player player = (Player) entity;
             AbstractPlayerDamageModel playerDamageModel = CommonUtils.getDamageModel(player);
             if (DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false) != 1.0F) {
                 try {
                     SoundEvent sound = (SoundEvent) getHurtSound.invoke(player, DamageSource.MAGIC);
-                    player.level.playSound(null, player.getX(), player.getY(), player.getZ(), sound, player.getSoundSource(), (float) getSoundVolume.invoke(player), (float) getSoundPitch.invoke(player));
+                    player.level.playSound(null, player.getX(), player.getY(), player.getZ(), sound, player.getSoundSource(), (float) getSoundVolume.invoke(player), (float) getVoicePitch.invoke(player));
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     FirstAid.LOGGER.error("Could not play hurt sound!", e);
                 }

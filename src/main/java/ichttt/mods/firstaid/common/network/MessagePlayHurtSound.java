@@ -20,9 +20,9 @@ package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.client.DebuffTimedSound;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.SoundEvent;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Objects;
@@ -32,7 +32,7 @@ public class MessagePlayHurtSound {
     private final SoundEvent sound;
     private final int duration;
 
-    public MessagePlayHurtSound(PacketBuffer buffer) {
+    public MessagePlayHurtSound(FriendlyByteBuf buffer) {
         this(ForgeRegistries.SOUND_EVENTS.getValue(buffer.readResourceLocation()), buffer.readInt());
     }
 
@@ -41,7 +41,7 @@ public class MessagePlayHurtSound {
         this.duration = duration;
     }
 
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeResourceLocation(Objects.requireNonNull(sound.getRegistryName()));
         buf.writeInt(duration);
     }

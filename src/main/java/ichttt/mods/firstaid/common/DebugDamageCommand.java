@@ -30,24 +30,24 @@ import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DirectDamageDistribution;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.Util;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class DebugDamageCommand {
-    private static final SimpleCommandExceptionType TYPE = new SimpleCommandExceptionType(new StringTextComponent("0 is invalid as damage"));
+    private static final SimpleCommandExceptionType TYPE = new SimpleCommandExceptionType(new TextComponent("0 is invalid as damage"));
 
-    public static void register(CommandDispatcher<CommandSource> dispatcher) {
-        LiteralArgumentBuilder<CommandSource> builder = Commands.literal("damagePart").requires((source) -> source.hasPermission(2));
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("damagePart").requires((source) -> source.hasPermission(2));
         List<EnumPlayerPart> allowedValues = new ArrayList<>(Arrays.asList(EnumPlayerPart.VALUES));
         allowedValues.add(null);
 
@@ -61,7 +61,7 @@ public class DebugDamageCommand {
         dispatcher.register(builder);
     }
 
-    private static int handleCommand(EnumPlayerPart part, float damage, boolean debuff, ServerPlayerEntity player) throws CommandSyntaxException {
+    private static int handleCommand(EnumPlayerPart part, float damage, boolean debuff, ServerPlayer player) throws CommandSyntaxException {
         if (damage == 0F)
             throw TYPE.create();
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
@@ -77,14 +77,14 @@ public class DebugDamageCommand {
         return 1;
     }
 
-    private static void doDamage(EnumPlayerPart part, float damage, boolean debuff, ServerPlayerEntity player, AbstractPlayerDamageModel damageModel) {
+    private static void doDamage(EnumPlayerPart part, float damage, boolean debuff, ServerPlayer player, AbstractPlayerDamageModel damageModel) {
         if (damage > 0F) {
             DamageDistribution.handleDamageTaken(new DirectDamageDistribution(part, debuff), damageModel, damage, player, DamageSource.OUT_OF_WORLD, false, false);
         } else {
             damageModel.getFromEnum(part).heal(-damage, player, debuff);
         }
         if (damageModel.isDead(player)) {
-            player.sendMessage(new TranslationTextComponent("death.attack.generic", player.getDisplayName()), Util.NIL_UUID);
+            player.sendMessage(new TranslatableComponent("death.attack.generic", player.getDisplayName()), Util.NIL_UUID);
             CommonUtils.killPlayer(damageModel, player, null);
         }
     }

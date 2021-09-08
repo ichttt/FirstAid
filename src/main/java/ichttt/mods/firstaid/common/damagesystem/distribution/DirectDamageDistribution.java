@@ -21,8 +21,8 @@ package ichttt.mods.firstaid.common.damagesystem.distribution;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.damagesource.DamageSource;
 
 import javax.annotation.Nonnull;
 
@@ -36,7 +36,7 @@ public class DirectDamageDistribution implements IDamageDistribution {
     }
 
     @Override
-    public float distributeDamage(float damage, @Nonnull PlayerEntity player, @Nonnull DamageSource source, boolean addStat) {
+    public float distributeDamage(float damage, @Nonnull Player player, @Nonnull DamageSource source, boolean addStat) {
         return CommonUtils.getDamageModel(player).getFromEnum(part).damage(damage, player, debuff);
     }
 }

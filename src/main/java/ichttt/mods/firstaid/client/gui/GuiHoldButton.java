@@ -18,15 +18,16 @@
 
 package ichttt.mods.firstaid.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.widget.button.AbstractButton;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.Util;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.util.Mth;
+import net.minecraft.network.chat.Component;
 
 public class GuiHoldButton extends AbstractButton {
     public final int id;
@@ -35,7 +36,7 @@ public class GuiHoldButton extends AbstractButton {
     public final boolean isRightSide;
     private long pressStart = -1;
 
-    public GuiHoldButton(int id, int x, int y, int widthIn, int heightIn, ITextComponent buttonText, boolean isRightSide) {
+    public GuiHoldButton(int id, int x, int y, int widthIn, int heightIn, Component buttonText, boolean isRightSide) {
         super(x, y, widthIn, heightIn, buttonText);
         this.id = id;
         this.isRightSide = isRightSide;
@@ -51,14 +52,14 @@ public class GuiHoldButton extends AbstractButton {
     }
 
     @Override
-    public void renderButton(MatrixStack stack, int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
+    public void renderButton(PoseStack stack, int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
         Minecraft minecraft = Minecraft.getInstance();
-        FontRenderer fontrenderer = minecraft.font;
-        minecraft.getTextureManager().bind(WIDGETS_LOCATION);
+        Font fontrenderer = minecraft.font;
+        RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
         if (this.active)
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.alpha);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
         else
-            RenderSystem.color4f(0.0F, 1.0F, 1.0F, this.alpha);
+            RenderSystem.setShaderColor(0.0F, 1.0F, 1.0F, this.alpha);
         int i = this.getYImage(this.isHovered());
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -75,7 +76,7 @@ public class GuiHoldButton extends AbstractButton {
             this.drawCenteredString(stack, fontrenderer, this.getMessage(), Math.round((this.x + this.width / 2F) / textScaleFactor), Math.round((this.y + (this.height - 8) / 2F) / textScaleFactor), j);
             stack.popPose();
         } else
-            this.drawCenteredString(stack, fontrenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255.0F) << 24);
+            this.drawCenteredString(stack, fontrenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | Mth.ceil(this.alpha * 255.0F) << 24);
     }
 
     @Override
@@ -111,5 +112,10 @@ public class GuiHoldButton extends AbstractButton {
     @Override
     public void onPress() {
         pressStart = Util.getMillis();
+    }
+
+    @Override
+    public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+        // shrug
     }
 }

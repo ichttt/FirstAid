@@ -28,18 +28,18 @@ import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.fmllegacy.network.NetworkDirection;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -53,32 +53,32 @@ import java.util.Objects;
 
 public class CommonUtils {
     @Nonnull
-    public static final EquipmentSlotType[] ARMOR_SLOTS;
+    public static final EquipmentSlot[] ARMOR_SLOTS;
     @Nonnull
-    private static final Map<EquipmentSlotType, List<EnumPlayerPart>> slotToParts;
+    private static final Map<EquipmentSlot, List<EnumPlayerPart>> slotToParts;
 
     static {
-        ARMOR_SLOTS = new EquipmentSlotType[4];
-        ARMOR_SLOTS[3] = EquipmentSlotType.HEAD;
-        ARMOR_SLOTS[2] = EquipmentSlotType.CHEST;
-        ARMOR_SLOTS[1] = EquipmentSlotType.LEGS;
-        ARMOR_SLOTS[0] = EquipmentSlotType.FEET;
-        slotToParts = new EnumMap<>(EquipmentSlotType.class);
-        slotToParts.put(EquipmentSlotType.HEAD, Collections.singletonList(EnumPlayerPart.HEAD));
-        slotToParts.put(EquipmentSlotType.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY));
-        slotToParts.put(EquipmentSlotType.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG));
-        slotToParts.put(EquipmentSlotType.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT));
+        ARMOR_SLOTS = new EquipmentSlot[4];
+        ARMOR_SLOTS[3] = EquipmentSlot.HEAD;
+        ARMOR_SLOTS[2] = EquipmentSlot.CHEST;
+        ARMOR_SLOTS[1] = EquipmentSlot.LEGS;
+        ARMOR_SLOTS[0] = EquipmentSlot.FEET;
+        slotToParts = new EnumMap<>(EquipmentSlot.class);
+        slotToParts.put(EquipmentSlot.HEAD, Collections.singletonList(EnumPlayerPart.HEAD));
+        slotToParts.put(EquipmentSlot.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY));
+        slotToParts.put(EquipmentSlot.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG));
+        slotToParts.put(EquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT));
     }
 
-    public static List<EnumPlayerPart> getPartListForSlot(EquipmentSlotType slot) {
+    public static List<EnumPlayerPart> getPartListForSlot(EquipmentSlot slot) {
         return new ArrayList<>(slotToParts.get(slot));
     }
 
-    public static EnumPlayerPart[] getPartArrayForSlot(EquipmentSlotType slot) {
+    public static EnumPlayerPart[] getPartArrayForSlot(EquipmentSlot slot) {
         return getPartListForSlot(slot).toArray(new EnumPlayerPart[0]);
     }
 
-    public static void killPlayer(@Nonnull AbstractPlayerDamageModel damageModel, @Nonnull PlayerEntity player, @Nullable DamageSource source) {
+    public static void killPlayer(@Nonnull AbstractPlayerDamageModel damageModel, @Nonnull Player player, @Nullable DamageSource source) {
         if (player.level.isClientSide) {
             try {
                 throw new RuntimeException("Tried to kill the player on the client!");
@@ -101,8 +101,8 @@ public class CommonUtils {
                     if (part.canCauseDeath)
                         part.currentHealth = Math.max(part.currentHealth, 1F);
                 }
-                if (player instanceof ServerPlayerEntity)
-                    FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(damageModel, false));
+                if (player instanceof ServerPlayer)
+                    FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncDamageModel(damageModel, false));
                 return;
             }
         }
@@ -111,7 +111,7 @@ public class CommonUtils {
 //        if (revival != null)
 //            revival.startBleeding(player, source);
 //        else
-            ((DataManagerWrapper) player.entityData).set_impl(PlayerEntity.DATA_HEALTH_ID, 0F);
+            ((DataManagerWrapper) player.entityData).set_impl(Player.DATA_HEALTH_ID, 0F);
     }
 
 //    /**
@@ -133,11 +133,11 @@ public class CommonUtils {
 //            return null;
 //    }
 
-    public static boolean isValidArmorSlot(EquipmentSlotType slot) {
-        return slot.getType() == EquipmentSlotType.Group.ARMOR;
+    public static boolean isValidArmorSlot(EquipmentSlot slot) {
+        return slot.getType() == EquipmentSlot.Type.ARMOR;
     }
 
-    public static boolean isSurvivalOrAdventure(PlayerEntity player) {
+    public static boolean isSurvivalOrAdventure(Player player) {
         return !player.isSpectator() && !player.isCreative();
     }
 
@@ -147,7 +147,7 @@ public class CommonUtils {
         return activeModContainer == null ? "UNKNOWN-NULL" : activeModContainer.getModId();
     }
 
-    public static void healPlayerByPercentage(double percentage, AbstractPlayerDamageModel damageModel, PlayerEntity player) {
+    public static void healPlayerByPercentage(double percentage, AbstractPlayerDamageModel damageModel, Player player) {
         Objects.requireNonNull(damageModel);
         int healValue = Ints.checkedCast(Math.round(damageModel.getCurrentMaxHealth() * percentage));
         HealthDistribution.manageHealth(healValue, damageModel, player, true, false);
@@ -163,21 +163,21 @@ public class CommonUtils {
     }
 
     @Nonnull
-    public static AbstractPlayerDamageModel getDamageModel(PlayerEntity player) {
+    public static AbstractPlayerDamageModel getDamageModel(Player player) {
         return getOptionalDamageModel(player).orElseThrow(() -> new IllegalArgumentException("Player " + player.getName().getContents() + " is missing a damage model!"));
     }
 
     @Nonnull
-    public static LazyOptional<AbstractPlayerDamageModel> getOptionalDamageModel(PlayerEntity player) {
+    public static LazyOptional<AbstractPlayerDamageModel> getOptionalDamageModel(Player player) {
         return player.getCapability(CapabilityExtendedHealthSystem.INSTANCE);
     }
 
     public static boolean hasDamageModel(Entity entity) {
-        return entity instanceof PlayerEntity && !(entity instanceof FakePlayer);
+        return entity instanceof Player && !(entity instanceof FakePlayer);
     }
 
     @Nonnull
-    public static ServerPlayerEntity checkServer(NetworkEvent.Context context) {
+    public static ServerPlayer checkServer(NetworkEvent.Context context) {
         if (context.getDirection() != NetworkDirection.PLAY_TO_SERVER)
             throw new IllegalArgumentException("Wrong side for server packet handler " + context.getDirection());
         context.setPacketHandled(true);

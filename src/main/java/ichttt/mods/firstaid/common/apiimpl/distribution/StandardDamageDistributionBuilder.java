@@ -22,20 +22,20 @@ import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.distribution.IStandardDamageDistributionBuilder;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistribution;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.world.entity.EquipmentSlot;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 
 public class StandardDamageDistributionBuilder extends BaseDamageDistributionBuilder implements IStandardDamageDistributionBuilder {
-    private final ArrayList<Pair<EquipmentSlotType, EnumPlayerPart[]>> partList = new ArrayList<>();
+    private final ArrayList<Pair<EquipmentSlot, EnumPlayerPart[]>> partList = new ArrayList<>();
     private boolean ignoreOrder;
     private boolean disableNeighbourRestDistribution;
 
     @Nonnull
     @Override
-    public IStandardDamageDistributionBuilder addDistributionLayer(EquipmentSlotType slot, EnumPlayerPart... parts) {
+    public IStandardDamageDistributionBuilder addDistributionLayer(EquipmentSlot slot, EnumPlayerPart... parts) {
         partList.add(Pair.of(slot, parts));
         return this;
     }

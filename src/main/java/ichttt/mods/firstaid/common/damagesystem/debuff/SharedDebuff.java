@@ -24,8 +24,8 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 
 public class SharedDebuff implements IDebuff {
     private final IDebuff debuff;
@@ -43,7 +43,7 @@ public class SharedDebuff implements IDebuff {
     }
 
     @Override
-    public void handleDamageTaken(float damage, float healthPerMax, ServerPlayerEntity player) {
+    public void handleDamageTaken(float damage, float healthPerMax, ServerPlayer player) {
         if (debuff.isEnabled()) {
             this.damage += damage;
             this.damageCount++;
@@ -51,15 +51,15 @@ public class SharedDebuff implements IDebuff {
     }
 
     @Override
-    public void handleHealing(float healingDone, float healthPerMax, ServerPlayerEntity player) {
+    public void handleHealing(float healingDone, float healthPerMax, ServerPlayer player) {
         if (debuff.isEnabled()) {
             this.healingDone += healingDone;
             this.healingCount++;
         }
     }
 
-    public void tick(PlayerEntity player) {
-        if (!debuff.isEnabled() || !(player instanceof ServerPlayerEntity))
+    public void tick(Player player) {
+        if (!debuff.isEnabled() || !(player instanceof ServerPlayer))
             return;
 
         AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null).orElseThrow(() -> new RuntimeException("Could not find damage model for " + player));
@@ -72,11 +72,11 @@ public class SharedDebuff implements IDebuff {
         healthPerMax /= parts.length;
         if (healingCount > 0) {
             this.healingDone /= healingCount;
-            debuff.handleHealing(this.healingDone, healthPerMax, (ServerPlayerEntity) player);
+            debuff.handleHealing(this.healingDone, healthPerMax, (ServerPlayer) player);
         }
         if (damageCount > 0) {
             this.damage /= damageCount;
-            debuff.handleDamageTaken(this.damage, healthPerMax, (ServerPlayerEntity) player);
+            debuff.handleDamageTaken(this.damage, healthPerMax, (ServerPlayer) player);
         }
         this.healingDone = 0;
         this.damage = 0;

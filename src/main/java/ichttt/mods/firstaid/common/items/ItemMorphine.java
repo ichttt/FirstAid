@@ -21,16 +21,16 @@ package ichttt.mods.firstaid.common.items;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.UseAction;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -44,10 +44,10 @@ public class ItemMorphine extends Item {
 
     @Override
     @Nonnull
-    public ItemStack finishUsingItem(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull LivingEntity entityLiving) {
+    public ItemStack finishUsingItem(@Nonnull ItemStack stack, @Nonnull Level world, @Nonnull LivingEntity entityLiving) {
         if (CommonUtils.hasDamageModel(entityLiving)) {
-            AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel((PlayerEntity) entityLiving);
-            Objects.requireNonNull(damageModel).applyMorphine((PlayerEntity) entityLiving);
+            AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel((Player) entityLiving);
+            Objects.requireNonNull(damageModel).applyMorphine((Player) entityLiving);
         }
         stack.shrink(1);
         return stack;
@@ -55,16 +55,16 @@ public class ItemMorphine extends Item {
 
     @Override
     @Nonnull
-    public UseAction getUseAnimation(ItemStack stack) {
-        return UseAction.EAT;
+    public UseAnim getUseAnimation(ItemStack stack) {
+        return UseAnim.EAT;
     }
 
     @Override
     @Nonnull
-    public ActionResult<ItemStack> use(World world, PlayerEntity player, @Nonnull Hand hand) {
+    public InteractionResultHolder<ItemStack> use(Level world, Player player, @Nonnull InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
         player.startUsingItem(hand);
-        return new ActionResult<>(ActionResultType.SUCCESS, itemstack);
+        return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemstack);
     }
 
     @Override

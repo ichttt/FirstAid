@@ -25,41 +25,41 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.Util;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class MessageApplyHealingItem {
     private final EnumPlayerPart part;
-    private final Hand hand;
+    private final InteractionHand hand;
 
-    public MessageApplyHealingItem(PacketBuffer buffer) {
+    public MessageApplyHealingItem(FriendlyByteBuf buffer) {
         this.part = EnumPlayerPart.VALUES[buffer.readByte()];
-        this.hand = buffer.readBoolean() ? Hand.MAIN_HAND : Hand.OFF_HAND;
+        this.hand = buffer.readBoolean() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
     }
 
-    public MessageApplyHealingItem(EnumPlayerPart part, Hand hand) {
+    public MessageApplyHealingItem(EnumPlayerPart part, InteractionHand hand) {
         this.part = part;
         this.hand = hand;
     }
 
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeByte(part.ordinal());
-        buf.writeBoolean(hand == Hand.MAIN_HAND);
+        buf.writeBoolean(hand == InteractionHand.MAIN_HAND);
     }
 
     public static class Handler {
 
         public static void onMessage(final MessageApplyHealingItem message, Supplier<NetworkEvent.Context> supplier) {
             NetworkEvent.Context ctx = supplier.get();
-            ServerPlayerEntity player = CommonUtils.checkServer(ctx);
+            ServerPlayer player = CommonUtils.checkServer(ctx);
             ctx.enqueueWork(() -> {
                 AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
                 ItemStack stack = player.getItemInHand(message.hand);
@@ -67,7 +67,7 @@ public class MessageApplyHealingItem {
                 AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
                 if (healer == null) {
                     FirstAid.LOGGER.warn("Player {} has invalid item in hand {} while it should be an healing item", player.getName(), item.getRegistryName());
-                    player.sendMessage(new StringTextComponent("Unable to apply healing item!"), Util.NIL_UUID);
+                    player.sendMessage(new TextComponent("Unable to apply healing item!"), Util.NIL_UUID);
                     return;
                 }
                 stack.shrink(1);

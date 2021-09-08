@@ -27,16 +27,16 @@ import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
@@ -44,7 +44,7 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 public class EqualDamageDistribution implements IDamageDistribution {
-    private static final Method applyPotionDamageCalculationsMethod = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_70672_c", DamageSource.class, float.class);
+    private static final Method applyPotionDamageCalculationsMethod = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "m_6515_", DamageSource.class, float.class);
     private final boolean tryNoKill;
     private final float reductionMultiplier;
 
@@ -53,10 +53,10 @@ public class EqualDamageDistribution implements IDamageDistribution {
         this.reductionMultiplier = reductionMultiplier;
     }
 
-    private float reduceDamage(float originalDamage, PlayerEntity player, DamageSource source) {
+    private float reduceDamage(float originalDamage, Player player, DamageSource source) {
         //As we damage all, also go through each armor slot
         float damage = originalDamage;
-        for (EquipmentSlotType slot : CommonUtils.ARMOR_SLOTS) {
+        for (EquipmentSlot slot : CommonUtils.ARMOR_SLOTS) {
             ItemStack armor = player.getItemBySlot(slot);
             damage = ArmorUtils.applyArmor(player, armor, source, damage, slot);
             if (damage <= 0F) return 0F;
@@ -76,7 +76,7 @@ public class EqualDamageDistribution implements IDamageDistribution {
         return damage;
     }
 
-    private float distributeOnParts(float damage, AbstractPlayerDamageModel damageModel, PlayerEntity player, boolean tryNoKillThisRound) {
+    private float distributeOnParts(float damage, AbstractPlayerDamageModel damageModel, Player player, boolean tryNoKillThisRound) {
         int iterationCounter = 0;
         int divCount = EnumPlayerPart.VALUES.length;
         float prevDamageLeft;
@@ -107,7 +107,7 @@ public class EqualDamageDistribution implements IDamageDistribution {
     }
 
     @Override
-    public float distributeDamage(float damage, @Nonnull PlayerEntity player, @Nonnull DamageSource source, boolean addStat) {
+    public float distributeDamage(float damage, @Nonnull Player player, @Nonnull DamageSource source, boolean addStat) {
         damage = reduceDamage(damage, player, source);
         if (damage <= 0F) return 0F;
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
@@ -117,7 +117,7 @@ public class EqualDamageDistribution implements IDamageDistribution {
         if (damageLeft > 0F && tryNoKill)
             damageLeft = distributeOnParts(damage, damageModel, player, false);
 
-        FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(damageModel, false));
+        FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncDamageModel(damageModel, false));
         float effectiveDmg = damage - damageLeft;
         if (effectiveDmg < 3.4028235E37F) {
             player.awardStat(Stats.DAMAGE_TAKEN, Math.round(effectiveDmg * 10.0F));

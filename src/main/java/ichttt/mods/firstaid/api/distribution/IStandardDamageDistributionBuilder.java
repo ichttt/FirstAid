@@ -20,7 +20,7 @@
 package ichttt.mods.firstaid.api.distribution;
 
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.world.entity.EquipmentSlot;
 
 import javax.annotation.Nonnull;
 
@@ -36,7 +36,7 @@ public interface IStandardDamageDistributionBuilder extends IDamageDistributionB
      * @return The current builder
      */
     @Nonnull
-    IStandardDamageDistributionBuilder addDistributionLayer(EquipmentSlotType slot, EnumPlayerPart... parts);
+    IStandardDamageDistributionBuilder addDistributionLayer(EquipmentSlot slot, EnumPlayerPart... parts);
 
     /**
      * If called, the distribution table will be shuffled, so a distribution pair is picked at random.

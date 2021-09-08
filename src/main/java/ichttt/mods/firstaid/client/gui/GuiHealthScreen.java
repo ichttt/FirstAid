@@ -18,7 +18,7 @@
 
 package ichttt.mods.firstaid.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
@@ -32,20 +32,23 @@ import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.inventory.InventoryScreen;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.gui.widget.button.AbstractButton;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.util.InputMappings;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
-import net.minecraft.util.StringUtils;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.resources.TextureAtlasHolder;
+import net.minecraft.client.resources.language.I18n;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.util.StringUtil;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -70,16 +73,16 @@ public class GuiHealthScreen extends Screen {
     public int guiTop;
     public AbstractButton cancelButton;
     private AbstractButton head, leftArm, leftLeg, leftFoot, body, rightArm, rightLeg, rightFoot;
-    private Hand activeHand;
+    private InteractionHand activeHand;
 
     public GuiHealthScreen(AbstractPlayerDamageModel damageModel) {
-        super(new TranslationTextComponent("firstaid.gui.healthscreen"));
+        super(new TranslatableComponent("firstaid.gui.healthscreen"));
         this.damageModel = damageModel;
         disableButtons = true;
     }
 
-    public GuiHealthScreen(AbstractPlayerDamageModel damageModel, Hand activeHand) {
-        super(new TranslationTextComponent("firstaid.gui.healthscreen"));
+    public GuiHealthScreen(AbstractPlayerDamageModel damageModel, InteractionHand activeHand) {
+        super(new TranslatableComponent("firstaid.gui.healthscreen"));
         this.damageModel = damageModel;
         this.activeHand = activeHand;
         disableButtons = false;
@@ -91,25 +94,25 @@ public class GuiHealthScreen extends Screen {
         this.guiLeft = (this.width - xSize) / 2;
         this.guiTop = (this.height - ySize) / 2;
 
-        head = new GuiHoldButton(1, this.guiLeft + 4, this.guiTop + 8, 52, 20, new TranslationTextComponent("firstaid.gui.head"), false);
-        addButton(head);
+        head = new GuiHoldButton(1, this.guiLeft + 4, this.guiTop + 8, 52, 20, new TranslatableComponent("firstaid.gui.head"), false);
+        addRenderableWidget(head);
 
-        leftArm = new GuiHoldButton(2, this.guiLeft + 4, this.guiTop + 33, 52, 20, new TranslationTextComponent("firstaid.gui.left_arm"), false);
-        addButton(leftArm);
-        leftLeg = new GuiHoldButton(3, this.guiLeft + 4, this.guiTop + 58, 52, 20, new TranslationTextComponent("firstaid.gui.left_leg"), false);
-        addButton(leftLeg);
-        leftFoot = new GuiHoldButton(4, this.guiLeft + 4, this.guiTop + 83, 52, 20, new TranslationTextComponent("firstaid.gui.left_foot"), false);
-        addButton(leftFoot);
+        leftArm = new GuiHoldButton(2, this.guiLeft + 4, this.guiTop + 33, 52, 20, new TranslatableComponent("firstaid.gui.left_arm"), false);
+        addRenderableWidget(leftArm);
+        leftLeg = new GuiHoldButton(3, this.guiLeft + 4, this.guiTop + 58, 52, 20, new TranslatableComponent("firstaid.gui.left_leg"), false);
+        addRenderableWidget(leftLeg);
+        leftFoot = new GuiHoldButton(4, this.guiLeft + 4, this.guiTop + 83, 52, 20, new TranslatableComponent("firstaid.gui.left_foot"), false);
+        addRenderableWidget(leftFoot);
 
-        body = new GuiHoldButton(5, this.guiLeft + 199, this.guiTop + 8, 52, 20, new TranslationTextComponent("firstaid.gui.body"), true);
-        addButton(body);
+        body = new GuiHoldButton(5, this.guiLeft + 199, this.guiTop + 8, 52, 20, new TranslatableComponent("firstaid.gui.body"), true);
+        addRenderableWidget(body);
 
-        rightArm = new GuiHoldButton(6, this.guiLeft + 199, this.guiTop + 33, 52, 20, new TranslationTextComponent("firstaid.gui.right_arm"), true);
-        addButton(rightArm);
-        rightLeg = new GuiHoldButton(7, this.guiLeft + 199, this.guiTop + 58, 52, 20, new TranslationTextComponent("firstaid.gui.right_leg"), true);
-        addButton(rightLeg);
-        rightFoot = new GuiHoldButton(8, this.guiLeft + 199, this.guiTop + 83, 52, 20, new TranslationTextComponent("firstaid.gui.right_foot"), true);
-        addButton(rightFoot);
+        rightArm = new GuiHoldButton(6, this.guiLeft + 199, this.guiTop + 33, 52, 20, new TranslatableComponent("firstaid.gui.right_arm"), true);
+        addRenderableWidget(rightArm);
+        rightLeg = new GuiHoldButton(7, this.guiLeft + 199, this.guiTop + 58, 52, 20, new TranslatableComponent("firstaid.gui.right_leg"), true);
+        addRenderableWidget(rightLeg);
+        rightFoot = new GuiHoldButton(8, this.guiLeft + 199, this.guiTop + 83, 52, 20, new TranslatableComponent("firstaid.gui.right_foot"), true);
+        addRenderableWidget(rightFoot);
 
         if (disableButtons) {
             head.active = false;
@@ -122,21 +125,21 @@ public class GuiHealthScreen extends Screen {
             rightFoot.active = false;
         }
 
-        cancelButton = new Button(this.width / 2 - 100, this.height - 50, 200, 20, new TranslationTextComponent(disableButtons ? "gui.done" : "gui.cancel"), button -> onClose());
-        addButton(cancelButton);
+        cancelButton = new Button(this.width / 2 - 100, this.height - 50, 200, 20, new TranslatableComponent(disableButtons ? "gui.done" : "gui.cancel"), button -> onClose());
+        addRenderableWidget(cancelButton);
 
         if (this.minecraft.options.renderDebug) {
-            Button refresh = new Button(this.guiLeft + 218, this.guiTop + 115, 36, 20, new StringTextComponent("resync"), button -> {
+            Button refresh = new Button(this.guiLeft + 218, this.guiTop + 115, 36, 20, new TextComponent("resync"), button -> {
                 FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.REQUEST_REFRESH));
                 FirstAid.LOGGER.info("Requesting refresh");
-                minecraft.player.displayClientMessage(new StringTextComponent("Re-downloading health data from server..."), true);
+                minecraft.player.displayClientMessage(new TextComponent("Re-downloading health data from server..."), true);
                 onClose();
             });
-            addButton(refresh);
+            addRenderableWidget(refresh);
         }
 
         holdButtons.clear();
-        for (Widget button : this.buttons) {
+        for (AbstractWidget button : this.getButtons()) {
             if (button instanceof GuiHoldButton) {
                 Integer holdTime = activeHand == null ? null : FirstAidRegistryImpl.INSTANCE.getPartHealingTime(minecraft.player.getItemInHand(activeHand));
                 if (holdTime == null) holdTime = Integer.MAX_VALUE;
@@ -149,11 +152,11 @@ public class GuiHealthScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         //Setup background
         this.renderBackground(stack);
         this.fillGradient(stack, this.guiLeft, this.guiTop, this.guiLeft + xSize, this.guiTop + ySize, -16777216, -16777216);
-        this.minecraft.getTextureManager().bind(HealthRenderUtils.GUI_LOCATION);
+        RenderSystem.setShaderTexture(0, HealthRenderUtils.GUI_LOCATION);
         this.blit(stack, this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
         //Player
         int entityLookX = this.guiLeft + (xSize / 2) - mouseX;
@@ -170,12 +173,13 @@ public class GuiHealthScreen extends Screen {
         //Text info
         int morphineTicks = damageModel.getMorphineTicks();
         if (morphineTicks > 0)
-            drawCenteredString(stack, this.minecraft.font, I18n.get("firstaid.gui.morphine_left", StringUtils.formatTickDuration(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - (this.activeHand == null ? 21 : 29), 0xFFFFFF);
+            drawCenteredString(stack, this.minecraft.font, I18n.get("firstaid.gui.morphine_left", StringUtil.formatTickDuration(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - (this.activeHand == null ? 21 : 29), 0xFFFFFF);
         if (this.activeHand != null)
             drawCenteredString(stack, this.minecraft.font, I18n.get("firstaid.gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
 
+        RenderSystem.setShaderTexture(0, Gui.GUI_ICONS_LOCATION);
         //Health
-        RenderSystem.color4f(1F, 1F, 1F, 1F);
+        RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
         drawHealth(stack, damageModel.HEAD, false, 14);
         drawHealth(stack, damageModel.LEFT_ARM, false, 39);
         drawHealth(stack, damageModel.LEFT_LEG, false, 64);
@@ -205,30 +209,32 @@ public class GuiHealthScreen extends Screen {
         int bedY = (int) (renderBedY * bedScaleFactor);
 
         //Sleep info icon
-        RenderSystem.pushMatrix();
-        RenderSystem.scalef(bedScaleFactor, bedScaleFactor, bedScaleFactor);
-        minecraft.getItemRenderer().renderAndDecorateItem(null, BED_ITEMSTACK, renderBedX, renderBedY);
-        RenderSystem.popMatrix();
+        PoseStack modelViewStack = RenderSystem.getModelViewStack();
+        modelViewStack.pushPose();
+        modelViewStack.scale(bedScaleFactor, bedScaleFactor, bedScaleFactor);
+        RenderSystem.applyModelViewMatrix();
+        minecraft.getItemRenderer().renderAndDecorateItem(BED_ITEMSTACK, renderBedX, renderBedY);
+        modelViewStack.popPose();
+        RenderSystem.applyModelViewMatrix();
 
         //Sleep info tooltip
         if (mouseX >= bedX && mouseY >= bedY && mouseX < bedX + (16 * bedScaleFactor) && mouseY < bedY + (16 * bedScaleFactor)) {
-            ITextComponent s = sleepHealing == 0D ? new TranslationTextComponent("firstaid.gui.no_sleep_heal") : new TranslationTextComponent("firstaid.gui.sleep_heal_amount", FORMAT.format(sleepHealing * 100));
+            Component s = sleepHealing == 0D ? new TranslatableComponent("firstaid.gui.no_sleep_heal") : new TranslatableComponent("firstaid.gui.sleep_heal_amount", FORMAT.format(sleepHealing * 100));
             renderTooltip(stack, s, mouseX, mouseY);
-            RenderSystem.disableLighting();
         }
 
         holdButtonMouseCallback(stack); //callback: check if buttons are finish
     }
 
-    private void tooltipButton(MatrixStack stack, AbstractButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
+    private void tooltipButton(PoseStack stack, AbstractButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
         if (!enabled && button.isHovered()) {
-            renderComponentTooltip(stack, Arrays.asList(new StringTextComponent(I18n.get("firstaid.gui.active_item") + ": " + I18n.get(part.activeHealer.stack.getDescriptionId())), new TranslationTextComponent("firstaid.gui.next_heal", Math.round((part.activeHealer.ticksPerHeal.getAsInt() - part.activeHealer.getTicksPassed()) / 20F))), mouseX, mouseY);
+            renderComponentTooltip(stack, Arrays.asList(new TextComponent(I18n.get("firstaid.gui.active_item") + ": " + I18n.get(part.activeHealer.stack.getDescriptionId())), new TranslatableComponent("firstaid.gui.next_heal", Math.round((part.activeHealer.ticksPerHeal.getAsInt() - part.activeHealer.getTicksPassed()) / 20F))), mouseX, mouseY);
         }
         if (!disableButtons) button.active = enabled;
     }
 
-    public void drawHealth(MatrixStack stack, AbstractDamageablePart damageablePart, boolean right, int yOffset) {
+    public void drawHealth(PoseStack stack, AbstractDamageablePart damageablePart, boolean right, int yOffset) {
         stack.pushPose();
         int xTranslation = guiLeft + (right ? getRightOffset(damageablePart) : 57);
         HealthRenderUtils.drawHealth(stack, damageablePart, xTranslation, guiTop + yOffset, this, true);
@@ -244,7 +250,7 @@ public class GuiHealthScreen extends Screen {
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
         if (super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_))
             return true;
-        if (ClientHooks.SHOW_WOUNDS.isActiveAndMatches(InputMappings.getKey(p_keyPressed_1_, p_keyPressed_2_))) {
+        if (ClientHooks.SHOW_WOUNDS.isActiveAndMatches(InputConstants.getKey(p_keyPressed_1_, p_keyPressed_2_))) {
             onClose();
             return true;
         }
@@ -264,7 +270,7 @@ public class GuiHealthScreen extends Screen {
         }
     }
 
-    protected void holdButtonMouseCallback(MatrixStack stack) {
+    protected void holdButtonMouseCallback(PoseStack stack) {
         for (GuiHoldButton button : this.holdButtons) {
             int timeLeft = button.getTimeLeft();
             if (timeLeft == 0) {
@@ -280,7 +286,7 @@ public class GuiHealthScreen extends Screen {
             } else if (timeLeft != -1) {
                 float timeInSecs = (timeLeft / 1000F);
                 if (timeInSecs < 0F) timeInSecs = 0F;
-                this.minecraft.getTextureManager().bind(HealthRenderUtils.GUI_LOCATION);
+                RenderSystem.setShaderTexture(0, HealthRenderUtils.GUI_LOCATION);
                 this.blit(stack, button.x + (button.isRightSide ? 56 : -25), button.y - 2, button.isRightSide ? 2 : 0, 169, 22, 24);
                 this.minecraft.font.draw(stack, HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), button.x + (button.isRightSide ? 60 : -20), button.y + 6, 0xFFFFFF);
             }
@@ -304,7 +310,7 @@ public class GuiHealthScreen extends Screen {
         super.onClose();
     }
 
-    public List<Widget> getButtons() {
-        return this.buttons;
+    public List<AbstractWidget> getButtons() {
+        return (List<AbstractWidget>) (Object) this.renderables;
     }
 }

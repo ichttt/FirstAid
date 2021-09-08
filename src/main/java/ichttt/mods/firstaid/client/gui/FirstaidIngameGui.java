@@ -18,25 +18,25 @@
 
 package ichttt.mods.firstaid.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.IngameGui;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.Util;
+import net.minecraft.util.Mth;
 import net.minecraftforge.client.gui.ForgeIngameGui;
 
 public class FirstaidIngameGui {
 
     // Copy of ForgeIngameGui#renderHealth, modified to fit being called from an event listener and to support different textures for different parts of the texture
-    public static void renderHealth(IngameGui gui, int width, int height, MatrixStack mStack) {
+    public static void renderHealth(ForgeIngameGui gui, int width, int height, PoseStack mStack) {
         // Firstaid: No pre event, we get called from this
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getProfiler().push("health");
@@ -51,14 +51,14 @@ public class FirstaidIngameGui {
                 }
             }
             criticalHealth = (criticalHealth / (float) damageModel.getCurrentMaxHealth()) * minecraft.player.getMaxHealth();
-            criticalHalfHearts = MathHelper.ceil(criticalHealth);
+            criticalHalfHearts = Mth.ceil(criticalHealth);
         } else {
             criticalHalfHearts = 0;
         }
         RenderSystem.enableBlend();
 
-        PlayerEntity player = (PlayerEntity)minecraft.getCameraEntity();
-        int health = MathHelper.ceil(player.getHealth());
+        Player player = (Player)minecraft.getCameraEntity();
+        int health = Mth.ceil(player.getHealth());
         boolean highlight = gui.healthBlinkTime > (long)gui.tickCount && (gui.healthBlinkTime - (long)gui.tickCount) / 3L %2L == 1L;
 
         if (health < gui.lastHealth && player.invulnerableTime > 0)
@@ -82,38 +82,38 @@ public class FirstaidIngameGui {
         gui.lastHealth = health;
         int healthLast = gui.displayHealth;
 
-        ModifiableAttributeInstance attrMaxHealth = player.getAttribute(Attributes.MAX_HEALTH);
-        float healthMax = (float)attrMaxHealth.getValue();
-        float absorb = MathHelper.ceil(player.getAbsorptionAmount());
+        AttributeInstance attrMaxHealth = player.getAttribute(Attributes.MAX_HEALTH);
+        float healthMax = Math.max((float)attrMaxHealth.getValue(), Math.max(healthLast, health));
+        int absorb = Mth.ceil(player.getAbsorptionAmount());
 
-        int healthRows = MathHelper.ceil((healthMax + absorb) / 2.0F / 10.0F);
+        int healthRows = Mth.ceil((healthMax + absorb) / 2.0F / 10.0F);
         int rowHeight = Math.max(10 - (healthRows - 2), 3);
 
         gui.random.setSeed((long)(gui.tickCount * 312871));
 
         int left = width / 2 - 91;
-        int top = height - ForgeIngameGui.left_height;
-        ForgeIngameGui.left_height += (healthRows * rowHeight);
-        if (rowHeight != 10) ForgeIngameGui.left_height += 10 - rowHeight;
+        int top = height - gui.left_height;
+        gui.left_height += (healthRows * rowHeight);
+        if (rowHeight != 10) gui.left_height += 10 - rowHeight;
 
         int regen = -1;
-        if (player.hasEffect(Effects.REGENERATION))
+        if (player.hasEffect(MobEffects.REGENERATION))
         {
-            regen = gui.tickCount % 25;
+            regen = gui.tickCount % Mth.ceil(healthMax + 5.0F);
         }
 
         final int BACKGROUND = (highlight ? 25 : 16);
         int MARGIN = 16;
-        if (player.hasEffect(Effects.POISON))      MARGIN += 36;
-        else if (player.hasEffect(Effects.WITHER)) MARGIN += 72;
+        if (player.hasEffect(MobEffects.POISON))      MARGIN += 36;
+        else if (player.hasEffect(MobEffects.WITHER)) MARGIN += 72;
         float absorbRemaining = absorb;
 
-        for (int i = MathHelper.ceil((healthMax + absorb) / 2.0F) - 1; i >= 0; --i)
+        for (int i = Mth.ceil((healthMax + absorb) / 2.0F) - 1; i >= 0; --i)
         {
             boolean thisHalfCritical = (i * 2) + 1 == criticalHalfHearts;
             final int TOP =  9 * (i * 2 < (criticalHalfHearts) && !thisHalfCritical ? 5 : 0);
             //int b0 = (highlight ? 1 : 0);
-            int row = MathHelper.ceil((float)(i + 1) / 10.0F) - 1;
+            int row = Mth.ceil((float)(i + 1) / 10.0F) - 1;
             int x = left + i % 10 * 8;
             int y = top - row * rowHeight;
 

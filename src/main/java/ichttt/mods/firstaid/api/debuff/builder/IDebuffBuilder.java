@@ -20,7 +20,7 @@
 package ichttt.mods.firstaid.api.debuff.builder;
 
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.sounds.SoundEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -26,11 +26,11 @@ import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -51,7 +51,7 @@ public class DamageablePart extends AbstractDamageablePart {
     }
 
     @Override
-    public float heal(float amount, @Nullable PlayerEntity player, boolean applyDebuff) {
+    public float heal(float amount, @Nullable Player player, boolean applyDebuff) {
         if (amount <= 0F)
             return 0F;
         float notFitting = Math.abs(Math.min(0F, maxHealth - (currentHealth + amount)));
@@ -64,18 +64,18 @@ public class DamageablePart extends AbstractDamageablePart {
         final float finalNotFitting = notFitting;
         if (applyDebuff) {
             Objects.requireNonNull(player, "Got null player with applyDebuff = true");
-            Arrays.stream(debuffs).forEach(debuff -> debuff.handleHealing(amount - finalNotFitting, currentHealth / maxHealth, (ServerPlayerEntity) player));
+            Arrays.stream(debuffs).forEach(debuff -> debuff.handleHealing(amount - finalNotFitting, currentHealth / maxHealth, (ServerPlayer) player));
         }
         return notFitting;
     }
 
     @Override
-    public float damage(float amount, @Nullable PlayerEntity player, boolean applyDebuff) {
+    public float damage(float amount, @Nullable Player player, boolean applyDebuff) {
         return damage(amount, player, applyDebuff, 0F);
     }
 
     @Override
-    public float damage(float amount, @Nullable PlayerEntity player, boolean applyDebuff, float minHealth) {
+    public float damage(float amount, @Nullable Player player, boolean applyDebuff, float minHealth) {
         if (amount <= 0F)
             return 0F;
         if (minHealth > maxHealth)
@@ -89,13 +89,13 @@ public class DamageablePart extends AbstractDamageablePart {
         currentHealth = Math.max(minHealth, currentHealth - amount);
         if (applyDebuff) {
             Objects.requireNonNull(player, "Got null player with applyDebuff = true");
-            Arrays.stream(debuffs).forEach(debuff -> debuff.handleDamageTaken(origAmount - notFitting, currentHealth / maxHealth, (ServerPlayerEntity) player));
+            Arrays.stream(debuffs).forEach(debuff -> debuff.handleDamageTaken(origAmount - notFitting, currentHealth / maxHealth, (ServerPlayer) player));
         }
         return notFitting;
     }
 
     @Override
-    public void tick(World world, PlayerEntity player, boolean tickDebuffs) {
+    public void tick(Level world, Player player, boolean tickDebuffs) {
         if (activeHealer != null) {
             if (activeHealer.tick()) {
                 heal(1F, player, !world.isClientSide);
@@ -108,8 +108,8 @@ public class DamageablePart extends AbstractDamageablePart {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT compound = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag compound = new CompoundTag();
         compound.putFloat("health", currentHealth);
         if (FirstAidConfig.SERVER.scaleMaxHealth.get())
             compound.putInt("maxHealth", maxHealth);
@@ -124,7 +124,7 @@ public class DamageablePart extends AbstractDamageablePart {
     }
 
     @Override
-    public void deserializeNBT(@Nullable CompoundNBT nbt) {
+    public void deserializeNBT(@Nullable CompoundTag nbt) {
         if (nbt == null)
             return;
         if (nbt.contains("maxHealth") && FirstAidConfig.SERVER.scaleMaxHealth.get())
@@ -134,7 +134,7 @@ public class DamageablePart extends AbstractDamageablePart {
         if (nbt.contains("healingItem"))
             stack = new ItemStack(nbt.getByte("healingItem") == 1 ? FirstAidItems.PLASTER : FirstAidItems.BANDAGE);
         else if (nbt.contains("healer"))
-            stack = ItemStack.of((CompoundNBT) Objects.requireNonNull(nbt.get("healer")));
+            stack = ItemStack.of((CompoundTag) Objects.requireNonNull(nbt.get("healer")));
 
         if (stack != null) {
             AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);

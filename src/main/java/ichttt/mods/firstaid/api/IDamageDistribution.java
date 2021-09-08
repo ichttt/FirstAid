@@ -19,14 +19,14 @@
 
 package ichttt.mods.firstaid.api;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.damagesource.DamageSource;
 
 import javax.annotation.Nonnull;
 
 public interface IDamageDistribution {
 
-    float distributeDamage(float damage, @Nonnull PlayerEntity player, @Nonnull DamageSource source, boolean addStat);
+    float distributeDamage(float damage, @Nonnull Player player, @Nonnull DamageSource source, boolean addStat);
 
     default boolean skipGlobalPotionModifiers() {
         return false;

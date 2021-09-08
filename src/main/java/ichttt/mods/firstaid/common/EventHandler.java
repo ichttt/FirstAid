@@ -34,27 +34,27 @@ import ichttt.mods.firstaid.common.network.MessageConfiguration;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.PlayerSizeHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.loot.ItemLootEntry;
-import net.minecraft.loot.LootEntry;
-import net.minecraft.loot.LootPool;
-import net.minecraft.loot.LootTables;
-import net.minecraft.loot.RandomValueRange;
-import net.minecraft.loot.functions.SetCount;
-import net.minecraft.potion.Effect;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.FoodStats;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.food.FoodData;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -68,9 +68,9 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
+import net.minecraftforge.fmlserverevents.FMLServerStoppedEvent;
 import net.minecraftforge.registries.ObjectHolder;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -87,10 +87,10 @@ public class EventHandler {
     @ObjectHolder("firstaid:debuff.heartbeat")
     public static final SoundEvent HEARTBEAT = FirstAidItems.getNull();
     @ObjectHolder("firstaid:morphine")
-    public static final Effect MORPHINE = FirstAidItems.getNull();
+    public static final MobEffect MORPHINE = FirstAidItems.getNull();
 
-    public static final Map<PlayerEntity, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
-    private static final Field LOOT_ENTRIES_FIELD = ObfuscationReflectionHelper.findField(LootPool.class, "field_186453_a");
+    public static final Map<Player, Pair<Entity, HitResult>> hitList = new WeakHashMap<>();
+    private static final Field LOOT_ENTRIES_FIELD = ObfuscationReflectionHelper.findField(LootPool.class, "f_79023_");
 
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
@@ -98,14 +98,14 @@ public class EventHandler {
         if (entity.level.isClientSide || !CommonUtils.hasDamageModel(entity))
             return;
         float amountToDamage = event.getAmount();
-        PlayerEntity player = (PlayerEntity) entity;
+        Player player = (Player) entity;
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
         DamageSource source = event.getSource();
 
         if (amountToDamage == Float.MAX_VALUE) {
             damageModel.forEach(damageablePart -> damageablePart.currentHealth = 0F);
-            if (player instanceof ServerPlayerEntity)
-                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(damageModel, false));
+            if (player instanceof ServerPlayer)
+                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncDamageModel(damageModel, false));
             event.setCanceled(true);
             CommonUtils.killPlayer(damageModel, player, source);
             return;
@@ -115,10 +115,10 @@ public class EventHandler {
         IDamageDistribution damageDistribution = FirstAidRegistryImpl.INSTANCE.getDamageDistributionForSource(source);
 
         if (source.isProjectile()) {
-            Pair<Entity, RayTraceResult> rayTraceResult = hitList.remove(player);
+            Pair<Entity, HitResult> rayTraceResult = hitList.remove(player);
             if (rayTraceResult != null) {
                 Entity entityProjectile = rayTraceResult.getLeft();
-                EquipmentSlotType slot = PlayerSizeHelper.getSlotTypeForProjectileHit(entityProjectile, player);
+                EquipmentSlot slot = PlayerSizeHelper.getSlotTypeForProjectileHit(entityProjectile, player);
                 if (slot != null) {
                     EnumPlayerPart[] possibleParts = CommonUtils.getPartArrayForSlot(slot);
                     damageDistribution = new StandardDamageDistribution(Collections.singletonList(Pair.of(slot, possibleParts)), false, true);
@@ -142,13 +142,13 @@ public class EventHandler {
 
     @SubscribeEvent(priority =  EventPriority.LOWEST)
     public static void onProjectileImpact(ProjectileImpactEvent event) {
-        RayTraceResult result = event.getRayTraceResult();
-        if (result.getType() != RayTraceResult.Type.ENTITY)
+        HitResult result = event.getRayTraceResult();
+        if (result.getType() != HitResult.Type.ENTITY)
             return;
 
-        Entity entity = ((EntityRayTraceResult) result).getEntity();
-        if (!entity.level.isClientSide && entity instanceof PlayerEntity) {
-            hitList.put((PlayerEntity) entity, Pair.of(event.getEntity(), event.getRayTraceResult()));
+        Entity entity = ((EntityHitResult) result).getEntity();
+        if (!entity.level.isClientSide && entity instanceof Player) {
+            hitList.put((Player) entity, Pair.of(event.getEntity(), event.getRayTraceResult()));
         }
     }
 
@@ -156,7 +156,7 @@ public class EventHandler {
     public static void registerCapability(AttachCapabilitiesEvent<Entity> event) {
         Entity obj = event.getObject();
         if (CommonUtils.hasDamageModel(obj)) {
-            PlayerEntity player = (PlayerEntity) obj;
+            Player player = (Player) obj;
             AbstractPlayerDamageModel damageModel = PlayerDamageModel.create();
             event.addCapability(CapProvider.IDENTIFIER, new CapProvider(damageModel));
             //replace the data manager with our wrapper to grab absorption
@@ -176,7 +176,7 @@ public class EventHandler {
     @SubscribeEvent
     public static void onSleepFinished(SleepFinishedTimeEvent event) {
         if (ModList.get().isLoaded("morpheus")) return;
-        for (PlayerEntity player : event.getWorld().players()) {
+        for (Player player : event.getWorld().players()) {
             if (player.isSleepingLongEnough())
                 CommonUtils.getDamageModel(player).sleepHeal(player);
         }
@@ -188,22 +188,22 @@ public class EventHandler {
         ResourceLocation tableName = event.getName();
         LootPool pool = null;
         int bandage = 0, plaster = 0, morphine = 0;
-        if (tableName.equals(LootTables.SPAWN_BONUS_CHEST)) {
+        if (tableName.equals(BuiltInLootTables.SPAWN_BONUS_CHEST)) {
             pool = event.getTable().getPool("main");
             bandage = 8;
             plaster = 16;
             morphine = 4;
-        } else if (tableName.equals(LootTables.STRONGHOLD_CORRIDOR) || tableName.equals(LootTables.STRONGHOLD_CROSSING) || tableName.equals(LootTables.ABANDONED_MINESHAFT)) {
+        } else if (tableName.equals(BuiltInLootTables.STRONGHOLD_CORRIDOR) || tableName.equals(BuiltInLootTables.STRONGHOLD_CROSSING) || tableName.equals(BuiltInLootTables.ABANDONED_MINESHAFT)) {
             pool = event.getTable().getPool("main");
             bandage = 20;
             plaster = 24;
             morphine = 8;
-        } else if (tableName.equals(LootTables.VILLAGE_BUTCHER)) {
+        } else if (tableName.equals(BuiltInLootTables.VILLAGE_BUTCHER)) {
             pool = event.getTable().getPool("main");
             bandage = 4;
             plaster = 16;
             morphine = 2;
-        } else if (tableName.equals(LootTables.IGLOO_CHEST)) {
+        } else if (tableName.equals(BuiltInLootTables.IGLOO_CHEST)) {
             pool = event.getTable().getPool("main");
             bandage = 4;
             plaster = 8;
@@ -211,24 +211,24 @@ public class EventHandler {
         }
 
         if (pool != null) {
-            List<LootEntry> lootEntries;
+            List<LootPoolEntryContainer> lootEntries;
             try {
-                lootEntries = (List<LootEntry>) LOOT_ENTRIES_FIELD.get(pool);
+                lootEntries = (List<LootPoolEntryContainer>) LOOT_ENTRIES_FIELD.get(pool);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("Reflection failed!", e);
             }
-            lootEntries.add(ItemLootEntry.lootTableItem(() -> FirstAidItems.BANDAGE)
-                    .apply(SetCount.setCount(new RandomValueRange(1, 3)))
+            lootEntries.add(LootItem.lootTableItem(() -> FirstAidItems.BANDAGE)
+                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 3)))
                     .setWeight(bandage)
                     .setQuality(0)
                     .build());
-            lootEntries.add(ItemLootEntry.lootTableItem(() -> FirstAidItems.PLASTER)
-                    .apply(SetCount.setCount(new RandomValueRange(1, 5)))
+            lootEntries.add(LootItem.lootTableItem(() -> FirstAidItems.PLASTER)
+                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 5)))
                     .setWeight(plaster)
                     .setQuality(0)
                     .build());
-            lootEntries.add(ItemLootEntry.lootTableItem(() -> FirstAidItems.MORPHINE)
-                    .apply(SetCount.setCount(new RandomValueRange(1, 2)))
+            lootEntries.add(LootItem.lootTableItem(() -> FirstAidItems.MORPHINE)
+                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 2)))
                     .setWeight(morphine)
                     .setQuality(0)
                     .build());
@@ -245,7 +245,7 @@ public class EventHandler {
             return;
         float amount = event.getAmount();
         //Hacky shit to reduce vanilla regen
-        if (Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch(stackTraceElement -> stackTraceElement.getClassName().equals(FoodStats.class.getName()))) {
+        if (Arrays.stream(Thread.currentThread().getStackTrace()).anyMatch(stackTraceElement -> stackTraceElement.getClassName().equals(FoodData.class.getName()))) {
             if (FirstAidConfig.SERVER.allowNaturalRegeneration.get())
                 amount = amount * (float) (double) FirstAidConfig.SERVER.naturalRegenMultiplier.get();
         } else {
@@ -254,7 +254,7 @@ public class EventHandler {
         if (FirstAidConfig.GENERAL.debug.get()) {
             CommonUtils.debugLogStacktrace("External healing: : " + amount);
         }
-        HealthDistribution.distributeHealth(amount, (PlayerEntity) entity, true);
+        HealthDistribution.distributeHealth(amount, (Player) entity, true);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -264,7 +264,7 @@ public class EventHandler {
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(event.getPlayer());
             if (damageModel.hasTutorial)
                 CapProvider.tutorialDone.add(event.getPlayer().getName().getString());
-            ServerPlayerEntity playerMP = (ServerPlayerEntity) event.getPlayer();
+            ServerPlayer playerMP = (ServerPlayer) event.getPlayer();
             FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> playerMP), new MessageConfiguration(damageModel.serializeNBT()));
         }
     }
@@ -276,16 +276,16 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event) {
-        IWorld world = event.getWorld();
-        if (!world.isClientSide() && world instanceof World)
-            ((World) world).getGameRules().getRule(GameRules.RULE_NATURAL_REGENERATION).set(FirstAidConfig.SERVER.allowNaturalRegeneration.get(), ((World) world).getServer());
+        LevelAccessor world = event.getWorld();
+        if (!world.isClientSide() && world instanceof Level)
+            ((Level) world).getGameRules().getRule(GameRules.RULE_NATURAL_REGENERATION).set(FirstAidConfig.SERVER.allowNaturalRegeneration.get(), ((Level) world).getServer());
     }
 
     @SubscribeEvent
     public static void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
-        PlayerEntity player = event.getPlayer();
-        if (!player.level.isClientSide && player instanceof ServerPlayerEntity) //Mojang seems to wipe all caps on teleport
-            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(CommonUtils.getDamageModel(player), true));
+        Player player = event.getPlayer();
+        if (!player.level.isClientSide && player instanceof ServerPlayer) //Mojang seems to wipe all caps on teleport
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncDamageModel(CommonUtils.getDamageModel(player), true));
     }
 
     @SubscribeEvent
@@ -323,8 +323,8 @@ public class EventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        PlayerEntity player = event.getPlayer();
-        if (!event.isEndConquered() && !player.level.isClientSide && player instanceof ServerPlayerEntity) {
+        Player player = event.getPlayer();
+        if (!event.isEndConquered() && !player.level.isClientSide && player instanceof ServerPlayer) {
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
             damageModel.runScaleLogic(player);
             damageModel.forEach(damageablePart -> damageablePart.heal(damageablePart.getMaxHealth(), player, false));

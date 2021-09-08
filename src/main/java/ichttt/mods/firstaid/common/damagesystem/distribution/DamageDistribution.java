@@ -30,15 +30,15 @@ import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.network.MessageUpdatePart;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -49,11 +49,11 @@ import java.util.List;
 
 public abstract class DamageDistribution implements IDamageDistribution {
 
-    public static float handleDamageTaken(IDamageDistribution damageDistribution, AbstractPlayerDamageModel damageModel, float damage, @Nonnull PlayerEntity player, @Nonnull DamageSource source, boolean addStat, boolean redistributeIfLeft) {
+    public static float handleDamageTaken(IDamageDistribution damageDistribution, AbstractPlayerDamageModel damageModel, float damage, @Nonnull Player player, @Nonnull DamageSource source, boolean addStat, boolean redistributeIfLeft) {
         if (FirstAidConfig.GENERAL.debug.get()) {
             FirstAid.LOGGER.info("--- Damaging {} using {} for dmg source {}, redistribute {}, addStat {} ---", damage, damageDistribution.toString(), source.msgId, redistributeIfLeft, addStat);
         }
-        CompoundNBT beforeCache = damageModel.serializeNBT();
+        CompoundTag beforeCache = damageModel.serializeNBT();
         if (!damageDistribution.skipGlobalPotionModifiers())
             damage = ArmorUtils.applyGlobalPotionModifiers(player, source, damage);
         //VANILLA COPY - combat tracker and exhaustion
@@ -91,11 +91,11 @@ public abstract class DamageDistribution implements IDamageDistribution {
         return left;
     }
 
-    protected float minHealth(@Nonnull PlayerEntity player, @Nonnull AbstractDamageablePart part) {
+    protected float minHealth(@Nonnull Player player, @Nonnull AbstractDamageablePart part) {
         return 0F;
     }
 
-    protected float distributeDamageOnParts(float damage, @Nonnull AbstractPlayerDamageModel damageModel, @Nonnull EnumPlayerPart[] enumParts, @Nonnull PlayerEntity player, boolean addStat) {
+    protected float distributeDamageOnParts(float damage, @Nonnull AbstractPlayerDamageModel damageModel, @Nonnull EnumPlayerPart[] enumParts, @Nonnull Player player, boolean addStat) {
         ArrayList<AbstractDamageablePart> damageableParts = new ArrayList<>(enumParts.length);
         for (EnumPlayerPart part : enumParts) {
             damageableParts.add(damageModel.getFromEnum(part));
@@ -104,7 +104,7 @@ public abstract class DamageDistribution implements IDamageDistribution {
         for (AbstractDamageablePart part : damageableParts) {
             float minHealth = minHealth(player, part);
             float dmgDone = damage - part.damage(damage, player, !player.hasEffect(EventHandler.MORPHINE), minHealth);
-            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageUpdatePart(part));
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageUpdatePart(part));
             if (addStat)
                 player.awardStat(Stats.DAMAGE_TAKEN, Math.round(dmgDone * 10.0F));
             damage -= dmgDone;
@@ -119,17 +119,17 @@ public abstract class DamageDistribution implements IDamageDistribution {
     }
 
     @Nonnull
-    protected abstract List<Pair<EquipmentSlotType, EnumPlayerPart[]>> getPartList();
+    protected abstract List<Pair<EquipmentSlot, EnumPlayerPart[]>> getPartList();
 
     @Override
-    public float distributeDamage(float damage, @Nonnull PlayerEntity player, @Nonnull DamageSource source, boolean addStat) {
+    public float distributeDamage(float damage, @Nonnull Player player, @Nonnull DamageSource source, boolean addStat) {
         if (damage <= 0F) return 0F;
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
         if (FirstAidConfig.GENERAL.debug.get()) {
             FirstAid.LOGGER.info("Starting distribution of {} damage...", damage);
         }
-        for (Pair<EquipmentSlotType, EnumPlayerPart[]> pair : getPartList()) {
-            EquipmentSlotType slot = pair.getLeft();
+        for (Pair<EquipmentSlot, EnumPlayerPart[]> pair : getPartList()) {
+            EquipmentSlot slot = pair.getLeft();
             EnumPlayerPart[] parts = pair.getRight();
             if (Arrays.stream(parts).map(damageModel::getFromEnum).anyMatch(part -> part.currentHealth > minHealth(player, part))) {
                 final float originalDamage = damage;

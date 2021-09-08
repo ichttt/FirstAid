@@ -20,15 +20,15 @@
 package ichttt.mods.firstaid.api.damagesystem;
 
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public abstract class AbstractDamageablePart implements INBTSerializable<CompoundNBT> {
+public abstract class AbstractDamageablePart implements INBTSerializable<CompoundTag> {
     public final int initialMaxHealth;
     public final boolean canCauseDeath;
     @Nonnull
@@ -51,7 +51,7 @@ public abstract class AbstractDamageablePart implements INBTSerializable<Compoun
      * @param applyDebuff If all registered debuffs should be notified of the healing done
      * @return The amount of health that could not be added
      */
-    public abstract float heal(float amount, @Nullable PlayerEntity player, boolean applyDebuff);
+    public abstract float heal(float amount, @Nullable Player player, boolean applyDebuff);
 
     /**
      * Damages the part for the specified amount.
@@ -61,7 +61,7 @@ public abstract class AbstractDamageablePart implements INBTSerializable<Compoun
      * @param applyDebuff If all registered debuffs should be notified of the damage taken
      * @return The amount of damage that could not be done
      */
-    public abstract float damage(float amount, @Nullable PlayerEntity player, boolean applyDebuff);
+    public abstract float damage(float amount, @Nullable Player player, boolean applyDebuff);
 
     /**
      * Damages the part for the specified amount.
@@ -72,13 +72,13 @@ public abstract class AbstractDamageablePart implements INBTSerializable<Compoun
      * @param minHealth   The minimum health the part should drop to
      * @return The amount of damage that could not be done
      */
-    public abstract float damage(float amount, @Nullable PlayerEntity player, boolean applyDebuff, float minHealth);
+    public abstract float damage(float amount, @Nullable Player player, boolean applyDebuff, float minHealth);
 
     /**
      * Updates the part.
      * Should not be called by other mods!
      */
-    public abstract void tick(World world, PlayerEntity player, boolean tickDebuffs);
+    public abstract void tick(Level world, Player player, boolean tickDebuffs);
 
     public abstract void setAbsorption(float absorption);
 

@@ -20,7 +20,7 @@
 package ichttt.mods.firstaid.api.distribution;
 
 import ichttt.mods.firstaid.api.IDamageDistribution;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.damagesource.DamageSource;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

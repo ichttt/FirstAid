@@ -18,35 +18,35 @@
 
 package ichttt.mods.firstaid.common.util;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.phys.AABB;
 
 import javax.annotation.Nullable;
 
 public class ProjectileHelper {
     //PLAYER: 0, 0, 0, 0.6, 1.6, 0.6
-    private static final AxisAlignedBB HEAD_AABB = new AxisAlignedBB(0D, 1.5D, 0D, 1D, 2.0D, 1D);
-    private static final AxisAlignedBB MAIN_AABB = new AxisAlignedBB(0D, 0.8D, 0D, 1D, 1.5D, 1D);
-    private static final AxisAlignedBB LEG_AABB = new AxisAlignedBB(0D, 0.4D, 0D, 1D, 0.8D, 1D);
-    private static final AxisAlignedBB FEET_AABB = new AxisAlignedBB(0D, 0.0D, 0D, 1D, 0.4D, 1D);
+    private static final AABB HEAD_AABB = new AABB(0D, 1.5D, 0D, 1D, 2.0D, 1D);
+    private static final AABB MAIN_AABB = new AABB(0D, 0.8D, 0D, 1D, 1.5D, 1D);
+    private static final AABB LEG_AABB = new AABB(0D, 0.4D, 0D, 1D, 0.8D, 1D);
+    private static final AABB FEET_AABB = new AABB(0D, 0.0D, 0D, 1D, 0.4D, 1D);
 
     @Nullable
-    public static EquipmentSlotType getPartByPosition(Entity hittingObject, PlayerEntity toTrack) {
+    public static EquipmentSlot getPartByPosition(Entity hittingObject, Player toTrack) {
         if (testAABB(hittingObject, toTrack, HEAD_AABB))
-            return EquipmentSlotType.HEAD;
+            return EquipmentSlot.HEAD;
         if (testAABB(hittingObject, toTrack, MAIN_AABB))
-            return EquipmentSlotType.CHEST;
+            return EquipmentSlot.CHEST;
         if (testAABB(hittingObject, toTrack, LEG_AABB))
-            return EquipmentSlotType.LEGS;
+            return EquipmentSlot.LEGS;
         if (testAABB(hittingObject, toTrack, FEET_AABB))
-            return EquipmentSlotType.FEET;
+            return EquipmentSlot.FEET;
         return null;
     }
 
-    private static boolean testAABB(Entity hittingObject, PlayerEntity toTest, AxisAlignedBB aabb) {
-        AxisAlignedBB toTestAABB = hittingObject.getBoundingBox();
+    private static boolean testAABB(Entity hittingObject, Player toTest, AABB aabb) {
+        AABB toTestAABB = hittingObject.getBoundingBox();
         return (toTestAABB.minY - toTest.getY()) < aabb.maxY && (toTestAABB.maxY - toTest.getY()) > aabb.minY;
     }
 }

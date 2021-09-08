@@ -21,14 +21,14 @@ package ichttt.mods.firstaid.client;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.ITickableSound;
-import net.minecraft.client.audio.Sound;
-import net.minecraft.client.audio.SoundEventAccessor;
-import net.minecraft.client.audio.SoundHandler;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.client.resources.sounds.TickableSoundInstance;
+import net.minecraft.client.resources.sounds.Sound;
+import net.minecraft.client.sounds.WeighedSoundEvents;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,13 +36,15 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DebuffTimedSound implements ITickableSound {
+import net.minecraft.client.resources.sounds.SoundInstance.Attenuation;
+
+public class DebuffTimedSound implements TickableSoundInstance {
     private static final float volumeMultiplier = 1.25F;
     private final float minusPerTick;
     private final int debuffDuration;
     private final ResourceLocation soundLocation;
     private final SoundEvent event;
-    private final WeakReference<ClientPlayerEntity> player;
+    private final WeakReference<LocalPlayer> player;
     private Sound sound;
     private float volume = volumeMultiplier;
     private int ticks;
@@ -51,7 +53,7 @@ public class DebuffTimedSound implements ITickableSound {
     public static void playHurtSound(SoundEvent event, int duration) {
         if (!FirstAidConfig.CLIENT.enableSounds.get())
             return;
-        SoundHandler soundHandler = Minecraft.getInstance().getSoundManager();
+        SoundManager soundHandler = Minecraft.getInstance().getSoundManager();
         DebuffTimedSound matchingSound = activeSounds.get(event);
         if (matchingSound != null) {
             if (!matchingSound.isStopped())
@@ -73,7 +75,7 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Override
     public boolean isStopped() {
-        ClientPlayerEntity player = this.player.get();
+        LocalPlayer player = this.player.get();
         boolean done = player == null || ticks >= debuffDuration || player.getHealth() <= 0;
         if (done)
             activeSounds.remove(this.event);
@@ -88,13 +90,13 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Nullable
     @Override
-    public SoundEventAccessor resolve(@Nonnull SoundHandler handler) {
-        SoundEventAccessor soundEventAccessor = handler.getSoundEvent(this.soundLocation);
+    public WeighedSoundEvents resolve(@Nonnull SoundManager handler) {
+        WeighedSoundEvents soundEventAccessor = handler.getSoundEvent(this.soundLocation);
 
         if (soundEventAccessor == null)
         {
             FirstAid.LOGGER.warn("Missing sound for location " + this.soundLocation);
-            this.sound = SoundHandler.EMPTY_SOUND;
+            this.sound = SoundManager.EMPTY_SOUND;
         }
         else
         {
@@ -112,8 +114,8 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Nonnull
     @Override
-    public SoundCategory getSource() {
-        return SoundCategory.PLAYERS;
+    public SoundSource getSource() {
+        return SoundSource.PLAYERS;
     }
 
     @Override
@@ -143,7 +145,7 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Override
     public double getX() {
-        ClientPlayerEntity player = this.player.get();
+        LocalPlayer player = this.player.get();
         if (player == null)
             return 0F;
         return player.getX();
@@ -151,7 +153,7 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Override
     public double getY() {
-        ClientPlayerEntity player = this.player.get();
+        LocalPlayer player = this.player.get();
         if (player == null)
             return 0F;
         return player.getY();
@@ -159,7 +161,7 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Override
     public double getZ() {
-        ClientPlayerEntity player = this.player.get();
+        LocalPlayer player = this.player.get();
         if (player == null)
             return 0F;
         return player.getZ();
@@ -167,8 +169,8 @@ public class DebuffTimedSound implements ITickableSound {
 
     @Nonnull
     @Override
-    public AttenuationType getAttenuation() {
-        return AttenuationType.NONE;
+    public Attenuation getAttenuation() {
+        return Attenuation.NONE;
     }
 
     @Override

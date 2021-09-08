@@ -23,17 +23,17 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class MessageAddHealth {
     private final float[] table;
 
-    public MessageAddHealth(PacketBuffer buffer) {
+    public MessageAddHealth(FriendlyByteBuf buffer) {
         this.table = new float[8];
         for (int i = 0; i < 8; i++) {
             this.table[i] = buffer.readFloat();
@@ -44,7 +44,7 @@ public class MessageAddHealth {
         this.table = table;
     }
 
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         for (float f : table)
             buf.writeFloat(f);
     }
@@ -55,7 +55,7 @@ public class MessageAddHealth {
             NetworkEvent.Context ctx = supplier.get();
             CommonUtils.checkClient(ctx);
             ctx.enqueueWork(() -> {
-                ClientPlayerEntity playerSP = Minecraft.getInstance().player;
+                LocalPlayer playerSP = Minecraft.getInstance().player;
                 LazyOptional<AbstractPlayerDamageModel> optDamageModel = CommonUtils.getOptionalDamageModel(playerSP);
                 if (optDamageModel.isPresent()) {
                     AbstractPlayerDamageModel damageModel = optDamageModel.resolve().get();

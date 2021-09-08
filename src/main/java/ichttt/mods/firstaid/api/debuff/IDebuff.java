@@ -19,22 +19,22 @@
 
 package ichttt.mods.firstaid.api.debuff;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 
 public interface IDebuff {
 
-    void handleDamageTaken(float damage, float healthPerMax, ServerPlayerEntity player);
+    void handleDamageTaken(float damage, float healthPerMax, ServerPlayer player);
 
-    void handleHealing(float healingDone, float healthPerMax, ServerPlayerEntity player);
+    void handleHealing(float healingDone, float healthPerMax, ServerPlayer player);
 
     default boolean isEnabled() {
         return true;
     }
 
-    default void update(PlayerEntity player) {}
+    default void update(Player player) {}
 
-    default void update(PlayerEntity player, float healthPerMax) {
+    default void update(Player player, float healthPerMax) {
         update(player);
     }
 }

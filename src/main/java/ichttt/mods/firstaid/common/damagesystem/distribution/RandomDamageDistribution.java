@@ -22,8 +22,8 @@ import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -53,7 +53,7 @@ public class RandomDamageDistribution extends DamageDistribution {
     }
 
     @Override
-    protected float minHealth(@Nonnull PlayerEntity player, @Nonnull AbstractDamageablePart playerPart) {
+    protected float minHealth(@Nonnull Player player, @Nonnull AbstractDamageablePart playerPart) {
         if (tryNoKill && playerPart.canCauseDeath)
             return 1F;
         return 0F;
@@ -61,15 +61,15 @@ public class RandomDamageDistribution extends DamageDistribution {
 
     @Override
     @Nonnull
-    protected List<Pair<EquipmentSlotType, EnumPlayerPart[]>> getPartList() {
+    protected List<Pair<EquipmentSlot, EnumPlayerPart[]>> getPartList() {
         if (nearestFirst) {
             int startValue = RANDOM.nextInt(4);
             return addAllRandom(startValue, RANDOM.nextBoolean());
         } else {
-            List<Pair<EquipmentSlotType, EnumPlayerPart[]>> partList = new ArrayList<>();
-            List<EquipmentSlotType> slots = Arrays.asList(EquipmentSlotType.values());
+            List<Pair<EquipmentSlot, EnumPlayerPart[]>> partList = new ArrayList<>();
+            List<EquipmentSlot> slots = Arrays.asList(EquipmentSlot.values());
             Collections.shuffle(slots, RANDOM);
-            for (EquipmentSlotType slot : slots) {
+            for (EquipmentSlot slot : slots) {
                 if (!CommonUtils.isValidArmorSlot(slot))
                     continue;
                 List<EnumPlayerPart> parts = CommonUtils.getPartListForSlot(slot);
@@ -80,13 +80,13 @@ public class RandomDamageDistribution extends DamageDistribution {
         }
     }
 
-    public static List<Pair<EquipmentSlotType, EnumPlayerPart[]>> addAllRandom(int startValue, boolean up) {
-        List<Pair<EquipmentSlotType, EnumPlayerPart[]>> partList = new ArrayList<>();
+    public static List<Pair<EquipmentSlot, EnumPlayerPart[]>> addAllRandom(int startValue, boolean up) {
+        List<Pair<EquipmentSlot, EnumPlayerPart[]>> partList = new ArrayList<>();
         for (int i = 0; i < CommonUtils.ARMOR_SLOTS.length; i ++) {
             int posInArray = Math.abs(i - (up ? 0 : 3)) + startValue;
             if (posInArray > 3)
                 posInArray -= 4;
-            EquipmentSlotType slot = CommonUtils.ARMOR_SLOTS[posInArray];
+            EquipmentSlot slot = CommonUtils.ARMOR_SLOTS[posInArray];
             List<EnumPlayerPart> parts = CommonUtils.getPartListForSlot(slot);
             Collections.shuffle(parts);
             partList.add(Pair.of(slot, parts.toArray(new EnumPlayerPart[0])));

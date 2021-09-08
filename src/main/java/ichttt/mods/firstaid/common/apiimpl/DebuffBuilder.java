@@ -22,7 +22,7 @@ import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.sounds.SoundEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

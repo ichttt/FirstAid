@@ -18,7 +18,7 @@
 
 package ichttt.mods.firstaid.common;
 
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.phys.AABB;
 
 public class AABBAlignedBoundingBox {
     private final double minX;
@@ -37,7 +37,7 @@ public class AABBAlignedBoundingBox {
         this.maxZ = maxZ;
     }
 
-    public AxisAlignedBB createAABB(AxisAlignedBB original) {
+    public AABB createAABB(AABB original) {
         double sizeX = original.getXsize();
         double sizeY = original.getYsize();
         double sizeZ = original.getZsize();
@@ -47,6 +47,6 @@ public class AABBAlignedBoundingBox {
         double newMaxX = original.minX + (sizeX * maxX);
         double newMaxY = original.minY + (sizeY * maxY);
         double newMaxZ = original.minZ + (sizeZ * maxZ);
-        return new AxisAlignedBB(newMinX, newMinY, newMinZ, newMaxX, newMaxY, newMaxZ);
+        return new AABB(newMinX, newMinY, newMinZ, newMaxX, newMaxY, newMaxZ);
     }
 }

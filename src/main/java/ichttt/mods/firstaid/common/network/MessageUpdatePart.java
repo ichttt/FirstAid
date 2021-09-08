@@ -22,8 +22,8 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -33,7 +33,7 @@ public class MessageUpdatePart {
     private final float absorption;
     private final float currentHealth;
 
-    public MessageUpdatePart(PacketBuffer buf) {
+    public MessageUpdatePart(FriendlyByteBuf buf) {
         this.id = buf.readByte();
         this.maxHealth = buf.readInt();
         this.absorption = buf.readFloat();
@@ -48,7 +48,7 @@ public class MessageUpdatePart {
         this.currentHealth = part.currentHealth;
     }
 
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeByte(id);
         buf.writeInt(maxHealth);
         buf.writeFloat(absorption);

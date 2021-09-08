@@ -19,7 +19,7 @@
 
 package ichttt.mods.firstaid.api.distribution;
 
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.damagesource.DamageSource;
 
 import java.util.function.Predicate;
 

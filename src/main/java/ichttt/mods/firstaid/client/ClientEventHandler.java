@@ -37,24 +37,25 @@ import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.PlayerSizeHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.entity.model.PlayerModel;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.StringUtils;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.util.StringUtil;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -79,9 +80,9 @@ public class ClientEventHandler {
             PlayerModelRenderer.tickFun();
         }
         if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.level != null && mc.level.isClientSide) {
-            mc.player.displayClientMessage(new StringTextComponent("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
+            mc.player.displayClientMessage(new TextComponent("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
             for (String s : RegistryManager.debuffConfigErrors)
-                mc.player.displayClientMessage(new StringTextComponent("[FirstAid] " + s), false);
+                mc.player.displayClientMessage(new TextComponent("[FirstAid] " + s), false);
             RegistryManager.debuffConfigErrors.clear();
         }
         if (HUDHandler.INSTANCE.ticker >= 0)
@@ -105,14 +106,14 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
-    public static void preRender(RenderGameOverlayEvent.Pre event) {
+    public static void preRender(RenderGameOverlayEvent.PreLayer event) {
         RenderGameOverlayEvent.ElementType type = event.getType();
-        if (type == RenderGameOverlayEvent.ElementType.HEALTH) {
+        if (type == RenderGameOverlayEvent.ElementType.LAYER && (event.getOverlay() == ForgeIngameGui.PLAYER_HEALTH_ELEMENT)) {
             FirstAidConfig.Client.VanillaHealthbarMode vanillaHealthBarMode = FirstAidConfig.CLIENT.vanillaHealthBarMode.get();
             if (vanillaHealthBarMode != FirstAidConfig.Client.VanillaHealthbarMode.NORMAL) {
                 event.setCanceled(true);
                 if (vanillaHealthBarMode == FirstAidConfig.Client.VanillaHealthbarMode.HIGHLIGHT_CRITICAL_PATH && FirstAidConfig.SERVER.vanillaHealthCalculation.get() == FirstAidConfig.Server.VanillaHealthCalculationMode.AVERAGE_ALL) {
-                    FirstaidIngameGui.renderHealth(Minecraft.getInstance().gui, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), event.getMatrixStack());
+                    FirstaidIngameGui.renderHealth((ForgeIngameGui) Minecraft.getInstance().gui, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), event.getMatrixStack());
                 }
             }
         }
@@ -132,17 +133,17 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
-    public static void onLivingRender(RenderLivingEvent.Post<PlayerEntity, PlayerModel<PlayerEntity>> event) {
+    public static void onLivingRender(RenderLivingEvent.Post<Player, PlayerModel<Player>> event) {
         Entity entity = event.getEntity();
-        if (entity instanceof PlayerEntity) {
-            EntityRendererManager renderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+        if (entity instanceof Player) {
+            EntityRenderDispatcher renderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
             if (renderDispatcher.shouldRenderHitBoxes()) {
                 event.getMatrixStack().pushPose();
                 //See PlayerRenderer.getRenderOffset
                 if (entity.isCrouching()) {
                     event.getMatrixStack().translate(0D, 0.125D, 0D);
                 }
-                AxisAlignedBB aabb = entity.getBoundingBox();
+                AABB aabb = entity.getBoundingBox();
 
 
                 Collection<AABBAlignedBoundingBox> allBoxes = PlayerSizeHelper.getBoxes(entity).values();
@@ -151,8 +152,8 @@ public class ClientEventHandler {
                 float b = 1.0F;
 
                 for (AABBAlignedBoundingBox box : allBoxes) {
-                    AxisAlignedBB bbox = box.createAABB(aabb);
-                    WorldRenderer.renderLineBox(event.getMatrixStack(), event.getBuffers().getBuffer(RenderType.lines()), bbox.inflate(0.02D).move(-entity.getX(), -entity.getY(), -entity.getZ()), r, g, b, 1.0F);
+                    AABB bbox = box.createAABB(aabb);
+                    LevelRenderer.renderLineBox(event.getMatrixStack(), event.getBuffers().getBuffer(RenderType.lines()), bbox.inflate(0.02D).move(-entity.getX(), -entity.getY(), -entity.getZ()), r, g, b, 1.0F);
                     r += 0.25F;
                     g += 0.5F;
                     b += 0.1F;
@@ -166,12 +167,12 @@ public class ClientEventHandler {
         }
     }
 
-    private static ITextComponent makeArmorMsg(double value) {
-        return new TranslationTextComponent("firstaid.specificarmor", FORMAT.format(value)).withStyle(TextFormatting.BLUE); //applyTextStyle
+    private static Component makeArmorMsg(double value) {
+        return new TranslatableComponent("firstaid.specificarmor", FORMAT.format(value)).withStyle(ChatFormatting.BLUE); //applyTextStyle
     }
 
-    private static ITextComponent makeToughnessMsg(double value) {
-        return new TranslationTextComponent("firstaid.specifictoughness", FORMAT.format(value)).withStyle(TextFormatting.BLUE); //applyTextStyle
+    private static Component makeToughnessMsg(double value) {
+        return new TranslatableComponent("firstaid.specifictoughness", FORMAT.format(value)).withStyle(ChatFormatting.BLUE); //applyTextStyle
     }
 
     private static <T> void replaceOrAppend(List<T> list, T search, T replace) {
@@ -189,25 +190,25 @@ public class ClientEventHandler {
         ItemStack stack = event.getItemStack();
         Item item = stack.getItem();
         if (item == FirstAidItems.MORPHINE) {
-            event.getToolTip().add(new TranslationTextComponent("firstaid.tooltip.morphine", "3:30-4:30"));
+            event.getToolTip().add(new TranslatableComponent("firstaid.tooltip.morphine", "3:30-4:30"));
             return;
         }
         if (FirstAidConfig.CLIENT.armorTooltipMode.get() != FirstAidConfig.Client.TooltipMode.NONE) {
             if (item instanceof ArmorItem) {
                 ArmorItem armor = (ArmorItem) item;
-                List<ITextComponent> tooltip = event.getToolTip();
+                List<Component> tooltip = event.getToolTip();
 
                 double normalArmor = ArmorUtils.getArmor(stack, armor.getSlot());
                 double totalArmor = ArmorUtils.applyArmorModifier(armor.getSlot(), normalArmor);
                 if (totalArmor > 0D) {
-                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalArmor), new TranslationTextComponent("attribute.name.generic.armor")).withStyle(TextFormatting.BLUE);
+                    Component original = new TranslatableComponent("attribute.modifier.plus.0", FORMAT.format(normalArmor), new TranslatableComponent("attribute.name.generic.armor")).withStyle(ChatFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
                 }
 
                 double normalToughness = ArmorUtils.getArmorToughness(stack, armor.getSlot());
                 double totalToughness = ArmorUtils.applyToughnessModifier(armor.getSlot(), normalToughness);
                 if (totalToughness > 0D) {
-                    ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalToughness), new TranslationTextComponent("attribute.name.generic.armor_toughness")).withStyle(TextFormatting.BLUE);
+                    Component original = new TranslatableComponent("attribute.modifier.plus.0", FORMAT.format(normalToughness), new TranslatableComponent("attribute.name.generic.armor_toughness")).withStyle(ChatFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
                 }
             }
@@ -215,7 +216,7 @@ public class ClientEventHandler {
 
         AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
         if (healer != null && event.getPlayer() != null) {
-            event.getToolTip().add(new TranslationTextComponent("firstaid.tooltip.healer", healer.maxHeal.getAsInt() / 2, StringUtils.formatTickDuration(healer.ticksPerHeal.getAsInt())));
+            event.getToolTip().add(new TranslatableComponent("firstaid.tooltip.healer", healer.maxHeal.getAsInt() / 2, StringUtil.formatTickDuration(healer.ticksPerHeal.getAsInt())));
         }
     }
 

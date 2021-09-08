@@ -18,12 +18,14 @@
 
 package ichttt.mods.firstaid.common.network;
 
+import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -54,11 +56,16 @@ public class MessageAddHealth {
             CommonUtils.checkClient(ctx);
             ctx.enqueueWork(() -> {
                 ClientPlayerEntity playerSP = Minecraft.getInstance().player;
-                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(playerSP);
-                for (int i = 0; i < message.table.length; i++) {
-                    float f = message.table[i];
-                    EnumPlayerPart part = EnumPlayerPart.VALUES[i];
-                    damageModel.getFromEnum(part).heal(f, playerSP, false);
+                LazyOptional<AbstractPlayerDamageModel> optDamageModel = CommonUtils.getOptionalDamageModel(playerSP);
+                if (optDamageModel.isPresent()) {
+                    AbstractPlayerDamageModel damageModel = optDamageModel.resolve().get();
+                    for (int i = 0; i < message.table.length; i++) {
+                        float f = message.table[i];
+                        EnumPlayerPart part = EnumPlayerPart.VALUES[i];
+                        damageModel.getFromEnum(part).heal(f, playerSP, false);
+                    }
+                } else {
+                    FirstAid.LOGGER.debug("Failed to find damage model, what?");
                 }
             });
         }

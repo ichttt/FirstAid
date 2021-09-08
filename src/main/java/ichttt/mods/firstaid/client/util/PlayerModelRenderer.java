@@ -31,17 +31,16 @@ import com.mojang.math.Vector3f;
 
 public class PlayerModelRenderer {
     private static final ResourceLocation HEALTH_RENDER_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health.png");
-    private static final ResourceLocation HEALTH_RENDER_LOCATION_OLD = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health_old.png");
     private static final int SIZE = 32;
     private static int angle = 0;
     private static boolean otherWay = false;
     private static int cooldown = 0;
 
-    public static void renderPlayerHealth(PoseStack stack, AbstractPlayerDamageModel damageModel, boolean fourColors, boolean oldModel, GuiComponent gui, boolean flashState, float alpha, float partialTicks) {
+    public static void renderPlayerHealth(PoseStack stack, AbstractPlayerDamageModel damageModel, boolean fourColors, GuiComponent gui, boolean flashState, float alpha, float partialTicks) {
         int yOffset = flashState ? 64 : 0;
         RenderSystem.enableBlend();
         RenderSystem.setShaderColor(1F, 1F, 1F, 1 - (alpha / 255));
-        RenderSystem.setShaderTexture(0, oldModel ? HEALTH_RENDER_LOCATION_OLD : HEALTH_RENDER_LOCATION);
+        RenderSystem.setShaderTexture(0, HEALTH_RENDER_LOCATION);
         if (FirstAidConfig.CLIENT.enableEasterEggs.get() && (EventCalendar.isAFDay() || EventCalendar.isHalloween())) {
             float angle = PlayerModelRenderer.angle;
             if (cooldown == 0) {

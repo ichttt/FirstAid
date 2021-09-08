@@ -149,9 +149,8 @@ public class HUDHandler implements ResourceManagerReloadListener {
         }
         mc.getProfiler().popPush("render");
         if (overlayMode.isPlayerModel()) {
-            boolean fourColors = overlayMode == FirstAidConfig.Client.OverlayMode.PLAYER_MODEL_4_COLORS || overlayMode == FirstAidConfig.Client.OverlayMode.PLAYER_MODEL_OLD_4_COLORS;
-            boolean oldModel = overlayMode == FirstAidConfig.Client.OverlayMode.PLAYER_MODEL_OLD_4_COLORS || overlayMode == FirstAidConfig.Client.OverlayMode.PLAYER_MODEL_OLD_COLORS;
-            PlayerModelRenderer.renderPlayerHealth(stack, damageModel, fourColors, oldModel, gui, flashStateManager.update(Util.getMillis()), alpha, partialTicks);
+            boolean fourColors = overlayMode == FirstAidConfig.Client.OverlayMode.PLAYER_MODEL_4_COLORS;
+            PlayerModelRenderer.renderPlayerHealth(stack, damageModel, fourColors, gui, flashStateManager.update(Util.getMillis()), alpha, partialTicks);
         } else {
             int xTranslation = maxLength;
             for (AbstractDamageablePart part : damageModel) {

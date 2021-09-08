@@ -11,6 +11,7 @@ license="Main Mod: GPLv3, API: LGPL v2.1"
     version="${file.jarVersion}"
     displayName="First Aid"
     description="First Aid is a game changing mod focused around a new health system"
+    credits="Thanks to TechnikForLife for developing the initial idea with me, and thanks to rozarke for designing the new textures for FirstAid!"
 [[dependencies.firstaid]]
     modId="minecraft"
     mandatory=true

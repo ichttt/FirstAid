@@ -67,7 +67,7 @@ public class EventCalendar {
     }
 
     public static boolean isGuiFun() {
-        return (isNewYear || isHalloween || isAFDay) && FirstAidConfig.CLIENT.enableEasterEggs.get();
+        return (isHalloween || isAFDay) && FirstAidConfig.CLIENT.enableEasterEggs.get();
     }
 
     public static boolean isNewYear() {

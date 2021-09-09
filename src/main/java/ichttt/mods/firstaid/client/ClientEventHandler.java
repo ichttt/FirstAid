@@ -56,9 +56,11 @@ import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.gui.ForgeIngameGui;
+import net.minecraftforge.client.gui.OverlayRegistry;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 import java.text.DecimalFormat;
 import java.util.Collection;
@@ -112,23 +114,11 @@ public class ClientEventHandler {
             FirstAidConfig.Client.VanillaHealthbarMode vanillaHealthBarMode = FirstAidConfig.CLIENT.vanillaHealthBarMode.get();
             if (vanillaHealthBarMode != FirstAidConfig.Client.VanillaHealthbarMode.NORMAL) {
                 event.setCanceled(true);
-                if (vanillaHealthBarMode == FirstAidConfig.Client.VanillaHealthbarMode.HIGHLIGHT_CRITICAL_PATH && FirstAidConfig.SERVER.vanillaHealthCalculation.get() == FirstAidConfig.Server.VanillaHealthCalculationMode.AVERAGE_ALL) {
+                ForgeIngameGui gui = (ForgeIngameGui) Minecraft.getInstance().gui;
+                if (gui.shouldDrawSurvivalElements() && vanillaHealthBarMode == FirstAidConfig.Client.VanillaHealthbarMode.HIGHLIGHT_CRITICAL_PATH && FirstAidConfig.SERVER.vanillaHealthCalculation.get() == FirstAidConfig.Server.VanillaHealthCalculationMode.AVERAGE_ALL) {
                     FirstaidIngameGui.renderHealth((ForgeIngameGui) Minecraft.getInstance().gui, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), event.getMatrixStack());
                 }
             }
-        }
-    }
-
-    @SubscribeEvent
-    public static void renderOverlay(RenderGameOverlayEvent.Post event) {
-        RenderGameOverlayEvent.ElementType type = event.getType();
-        if (type == RenderGameOverlayEvent.ElementType.ALL || (type == RenderGameOverlayEvent.ElementType.TEXT && FirstAidConfig.CLIENT.overlayMode.get() != FirstAidConfig.Client.OverlayMode.OFF && FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.BOTTOM_LEFT)) {
-            Minecraft mc = Minecraft.getInstance();
-            if (!mc.player.isAlive()) return;
-            mc.getProfiler().push("FirstAidOverlay");
-            HUDHandler.INSTANCE.renderOverlay(event.getMatrixStack(), mc, event.getPartialTicks());
-            mc.getProfiler().pop();
-            mc.getProfiler().pop();
         }
     }
 
@@ -224,5 +214,12 @@ public class ClientEventHandler {
     public static void onDisconnect(ClientPlayerNetworkEvent.LoggedOutEvent event) {
         FirstAid.isSynced = false;
         HUDHandler.INSTANCE.ticker = -1;
+    }
+
+    @SubscribeEvent
+    public static void onConfigChange(ModConfigEvent.Reloading event) {
+        if (event.getConfig().getModId().equals(FirstAid.MODID) && ClientHooks.firstAidOverlay != null) {
+            OverlayRegistry.enableOverlay(ClientHooks.firstAidOverlay, FirstAidConfig.CLIENT.overlayMode.get() != FirstAidConfig.Client.OverlayMode.OFF);
+        }
     }
 }

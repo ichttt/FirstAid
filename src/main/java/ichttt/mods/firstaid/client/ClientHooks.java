@@ -18,7 +18,9 @@
 
 package ichttt.mods.firstaid.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.util.CommonUtils;
@@ -27,6 +29,9 @@ import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.InteractionHand;
+import net.minecraftforge.client.gui.ForgeIngameGui;
+import net.minecraftforge.client.gui.IIngameOverlay;
+import net.minecraftforge.client.gui.OverlayRegistry;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -36,6 +41,7 @@ import org.lwjgl.glfw.GLFW;
 
 
 public class ClientHooks {
+    public static IIngameOverlay firstAidOverlay;
     public static final KeyMapping SHOW_WOUNDS = new KeyMapping("keybinds.show_wounds", KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_H), "First Aid");
 
     public static void setup(FMLClientSetupEvent event) {
@@ -47,6 +53,8 @@ public class ClientHooks {
 
     public static void lateSetup(FMLLoadCompleteEvent event) { //register after the reload listener for language has registered
         ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(HUDHandler.INSTANCE);
+        firstAidOverlay = OverlayRegistry.registerOverlayTop("firstaid:hud", (gui, mStack, partialTicks, width, height) -> HUDHandler.INSTANCE.renderOverlay(mStack, gui, partialTicks));
+        OverlayRegistry.enableOverlay(firstAidOverlay, FirstAidConfig.CLIENT.overlayMode.get() != FirstAidConfig.Client.OverlayMode.OFF);
     }
 
     public static void showGuiApplyHealth(InteractionHand activeHand) {

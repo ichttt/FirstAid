@@ -137,10 +137,6 @@ public class CommonUtils {
         return slot.getType() == EquipmentSlot.Type.ARMOR;
     }
 
-    public static boolean isSurvivalOrAdventure(Player player) {
-        return !player.isSpectator() && !player.isCreative();
-    }
-
     @Nonnull
     public static String getActiveModidSafe() {
         ModContainer activeModContainer = ModLoadingContext.get().getActiveContainer();

@@ -29,8 +29,11 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.resources.ResourceLocation;
 import com.mojang.math.Vector3f;
 
+import java.util.Random;
+
 public class PlayerModelRenderer {
     private static final ResourceLocation HEALTH_RENDER_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/simple_health.png");
+    private static final Random RANDOM = new Random();
     private static final int SIZE = 32;
     private static int angle = 0;
     private static boolean otherWay = false;
@@ -106,9 +109,9 @@ public class PlayerModelRenderer {
         if (angle >= 90 || angle <= 0) {
             otherWay = !otherWay;
             if (!otherWay) {
-                cooldown = 200;
+                cooldown = 200 + RANDOM.nextInt(400);
             } else {
-                cooldown = 30;
+                cooldown = 30 + RANDOM.nextInt(60);
             }
         }
     }

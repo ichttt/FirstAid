@@ -40,6 +40,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.Util;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.Mth;
+import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.resource.IResourceType;
 import net.minecraftforge.resource.VanillaResourceType;
 
@@ -76,10 +77,17 @@ public class HUDHandler implements ResourceManagerReloadListener {
         return maxLength;
     }
 
-    public void renderOverlay(PoseStack stack, Minecraft mc, float partialTicks) {
+    public void renderOverlay(PoseStack mStack, ForgeIngameGui gui, float partialTicks) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || !mc.player.isAlive()) return;
+        mc.getProfiler().push("FirstAidOverlay");
+        doRenderOverlay(mStack, mc, gui, partialTicks);
+        mc.getProfiler().pop();
+        mc.getProfiler().pop();
+    }
+
+    private void doRenderOverlay(PoseStack stack, Minecraft mc, ForgeIngameGui gui, float partialTicks) {
         mc.getProfiler().push("prepare");
-        if (mc.player == null)
-            return;
 
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
         if (!FirstAid.isSynced) //Wait until we receive the remote model
@@ -101,14 +109,13 @@ public class HUDHandler implements ResourceManagerReloadListener {
         }
 
         FirstAidConfig.Client.OverlayMode overlayMode = FirstAidConfig.CLIENT.overlayMode.get();
-        if (overlayMode == FirstAidConfig.Client.OverlayMode.OFF || (GuiHealthScreen.isOpen && !overlayMode.isPlayerModel()) || !CommonUtils.isSurvivalOrAdventure(mc.player))
+        if (overlayMode == FirstAidConfig.Client.OverlayMode.OFF || (GuiHealthScreen.isOpen && !overlayMode.isPlayerModel()) || !gui.shouldDrawSurvivalElements())
             return;
 
         if (visibleTicks != -1 && ticker < 0)
             return;
 
         RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
-        GuiComponent gui = mc.gui;
         int xOffset = FirstAidConfig.CLIENT.xOffset.get();
         int yOffset = FirstAidConfig.CLIENT.yOffset.get();
         boolean playerModel = overlayMode.isPlayerModel();

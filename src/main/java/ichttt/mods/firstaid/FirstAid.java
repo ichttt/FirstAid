@@ -24,14 +24,7 @@ import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.HealingItemApiHelperImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
-import ichttt.mods.firstaid.common.network.MessageAddHealth;
-import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
-import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
-import ichttt.mods.firstaid.common.network.MessageClientRequest;
-import ichttt.mods.firstaid.common.network.MessageConfiguration;
-import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
-import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
-import ichttt.mods.firstaid.common.network.MessageUpdatePart;
+import ichttt.mods.firstaid.common.network.*;
 import ichttt.mods.firstaid.common.potion.FirstAidPotion;
 import ichttt.mods.firstaid.common.potion.PotionPoisonPatched;
 import net.minecraft.item.Item;
@@ -141,6 +134,7 @@ public class FirstAid {
         NETWORKING.registerMessage(++i, MessageAddHealth.class, MessageAddHealth::encode, MessageAddHealth::new, (message, supplier) -> MessageAddHealth.Handler.onMessage(message, supplier));
         NETWORKING.registerMessage(++i, MessagePlayHurtSound.class, MessagePlayHurtSound::encode, MessagePlayHurtSound::new, (message, supplier) -> MessagePlayHurtSound.Handler.onMessage(message, supplier));
         NETWORKING.registerMessage(++i, MessageClientRequest.class, MessageClientRequest::encode, MessageClientRequest::new, (message, supplier) -> MessageClientRequest.Handler.onMessage(message, supplier));
+        NETWORKING.registerMessage(++i, MessageClientRequestRefresh.class, MessageClientRequestRefresh::encode, MessageClientRequestRefresh::new, (message, supplier) -> MessageClientRequestRefresh.Handler.onMessage(message, supplier));
         NETWORKING.registerMessage(++i, MessageSyncDamageModel.class, MessageSyncDamageModel::encode, MessageSyncDamageModel::new, (message, supplier) -> MessageSyncDamageModel.Handler.onMessage(message, supplier));
 
 

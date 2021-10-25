@@ -102,7 +102,7 @@ public class CommonUtils {
                         part.currentHealth = Math.max(part.currentHealth, 1F);
                 }
                 if (player instanceof ServerPlayerEntity)
-                    FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(damageModel, false));
+                    FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(damageModel, false, player.getUUID()));
                 return;
             }
         }

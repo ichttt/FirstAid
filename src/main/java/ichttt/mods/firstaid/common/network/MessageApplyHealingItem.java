@@ -25,34 +25,43 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.util.CommonUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.fml.loading.FMLCommonLaunchHandler;
 import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.fml.network.PacketDistributor;
 
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class MessageApplyHealingItem {
     private final EnumPlayerPart part;
     private final Hand hand;
+    private final UUID playerUUID;
 
     public MessageApplyHealingItem(PacketBuffer buffer) {
         this.part = EnumPlayerPart.VALUES[buffer.readByte()];
         this.hand = buffer.readBoolean() ? Hand.MAIN_HAND : Hand.OFF_HAND;
+        this.playerUUID = buffer.readUUID();
     }
 
-    public MessageApplyHealingItem(EnumPlayerPart part, Hand hand) {
+    public MessageApplyHealingItem(EnumPlayerPart part, Hand hand, UUID playerUUID) {
         this.part = part;
         this.hand = hand;
+        this.playerUUID = playerUUID;
     }
 
     public void encode(PacketBuffer buf) {
         buf.writeByte(part.ordinal());
         buf.writeBoolean(hand == Hand.MAIN_HAND);
+        buf.writeUUID(playerUUID);
     }
 
     public static class Handler {
@@ -60,8 +69,9 @@ public class MessageApplyHealingItem {
         public static void onMessage(final MessageApplyHealingItem message, Supplier<NetworkEvent.Context> supplier) {
             NetworkEvent.Context ctx = supplier.get();
             ServerPlayerEntity player = CommonUtils.checkServer(ctx);
+            ServerPlayerEntity target = player.server.getPlayerList().getPlayer(message.playerUUID);
             ctx.enqueueWork(() -> {
-                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(target);
                 ItemStack stack = player.getItemInHand(message.hand);
                 Item item = stack.getItem();
                 AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
@@ -73,6 +83,7 @@ public class MessageApplyHealingItem {
                 stack.shrink(1);
                 AbstractDamageablePart damageablePart = damageModel.getFromEnum(message.part);
                 damageablePart.activeHealer = healer;
+                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> target), new MessageSyncDamageModel(CommonUtils.getDamageModel(target), true, target.getUUID()));
             });
         }
     }

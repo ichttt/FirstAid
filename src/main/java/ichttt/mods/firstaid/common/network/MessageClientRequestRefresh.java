@@ -21,26 +21,28 @@ package ichttt.mods.firstaid.common.network;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.util.CommonUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
+import java.util.UUID;
 import java.util.function.Supplier;
 
-public class MessageClientRequest {
-    private final Type type;
+public class MessageClientRequestRefresh {
+    private final UUID playerUUID;
 
-    public MessageClientRequest(PacketBuffer buffer) {
-        this.type = Type.TYPES[buffer.readByte()];
+    public MessageClientRequestRefresh(PacketBuffer buffer) {
+        this.playerUUID = buffer.readUUID();
     }
 
-    public MessageClientRequest(Type type) {
-        this.type = type;
+    public MessageClientRequestRefresh(UUID playerUUID) {
+        this.playerUUID = playerUUID;
     }
 
     public void encode(PacketBuffer buf) {
-        buf.writeByte(type.ordinal());
+        buf.writeUUID(playerUUID);
     }
 
     public enum Type {
@@ -51,15 +53,11 @@ public class MessageClientRequest {
 
     public static class Handler {
 
-        public static void onMessage(MessageClientRequest message, Supplier<NetworkEvent.Context> supplier) {
+        public static void onMessage(MessageClientRequestRefresh message, Supplier<NetworkEvent.Context> supplier) {
             NetworkEvent.Context ctx = supplier.get();
             ServerPlayerEntity player = CommonUtils.checkServer(ctx);
-            if (message.type == Type.TUTORIAL_COMPLETE) {
-                CapProvider.tutorialDone.add(player.getName().getString());
-                ctx.enqueueWork(() -> CommonUtils.getDamageModel(player).hasTutorial = true);
-            } else if (message.type == Type.REQUEST_REFRESH) {
-                    FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(CommonUtils.getDamageModel(player), true, player.getUUID()));
-            }
+            ServerPlayerEntity target = player.server.getPlayerList().getPlayer(message.playerUUID);
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(CommonUtils.getDamageModel(target), true, target.getUUID()));
         }
     }
 }

@@ -32,6 +32,7 @@ import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
+import ichttt.mods.firstaid.common.network.MessageClientRequestRefresh;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.inventory.InventoryScreen;
 import net.minecraft.client.gui.widget.Widget;
@@ -39,6 +40,7 @@ import net.minecraft.client.gui.widget.button.AbstractButton;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
@@ -72,17 +74,23 @@ public class GuiHealthScreen extends Screen {
     private AbstractButton head, leftArm, leftLeg, leftFoot, body, rightArm, rightLeg, rightFoot;
     private Hand activeHand;
 
-    public GuiHealthScreen(AbstractPlayerDamageModel damageModel) {
+    private PlayerEntity player;
+
+    public GuiHealthScreen(AbstractPlayerDamageModel damageModel, PlayerEntity player) {
         super(new TranslationTextComponent("firstaid.gui.healthscreen"));
         this.damageModel = damageModel;
         disableButtons = true;
+
+        this.player = player;
     }
 
-    public GuiHealthScreen(AbstractPlayerDamageModel damageModel, Hand activeHand) {
+    public GuiHealthScreen(AbstractPlayerDamageModel damageModel, Hand activeHand, PlayerEntity player) {
         super(new TranslationTextComponent("firstaid.gui.healthscreen"));
         this.damageModel = damageModel;
         this.activeHand = activeHand;
         disableButtons = false;
+
+        this.player = player;
     }
 
     @Override
@@ -125,9 +133,11 @@ public class GuiHealthScreen extends Screen {
         cancelButton = new Button(this.width / 2 - 100, this.height - 50, 200, 20, new TranslationTextComponent(disableButtons ? "gui.done" : "gui.cancel"), button -> onClose());
         addButton(cancelButton);
 
+        // Refresh at opening
+        FirstAid.NETWORKING.sendToServer(new MessageClientRequestRefresh(this.player.getUUID()));
         if (this.minecraft.options.renderDebug) {
             Button refresh = new Button(this.guiLeft + 218, this.guiTop + 115, 36, 20, new StringTextComponent("resync"), button -> {
-                FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.REQUEST_REFRESH));
+                FirstAid.NETWORKING.sendToServer(new MessageClientRequestRefresh(this.player.getUUID()));
                 FirstAid.LOGGER.info("Requesting refresh");
                 minecraft.player.displayClientMessage(new StringTextComponent("Re-downloading health data from server..."), true);
                 onClose();
@@ -162,7 +172,7 @@ public class GuiHealthScreen extends Screen {
             entityLookX = -entityLookX;
             entityLookY = -entityLookY;
         }
-        InventoryScreen.renderEntityInInventory(this.width / 2, this.height / 2 + 30, 45, entityLookX, entityLookY, minecraft.player);
+        InventoryScreen.renderEntityInInventory(this.width / 2, this.height / 2 + 30, 45, entityLookX, entityLookY, this.player);
 
         //Button
         super.render(stack, mouseX, mouseY, partialTicks);
@@ -271,7 +281,7 @@ public class GuiHealthScreen extends Screen {
                 //We are officially done
                 button.reset();
                 EnumPlayerPart playerPart = EnumPlayerPart.VALUES[button.id - 1];
-                FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, activeHand));
+                FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, activeHand, player.getUUID()));
                 AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
                 part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(minecraft.player.getItemInHand(this.activeHand));
                 onClose();

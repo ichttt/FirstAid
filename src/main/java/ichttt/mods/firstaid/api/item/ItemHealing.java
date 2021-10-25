@@ -21,17 +21,25 @@ package ichttt.mods.firstaid.api.item;
 
 import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
+import ichttt.mods.firstaid.client.ClientHooks;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.function.Function;
+
+import static net.minecraft.util.ActionResultType.CONSUME;
 
 /**
  * Base class for custom healing items. Handles the logic for healing automatically.
@@ -71,5 +79,14 @@ public class ItemHealing extends Item {
     @Override
     public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, @Nonnull Hand handIn) {
         return HealingItemApiHelper.INSTANCE.onItemRightClick(this, worldIn, playerIn, handIn);
+    }
+
+    @Override
+    public ActionResultType interactLivingEntity(ItemStack stack, PlayerEntity playerEntity, LivingEntity livingEntity, Hand hand) {
+        if (livingEntity instanceof PlayerEntity && playerEntity.isLocalPlayer()) {
+            DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> ClientHooks.showGuiApplyHealth(hand, (PlayerEntity) livingEntity));
+            return CONSUME;
+        }
+        return super.interactLivingEntity(stack, playerEntity, livingEntity, hand);
     }
 }

@@ -21,29 +21,35 @@ package ichttt.mods.firstaid.common.network;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class MessageSyncDamageModel {
     private final CompoundNBT playerDamageModel;
     private final boolean scaleMaxHealth;
+    private final UUID playerUUID;
 
     public MessageSyncDamageModel(PacketBuffer buffer) {
         this.playerDamageModel = buffer.readNbt();
         this.scaleMaxHealth = buffer.readBoolean();
+        this.playerUUID = buffer.readUUID();
     }
 
-    public MessageSyncDamageModel(AbstractPlayerDamageModel damageModel, boolean scaleMaxHealth) {
+    public MessageSyncDamageModel(AbstractPlayerDamageModel damageModel, boolean scaleMaxHealth, UUID playerUUID) {
         this.playerDamageModel = damageModel.serializeNBT();
         this.scaleMaxHealth = scaleMaxHealth;
+        this.playerUUID = playerUUID;
     }
 
     public void encode(PacketBuffer buffer) {
         buffer.writeNbt(this.playerDamageModel);
         buffer.writeBoolean(scaleMaxHealth);
+        buffer.writeUUID(playerUUID);
     }
 
     public static final class Handler {
@@ -53,9 +59,10 @@ public class MessageSyncDamageModel {
             CommonUtils.checkClient(ctx);
             ctx.enqueueWork(() -> {
                 Minecraft mc = Minecraft.getInstance();
-                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
+                PlayerEntity player = mc.level.getPlayerByUUID(message.playerUUID);
+                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
                 if (message.scaleMaxHealth)
-                    damageModel.runScaleLogic(mc.player);
+                    damageModel.runScaleLogic(player);
                 damageModel.deserializeNBT(message.playerDamageModel);
             });
         }

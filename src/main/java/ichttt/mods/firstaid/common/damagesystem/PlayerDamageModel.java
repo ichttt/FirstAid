@@ -148,7 +148,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             resyncTimer--;
             if (resyncTimer == 0) {
                 resyncTimer = -1;
-                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(this, true));
+                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(this, true, player.getUUID()));
             }
         }
 
@@ -396,7 +396,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         }
         //make sure to resync the client health
         if (!player.level.isClientSide && player instanceof ServerPlayerEntity)
-            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(this, true)); //Upload changes to the client
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new MessageSyncDamageModel(this, true, player.getUUID())); //Upload changes to the client
     }
 
     @Override

@@ -73,7 +73,7 @@ public class DebugDamageCommand {
             doDamage(part, damage, debuff, player, damageModel);
         }
 
-        FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(damageModel, false));
+        FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(damageModel, false, player.getUUID()));
         return 1;
     }
 

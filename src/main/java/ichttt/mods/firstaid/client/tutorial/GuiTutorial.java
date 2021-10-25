@@ -32,6 +32,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -42,10 +43,10 @@ public class GuiTutorial extends Screen {
     private final TutorialAction action;
 
     @SuppressWarnings("deprecation") // we still need this method
-    public GuiTutorial() {
+    public GuiTutorial(PlayerEntity player) {
         super(new TranslationTextComponent("firstaid.tutorial"));
         this.demoModel = PlayerDamageModel.create();
-        this.parent = new GuiHealthScreen(demoModel);
+        this.parent = new GuiHealthScreen(demoModel, player);
         this.action = new TutorialAction(this);
 
         this.action.addTextWrapper("firstaid.tutorial.welcome");
@@ -77,7 +78,7 @@ public class GuiTutorial extends Screen {
             if (action.hasNext()) GuiTutorial.this.action.next();
             else {
                 FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
-                minecraft.setScreen(new GuiHealthScreen(CommonUtils.getDamageModel(minecraft.player)));
+                minecraft.setScreen(new GuiHealthScreen(CommonUtils.getDamageModel(minecraft.player), minecraft.player));
             }
         }));
         for (Widget button : parent.getButtons()) {

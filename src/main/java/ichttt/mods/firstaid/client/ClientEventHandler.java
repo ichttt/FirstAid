@@ -96,10 +96,10 @@ public class ClientEventHandler {
             if (!damageModel.hasTutorial) {
                 damageModel.hasTutorial = true;
                 CapProvider.tutorialDone.add(mc.player.getName().getString());
-                Minecraft.getInstance().setScreen(new GuiTutorial());
+                Minecraft.getInstance().setScreen(new GuiTutorial(mc.player));
             }
             else {
-                mc.setScreen(new GuiHealthScreen(damageModel));
+                mc.setScreen(new GuiHealthScreen(damageModel, mc.player));
             }
         }
     }

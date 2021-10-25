@@ -25,6 +25,7 @@ import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.util.Hand;
 import net.minecraftforge.client.settings.KeyConflictContext;
@@ -49,9 +50,9 @@ public class ClientHooks {
         ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(HUDHandler.INSTANCE);
     }
 
-    public static void showGuiApplyHealth(Hand activeHand) {
+    public static void showGuiApplyHealth(Hand activeHand, PlayerEntity player) {
         Minecraft mc = Minecraft.getInstance();
-        GuiHealthScreen.INSTANCE = new GuiHealthScreen(CommonUtils.getDamageModel(mc.player), activeHand);
+        GuiHealthScreen.INSTANCE = new GuiHealthScreen(CommonUtils.getDamageModel(player), activeHand, player);
         mc.setScreen(GuiHealthScreen.INSTANCE);
     }
 }

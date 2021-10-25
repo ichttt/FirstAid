@@ -22,6 +22,7 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.item.HealingItemApiHelper;
 import ichttt.mods.firstaid.api.item.ItemHealing;
 import ichttt.mods.firstaid.client.ClientHooks;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -44,8 +45,9 @@ public class HealingItemApiHelperImpl extends HealingItemApiHelper {
     @Nonnull
     @Override
     public ActionResult<ItemStack> onItemRightClick(ItemHealing itemHealing, World world, PlayerEntity player, Hand hand) {
-        if (world.isClientSide)
-            DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> ClientHooks.showGuiApplyHealth(hand));
+        if (world.isClientSide) {
+            DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> ClientHooks.showGuiApplyHealth(hand, player));
+        }
         return new ActionResult<>(ActionResultType.SUCCESS, player.getItemInHand(hand));
     }
 

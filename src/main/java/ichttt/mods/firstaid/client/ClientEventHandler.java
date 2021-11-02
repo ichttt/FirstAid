@@ -23,6 +23,7 @@ import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.client.gui.FirstaidIngameGui;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
@@ -60,6 +61,7 @@ import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.ISpecialArmor;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -68,12 +70,14 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
 public class ClientEventHandler {
+    public static final List<String> INVALID_CONFIG_ERRORS = new ArrayList<>();
     private static final DecimalFormat FORMAT = new DecimalFormat("#.##");
     private static int id;
 
@@ -95,11 +99,11 @@ public class ClientEventHandler {
             if (id > 15) id = 0;
             PlayerModelRenderer.tickFun();
         }
-        if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.world.isRemote) {
-            mc.player.sendStatusMessage(new TextComponentString("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
-            for (String s : RegistryManager.debuffConfigErrors)
+        if (!INVALID_CONFIG_ERRORS.isEmpty() && mc.world.isRemote) {
+            mc.player.sendStatusMessage(new TextComponentString("[FirstAid] FirstAid has detected invalid config entries."), false);
+            for (String s : INVALID_CONFIG_ERRORS)
                 mc.player.sendStatusMessage(new TextComponentString("[FirstAid] " + s), false);
-            RegistryManager.debuffConfigErrors.clear();
+            INVALID_CONFIG_ERRORS.clear();
         }
         if (HUDHandler.INSTANCE.ticker >= 0)
             HUDHandler.INSTANCE.ticker--;
@@ -282,5 +286,28 @@ public class ClientEventHandler {
                 option.revert();
         }
         HUDHandler.INSTANCE.ticker = -1;
+    }
+
+    @SubscribeEvent
+    public static void onConfigChange(ConfigChangedEvent.OnConfigChangedEvent event) {
+        if (FirstAidConfig.overlay.vanillaHealthBarMode == FirstAidConfig.Overlay.VanillaHealthbarMode.SPLIT) {
+            if (FirstAidConfig.vanillaHealthCalculation != FirstAidConfig.VanillaHealthCalculationMode.AVERAGE_ALL) {
+                logOverlayError(FirstAidConfig.Overlay.VanillaHealthbarMode.SPLIT, FirstAidConfig.vanillaHealthCalculation, FirstAidConfig.VanillaHealthCalculationMode.AVERAGE_ALL);
+            }
+            if (FirstAidConfig.maxHealthMode != FirstAidConfig.VanillaMaxHealthMode.SYNC_FIRSTAID_VANILLA) {
+                logOverlayError(FirstAidConfig.Overlay.VanillaHealthbarMode.SPLIT, FirstAidConfig.maxHealthMode, FirstAidConfig.VanillaMaxHealthMode.SYNC_FIRSTAID_VANILLA);
+            }
+        }
+        if (FirstAidConfig.overlay.vanillaHealthBarMode == FirstAidConfig.Overlay.VanillaHealthbarMode.HIGHLIGHT_CRITICAL_PATH) {
+            if (FirstAidConfig.vanillaHealthCalculation != FirstAidConfig.VanillaHealthCalculationMode.AVERAGE_ALL) {
+                logOverlayError(FirstAidConfig.Overlay.VanillaHealthbarMode.HIGHLIGHT_CRITICAL_PATH, FirstAidConfig.vanillaHealthCalculation, FirstAidConfig.VanillaHealthCalculationMode.AVERAGE_ALL);
+            }
+        }
+    }
+
+    private static<T extends Enum<T>> void logOverlayError(FirstAidConfig.Overlay.VanillaHealthbarMode wanted, Enum<T> required, Enum<T> current) {
+        String errorMsg = String.format("Invalid config entry: vanilla health bar mode %s requires %s as %s but %s is selected", wanted, required.name(), required.getClass().getSimpleName(), current);
+        FirstAid.LOGGER.warn(errorMsg);
+        INVALID_CONFIG_ERRORS.add(errorMsg);
     }
 }

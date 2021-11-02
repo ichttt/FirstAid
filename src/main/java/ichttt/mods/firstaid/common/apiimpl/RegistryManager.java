@@ -26,6 +26,7 @@ import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
 import ichttt.mods.firstaid.api.distribution.DamageDistributionBuilderFactory;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.client.ClientEventHandler;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.distribution.DamageDistributionBuilderFactoryImpl;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -40,8 +41,6 @@ import java.util.Objects;
 import java.util.function.BooleanSupplier;
 
 public class RegistryManager {
-    public static final List<String> debuffConfigErrors = new ArrayList<>();
-
     public static void setupRegistries() {
         FirstAidRegistry.setImpl(FirstAidRegistryImpl.INSTANCE);
         DebuffBuilderFactory.setInstance(DebuffBuilderFactoryImpl.INSTANCE);
@@ -151,7 +150,7 @@ public class RegistryManager {
     private static void logError(String error, String potionName, EnumDebuffSlot slot) {
         String errorMsg = String.format("Invalid config entry for debuff %s at part %s: %s", potionName, slot.toString(), error);
         FirstAid.LOGGER.warn(errorMsg);
-        debuffConfigErrors.add(errorMsg);
+        ClientEventHandler.INVALID_CONFIG_ERRORS.add(errorMsg);
     }
 
     public static void finalizeRegistries() {

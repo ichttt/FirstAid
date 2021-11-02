@@ -59,6 +59,8 @@ public class ClientProxy implements IProxy {
         EventCalendar.checkDate();
         ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(HUDHandler.INSTANCE);
         advancedConfigOptions = ExtraConfigManager.getAnnotatedFields(ExtraConfig.Advanced.class, FirstAidConfig.class);
+        //HACK: Check config settings
+        ClientEventHandler.onConfigChange(null);
     }
 
     @Override

@@ -53,8 +53,8 @@ import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class GuiHealthScreen extends GuiScreen {
-    public static final int xSize = 256;
-    public static final int ySize = 137;
+    public static final int X_SIZE = 256;
+    public static final int Y_SIZE = 137;
     public static final ItemStack BED_ITEMSTACK = new ItemStack(Items.BED);
     private static final DecimalFormat FORMAT = new DecimalFormat("##.#");
 
@@ -85,8 +85,8 @@ public class GuiHealthScreen extends GuiScreen {
     @Override
     public void initGui() {
         isOpen = true;
-        this.guiLeft = (this.width - xSize) / 2;
-        this.guiTop = (this.height - ySize) / 2;
+        this.guiLeft = (this.width - X_SIZE) / 2;
+        this.guiTop = (this.height - Y_SIZE) / 2;
 
         head = new GuiHoldButton(1, this.guiLeft + 4, this.guiTop + 8, 52, 20, I18n.format("gui.head"), false);
         this.buttonList.add(head);
@@ -145,11 +145,12 @@ public class GuiHealthScreen extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         //Setup background
         this.drawDefaultBackground();
-        this.drawGradientRect(this.guiLeft, this.guiTop, this.guiLeft + xSize, this.guiTop + ySize, -16777216, -16777216);
+        this.drawGradientRect(this.guiLeft, this.guiTop, this.guiLeft + X_SIZE, this.guiTop + Y_SIZE, -16777216, -16777216);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
-        this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
+        this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, X_SIZE, Y_SIZE);
         //Player
-        int entityLookX = this.guiLeft + (xSize / 2) - mouseX;
+        int entityLookX = this.guiLeft + (X_SIZE / 2) - mouseX;
         int entityLookY = this.guiTop + 20 - mouseY;
         if (EventCalendar.isGuiFun()) {
             entityLookX = -entityLookX;
@@ -163,9 +164,9 @@ public class GuiHealthScreen extends GuiScreen {
         //Text info
         int morphineTicks = damageModel.getMorphineTicks();
         if (morphineTicks > 0)
-            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", StringUtils.ticksToElapsedTime(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - (this.activeHand == null ? 21 : 29), 0xFFFFFF);
+            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.morphine_left", StringUtils.ticksToElapsedTime(morphineTicks)), this.guiLeft + (X_SIZE / 2), this.guiTop + Y_SIZE - (this.activeHand == null ? 21 : 29), 0xFFFFFF);
         if (this.activeHand != null)
-            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
+            drawCenteredString(this.mc.fontRenderer, I18n.format("gui.apply_hint"), this.guiLeft + (X_SIZE / 2), this.guiTop + Y_SIZE - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
 
         //Health
         this.mc.getTextureManager().bindTexture(Gui.ICONS);
@@ -198,7 +199,7 @@ public class GuiHealthScreen extends GuiScreen {
         //Sleep info setup
         double sleepHealing = FirstAidConfig.externalHealing.sleepHealPercentage;
         int renderBedX = Math.round(guiLeft / bedScaleFactor) + 2;
-        int renderBedY = Math.round((guiTop + ySize) / bedScaleFactor) - 18;
+        int renderBedY = Math.round((guiTop + Y_SIZE) / bedScaleFactor) - 18;
         int bedX = (int) (renderBedX * bedScaleFactor);
         int bedY = (int) (renderBedY * bedScaleFactor);
 

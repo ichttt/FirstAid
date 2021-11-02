@@ -22,6 +22,10 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.floats.FloatList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiIngame;
 import net.minecraft.client.renderer.GlStateManager;
@@ -37,6 +41,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HEALTH;
 
@@ -56,7 +62,187 @@ public class FirstaidIngameGui {
         eventParentField = f;
     }
 
-    public static void renderHealth(GuiIngame gui, int width, int height) {
+    public static void renderHealthSplit(GuiIngame gui, int width, int height) {
+        // Firstaid: No pre event, we get called from this
+        Minecraft mc = Minecraft.getMinecraft();
+        mc.profiler.startSection("health");
+        GlStateManager.enableBlend();
+
+        EntityPlayer player = (EntityPlayer)mc.getRenderViewEntity();
+        int health = MathHelper.ceil(player.getHealth());
+        boolean highlight = gui.healthUpdateCounter > (long)gui.updateCounter && (gui.healthUpdateCounter - (long)gui.updateCounter) / 3L %2L == 1L;
+
+        if (health < gui.playerHealth && player.hurtResistantTime > 0)
+        {
+            gui.lastSystemTime = Minecraft.getSystemTime();
+            gui.healthUpdateCounter = (long)(gui.updateCounter + 20);
+        }
+        else if (health > gui.playerHealth && player.hurtResistantTime > 0)
+        {
+            gui.lastSystemTime = Minecraft.getSystemTime();
+            gui.healthUpdateCounter = (long)(gui.updateCounter + 10);
+        }
+
+        if (Minecraft.getSystemTime() - gui.lastSystemTime > 1000L)
+        {
+            gui.playerHealth = health;
+            gui.lastPlayerHealth = health;
+            gui.lastSystemTime = Minecraft.getSystemTime();
+        }
+
+        gui.playerHealth = health;
+        int healthLast = gui.lastPlayerHealth;
+
+        IAttributeInstance attrMaxHealth = player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
+        float healthMax = (float)attrMaxHealth.getAttributeValue();
+        float absorb = MathHelper.ceil(player.getAbsorptionAmount());
+
+        int healthRows = MathHelper.ceil((healthMax + absorb) / 2.0F / 10.0F);
+        int rowHeight = Math.max(10 - (healthRows - 2), 3);
+
+        gui.rand.setSeed((long)(gui.updateCounter * 312871));
+
+        int left = width / 2 - 91;
+        int top = height - GuiIngameForge.left_height;
+        GuiIngameForge.left_height += (healthRows * rowHeight);
+        if (rowHeight != 10) GuiIngameForge.left_height += 10 - rowHeight;
+
+        int regen = -1;
+        if (player.isPotionActive(MobEffects.REGENERATION))
+        {
+            regen = gui.updateCounter % 25;
+        }
+
+        final int BACKGROUND = (highlight ? 25 : 16);
+        int MARGIN = 16;
+        if (player.isPotionActive(MobEffects.POISON))      MARGIN += 36;
+        else if (player.isPotionActive(MobEffects.WITHER)) MARGIN += 72;
+
+        // Firstaid: increase healthMax as needed
+        AbstractPlayerDamageModel damageModel = mc.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
+        IntList healthList = new IntArrayList(3);
+        IntList spacesList = new IntArrayList(3);
+        FloatList absorptionList = new FloatArrayList(3);
+
+        int spaceNeeded;
+        int emptySpaces = 0;
+        if (damageModel != null) {
+            float normalAbsorption = 0;
+            float normalHealth = 0;
+            int normalHealthMax = 0;
+            spaceNeeded = 0;
+            for (AbstractDamageablePart part : damageModel) {
+                if (part.canCauseDeath) {
+                    emptySpaces++;
+                    healthList.add(MathHelper.ceil(part.currentHealth));
+                    absorptionList.add(part.getAbsorption());
+                    // Space needed for absorption and max health
+                    int newSpacesNeeded = MathHelper.ceil((part.getMaxHealth() + part.getAbsorption()) / 2.0F);
+                    spacesList.add(newSpacesNeeded);
+                    spaceNeeded += newSpacesNeeded;
+                } else {
+                    normalHealthMax += part.getMaxHealth();
+                    normalHealth += part.currentHealth;
+                    normalAbsorption += part.getAbsorption();
+                }
+            }
+            int newSpacesNeeded = MathHelper.ceil((normalHealthMax + normalAbsorption) / 2.0F);
+            spaceNeeded += newSpacesNeeded;
+            spaceNeeded += emptySpaces;
+            healthList.add(MathHelper.ceil(normalHealth));
+            absorptionList.add(normalAbsorption);
+            spacesList.add(newSpacesNeeded);
+
+        } else {
+            healthList.add(health);
+            absorptionList.add(absorb);
+            spaceNeeded = MathHelper.ceil((healthMax + absorb) / 2.0F);
+        }
+
+        int currentDrawIndex = healthList.size() - 1;
+        int currHealth = healthList.getInt(currentDrawIndex);
+        float currAbsorption = absorptionList.getFloat(currentDrawIndex);
+        float absorbRemaining = currAbsorption;
+        int cleanOffset = emptySpaces + sum(spacesList, currentDrawIndex - 1);
+        for (int i = spaceNeeded - 1; i >= 0; --i)
+        {
+            int cleanedI = i - cleanOffset;
+            if (cleanedI == -1) {
+                // Now an empty space and switch to the next
+                currentDrawIndex--;
+                emptySpaces--;
+                currHealth = healthList.getInt(currentDrawIndex);
+                currAbsorption = absorptionList.getFloat(currentDrawIndex);
+                absorbRemaining = currAbsorption;
+                cleanOffset = emptySpaces + sum(spacesList, currentDrawIndex - 1);
+                continue;
+            }
+            int criticalOffset = 9 * (currentDrawIndex != healthList.size() - 1 ? 5 : 0);
+            //int b0 = (highlight ? 1 : 0);
+            int row = MathHelper.ceil((float)(i + 1) / 10.0F) - 1;
+            int x = left + i % 10 * 8;
+            int y = top - row * rowHeight;
+
+            if (health <= 4) y += gui.rand.nextInt(2);
+            if (i == regen) y -= 2;
+
+            gui.drawTexturedModalRect(x, y, BACKGROUND, criticalOffset, 9, 9);
+
+            if (highlight)
+            {
+                if (i * 2 + 1 < healthLast)
+                    gui.drawTexturedModalRect(x, y, MARGIN + 54, criticalOffset, 9, 9); //6
+                else if (i * 2 + 1 == healthLast)
+                    gui.drawTexturedModalRect(x, y, MARGIN + 63, criticalOffset, 9, 9); //7
+            }
+
+            if (currAbsorption > 0.0F)
+            {
+                if (absorbRemaining == currAbsorption && currAbsorption % 2.0F == 1.0F)
+                {
+                    gui.drawTexturedModalRect(x, y, MARGIN + 153, criticalOffset, 9, 9); //17
+                    absorbRemaining -= 1.0F;
+                }
+                else
+                {
+                    gui.drawTexturedModalRect(x, y, MARGIN + 144, criticalOffset, 9, 9); //16
+                    absorbRemaining -= 2.0F;
+                }
+            }
+            else
+            {
+                if (cleanedI * 2 + 1 < currHealth)
+                    gui.drawTexturedModalRect(x, y, MARGIN + 36, criticalOffset, 9, 9); //4
+                else if (cleanedI * 2 + 1 == currHealth)
+                    gui.drawTexturedModalRect(x, y, MARGIN + 45, criticalOffset, 9, 9); //5
+            }
+        }
+
+        GlStateManager.disableBlend();
+        mc.profiler.endSection();
+        if (eventParentField != null) {
+            RenderGameOverlayEvent event;
+            try {
+                event = (RenderGameOverlayEvent) eventParentField.get(gui);
+            } catch (IllegalAccessException e) {
+                FirstAid.LOGGER.error("Failed to access eventParentField", e);
+                event = null;
+            }
+            if (event != null) {
+                MinecraftForge.EVENT_BUS.post(new RenderGameOverlayEvent.Post(event, HEALTH));
+            }
+        }
+    }
+
+    private static int sum(IntList list, int startIndex) {
+        int num = 0;
+        for (int i = startIndex; i >= 0; i--) {
+            num += list.getInt(i);
+        }
+        return num;
+    }
+
+    public static void renderHealthMixedCritical(GuiIngame gui, int width, int height) {
         // Firstaid: No pre event, we get called from this
         Minecraft mc = Minecraft.getMinecraft();
         mc.profiler.startSection("health");

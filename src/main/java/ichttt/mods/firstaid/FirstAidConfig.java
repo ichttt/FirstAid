@@ -210,7 +210,7 @@ public class FirstAidConfig {
         }
 
         public enum VanillaHealthbarMode {
-            NORMAL, HIGHLIGHT_CRITICAL_PATH, HIDE
+            NORMAL, HIGHLIGHT_CRITICAL_PATH, SPLIT, HIDE
         }
 
         public static class DisplayMode {
@@ -233,6 +233,7 @@ public class FirstAidConfig {
         @Config.Comment({"The mode how to show the mc vanilla health bar.\n" +
                 "NORMAL shows the vanilla health value that calculated the way vanillaHealthCalculation is specified (server config)\n" +
                 "HIGHLIGHT_CRITICAL_PATH show the vanilla health value and highlights the health value of the most damaged critical limb (by default head or body) using the hardcore-styled hearts for them and the normal hearts for the rest of the health. Only works if vanillaHealthCalculation is set to AVERAGE_ALL\n" +
+                "SPLIT splits the health bar into the critical parts and the rest. Only works if vanillaHealthCalculation is set to AVERAGE_ALL and maxHealthMode is set to SYNC_FIRSTAID_VANILLA\n" +
                 "HIDE just doesn't display the vanilla health bar at all."})
         @Config.LangKey("firstaid.config.vanillahealthbarmode")
         public VanillaHealthbarMode vanillaHealthBarMode = VanillaHealthbarMode.HIDE;

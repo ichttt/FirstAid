@@ -76,6 +76,10 @@ public class DataManagerWrapper extends EntityDataManager {
     @Override
     public <T> void set(@Nonnull DataParameter<T> key, @Nonnull T value) {
         if (!hasFirstSetHealth && key == EntityLivingBase.HEALTH && (Float) value == player.getMaxHealth() && player.randomUnused1 == 0 && player.randomUnused2 == 0) {
+            // HACK:
+            // Intercept the first call to set health
+            // This happens before the entity is fully constructed, so BE CAREFUL, even toString on the player causes a crash
+            // We intercept this so we can adjust the max health in the sync mode before anything else sees the base value
             hasFirstSetHealth = true;
             if (FirstAidConfig.maxHealthMode == FirstAidConfig.VanillaMaxHealthMode.SYNC_FIRSTAID_VANILLA) {
                 int totalMaxHealth = FirstAidConfig.damageSystem.getTotalMaxHealth();

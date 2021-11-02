@@ -127,10 +127,13 @@ public class ClientEventHandler {
         if (type == RenderGameOverlayEvent.ElementType.HEALTH) {
             FirstAidConfig.Overlay.VanillaHealthbarMode vanillaHealthBarMode = FirstAidConfig.overlay.vanillaHealthBarMode;
             if (vanillaHealthBarMode != FirstAidConfig.Overlay.VanillaHealthbarMode.NORMAL) {
-                //TODO hunger texture?
-                event.setCanceled(true);
                 if (vanillaHealthBarMode == FirstAidConfig.Overlay.VanillaHealthbarMode.HIGHLIGHT_CRITICAL_PATH && FirstAidConfig.vanillaHealthCalculation == FirstAidConfig.VanillaHealthCalculationMode.AVERAGE_ALL) {
-                    FirstaidIngameGui.renderHealth(Minecraft.getMinecraft().ingameGUI, event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight());
+                    FirstaidIngameGui.renderHealthMixedCritical(Minecraft.getMinecraft().ingameGUI, event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight());
+                    event.setCanceled(true);
+                }
+                if (vanillaHealthBarMode == FirstAidConfig.Overlay.VanillaHealthbarMode.SPLIT && FirstAidConfig.vanillaHealthCalculation == FirstAidConfig.VanillaHealthCalculationMode.AVERAGE_ALL && FirstAidConfig.maxHealthMode == FirstAidConfig.VanillaMaxHealthMode.SYNC_FIRSTAID_VANILLA) {
+                    FirstaidIngameGui.renderHealthSplit(Minecraft.getMinecraft().ingameGUI, event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight());
+                    event.setCanceled(true);
                 }
             }
         }

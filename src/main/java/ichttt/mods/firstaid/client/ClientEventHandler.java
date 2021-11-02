@@ -50,7 +50,6 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.MobEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemPotion;
@@ -72,7 +71,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -84,8 +82,6 @@ import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
 public class ClientEventHandler {
-    @GameRegistry.ObjectHolder("minecraft:resistance")
-    public static final Potion RESISTANCE = null;
     private static final DecimalFormat FORMAT = new DecimalFormat("#.##");
     private static int id;
 
@@ -280,7 +276,7 @@ public class ClientEventHandler {
             List<PotionEffect> list = PotionUtils.getEffectsFromStack(stack);
             if (!list.isEmpty()) {
                 for (PotionEffect potionEffect : list) {
-                    if (RESISTANCE != null && potionEffect.getPotion() == RESISTANCE) {
+                    if (EventHandler.RESISTANCE != null && potionEffect.getPotion() == EventHandler.RESISTANCE) {
                         Potion potion = potionEffect.getPotion();
                         Map<IAttribute, AttributeModifier> map = potion.getAttributeModifierMap();
 

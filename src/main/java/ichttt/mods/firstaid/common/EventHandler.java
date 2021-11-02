@@ -79,6 +79,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
@@ -94,8 +95,10 @@ public class EventHandler {
     public static final SoundEvent HEARTBEAT = new SoundEvent(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat")).setRegistryName(new ResourceLocation(FirstAid.MODID, "debuff.heartbeat"));
     public static final Potion MORPHINE = new FirstAidPotion(false, 0xDDD, "morphine").setBeneficial();
     public static final Potion POISEN_PATCHED = PotionPoisonPatched.INSTANCE;
+    @GameRegistry.ObjectHolder("minecraft:resistance")
+    public static final Potion RESISTANCE = null;
 
-    public static final Map<EntityPlayer, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
+    public static final Map<EntityPlayer, Pair<Entity, RayTraceResult>> HIT_LIST = new WeakHashMap<>();
 
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
@@ -120,7 +123,7 @@ public class EventHandler {
         IDamageDistribution damageDistribution = FirstAidRegistryImpl.INSTANCE.getDamageDistributionForSource(source);
 
         if (source.isProjectile()) {
-            Pair<Entity, RayTraceResult> rayTraceResult = hitList.remove(player);
+            Pair<Entity, RayTraceResult> rayTraceResult = HIT_LIST.remove(player);
             if (rayTraceResult != null) {
                 Entity entityProjectile = rayTraceResult.getLeft();
                 EntityEquipmentSlot slot = PlayerSizeHelper.getSlotTypeForProjectileHit(entityProjectile, player);
@@ -142,7 +145,7 @@ public class EventHandler {
 
         event.setCanceled(true);
 
-        hitList.remove(player);
+        HIT_LIST.remove(player);
     }
 
     @SubscribeEvent(priority =  EventPriority.LOWEST)
@@ -153,7 +156,7 @@ public class EventHandler {
 
         Entity entity = result.entityHit;
         if (!entity.world.isRemote && entity instanceof EntityPlayer) {
-            hitList.put((EntityPlayer) entity, Pair.of(event.getEntity(), event.getRayTraceResult()));
+            HIT_LIST.put((EntityPlayer) entity, Pair.of(event.getEntity(), event.getRayTraceResult()));
         }
     }
 
@@ -189,7 +192,7 @@ public class EventHandler {
     public static void tickPlayers(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END && CommonUtils.isSurvivalOrAdventure(event.player)) {
             Objects.requireNonNull(event.player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).tick(event.player.world, event.player);
-            hitList.remove(event.player); //Damage should be done in the same tick as the hit was noted, otherwise we got a false-positive
+            HIT_LIST.remove(event.player); //Damage should be done in the same tick as the hit was noted, otherwise we got a false-positive
         }
     }
 
@@ -294,7 +297,7 @@ public class EventHandler {
 
     @SubscribeEvent(priority =  EventPriority.LOW)
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        hitList.remove(event.player);
+        HIT_LIST.remove(event.player);
     }
 
     @SubscribeEvent

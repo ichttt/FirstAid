@@ -79,7 +79,7 @@ import java.util.List;
 public class FirstAid {
     public static final String MODID = "firstaid";
     public static final String NAME = "First Aid";
-    public static final String VERSION = "1.6.19";
+    public static final String VERSION = "1.6.20";
     public static final String FINGERPRINT = "7904c4e13947c8a616c5f39b26bdeba796500722";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
@@ -157,6 +157,7 @@ public class FirstAid {
         ExtraConfigManager.scheduleDelete("experimentalSetHealth");
         ExtraConfigManager.scheduleDelete("Overlay.hideOnNoChange");
         ExtraConfigManager.scheduleDelete("Overlay.showVanillaHealthBar");
+        ExtraConfigManager.scheduleDelete("armorEnchantmentMode");
         ExtraConfigManager.postProcessConfigs();
 
         int i = 0;
@@ -218,6 +219,6 @@ public class FirstAid {
     public void onServerStop(FMLServerStoppedEvent event) {
         LOGGER.debug("Cleaning up");
         CapProvider.tutorialDone.clear();
-        EventHandler.hitList.clear();
+        EventHandler.HIT_LIST.clear();
     }
 }

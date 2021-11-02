@@ -52,6 +52,7 @@ public class DataManagerWrapper extends EntityDataManager {
     private final EntityPlayer player;
     private final EntityDataManager parent;
     private boolean track = true;
+    private boolean hasFirstSetHealth = false;
 
     public DataManagerWrapper(EntityPlayer player, EntityDataManager parent) {
         super(player);
@@ -74,6 +75,16 @@ public class DataManagerWrapper extends EntityDataManager {
 
     @Override
     public <T> void set(@Nonnull DataParameter<T> key, @Nonnull T value) {
+        if (!hasFirstSetHealth && key == EntityLivingBase.HEALTH && (Float) value == player.getMaxHealth() && player.randomUnused1 == 0 && player.randomUnused2 == 0) {
+            hasFirstSetHealth = true;
+            if (FirstAidConfig.maxHealthMode == FirstAidConfig.VanillaMaxHealthMode.SYNC_FIRSTAID_VANILLA) {
+                int totalMaxHealth = FirstAidConfig.damageSystem.getTotalMaxHealth();
+                player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(totalMaxHealth);
+                set_impl(EntityLivingBase.HEALTH, (float) totalMaxHealth);
+                //noinspection unchecked
+                value = (T) new Float(totalMaxHealth);
+            }
+        }
         if (!track) {
             if (key != EntityLivingBase.HEALTH)
                 set_impl(key, value);
@@ -101,7 +112,7 @@ public class DataManagerWrapper extends EntityDataManager {
                     //calculate diff
                     float orig = get(EntityLivingBase.HEALTH);
                     if (orig > 0 && !Float.isNaN(orig) && !Float.isInfinite(orig)) {
-                        if (FirstAidConfig.scaleMaxHealth)
+                        if (FirstAidConfig.maxHealthMode != FirstAidConfig.VanillaMaxHealthMode.IGNORE)
                             orig = Math.min(orig, (float) this.player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue());
                         float healed = aFloat - orig;
                         if (Math.abs(healed) > 0.001) {

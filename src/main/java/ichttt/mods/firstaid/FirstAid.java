@@ -46,6 +46,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigCategory;
+import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -59,8 +63,10 @@ import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import scala.xml.Atom;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -68,6 +74,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mod(modid = FirstAid.MODID,
      name = FirstAid.NAME,
@@ -157,7 +164,20 @@ public class FirstAid {
         ExtraConfigManager.scheduleDelete("experimentalSetHealth");
         ExtraConfigManager.scheduleDelete("Overlay.hideOnNoChange");
         ExtraConfigManager.scheduleDelete("Overlay.showVanillaHealthBar");
+        MutableBoolean migrated = new MutableBoolean(false);
+        ExtraConfigManager.scheduleDelete("scaleMaxHealth", (property, config) -> {
+            if (property.isBooleanValue()) {
+                ConfigCategory general = config.getCategory(Configuration.CATEGORY_GENERAL);
+                FirstAidConfig.VanillaMaxHealthMode mode = property.getBoolean() ? FirstAidConfig.VanillaMaxHealthMode.SCALE_FIRSTAID_TO_FIT_VANILLA : FirstAidConfig.VanillaMaxHealthMode.IGNORE;
+                general.get("maxHealthMode").set(mode.name());
+                migrated.setTrue();
+            }
+        });
         ExtraConfigManager.postProcessConfigs();
+        if (migrated.getValue()) {
+            ConfigManager.sync(MODID, Config.Type.INSTANCE);
+            LOGGER.info("Migrated maxHealthMode to {}", FirstAidConfig.maxHealthMode);
+        }
 
         int i = 0;
         NETWORKING = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);

@@ -29,18 +29,23 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.FieldWrapper;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.Loader;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class ExtraConfigManager {
-    private static List<String> toDeleteEntries = new ArrayList<>();
+    private static Map<String, BiConsumer<Property, Configuration>> toDeleteEntries = new LinkedHashMap<>();
     private static final Field CONFIG_FIELD;
     static {
         FirstAid.LOGGER.debug("Setting up forge internal reflection");
@@ -57,7 +62,11 @@ public class ExtraConfigManager {
     }
 
     public static void scheduleDelete(String name) {
-        if (toDeleteEntries != null) toDeleteEntries.add(name);
+        scheduleDelete(name, (property, config) -> {});
+    }
+
+    public static void scheduleDelete(String name, BiConsumer<Property, Configuration> consumer) {
+        if (toDeleteEntries != null) toDeleteEntries.put(name, consumer);
         else throw new IllegalStateException("Already cleaned up configs");
     }
 
@@ -86,15 +95,18 @@ public class ExtraConfigManager {
             FirstAid.LOGGER.warn("Skipping post processing due to null config");
             return;
         }
-
-        for (String s : toDeleteEntries) {
+        for (Map.Entry<String, BiConsumer<Property, Configuration>> entry : toDeleteEntries.entrySet()) {
+            String s = entry.getKey();
             String[] path = s.split("\\.");
             String catString = Configuration.CATEGORY_GENERAL + (path.length > 1 ? "." + s.substring(0, s.length() - (path[path.length - 1].length() + 1)) : "");
             if (config.hasCategory(catString)) {
                 ConfigCategory cat = config.getCategory(catString);
                 if (cat.containsKey(path[path.length - 1])) {
                     FirstAid.LOGGER.info("Removing prop " + s);
-                    cat.remove(path[path.length - 1]);
+                    Property remove = cat.remove(path[path.length - 1]);
+                    if (remove != null) {
+                        entry.getValue().accept(remove, config);
+                    }
                 }
             } else {
                 FirstAid.LOGGER.warn("Unable to find config category {} for removal of old config options", catString);

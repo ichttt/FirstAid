@@ -19,6 +19,7 @@
 package ichttt.mods.firstaid.common.damagesystem;
 
 import com.creativemd.playerrevive.api.IRevival;
+import com.google.common.collect.Lists;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
@@ -36,10 +37,12 @@ import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -47,6 +50,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -54,6 +58,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private final Set<SharedDebuff> sharedDebuffs = new HashSet<>();
@@ -65,6 +71,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private final boolean noCritical;
     private boolean needsMorphineUpdate = false;
     private int resyncTimer = -1;
+    private FirstAidConfig.VanillaMaxHealthMode prevMode = null;
 
     public static PlayerDamageModel create() {
         FirstAidRegistry registry = FirstAidRegistryImpl.INSTANCE;
@@ -103,6 +110,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         tagCompound.setTag("rightLeg", RIGHT_LEG.serializeNBT());
         tagCompound.setTag("rightFoot", RIGHT_FOOT.serializeNBT());
         tagCompound.setBoolean("hasTutorial", hasTutorial);
+        tagCompound.setInteger("maxHealthMode", FirstAidConfig.maxHealthMode.ordinal());
         return tagCompound;
     }
 
@@ -122,6 +130,19 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         }
         if (nbt.hasKey("hasTutorial"))
             hasTutorial = nbt.getBoolean("hasTutorial");
+        if (nbt.hasKey("maxHealthMode")) {
+            int maxHealthMode = nbt.getInteger("maxHealthMode");
+            if (maxHealthMode != FirstAidConfig.maxHealthMode.ordinal()) {
+                prevMode = FirstAidConfig.VanillaMaxHealthMode.values()[maxHealthMode];
+            }
+        } else {
+            // Workaround for old versions: IF a player part saved its max health the old mode was SCALE, and IGNORE otherwise
+            boolean hadStoredMaxHealth = nbt.getCompoundTag("head").hasKey("maxHealth");
+            FirstAidConfig.VanillaMaxHealthMode oldMode = hadStoredMaxHealth ? FirstAidConfig.VanillaMaxHealthMode.SCALE_FIRSTAID_TO_FIT_VANILLA : FirstAidConfig.VanillaMaxHealthMode.IGNORE;
+            if (oldMode != FirstAidConfig.maxHealthMode) {
+                prevMode = oldMode;
+            }
+        }
     }
 
     @Override
@@ -133,6 +154,24 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             sleepBlockTicks--;
         else if (sleepBlockTicks < 0)
             throw new RuntimeException("Negative sleepBlockTicks " + sleepBlockTicks);
+        if (prevMode != null) {
+            if (!world.isRemote && prevMode != FirstAidConfig.maxHealthMode) {
+                if (prevMode == FirstAidConfig.VanillaMaxHealthMode.SYNC_FIRSTAID_VANILLA) {
+                    // sync -> none/scaled transition
+                    // We have to reset to 20.0 plus whatever other mods granted/reduced
+                    float newMaxHealth = player.getMaxHealth() - FirstAidConfig.damageSystem.getTotalMaxHealth() + 20F;
+                    player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(newMaxHealth);
+                    scheduleResync();
+                } else if (FirstAidConfig.maxHealthMode == FirstAidConfig.VanillaMaxHealthMode.SYNC_FIRSTAID_VANILLA) {
+                    // none/scaled -> sync transition
+                    // We have to add so we match the max total health plus whatever other mods granted/reduced
+                    float newMaxHealth = player.getMaxHealth() + FirstAidConfig.damageSystem.getTotalMaxHealth() - 20F;
+                    player.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(newMaxHealth);
+                    scheduleResync();
+                }
+            }
+            prevMode = null;
+        }
 
         float newCurrentHealth = calculateNewCurrentHealth(player);
         if (Float.isNaN(newCurrentHealth)) {
@@ -423,7 +462,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public void runScaleLogic(EntityPlayer player) {
-        if (FirstAidConfig.scaleMaxHealth) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
+        if (FirstAidConfig.maxHealthMode == FirstAidConfig.VanillaMaxHealthMode.SCALE_FIRSTAID_TO_FIT_VANILLA) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
             player.world.profiler.startSection("healthscaling");
             float globalFactor = player.getMaxHealth() / 20F;
             if (prevScaleFactor != globalFactor) {
@@ -491,6 +530,89 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                 player.world.profiler.endSection();
             }
             prevScaleFactor = globalFactor;
+            player.world.profiler.endSection();
+        } else if (FirstAidConfig.maxHealthMode == FirstAidConfig.VanillaMaxHealthMode.SYNC_FIRSTAID_VANILLA) {
+            player.world.profiler.startSection("healthscaling");
+            float floatNewMaxHealth = player.getMaxHealth();
+            if (prevScaleFactor != floatNewMaxHealth) {
+                if (FirstAidConfig.debug) {
+                    FirstAid.LOGGER.info("Starting health scaling max health {} -> {}", prevScaleFactor, floatNewMaxHealth);
+                }
+                player.world.profiler.startSection("distribution");
+                int initialMaxHealth = FirstAidConfig.damageSystem.getTotalMaxHealth();
+                int newMaxHealth = Math.round(floatNewMaxHealth);
+                int diff = newMaxHealth - initialMaxHealth;
+                List<AbstractDamageablePart> parts = new ArrayList<>();
+                for (EnumPlayerPart value : EnumPlayerPart.VALUES) {
+                    parts.add(getFromEnum(value));
+                }
+                if (diff > 0) {
+                    parts.sort((o1, o2) -> Integer.compare(o1.initialMaxHealth, o2.initialMaxHealth));
+                    int remaining = EnumPlayerPart.VALUES.length;
+                    for (AbstractDamageablePart part : parts) {
+                        // Make sure to always add 2, as that's the lowest we can do
+                        int toAdd = MathHelper.roundUp(MathHelper.ceil(diff / (float) remaining), 2);
+                        // Nothing left to add, return
+                        if (toAdd <= 0) toAdd = 0;
+                        // We want to add more than we are allowed to, reduce toAdd by two until we fit
+                        // TODO can this even happen?
+                        while (toAdd > diff) {
+                            toAdd -= 2;
+                            // Doesn't fit, break
+                            if (toAdd <= 2) {
+                                toAdd = 0;
+                                break;
+                            }
+                        }
+                        int toSet = part.initialMaxHealth + toAdd;
+                        if (FirstAidConfig.debug) {
+                            FirstAid.LOGGER.info("Part {} max health: {} initial; {} old; {} new", part.part.name(), part.initialMaxHealth, part.getMaxHealth(), toSet);
+                        }
+                        part.setMaxHealth(toSet);
+                        // Make sure we have not reached the limit yet
+                        if (part.getMaxHealth() == toSet) {
+                            diff -= toAdd;
+                        }
+                        remaining--;
+                    }
+                } else if (diff < 0) {
+                    diff = -diff; // Flip the value, so we know what to subtract
+                    parts.sort((o1, o2) -> Integer.compare(o2.initialMaxHealth, o1.initialMaxHealth));
+                    int remaining = EnumPlayerPart.VALUES.length;
+                    for (AbstractDamageablePart part : parts) {
+                        // Make sure to always sub 2, as that's the lowest we can do
+                        int toSub = MathHelper.roundUp(MathHelper.ceil(diff / (float) remaining), 2);
+                        // Nothing left to add, return
+                        if (toSub <= 0) toSub = 0;
+                        // We want to add more than we are allowed to, reduce toAdd by two until we fit
+                        // TODO can this even happen?
+                        while (toSub > diff) {
+                            toSub -= 2;
+                            // Doesn't fit, break
+                            if (toSub <= 2) {
+                                toSub = 0;
+                                break;
+                            }
+                        }
+                        int toSet = part.initialMaxHealth - toSub;
+                        if (FirstAidConfig.debug) {
+                            FirstAid.LOGGER.info("Part {} max health: {} initial; {} old; {} new", part.part.name(), part.initialMaxHealth, part.getMaxHealth(), toSet);
+                        }
+                        part.setMaxHealth(toSet);
+                        // Make sure we have not reached the limit yet
+                        if (part.getMaxHealth() == toSet) {
+                            diff -= toSub;
+                        }
+                        remaining--;
+                    }
+                } else {
+                    for (AbstractDamageablePart part : parts) {
+                        part.setMaxHealth(part.initialMaxHealth);
+                    }
+                }
+                player.world.profiler.endSection();
+            }
+            prevScaleFactor = floatNewMaxHealth;
             player.world.profiler.endSection();
         }
     }

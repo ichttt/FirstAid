@@ -65,11 +65,19 @@ public class FirstAidConfig {
     @ExtraConfig.Advanced
     public static boolean enableSoundSystem = true;
 
-    @Config.Comment("If true, max health is scaled to your hearts, and the config entries get multiplier to match the max health")
-    @Config.LangKey("firstaid.config.scalemaxhealth")
+    @Config.Comment("Specifies how the vanilla max health should behave with the firstaid max health\n" +
+            "IGNORE ignores the vanilla max health, so it does not do anything to the first aid max health if your vanilla max health changes\n" +
+            "SCALE_FIRSTAID_TO_FIT_VANILLA scales the firstaid health according to the vanilla max health. Your vanilla max health will still start at 20 (=10 hearts), but for each additional heart the first aid max health will increase as well\n" +
+            "SYNC_FIRSTAID_VANILLA couples the vanilla max health and the first aid max health. Your starting vanilla max health will always match the sum of all firstaid hearts, and each additional heart means one extra firstaid heart.")
+    @Config.LangKey("firstaid.config.maxHealthMode")
     @Config.RequiresWorldRestart
     @ExtraConfig.Sync
-    public static boolean scaleMaxHealth = false;
+    public static VanillaMaxHealthMode maxHealthMode = VanillaMaxHealthMode.IGNORE;
+
+    // !!! THIS IS ORDER SENSITIVE ACROSS SAVES - DO NOT CHANGE THE ORDER !!!
+    public enum VanillaMaxHealthMode {
+        IGNORE, SCALE_FIRSTAID_TO_FIT_VANILLA, SYNC_FIRSTAID_VANILLA
+    }
 
     @Config.Comment("If true, max health will be capped at 6 hearts and absorption at 2 hearts per limb. If false, the health cap will be much higher (64 hearts normal and 16 absorption)")
     @Config.LangKey("firstaid.config.capmaxhealth")
@@ -297,6 +305,10 @@ public class FirstAidConfig {
 
         @Config.RangeInt(min = 2, max = 12)
         public int maxHealthRightFoot = 4;
+
+        public int getTotalMaxHealth() {
+            return maxHealthHead + maxHealthLeftArm + maxHealthLeftLeg + maxHealthLeftFoot + maxHealthBody + maxHealthRightArm + maxHealthRightLeg + maxHealthRightFoot;
+        }
     }
 
     public static class Debuffs {

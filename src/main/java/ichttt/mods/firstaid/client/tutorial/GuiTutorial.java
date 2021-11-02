@@ -72,7 +72,7 @@ public class GuiTutorial extends GuiScreen {
     public void initGui() {
         parent.setWorldAndResolution(mc, this.width, this.height);
         guiTop = parent.guiTop - 30;
-        this.buttonList.add(new GuiButton(0, parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, ">"));
+        this.buttonList.add(new GuiButton(0, parent.guiLeft + GuiHealthScreen.X_SIZE - 34, guiTop + 4, 32, 20, ">"));
         this.buttonList.addAll(parent.getButtons());
         parent.getButtons().clear();
     }
@@ -102,11 +102,11 @@ public class GuiTutorial extends GuiScreen {
         parent.drawScreen(mouseX, mouseY, partialTicks);
         GlStateManager.popMatrix();
         mc.getTextureManager().bindTexture(HealthRenderUtils.GUI_LOCATION);
-        drawTexturedModalRect(parent.guiLeft, guiTop ,0, 139, GuiHealthScreen.xSize, 28);
+        drawTexturedModalRect(parent.guiLeft, guiTop ,0, 139, GuiHealthScreen.X_SIZE, 28);
         GlStateManager.pushMatrix();
         this.action.draw();
         GlStateManager.popMatrix();
-        drawCenteredString(mc.fontRenderer, I18n.format("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 128, 0xFFFFFF);
+        drawCenteredString(mc.fontRenderer, I18n.format("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.X_SIZE / 2), parent.guiTop + 128, 0xFFFFFF);
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 

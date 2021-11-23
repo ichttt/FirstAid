@@ -181,6 +181,12 @@ public class FirstAidConfig {
         @Config.RangeDouble(min = 0D, max = 20D)
         @ExtraConfig.Advanced
         public double naturalRegenMultiplier = 0.5D;
+
+        @Config.Comment("Specifies how the vanilla resistance potion effect should reduce damage.\n" +
+                "By default, one level of resistance reduces 20% of damage. Changing this value to e.g. 10 will reduce the reduction to 10% damage reduction per level")
+        @Config.LangKey("firstaid.config.resistancereductionpercentperlevel")
+        @Config.RangeInt(min = 1, max = 40)
+        public int resistanceReductionPercentPerLevel = 20;
     }
 
     public static class Overlay {

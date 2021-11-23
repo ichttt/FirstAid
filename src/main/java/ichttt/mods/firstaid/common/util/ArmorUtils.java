@@ -261,10 +261,10 @@ public class ArmorUtils {
     public static float applyGlobalPotionModifiers(EntityPlayer player, DamageSource source, float damage) {
         if (source.isDamageAbsolute()) return damage;
         if (player.isPotionActive(MobEffects.RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
-            @SuppressWarnings("ConstantConditions") int i = (player.getActivePotionEffect(MobEffects.RESISTANCE).getAmplifier() + 1) * 5;
-            int j = 25 - i;
+            @SuppressWarnings("ConstantConditions") int i = (player.getActivePotionEffect(MobEffects.RESISTANCE).getAmplifier() + 1) * FirstAidConfig.externalHealing.resistanceReductionPercentPerLevel;
+            int j = 100 - i;
             float f = damage * (float) j;
-            damage = f / 25.0F;
+            damage = f / 100.0F;
         }
 
         if (damage <= 0.0F) return 0.0F;

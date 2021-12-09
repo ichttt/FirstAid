@@ -46,10 +46,17 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.TextComponentString;
@@ -70,6 +77,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
@@ -262,6 +270,47 @@ public class ClientEventHandler {
                         replaceOrAppend(tooltip, original, makeToughnessMsg(qualityToolsTotalToughness));
                     }
                 }
+            }
+        }
+        if (item instanceof ItemPotion) {
+            List<PotionEffect> list = PotionUtils.getEffectsFromStack(stack);
+            if (!list.isEmpty()) {
+                for (PotionEffect potionEffect : list) {
+                    //TODO objectholder
+                    if (potionEffect.getPotion() == MobEffects.RESISTANCE) {
+                        Potion potion = potionEffect.getPotion();
+                        Map<IAttribute, AttributeModifier> map = potion.getAttributeModifierMap();
+
+                        if (!map.isEmpty())
+                        {
+                            for (Map.Entry<IAttribute, AttributeModifier> entry : map.entrySet()) {
+                                AttributeModifier falseModifier = entry.getValue();
+                                AttributeModifier realModifier = new AttributeModifier(falseModifier.getName(), potion.getAttributeModifierAmount(potionEffect.getAmplifier(), falseModifier), falseModifier.getOperation());
+
+                                double d1;
+
+                                if (realModifier.getOperation() != 1 && realModifier.getOperation() != 2)
+                                {
+                                    d1 = realModifier.getAmount();
+                                }
+                                else
+                                {
+                                    d1 = realModifier.getAmount() * 100.0D;
+                                }
+
+                                String raw = TextFormatting.BLUE + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus." + realModifier.getOperation(), ItemStack.DECIMALFORMAT.format(d1), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name." + entry.getKey().getName()));
+                                String replacement = TextFormatting.BLUE + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus." + realModifier.getOperation(), ItemStack.DECIMALFORMAT.format(d1 * ((float) FirstAidConfig.externalHealing.resistanceReductionPercentPerLevel / 20F)), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name." + entry.getKey().getName()));
+
+                                List<String> toolTip = event.getToolTip();
+                                int index = toolTip.indexOf(raw);
+                                if (index != -1) {
+                                    toolTip.set(index, replacement);
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
         }
 

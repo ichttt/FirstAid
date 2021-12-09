@@ -22,6 +22,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.math.DoubleMath;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -278,16 +279,52 @@ public class ArmorUtils {
     public static float applyEnchantmentModifiers(EntityPlayer player, EntityEquipmentSlot slot, DamageSource source, float damage) {
         if (source.isDamageAbsolute()) return damage;
         int k;
-        if (FirstAidConfig.armorEnchantmentMode == FirstAidConfig.ArmorEnchantmentMode.LOCAL_ENCHANTMENTS) {
-            k = EnchantmentHelper.getEnchantmentModifierDamage(() -> Iterators.singletonIterator(player.getItemStackFromSlot(slot)), source);
-            k *= 4;
-        } else if (FirstAidConfig.armorEnchantmentMode == FirstAidConfig.ArmorEnchantmentMode.GLOBAL_ENCHANTMENTS){
+        if (FirstAidConfig.enchantmentHandling.armorEnchantmentMode == FirstAidConfig.EnchantmentHandling.ArmorEnchantmentMode.LOCAL_ENCHANTMENTS) {
+            ItemStack itemStackFromSlot = player.getItemStackFromSlot(slot);
+//            k = EnchantmentHelper.getEnchantmentModifierDamage(() -> Iterators.singletonIterator(itemStackFromSlot), source);
+            k = calculateEnchantmentModifierLocal(itemStackFromSlot, source);
+        } else if (FirstAidConfig.enchantmentHandling.armorEnchantmentMode == FirstAidConfig.EnchantmentHandling.ArmorEnchantmentMode.GLOBAL_ENCHANTMENTS){
             k = EnchantmentHelper.getEnchantmentModifierDamage(player.getArmorInventoryList(), source);
         } else {
-            throw new RuntimeException("What dark magic is " + FirstAidConfig.armorEnchantmentMode);
+            throw new RuntimeException("What dark magic is " + FirstAidConfig.enchantmentHandling.armorEnchantmentMode);
         }
 
         if (k > 0) damage = CombatRules.getDamageAfterMagicAbsorb(damage, (float) k);
         return damage;
+    }
+
+    // See EnchantmentHelper.applyEnchantmentModifier
+    private static int calculateEnchantmentModifierLocal(ItemStack stack, DamageSource source)
+    {
+        int ret = 0;
+        if (!stack.isEmpty())
+        {
+            NBTTagList nbttaglist = stack.getEnchantmentTagList();
+
+            for (int i = 0; i < nbttaglist.tagCount(); ++i)
+            {
+                int j = nbttaglist.getCompoundTagAt(i).getShort("id");
+                int k = nbttaglist.getCompoundTagAt(i).getShort("lvl");
+
+                if (Enchantment.getEnchantmentByID(j) != null)
+                {
+                    Enchantment enchantment = Enchantment.getEnchantmentByID(j);
+                    int val = enchantment.calcModifierDamage(k, source);
+                    String[] resourceLocation = FirstAidConfig.enchantmentHandling.overrideEntries.resourceLocation;
+                    int[] multiplierOverride = FirstAidConfig.enchantmentHandling.overrideEntries.multiplierOverride;
+                    String enchantRlAsString = enchantment.getRegistryName().toString();
+                    int multiplier = FirstAidConfig.enchantmentHandling.enchantmentMultiplier;
+                    for (int l = 0; l < resourceLocation.length; l++) {
+                        String s = resourceLocation[i];
+                        if (s.equals(enchantRlAsString)) {
+                            multiplier = multiplierOverride[i];
+                            break;
+                        }
+                    }
+                    ret += (val * multiplier);
+                }
+            }
+        }
+        return ret;
     }
 }

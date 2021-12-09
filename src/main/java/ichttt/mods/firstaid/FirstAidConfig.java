@@ -60,6 +60,12 @@ public class FirstAidConfig {
     @ExtraConfig.Sync
     public static final LocationalArmor locationalArmor = new LocationalArmor();
 
+    @Config.Comment("Specify how enchantments are applied")
+    @Config.LangKey("firstaid.config.enchantmenthandling")
+    @ExtraConfig.Advanced
+    @ExtraConfig.Sync
+    public static final EnchantmentHandling enchantmentHandling = new EnchantmentHandling();
+
     @Config.Comment("Set to true to enable the debuff sounds. Requieres enableDebuffs to be true")
     @Config.LangKey("firstaid.config.enablesoundsystem")
     @ExtraConfig.Advanced
@@ -105,20 +111,40 @@ public class FirstAidConfig {
             "When there is too much damage, the damage will still kill the player. Other distributions that defined are not affected by this.")
     public static boolean useFriendlyRandomDistribution = false;
 
-    @Config.Comment("If set to LOCAL_ENCHANTMENTS, only the enchantments for the armor for the body part that is currently being damaged is taken into account. The strength of the armor is multiplied by 4, so it matches the vanilla default\n" +
-            "If set to GLOBAL_ENCHANTMENTS, the enchantments of all armor pieces are taken into account for all body parts that have any kind of armor.")
-    public static ArmorEnchantmentMode armorEnchantmentMode = ArmorEnchantmentMode.LOCAL_ENCHANTMENTS;
-
-
-    public enum ArmorEnchantmentMode {
-        GLOBAL_ENCHANTMENTS, LOCAL_ENCHANTMENTS
-    }
 
     @Config.Comment("Enabled additional debug logs - May slow down the game and will increase log file size\nOnly enable for special purposes")
     @Config.LangKey("firstaid.config.debug")
     @Config.RequiresMcRestart
     @ExtraConfig.Advanced
     public static boolean debug = false;
+
+    public static class EnchantmentHandling {
+        @Config.Comment("If set to LOCAL_ENCHANTMENTS, only the enchantments for the armor for the body part that is currently being damaged is taken into account. The strength of the armor is multiplied by 4, so it matches the vanilla default\n" +
+                "If set to GLOBAL_ENCHANTMENTS, the enchantments of all armor pieces are taken into account for all body parts that have any kind of armor.")
+        public ArmorEnchantmentMode armorEnchantmentMode = ArmorEnchantmentMode.LOCAL_ENCHANTMENTS; //TODO migrate
+
+        @Config.RangeInt(min = 1, max = 4)
+        @Config.Comment("Specifies the default modifier. This is only used if armorEnchantmentMode is LOCAL_ENCHANTMENTS, as this is used scale up the values to somewhat match what vanilla balances around (as vanilla balances around global enchantments)")
+        public int enchantmentMultiplier = 4;
+
+        @Config.Comment("Specifies the overrides for the the modifier. This is only used if armorEnchantmentMode is LOCAL_ENCHANTMENTS. This can be used to set another multiplier for special enchantments")
+        @ExtraConfig.Advanced
+        public OverrideEntries overrideEntries = new OverrideEntries();
+
+
+        public enum ArmorEnchantmentMode {
+            GLOBAL_ENCHANTMENTS, LOCAL_ENCHANTMENTS
+        }
+
+        public static class OverrideEntries {
+            @Config.Comment("The resource location of the enchantment. Must be fully specified and cannot use wildcard. Example: minecraft:feather_falling")
+            public String[] resourceLocation = new String[]{"minecraft:feather_falling"};
+            @Config.RangeInt(min = 1, max = 4)
+            public int[] multiplierOverride = new int[]{1};
+        }
+
+
+    }
 
     public static class InternalHealing {
 

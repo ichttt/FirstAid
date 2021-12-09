@@ -160,9 +160,19 @@ public class ConfigEntry<T extends Annotation> {
         } else if (type == short[].class || type == Short[].class) {
             throw new UnsupportedOperationException("Cannot read from buf: Class not implemented for sync: " + type);
         } else if (type == int[].class || type == Integer[].class) {
-            throw new UnsupportedOperationException("Cannot read from buf: Class not implemented for sync: " + type);
+            byte len = buf.readByte();
+            int[] arr = new int[len];
+            for (int i = 0; i < len; i++) {
+                arr[i] = buf.readInt();
+            }
+            f.set(fieldAccessor, arr);
         } else if (type == String[].class) {
-            throw new UnsupportedOperationException("Cannot read from buf: Class not implemented for sync: " + type);
+            byte len = buf.readByte();
+            String[] arr = new String[len];
+            for (int i = 0; i < len; i++) {
+                arr[i] = ByteBufUtils.readUTF8String(buf);
+            }
+            f.set(fieldAccessor, arr);
         } else if (type.getSuperclass() == Object.class) {
             Object newInstance = f.get(fieldAccessor);
             for (Field newField : newInstance.getClass().getDeclaredFields())
@@ -204,13 +214,26 @@ public class ConfigEntry<T extends Annotation> {
         } else if (type == short[].class || type == Short[].class) {
             throw new UnsupportedOperationException("Cannot write to buf: Class not implemented for sync: " + type);
         } else if (type == int[].class || type == Integer[].class) {
-            throw new UnsupportedOperationException("Cannot write to buf: Class not implemented for sync: " + type);
+            int[] value = (int[]) f.get(fieldAccessor);
+            buf.writeByte(checkedCast(value.length));
+            for (int i : value) {
+                buf.writeInt(i);
+            }
         } else if (type == String[].class) {
-            throw new UnsupportedOperationException("Cannot write to buf: Class not implemented for sync: " + type);
+            String[] value = (String[]) f.get(fieldAccessor);
+            buf.writeByte(checkedCast(value.length));
+            for (String s : value) {
+                ByteBufUtils.writeUTF8String(buf, s);
+            }
         } else if (type.getSuperclass() == Object.class) {
             Object newInstance = f.get(fieldAccessor);
             for (Field newField : newInstance.getClass().getDeclaredFields())
                 writeToByteBuf(newField, newInstance, buf);
         }
+    }
+
+    private static byte checkedCast(int val) {
+        if (val > Byte.MAX_VALUE) throw new RuntimeException(val + " is too large!");
+        return (byte) val;
     }
 }

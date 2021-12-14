@@ -30,6 +30,7 @@ import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
 import ichttt.mods.firstaid.common.AABBAlignedBoundingBox;
 import ichttt.mods.firstaid.common.CapProvider;
+import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.config.ConfigEntry;
@@ -71,6 +72,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -82,6 +84,8 @@ import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
 public class ClientEventHandler {
+    @GameRegistry.ObjectHolder("minecraft:resistance")
+    public static final Potion RESISTANCE = null;
     private static final DecimalFormat FORMAT = new DecimalFormat("#.##");
     private static int id;
 
@@ -276,8 +280,7 @@ public class ClientEventHandler {
             List<PotionEffect> list = PotionUtils.getEffectsFromStack(stack);
             if (!list.isEmpty()) {
                 for (PotionEffect potionEffect : list) {
-                    //TODO objectholder
-                    if (potionEffect.getPotion() == MobEffects.RESISTANCE) {
+                    if (RESISTANCE != null && potionEffect.getPotion() == RESISTANCE) {
                         Potion potion = potionEffect.getPotion();
                         Map<IAttribute, AttributeModifier> map = potion.getAttributeModifierMap();
 

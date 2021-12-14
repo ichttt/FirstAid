@@ -314,10 +314,16 @@ public class ArmorUtils {
                     int[] multiplierOverride = FirstAidConfig.enchantmentHandling.overrideEntries.multiplierOverride;
                     String enchantRlAsString = enchantment.getRegistryName().toString();
                     int multiplier = FirstAidConfig.enchantmentHandling.enchantmentMultiplier;
-                    for (int l = 0; l < resourceLocation.length; l++) {
-                        String s = resourceLocation[i];
+                    if (FirstAidConfig.debug) {
+                        FirstAid.LOGGER.info("Searching for enchantment multiplier override for {}, base is {}", enchantRlAsString, multiplier);
+                    }
+                    for (int l = 0; l < Math.min(resourceLocation.length, multiplierOverride.length); l++) {
+                        String s = resourceLocation[l];
                         if (s.equals(enchantRlAsString)) {
-                            multiplier = multiplierOverride[i];
+                            multiplier = multiplierOverride[l];
+                            if (FirstAidConfig.debug) {
+                                FirstAid.LOGGER.info("Found enchantment multiplier override for {}, new value is {}", enchantRlAsString, multiplier);
+                            }
                             break;
                         }
                     }

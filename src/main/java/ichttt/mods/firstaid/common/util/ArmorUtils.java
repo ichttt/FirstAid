@@ -189,11 +189,11 @@ public class ArmorUtils {
             return damage;
         if (player.hasEffect(Effects.DAMAGE_RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
             @SuppressWarnings("ConstantConditions")
-            int i = (player.getEffect(Effects.DAMAGE_RESISTANCE).getAmplifier() + 1) * 5;
-            int j = 25 - i;
+            int i = (player.getEffect(Effects.DAMAGE_RESISTANCE).getAmplifier() + 1) * FirstAidConfig.SERVER.resistanceReductionPercentPerLevel.get();
+            int j = 100 - i;
             float f = damage * (float) j;
             float f1 = damage;
-            damage = Math.max(f / 25.0F, 0.0F);
+            damage = Math.max(f / 100.0F, 0.0F);
             float f2 = f1 - damage;
             if (f2 > 0.0F && f2 < 3.4028235E37F) {
                 if (player instanceof ServerPlayerEntity) {

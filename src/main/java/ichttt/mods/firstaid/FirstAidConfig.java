@@ -136,6 +136,10 @@ public class FirstAidConfig {
                     .comment("The value vanilla's natural regeneration will be multiplied with. Has no effect if \"allowNaturalRegeneration\" is disabled")
                     .translation("firstaid.config.naturalregenmultiplier")
                     .defineInRange("naturalRegenMultiplier", 0.5D, 0D, 20D);
+            resistanceReductionPercentPerLevel = builder
+                    .comment("Specifies how the vanilla resistance potion effect should reduce damage.", "By default, one level of resistance reduces 20% of damage. Changing this value to e.g. 10 will reduce the reduction to 10% damage reduction per level")
+                    .translation("firstaid.config.resistancereductionpercentperlevel")
+                    .defineInRange("resistanceReductionPercentPerLevel", 20, 1, 40);
 
             builder.pop();
             builder.push("misc");
@@ -210,6 +214,7 @@ public class FirstAidConfig {
         public final ForgeConfigSpec.DoubleValue sleepHealPercentage;
         public final ForgeConfigSpec.DoubleValue otherRegenMultiplier;
         public final ForgeConfigSpec.DoubleValue naturalRegenMultiplier;
+        public final ForgeConfigSpec.IntValue resistanceReductionPercentPerLevel;
 
         public final ForgeConfigSpec.BooleanValue scaleMaxHealth;
         public final ForgeConfigSpec.BooleanValue capMaxHealth;

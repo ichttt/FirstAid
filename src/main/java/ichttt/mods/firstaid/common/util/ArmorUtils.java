@@ -132,7 +132,7 @@ public class ArmorUtils {
     }
 
     private static double getValueFromAttributes(Attribute attribute, EquipmentSlotType slot, ItemStack stack) {
-        return stack.getItem().getAttributeModifiers(slot, stack).get(attribute).stream().mapToDouble(AttributeModifier::getAmount).sum();
+        return stack.getAttributeModifiers(slot).get(attribute).stream().mapToDouble(AttributeModifier::getAmount).sum();
     }
 
     private static double getGlobalRestAttribute(PlayerEntity player, Attribute attribute) {
@@ -162,9 +162,8 @@ public class ArmorUtils {
         float totalArmor = 0F;
         float totalToughness = 0F;
         if (item instanceof ArmorItem) {
-            ArmorItem armor = (ArmorItem) item;
-            totalArmor = armor.getDefense();
-            totalToughness = armor.getToughness(); //getToughness
+            totalArmor = (float) getValueFromAttributes(Attributes.ARMOR, slot, itemStack);
+            totalToughness = (float) getValueFromAttributes(Attributes.ARMOR_TOUGHNESS, slot, itemStack); //getToughness
             totalArmor = (float) applyArmorModifier(slot, totalArmor);
             totalToughness = (float) applyToughnessModifier(slot, totalToughness);
         }

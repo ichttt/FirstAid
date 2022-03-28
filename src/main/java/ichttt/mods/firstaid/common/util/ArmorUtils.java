@@ -37,8 +37,10 @@ import net.minecraft.potion.Effects;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 public class ArmorUtils {
 
@@ -212,12 +214,35 @@ public class ArmorUtils {
      */
     @SuppressWarnings("JavadocReference")
     public static float applyEnchantmentModifiers(PlayerEntity player, EquipmentSlotType slot, DamageSource source, float damage) {
-        if (source.isBypassArmor()) return damage;
         int k;
         FirstAidConfig.Server.ArmorEnchantmentMode enchantmentMode = FirstAidConfig.SERVER.armorEnchantmentMode.get();
         if (enchantmentMode == FirstAidConfig.Server.ArmorEnchantmentMode.LOCAL_ENCHANTMENTS) {
-            k = EnchantmentHelper.getDamageProtection(() -> Iterators.singletonIterator(player.getItemBySlot(slot)), source);
-            k *= 4;
+            ItemStack itemStackFromSlot = player.getItemBySlot(slot);
+//            k = EnchantmentHelper.getDamageProtection(() -> Iterators.singletonIterator(player.getItemBySlot(slot)), source);
+            MutableInt mutableInt = new MutableInt();
+            EnchantmentHelper.runIterationOnItem((enchantment, level) -> {
+                int val = enchantment.getDamageProtection(level, source);
+                List<? extends String> resourceLocation = FirstAidConfig.SERVER.enchMulOverrideResourceLocations.get();
+                List<? extends Integer> multiplierOverride = FirstAidConfig.SERVER.enchMulOverrideMultiplier.get();
+                String enchantRlAsString = enchantment.getRegistryName().toString();
+                int multiplier = FirstAidConfig.SERVER.enchantmentMultiplier.get();
+                boolean debug = FirstAidConfig.GENERAL.debug.get();
+                if (debug) {
+                    FirstAid.LOGGER.info("Searching for enchantment multiplier override for {}, base is {}", enchantRlAsString, multiplier);
+                }
+                for (int i = 0; i < Math.min(resourceLocation.size(), multiplierOverride.size()); i++) {
+                    String s = resourceLocation.get(i);
+                    if (s.equals(enchantRlAsString)) {
+                        multiplier = multiplierOverride.get(i);
+                        if (debug) {
+                            FirstAid.LOGGER.info("Found enchantment multiplier override for {}, new value is {}", enchantRlAsString, multiplier);
+                        }
+                        break;
+                    }
+                }
+                mutableInt.add(val * multiplier);
+            }, itemStackFromSlot);
+            k = mutableInt.getValue();
         } else if (enchantmentMode == FirstAidConfig.Server.ArmorEnchantmentMode.GLOBAL_ENCHANTMENTS) {
             k = EnchantmentHelper.getDamageProtection(player.getArmorSlots(), source);
         } else {

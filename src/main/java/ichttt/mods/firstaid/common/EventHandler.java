@@ -88,6 +88,8 @@ public class EventHandler {
     public static final SoundEvent HEARTBEAT = FirstAidItems.getNull();
     @ObjectHolder("firstaid:morphine")
     public static final Effect MORPHINE = FirstAidItems.getNull();
+    @ObjectHolder("minecraft:resistance")
+    public static final Effect DAMAGE_RESISTANCE = FirstAidItems.getNull();
 
     public static final Map<PlayerEntity, Pair<Entity, RayTraceResult>> hitList = new WeakHashMap<>();
     private static final Field LOOT_ENTRIES_FIELD = ObfuscationReflectionHelper.findField(LootPool.class, "field_186453_a");

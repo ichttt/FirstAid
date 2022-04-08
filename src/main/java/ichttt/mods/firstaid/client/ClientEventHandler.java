@@ -29,6 +29,7 @@ import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
 import ichttt.mods.firstaid.common.AABBAlignedBoundingBox;
 import ichttt.mods.firstaid.common.CapProvider;
+import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
@@ -41,10 +42,17 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.PotionItem;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
+import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.ITextComponent;
@@ -62,6 +70,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class ClientEventHandler {
     private static final DecimalFormat FORMAT = new DecimalFormat("#.##");
@@ -210,6 +219,43 @@ public class ClientEventHandler {
                     ITextComponent original = new TranslationTextComponent("attribute.modifier.plus.0", FORMAT.format(normalToughness), new TranslationTextComponent("attribute.name.generic.armor_toughness")).withStyle(TextFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
                 }
+            }
+        }
+        if (item instanceof PotionItem) {
+            List<EffectInstance> list = PotionUtils.getMobEffects(stack);
+            if (!list.isEmpty()) {
+                for (EffectInstance potionEffect : list) {
+                    if (potionEffect.getEffect() == EventHandler.DAMAGE_RESISTANCE) {
+                        Effect potion = potionEffect.getEffect();
+                        Map<Attribute, AttributeModifier> map = potion.getAttributeModifiers();
+
+                        if (!map.isEmpty())
+                        {
+                            for (Map.Entry<Attribute, AttributeModifier> entry : map.entrySet()) {
+                                AttributeModifier falseModifier = entry.getValue();
+                                AttributeModifier realModifier = new AttributeModifier(falseModifier.getName(), potion.getAttributeModifierValue(potionEffect.getAmplifier(), falseModifier), falseModifier.getOperation());
+
+                                double d1;
+
+                                if (realModifier.getOperation() != AttributeModifier.Operation.MULTIPLY_BASE && realModifier.getOperation() != AttributeModifier.Operation.MULTIPLY_TOTAL) {
+                                    d1 = realModifier.getAmount();
+                                } else {
+                                    d1 = realModifier.getAmount() * 100.0D;
+                                }
+
+                                ITextComponent raw = (new TranslationTextComponent("attribute.modifier.plus." + realModifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1), new TranslationTextComponent(entry.getKey().getDescriptionId()))).withStyle(TextFormatting.BLUE);
+
+                                List<ITextComponent> toolTip = event.getToolTip();
+                                int index = toolTip.indexOf(raw);
+                                if (index != -1) {
+                                    ITextComponent replacement = (new TranslationTextComponent("attribute.modifier.plus." + realModifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1 * ((float) FirstAidConfig.SERVER.resistanceReductionPercentPerLevel.get() / 20F)), new TranslationTextComponent(entry.getKey().getDescriptionId()))).withStyle(TextFormatting.BLUE);
+                                    toolTip.set(index, replacement);
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
         }
 

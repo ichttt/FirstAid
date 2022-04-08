@@ -28,7 +28,7 @@ repositories {
     mavenLocal()
 }
 
-version = '1.10.1'
+version = '1.10.2'
 group = 'ichttt.mods.firstaid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'firstaid'
 

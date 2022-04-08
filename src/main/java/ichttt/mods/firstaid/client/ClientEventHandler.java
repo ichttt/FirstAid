@@ -41,19 +41,18 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.item.PotionItem;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.StringUtil;
+import net.minecraft.world.item.PotionItem;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -88,6 +87,7 @@ public class ClientEventHandler {
             GuiHealthScreen.BED_ITEMSTACK.setDamageValue(id);
             if (mc.level != null && mc.level.getGameTime() % 3 == 0) id++;
             if (id > 15) id = 0;
+            GuiHealthScreen.tickFun();
             PlayerModelRenderer.tickFun();
         }
         if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.level != null && mc.level.isClientSide) {
@@ -213,11 +213,11 @@ public class ClientEventHandler {
             }
         }
         if (item instanceof PotionItem) {
-            List<EffectInstance> list = PotionUtils.getMobEffects(stack);
+            List<MobEffectInstance> list = PotionUtils.getMobEffects(stack);
             if (!list.isEmpty()) {
-                for (EffectInstance potionEffect : list) {
+                for (MobEffectInstance potionEffect : list) {
                     if (potionEffect.getEffect() == EventHandler.DAMAGE_RESISTANCE) {
-                        Effect potion = potionEffect.getEffect();
+                        MobEffect potion = potionEffect.getEffect();
                         Map<Attribute, AttributeModifier> map = potion.getAttributeModifiers();
 
                         if (!map.isEmpty())
@@ -234,12 +234,12 @@ public class ClientEventHandler {
                                     d1 = realModifier.getAmount() * 100.0D;
                                 }
 
-                                ITextComponent raw = (new TranslationTextComponent("attribute.modifier.plus." + realModifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1), new TranslationTextComponent(entry.getKey().getDescriptionId()))).withStyle(TextFormatting.BLUE);
+                                Component raw = (new TranslatableComponent("attribute.modifier.plus." + realModifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1), new TranslatableComponent(entry.getKey().getDescriptionId()))).withStyle(ChatFormatting.BLUE);
 
-                                List<ITextComponent> toolTip = event.getToolTip();
+                                List<Component> toolTip = event.getToolTip();
                                 int index = toolTip.indexOf(raw);
                                 if (index != -1) {
-                                    ITextComponent replacement = (new TranslationTextComponent("attribute.modifier.plus." + realModifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1 * ((float) FirstAidConfig.SERVER.resistanceReductionPercentPerLevel.get() / 20F)), new TranslationTextComponent(entry.getKey().getDescriptionId()))).withStyle(TextFormatting.BLUE);
+                                    Component replacement = (new TranslatableComponent("attribute.modifier.plus." + realModifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1 * ((float) FirstAidConfig.SERVER.resistanceReductionPercentPerLevel.get() / 20F)), new TranslatableComponent(entry.getKey().getDescriptionId()))).withStyle(ChatFormatting.BLUE);
                                     toolTip.set(index, replacement);
                                 }
                             }

@@ -63,6 +63,7 @@ public class GuiHealthScreen extends Screen {
 
     public static GuiHealthScreen INSTANCE;
     public static boolean isOpen = false;
+    private static int funTicks = 0; // mod 500
 
     private final AbstractPlayerDamageModel damageModel;
     private final List<GuiHoldButton> holdButtons = new ArrayList<>();
@@ -86,6 +87,13 @@ public class GuiHealthScreen extends Screen {
         this.damageModel = damageModel;
         this.activeHand = activeHand;
         disableButtons = false;
+    }
+
+    public static void tickFun() {
+        funTicks++;
+        if (funTicks > 500) {
+            funTicks = (int) (Math.random() * 100);
+        }
     }
 
     @Override
@@ -162,8 +170,19 @@ public class GuiHealthScreen extends Screen {
         int entityLookX = this.guiLeft + (xSize / 2) - mouseX;
         int entityLookY = this.guiTop + 20 - mouseY;
         if (EventCalendar.isGuiFun()) {
-            entityLookX = -entityLookX;
-            entityLookY = -entityLookY;
+            if (EventCalendar.isHalloween()) {
+                // Make it spoooky
+                if ((funTicks > 250 && funTicks < 270) || (funTicks > 330 && funTicks < 340)) {
+                    entityLookX = 0;
+                    entityLookY = 0;
+                } else if ((funTicks > 480 && funTicks < 500) || (funTicks > 340 && funTicks < 350 )) {
+                    entityLookX = -entityLookX;
+                    entityLookY = -entityLookY;
+                }
+            } else {
+                entityLookX = -entityLookX;
+                entityLookY = -entityLookY;
+            }
         }
         InventoryScreen.renderEntityInInventory(this.width / 2, this.height / 2 + 30, 45, entityLookX, entityLookY, minecraft.player);
 

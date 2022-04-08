@@ -109,9 +109,12 @@ public class PlayerModelRenderer {
         if (angle >= 90 || angle <= 0) {
             otherWay = !otherWay;
             if (!otherWay) {
-                cooldown = 200 + RANDOM.nextInt(400);
+                // Halloween is spooky, so make it more rare
+                int multiplier = EventCalendar.isHalloween() ? 10 : 1;
+                cooldown = (200 + RANDOM.nextInt(400)) * multiplier;
             } else {
-                cooldown = 30 + RANDOM.nextInt(60);
+                int multiplier = EventCalendar.isHalloween() ? 2 : 1;
+                cooldown = (30 + RANDOM.nextInt(60)) * multiplier;
             }
         }
     }

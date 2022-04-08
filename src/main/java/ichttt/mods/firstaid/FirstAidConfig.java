@@ -22,6 +22,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -106,7 +107,7 @@ public class FirstAidConfig {
             legsThoughnessOffset = offsetEntry(builder, "Legs", 0D);
             feetThoughnessOffset = offsetEntry(builder, "Feet", 0D);
 
-            builder.pop().push("Internal Healing");
+            builder.pop(2).push("Internal Healing");
 
             bandage = new IEEntry(builder, "bandage", 4, 18, 2500);
             plaster = new IEEntry(builder, "plaster", 2, 22, 3000);
@@ -136,6 +137,10 @@ public class FirstAidConfig {
                     .comment("The value vanilla's natural regeneration will be multiplied with. Has no effect if \"allowNaturalRegeneration\" is disabled")
                     .translation("firstaid.config.naturalregenmultiplier")
                     .defineInRange("naturalRegenMultiplier", 0.5D, 0D, 20D);
+            resistanceReductionPercentPerLevel = builder
+                    .comment("Specifies how the vanilla resistance potion effect should reduce damage.", "By default, one level of resistance reduces 20% of damage. Changing this value to e.g. 10 will reduce the reduction to 10% damage reduction per level")
+                    .translation("firstaid.config.resistancereductionpercentperlevel")
+                    .defineInRange("resistanceReductionPercentPerLevel", 20, 1, 40);
 
             builder.pop();
             builder.push("misc");
@@ -164,9 +169,40 @@ public class FirstAidConfig {
                     .define("useFriendlyRandomDistribution", false);
 
             armorEnchantmentMode = builder
-                    .comment("If set to LOCAL_ENCHANTMENTS, only the enchantments for the armor for the body part that is currently being damaged is taken into account. The strength of the armor is multiplied by 4, so it matches the vanilla default",
+                    .comment("If set to LOCAL_ENCHANTMENTS, only the enchantments for the armor for the body part that is currently being damaged is taken into account. The strength of the armor is multiplied by 4 (default value, can be changed by enchantmentMultiplier), so it matches the vanilla default",
                             "If set to GLOBAL_ENCHANTMENTS, the enchantments of all armor pieces are taken into account for all body parts that have any kind of armor.")
                     .defineEnum("armorEnchantmentMode", ArmorEnchantmentMode.LOCAL_ENCHANTMENTS);
+
+            builder.pop();
+
+            builder.push("Enchantment Handling");
+
+            enchantmentMultiplier = builder
+                    .comment("Specifies the default modifier. This is only used if armorEnchantmentMode is LOCAL_ENCHANTMENTS, as this is used scale up the values to somewhat match what vanilla balances around (as vanilla balances around global enchantments)")
+                    .defineInRange("enchantmentMultiplier", 4, 1, 4);
+
+            enchMulOverrideResourceLocations = builder
+                    .comment("Specifies the overrides for the the modifier. This is only used if armorEnchantmentMode is LOCAL_ENCHANTMENTS. This can be used to set another multiplier for special enchantments",
+                            "This list specifies the resource location of the enchantment. Must be fully specified and cannot use wildcard. Example: minecraft:feather_falling. First entry here will be matched to first multiplier, second entry to second multiplier and so on")
+                    .defineList("resourceLocations", Collections.singletonList("minecraft:feather_falling"), o -> {
+                        if (o == null || o.toString().isEmpty()) {
+                            FirstAid.LOGGER.warn("Ignored empty or invalid string for resourceLocations");
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    });
+            enchMulOverrideMultiplier = builder
+                    .comment("Specifies the overrides for the the modifier. This is only used if armorEnchantmentMode is LOCAL_ENCHANTMENTS. This can be used to set another multiplier for special enchantments",
+                            "This list specifies the multiplier of the corresponding resource location. See resourceLocations comment. Must be between 1 and 4")
+                    .defineList("overrideMultiplier", Collections.singletonList(2), o -> {
+                        try {
+                            int val = Integer.parseInt(o.toString());
+                            return val >= 1 && val <= 4;
+                        } catch (NumberFormatException ignored) {}
+                        FirstAid.LOGGER.warn("Invalid entry " + o.toString() + " for overrideMultiplier found!");
+                        return false;
+                    });
 
             builder.pop();
         }
@@ -210,12 +246,17 @@ public class FirstAidConfig {
         public final ForgeConfigSpec.DoubleValue sleepHealPercentage;
         public final ForgeConfigSpec.DoubleValue otherRegenMultiplier;
         public final ForgeConfigSpec.DoubleValue naturalRegenMultiplier;
+        public final ForgeConfigSpec.IntValue resistanceReductionPercentPerLevel;
 
         public final ForgeConfigSpec.BooleanValue scaleMaxHealth;
         public final ForgeConfigSpec.BooleanValue capMaxHealth;
         public final ForgeConfigSpec.EnumValue<VanillaHealthCalculationMode> vanillaHealthCalculation;
         public final ForgeConfigSpec.BooleanValue useFriendlyRandomDistribution;
         public final ForgeConfigSpec.EnumValue<ArmorEnchantmentMode> armorEnchantmentMode;
+
+        public final ForgeConfigSpec.IntValue enchantmentMultiplier;
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> enchMulOverrideResourceLocations;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> enchMulOverrideMultiplier;
 
 
         private static ForgeConfigSpec.IntValue healthEntry(ForgeConfigSpec.Builder builder, String name, int defaultVal) {

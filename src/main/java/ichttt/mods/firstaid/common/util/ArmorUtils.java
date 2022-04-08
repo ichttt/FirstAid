@@ -36,8 +36,10 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 public class ArmorUtils {
 
@@ -131,7 +133,7 @@ public class ArmorUtils {
     }
 
     private static double getValueFromAttributes(Attribute attribute, EquipmentSlot slot, ItemStack stack) {
-        return stack.getItem().getAttributeModifiers(slot, stack).get(attribute).stream().mapToDouble(AttributeModifier::getAmount).sum();
+        return stack.getAttributeModifiers(slot).get(attribute).stream().mapToDouble(AttributeModifier::getAmount).sum();
     }
 
     private static double getGlobalRestAttribute(Player player, Attribute attribute) {
@@ -161,9 +163,8 @@ public class ArmorUtils {
         float totalArmor = 0F;
         float totalToughness = 0F;
         if (item instanceof ArmorItem) {
-            ArmorItem armor = (ArmorItem) item;
-            totalArmor = armor.getDefense();
-            totalToughness = armor.getToughness(); //getToughness
+            totalArmor = (float) getValueFromAttributes(Attributes.ARMOR, slot, itemStack);
+            totalToughness = (float) getValueFromAttributes(Attributes.ARMOR_TOUGHNESS, slot, itemStack); //getToughness
             totalArmor = (float) applyArmorModifier(slot, totalArmor);
             totalToughness = (float) applyToughnessModifier(slot, totalToughness);
         }
@@ -189,11 +190,11 @@ public class ArmorUtils {
             return damage;
         if (player.hasEffect(MobEffects.DAMAGE_RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
             @SuppressWarnings("ConstantConditions")
-            int i = (player.getEffect(MobEffects.DAMAGE_RESISTANCE).getAmplifier() + 1) * 5;
-            int j = 25 - i;
+            int i = (player.getEffect(MobEffects.DAMAGE_RESISTANCE).getAmplifier() + 1) * FirstAidConfig.SERVER.resistanceReductionPercentPerLevel.get();
+            int j = 100 - i;
             float f = damage * (float) j;
             float f1 = damage;
-            damage = Math.max(f / 25.0F, 0.0F);
+            damage = Math.max(f / 100.0F, 0.0F);
             float f2 = f1 - damage;
             if (f2 > 0.0F && f2 < 3.4028235E37F) {
                 if (player instanceof ServerPlayer) {
@@ -212,12 +213,35 @@ public class ArmorUtils {
      */
     @SuppressWarnings("JavadocReference")
     public static float applyEnchantmentModifiers(Player player, EquipmentSlot slot, DamageSource source, float damage) {
-        if (source.isBypassArmor()) return damage;
         int k;
         FirstAidConfig.Server.ArmorEnchantmentMode enchantmentMode = FirstAidConfig.SERVER.armorEnchantmentMode.get();
         if (enchantmentMode == FirstAidConfig.Server.ArmorEnchantmentMode.LOCAL_ENCHANTMENTS) {
-            k = EnchantmentHelper.getDamageProtection(() -> Iterators.singletonIterator(player.getItemBySlot(slot)), source);
-            k *= 4;
+            ItemStack itemStackFromSlot = player.getItemBySlot(slot);
+//            k = EnchantmentHelper.getDamageProtection(() -> Iterators.singletonIterator(player.getItemBySlot(slot)), source);
+            MutableInt mutableInt = new MutableInt();
+            EnchantmentHelper.runIterationOnItem((enchantment, level) -> {
+                int val = enchantment.getDamageProtection(level, source);
+                List<? extends String> resourceLocation = FirstAidConfig.SERVER.enchMulOverrideResourceLocations.get();
+                List<? extends Integer> multiplierOverride = FirstAidConfig.SERVER.enchMulOverrideMultiplier.get();
+                String enchantRlAsString = enchantment.getRegistryName().toString();
+                int multiplier = FirstAidConfig.SERVER.enchantmentMultiplier.get();
+                boolean debug = FirstAidConfig.GENERAL.debug.get();
+                if (debug) {
+                    FirstAid.LOGGER.info("Searching for enchantment multiplier override for {}, base is {}", enchantRlAsString, multiplier);
+                }
+                for (int i = 0; i < Math.min(resourceLocation.size(), multiplierOverride.size()); i++) {
+                    String s = resourceLocation.get(i);
+                    if (s.equals(enchantRlAsString)) {
+                        multiplier = multiplierOverride.get(i);
+                        if (debug) {
+                            FirstAid.LOGGER.info("Found enchantment multiplier override for {}, new value is {}", enchantRlAsString, multiplier);
+                        }
+                        break;
+                    }
+                }
+                mutableInt.add(val * multiplier);
+            }, itemStackFromSlot);
+            k = mutableInt.getValue();
         } else if (enchantmentMode == FirstAidConfig.Server.ArmorEnchantmentMode.GLOBAL_ENCHANTMENTS) {
             k = EnchantmentHelper.getDamageProtection(player.getArmorSlots(), source);
         } else {

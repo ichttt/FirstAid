@@ -34,50 +34,39 @@ import ichttt.mods.firstaid.common.network.MessageConfiguration;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.PlayerSizeHelper;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
-import net.minecraft.world.level.storage.loot.LootPool;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.food.FoodData;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.event.world.SleepFinishedTimeEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.fmllegacy.network.PacketDistributor;
-import net.minecraftforge.fmlserverevents.FMLServerStoppedEvent;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ObjectHolder;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
@@ -92,7 +81,6 @@ public class EventHandler {
     public static final MobEffect DAMAGE_RESISTANCE = FirstAidItems.getNull();
 
     public static final Map<Player, Pair<Entity, HitResult>> hitList = new WeakHashMap<>();
-    private static final Field LOOT_ENTRIES_FIELD = ObfuscationReflectionHelper.findField(LootPool.class, "f_79023_");
 
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
@@ -184,58 +172,51 @@ public class EventHandler {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    @SubscribeEvent
-    public static void onLootTableLoad(LootTableLoadEvent event) {
-        ResourceLocation tableName = event.getName();
-        LootPool pool = null;
-        int bandage = 0, plaster = 0, morphine = 0;
-        if (tableName.equals(BuiltInLootTables.SPAWN_BONUS_CHEST)) {
-            pool = event.getTable().getPool("main");
-            bandage = 8;
-            plaster = 16;
-            morphine = 4;
-        } else if (tableName.equals(BuiltInLootTables.STRONGHOLD_CORRIDOR) || tableName.equals(BuiltInLootTables.STRONGHOLD_CROSSING) || tableName.equals(BuiltInLootTables.ABANDONED_MINESHAFT)) {
-            pool = event.getTable().getPool("main");
-            bandage = 20;
-            plaster = 24;
-            morphine = 8;
-        } else if (tableName.equals(BuiltInLootTables.VILLAGE_BUTCHER)) {
-            pool = event.getTable().getPool("main");
-            bandage = 4;
-            plaster = 16;
-            morphine = 2;
-        } else if (tableName.equals(BuiltInLootTables.IGLOO_CHEST)) {
-            pool = event.getTable().getPool("main");
-            bandage = 4;
-            plaster = 8;
-            morphine = 2;
-        }
-
-        if (pool != null) {
-            List<LootPoolEntryContainer> lootEntries;
-            try {
-                lootEntries = (List<LootPoolEntryContainer>) LOOT_ENTRIES_FIELD.get(pool);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Reflection failed!", e);
-            }
-            lootEntries.add(LootItem.lootTableItem(() -> FirstAidItems.BANDAGE)
-                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 3)))
-                    .setWeight(bandage)
-                    .setQuality(0)
-                    .build());
-            lootEntries.add(LootItem.lootTableItem(() -> FirstAidItems.PLASTER)
-                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 5)))
-                    .setWeight(plaster)
-                    .setQuality(0)
-                    .build());
-            lootEntries.add(LootItem.lootTableItem(() -> FirstAidItems.MORPHINE)
-                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 2)))
-                    .setWeight(morphine)
-                    .setQuality(0)
-                    .build());
-        }
-    }
+//    @SubscribeEvent TODO what
+//    public static void onLootTableLoad(LootTableLoadEvent event) {
+//        ResourceLocation tableName = event.getName();
+//        LootPool pool = null;
+//        int bandage = 0, plaster = 0, morphine = 0;
+//        if (tableName.equals(BuiltInLootTables.SPAWN_BONUS_CHEST)) {
+//            pool = event.getTable().getPool("main");
+//            bandage = 8;
+//            plaster = 16;
+//            morphine = 4;
+//        } else if (tableName.equals(BuiltInLootTables.STRONGHOLD_CORRIDOR) || tableName.equals(BuiltInLootTables.STRONGHOLD_CROSSING) || tableName.equals(BuiltInLootTables.ABANDONED_MINESHAFT)) {
+//            pool = event.getTable().getPool("main");
+//            bandage = 20;
+//            plaster = 24;
+//            morphine = 8;
+//        } else if (tableName.equals(BuiltInLootTables.VILLAGE_BUTCHER)) {
+//            pool = event.getTable().getPool("main");
+//            bandage = 4;
+//            plaster = 16;
+//            morphine = 2;
+//        } else if (tableName.equals(BuiltInLootTables.IGLOO_CHEST)) {
+//            pool = event.getTable().getPool("main");
+//            bandage = 4;
+//            plaster = 8;
+//            morphine = 2;
+//        }
+//
+//        if (pool != null) {
+//            lootEntries.add(LootItem.lootTableItem(() -> FirstAidItems.BANDAGE)
+//                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 3)))
+//                    .setWeight(bandage)
+//                    .setQuality(0)
+//                    .build());
+//            lootEntries.add(LootItem.lootTableItem(() -> FirstAidItems.PLASTER)
+//                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 5)))
+//                    .setWeight(plaster)
+//                    .setQuality(0)
+//                    .build());
+//            lootEntries.add(LootItem.lootTableItem(() -> FirstAidItems.MORPHINE)
+//                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 2)))
+//                    .setWeight(morphine)
+//                    .setQuality(0)
+//                    .build());
+//        }
+//    }
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onHeal(LivingHealEvent event) {
@@ -291,7 +272,7 @@ public class EventHandler {
     }
 
     @SubscribeEvent
-    public static void onServerStop(FMLServerStoppedEvent event) {
+    public static void onServerStop(ServerStoppedEvent event) {
         FirstAid.LOGGER.debug("Cleaning up");
         CapProvider.tutorialDone.clear();
         EventHandler.hitList.clear();

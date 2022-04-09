@@ -15,6 +15,6 @@ license="Main Mod: GPLv3, API: LGPL v2.1"
 [[dependencies.firstaid]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.17.1,1.18)"
+    versionRange="[1.18.2,1.19)"
     ordering="NONE"
     side="BOTH"

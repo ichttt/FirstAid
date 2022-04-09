@@ -21,10 +21,10 @@ package ichttt.mods.firstaid.api;
 
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.CapabilityToken;
 
 public class CapabilityExtendedHealthSystem {
 
-    @CapabilityInject(AbstractPlayerDamageModel.class)
-    public static Capability<AbstractPlayerDamageModel> INSTANCE;
+    public static Capability<AbstractPlayerDamageModel> INSTANCE = CapabilityManager.get(new CapabilityToken<>() {});
 }

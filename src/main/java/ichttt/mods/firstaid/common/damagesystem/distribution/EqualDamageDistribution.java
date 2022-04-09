@@ -36,7 +36,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.fmllegacy.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;

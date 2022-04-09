@@ -21,7 +21,7 @@ package ichttt.mods.firstaid.common.network;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 

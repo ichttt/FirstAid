@@ -60,7 +60,7 @@ public class GuiHoldButton extends AbstractButton {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
         else
             RenderSystem.setShaderColor(0.0F, 1.0F, 1.0F, this.alpha);
-        int i = this.getYImage(this.isHovered());
+        int i = this.getYImage(this.isHoveredOrFocused());
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
@@ -83,6 +83,13 @@ public class GuiHoldButton extends AbstractButton {
     public void mouseMoved(double xPos, double yPos) {
         super.mouseMoved(xPos, yPos);
         if (pressStart != -1 && !isMouseOver(xPos, yPos))
+            pressStart = -1;
+    }
+
+    @Override
+    protected void onFocusedChanged(boolean focused) {
+        super.onFocusedChanged(focused);
+        if (pressStart != -1 && !focused)
             pressStart = -1;
     }
 

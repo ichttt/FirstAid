@@ -26,7 +26,7 @@ import ichttt.mods.firstaid.common.network.MessageAddHealth;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.fmllegacy.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.Arrays;

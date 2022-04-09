@@ -35,14 +35,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.Util;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.Mth;
 import net.minecraftforge.client.gui.ForgeIngameGui;
-import net.minecraftforge.resource.IResourceType;
-import net.minecraftforge.resource.VanillaResourceType;
 
 import javax.annotation.Nonnull;
 import java.util.EnumMap;

@@ -247,7 +247,7 @@ public class GuiHealthScreen extends Screen {
 
     private void tooltipButton(PoseStack stack, AbstractButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
-        if (!enabled && button.isHovered()) {
+        if (!enabled && button.isHoveredOrFocused()) {
             renderComponentTooltip(stack, Arrays.asList(new TextComponent(I18n.get("firstaid.gui.active_item") + ": " + I18n.get(part.activeHealer.stack.getDescriptionId())), new TranslatableComponent("firstaid.gui.next_heal", Math.round((part.activeHealer.ticksPerHeal.getAsInt() - part.activeHealer.getTicksPassed()) / 20F))), mouseX, mouseY);
         }
         if (!disableButtons) button.active = enabled;

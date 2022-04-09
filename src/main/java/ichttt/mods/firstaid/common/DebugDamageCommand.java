@@ -37,7 +37,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.Util;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraftforge.fmllegacy.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.Arrays;

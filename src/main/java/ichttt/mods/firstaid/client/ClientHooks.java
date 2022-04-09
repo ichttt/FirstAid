@@ -18,7 +18,6 @@
 
 package ichttt.mods.firstaid.client;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
@@ -29,14 +28,13 @@ import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.InteractionHand;
-import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.client.gui.IIngameOverlay;
 import net.minecraftforge.client.gui.OverlayRegistry;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.minecraftforge.fmlclient.registry.ClientRegistry;
+import net.minecraftforge.client.ClientRegistry;
 import org.lwjgl.glfw.GLFW;
 
 

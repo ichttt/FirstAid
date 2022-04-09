@@ -23,8 +23,8 @@ import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fmllegacy.network.NetworkEvent;
-import net.minecraftforge.fmllegacy.network.PacketDistributor;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 

@@ -37,13 +37,11 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fmllegacy.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-
-import net.minecraft.network.syncher.SynchedEntityData.DataItem;
 
 /**
  * This is a hack to intervene all calls to absorption. It's not optimal but it's the best I could come up with without a coremod

@@ -18,6 +18,7 @@
 
 package ichttt.mods.firstaid.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
@@ -137,10 +138,11 @@ public class ClientEventHandler {
         if (entity instanceof Player) {
             EntityRenderDispatcher renderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
             if (renderDispatcher.shouldRenderHitBoxes()) {
-                event.getMatrixStack().pushPose();
+                PoseStack poseStack = event.getPoseStack();
+                poseStack.pushPose();
                 //See PlayerRenderer.getRenderOffset
                 if (entity.isCrouching()) {
-                    event.getMatrixStack().translate(0D, 0.125D, 0D);
+                    poseStack.translate(0D, 0.125D, 0D);
                 }
                 AABB aabb = entity.getBoundingBox();
 
@@ -152,7 +154,7 @@ public class ClientEventHandler {
 
                 for (AABBAlignedBoundingBox box : allBoxes) {
                     AABB bbox = box.createAABB(aabb);
-                    LevelRenderer.renderLineBox(event.getMatrixStack(), event.getBuffers().getBuffer(RenderType.lines()), bbox.inflate(0.02D).move(-entity.getX(), -entity.getY(), -entity.getZ()), r, g, b, 1.0F);
+                    LevelRenderer.renderLineBox(poseStack, event.getMultiBufferSource().getBuffer(RenderType.lines()), bbox.inflate(0.02D).move(-entity.getX(), -entity.getY(), -entity.getZ()), r, g, b, 1.0F);
                     r += 0.25F;
                     g += 0.5F;
                     b += 0.1F;
@@ -161,7 +163,7 @@ public class ClientEventHandler {
                     g %= 1.0F;
                     b %= 1.0F;
                 }
-                event.getMatrixStack().popPose();
+                poseStack.popPose();
             }
         }
     }

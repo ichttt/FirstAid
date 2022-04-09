@@ -22,7 +22,7 @@ import ichttt.mods.firstaid.client.DebuffTimedSound;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Objects;

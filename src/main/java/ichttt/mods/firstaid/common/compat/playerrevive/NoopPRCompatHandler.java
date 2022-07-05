@@ -29,7 +29,7 @@ public class NoopPRCompatHandler implements IPRCompatHandler {
     }
 
     @Override
-    public boolean isBleeding(Player player) {
+    public boolean isBleeding(Player player, boolean checkStacktrace) {
         return false;
     }
 }

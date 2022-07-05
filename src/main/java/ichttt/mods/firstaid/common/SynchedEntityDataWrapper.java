@@ -91,7 +91,7 @@ public class SynchedEntityDataWrapper extends SynchedEntityData {
                 float aFloat = (Float) value;
                 if (aFloat > player.getMaxHealth()) {
                     CommonUtils.getDamageModel(player).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
-                } else if (PRCompatManager.getHandler().isBleeding(player)) {
+                } else if (PRCompatManager.getHandler().isBleeding(player, true)) {
                     if (FirstAidConfig.GENERAL.debug.get())
                         CommonUtils.debugLogStacktrace("Completely ignoring setHealth!");
                     return;

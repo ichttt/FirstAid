@@ -31,6 +31,7 @@ import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.DataManagerWrapper;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
+import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
@@ -288,17 +289,13 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public boolean isDead(@Nullable Player player) {
-//        IRevival revival = CommonUtils.getRevivalIfPossible(player); TODO PR COMPAT
-//        if (revival != null) {
-//            if (!revival.isHealty() && !revival.isDead()) {
-//                if (FirstAidConfig.debug && !waitingForHelp)
-//                    FirstAid.LOGGER.info("Player start waiting for help");
-//                this.waitingForHelp = true; //Technically not dead yet, but we should still return true
-//                return true;
-//            } else if (this.waitingForHelp) {
-//                return true;
-//            }
-//        }
+        boolean bleeding = PRCompatManager.getHandler().isBleeding(player);
+        if (bleeding) {
+            if (FirstAidConfig.GENERAL.debug.get() && !waitingForHelp)
+                FirstAid.LOGGER.info("Player start waiting for help");
+            this.waitingForHelp = true; //Technically not dead yet, but we should still return true
+            return true;
+        }
 
         if (player != null && !player.isAlive())
             return true;

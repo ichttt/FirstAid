@@ -23,6 +23,7 @@ import ichttt.mods.firstaid.client.ClientHooks;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.HealingItemApiHelperImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
+import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
 import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.MessageAddHealth;
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
@@ -130,6 +131,7 @@ public class FirstAid {
         }
 
         RegistryManager.registerDefaults();
+        event.enqueueWork(() -> PRCompatManager.init());
     }
 
     public void loadComplete(FMLLoadCompleteEvent event) {

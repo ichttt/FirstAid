@@ -84,9 +84,8 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.18.2-40.0.44'
 
-    // runtimeOnly fg.deobf("curse.maven:spiceoflife-277616:3174886")
-
-    //compileOnly(files('libs/Morpheus-deobf.jar'))
+    implementation fg.deobf("curse.maven:playerrevive-266890:3759779")
+    runtimeOnly fg.deobf("curse.maven:creativecore-257814:3834521")
 
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..

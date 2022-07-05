@@ -300,27 +300,6 @@ public class EventHandler {
     public static void registerCommands(RegisterCommandsEvent event) {
         DebugDamageCommand.register(event.getDispatcher());
     }
-//
-//    @SubscribeEvent TODO PR comapt
-//    public static void onPlayerBleedToDeath(PlayerKilledEvent event) {
-//        EntityPlayer player = event.getEntityPlayer();
-//        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
-//        if (damageModel != null) {
-//            damageModel.stopWaitingForHelp(player);
-//        }
-//    }
-//
-//    @SubscribeEvent
-//    public static void onPlayerRevived(PlayerRevivedEvent event) {
-//        EntityPlayer player = event.getEntityPlayer();
-//        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null);
-//        if (damageModel != null) {
-//            damageModel.revivePlayer(player);
-//            damageModel.stopWaitingForHelp(player);
-//        }
-//    }
-//
-
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {

@@ -26,6 +26,8 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.DataManagerWrapper;
+import ichttt.mods.firstaid.common.compat.playerrevive.IPRCompatHandler;
+import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import net.minecraft.world.entity.Entity;
@@ -55,7 +57,7 @@ public class CommonUtils {
     @Nonnull
     public static final EquipmentSlot[] ARMOR_SLOTS;
     @Nonnull
-    private static final Map<EquipmentSlot, List<EnumPlayerPart>> slotToParts;
+    private static final Map<EquipmentSlot, List<EnumPlayerPart>> SLOT_TO_PARTS;
 
     static {
         ARMOR_SLOTS = new EquipmentSlot[4];
@@ -63,15 +65,15 @@ public class CommonUtils {
         ARMOR_SLOTS[2] = EquipmentSlot.CHEST;
         ARMOR_SLOTS[1] = EquipmentSlot.LEGS;
         ARMOR_SLOTS[0] = EquipmentSlot.FEET;
-        slotToParts = new EnumMap<>(EquipmentSlot.class);
-        slotToParts.put(EquipmentSlot.HEAD, Collections.singletonList(EnumPlayerPart.HEAD));
-        slotToParts.put(EquipmentSlot.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY));
-        slotToParts.put(EquipmentSlot.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG));
-        slotToParts.put(EquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT));
+        SLOT_TO_PARTS = new EnumMap<>(EquipmentSlot.class);
+        SLOT_TO_PARTS.put(EquipmentSlot.HEAD, Collections.singletonList(EnumPlayerPart.HEAD));
+        SLOT_TO_PARTS.put(EquipmentSlot.CHEST, Arrays.asList(EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY));
+        SLOT_TO_PARTS.put(EquipmentSlot.LEGS, Arrays.asList(EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG));
+        SLOT_TO_PARTS.put(EquipmentSlot.FEET, Arrays.asList(EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT));
     }
 
     public static List<EnumPlayerPart> getPartListForSlot(EquipmentSlot slot) {
-        return new ArrayList<>(slotToParts.get(slot));
+        return new ArrayList<>(SLOT_TO_PARTS.get(slot));
     }
 
     public static EnumPlayerPart[] getPartArrayForSlot(EquipmentSlot slot) {
@@ -106,32 +108,10 @@ public class CommonUtils {
                 return;
             }
         }
-
-//        IRevival revival = getRevivalIfPossible(player);
-//        if (revival != null)
-//            revival.startBleeding(player, source);
-//        else
+        IPRCompatHandler handler = PRCompatManager.getHandler();
+        if (!handler.tryRevivePlayer(player, source))
             ((DataManagerWrapper) player.entityData).set_impl(Player.DATA_HEALTH_ID, 0F);
     }
-
-//    /**
-//     * Gets the cap, or null if not applicable
-//     * @param player The player to check
-//     * @return The cap or null if the player cannot be revived
-//     */
-//    @Nullable
-//    public static IRevival getRevivalIfPossible(@Nullable EntityPlayer player) {
-//        if (player == null || CapaRevive.reviveCapa == null) TODO PlayerRevival Comapt
-//            return null;
-//        MinecraftServer server = player.getServer();
-//        if (server == null)
-//            return null;
-//        IRevival revival = player.getCapability(CapaRevive.reviveCapa, null);
-//        if (revival != null && server.getPlayerList().getCurrentPlayerCount() > 1)
-//            return revival;
-//        else
-//            return null;
-//    }
 
     public static boolean isValidArmorSlot(EquipmentSlot slot) {
         return slot.getType() == EquipmentSlot.Type.ARMOR;

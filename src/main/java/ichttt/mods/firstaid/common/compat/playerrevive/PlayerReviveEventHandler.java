@@ -11,20 +11,10 @@ import team.creative.playerrevive.api.event.PlayerRevivedEvent;
 public class PlayerReviveEventHandler {
 
     @SubscribeEvent
-    public static void onPlayerBleedToDeath(PlayerBleedOutEvent event) {
-        Player player = event.getPlayer();
-        LazyOptional<AbstractPlayerDamageModel> damageModel = CommonUtils.getOptionalDamageModel(player);
-        damageModel.ifPresent(model -> model.stopWaitingForHelp(player));
-    }
-
-    @SubscribeEvent
     public static void onPlayerRevived(PlayerRevivedEvent event) {
         Player player = event.getPlayer();
         LazyOptional<AbstractPlayerDamageModel> damageModel = CommonUtils.getOptionalDamageModel(player);
-        damageModel.ifPresent(model -> {
-            model.revivePlayer(player);
-            model.stopWaitingForHelp(player);
-        });
+        damageModel.ifPresent(model -> model.revivePlayer(player));
     }
 
 }

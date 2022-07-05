@@ -159,7 +159,7 @@ public class EventHandler {
             AbstractPlayerDamageModel damageModel = PlayerDamageModel.create();
             event.addCapability(CapProvider.IDENTIFIER, new CapProvider(damageModel));
             //replace the data manager with our wrapper to grab absorption
-            player.entityData = new DataManagerWrapper(player, player.entityData);
+            player.entityData = new SynchedEntityDataWrapper(player, player.entityData);
         }
     }
 

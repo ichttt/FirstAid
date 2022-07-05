@@ -25,7 +25,7 @@ import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.DataManagerWrapper;
+import ichttt.mods.firstaid.common.SynchedEntityDataWrapper;
 import ichttt.mods.firstaid.common.compat.playerrevive.IPRCompatHandler;
 import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
@@ -89,7 +89,7 @@ public class CommonUtils {
             }
         }
         if (source != null && FirstAidConfig.SERVER.allowOtherHealingItems.get()) {
-            DataManagerWrapper wrapper = (DataManagerWrapper) player.entityData;
+            SynchedEntityDataWrapper wrapper = (SynchedEntityDataWrapper) player.entityData;
             boolean protection;
             wrapper.toggleTracking(false);
             try {
@@ -110,7 +110,7 @@ public class CommonUtils {
         }
         IPRCompatHandler handler = PRCompatManager.getHandler();
         if (!handler.tryRevivePlayer(player, source))
-            ((DataManagerWrapper) player.entityData).set_impl(Player.DATA_HEALTH_ID, 0F);
+            ((SynchedEntityDataWrapper) player.entityData).set_impl(Player.DATA_HEALTH_ID, 0F);
     }
 
     public static boolean isValidArmorSlot(EquipmentSlot slot) {

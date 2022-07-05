@@ -20,8 +20,7 @@ package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
-import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
@@ -36,7 +35,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
@@ -47,12 +45,12 @@ import java.util.List;
  * This is a hack to intervene all calls to absorption. It's not optimal but it's the best I could come up with without a coremod
  * This should be compatible with other mods which do so as I respect the parent in any other case.
  */
-public class DataManagerWrapper extends SynchedEntityData {
+public class SynchedEntityDataWrapper extends SynchedEntityData {
     private final Player player;
     private final SynchedEntityData parent;
     private boolean track = true;
 
-    public DataManagerWrapper(Player player, SynchedEntityData parent) {
+    public SynchedEntityDataWrapper(Player player, SynchedEntityData parent) {
         super(player);
         this.player = player;
         this.parent = parent;
@@ -88,14 +86,15 @@ public class DataManagerWrapper extends SynchedEntityData {
             }
             CommonUtils.getDamageModel(player).setAbsorption(floatValue);
         } else if (key == LivingEntity.DATA_HEALTH_ID) {
+            // AVERT YOUR EYES - this code is barely readable and very hacky
             if (value instanceof Float && !player.level.isClientSide) {
                 float aFloat = (Float) value;
-                LazyOptional<AbstractPlayerDamageModel> damageModel;
                 if (aFloat > player.getMaxHealth()) {
                     CommonUtils.getDamageModel(player).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
-                } else if ((damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null)).isPresent() && damageModel.orElseThrow(RuntimeException::new).isWaitingForHelp()) {
+                } else if (PRCompatManager.getHandler().isBleeding(player)) {
                     if (FirstAidConfig.GENERAL.debug.get())
-                        CommonUtils.debugLogStacktrace("SetHealth falltrough");
+                        CommonUtils.debugLogStacktrace("Completely ignoring setHealth!");
+                    return;
                 } else if (FirstAidConfig.watchSetHealth && !Float.isInfinite(aFloat) && !Float.isNaN(aFloat) && aFloat > 0 && player instanceof ServerPlayer && ((ServerPlayer) player).connection != null) {
                     //calculate diff
                     float orig = get(LivingEntity.DATA_HEALTH_ID);

@@ -114,16 +114,6 @@ public abstract class AbstractPlayerDamageModel implements Iterable<AbstractDama
 
     public abstract void sleepHeal(Player player);
 
-    /**
-     * Internal for PlayerRevive compat
-     */
-    public abstract void stopWaitingForHelp(Player player);
-
-    /**
-     * Internal for PlayerRevive compat
-     */
-    public abstract boolean isWaitingForHelp();
-
     public abstract void revivePlayer(Player player);
 
     public abstract void runScaleLogic(Player player);

@@ -28,7 +28,7 @@ import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.CapProvider;
-import ichttt.mods.firstaid.common.DataManagerWrapper;
+import ichttt.mods.firstaid.common.SynchedEntityDataWrapper;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
@@ -62,7 +62,6 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private int sleepBlockTicks = 0;
     private float prevHealthCurrent = -1F;
     private float prevScaleFactor;
-    private boolean waitingForHelp = false;
     private final boolean noCritical;
     private boolean needsMorphineUpdate = false;
     private int resyncTimer = -1;
@@ -157,7 +156,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             FirstAid.LOGGER.error("Error calculating current health: Value was infinite"); //Shouldn't happen anymore, but let's be safe
         } else {
             if (newCurrentHealth != prevHealthCurrent)
-                ((DataManagerWrapper) player.entityData).set_impl(Player.DATA_HEALTH_ID, newCurrentHealth);
+                ((SynchedEntityDataWrapper) player.entityData).set_impl(Player.DATA_HEALTH_ID, newCurrentHealth);
             prevHealthCurrent = newCurrentHealth;
         }
 
@@ -291,10 +290,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     public boolean isDead(@Nullable Player player) {
         boolean bleeding = PRCompatManager.getHandler().isBleeding(player);
         if (bleeding) {
-            if (FirstAidConfig.GENERAL.debug.get() && !waitingForHelp)
-                FirstAid.LOGGER.info("Player start waiting for help");
-            this.waitingForHelp = true; //Technically not dead yet, but we should still return true
-            return true;
+            return true; //Technically not dead yet, but we should still return true to avoid running ticking and other logic
         }
 
         if (player != null && !player.isAlive())
@@ -363,21 +359,6 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             maxHealth += part.getMaxHealth();
         }
         return maxHealth;
-    }
-
-    @Override
-    public void stopWaitingForHelp(Player player) {
-        if (FirstAidConfig.GENERAL.debug.get()) {
-            FirstAid.LOGGER.info("Help waiting done!");
-        }
-        if (!this.waitingForHelp)
-            FirstAid.LOGGER.warn("Player {} not waiting for help!", player.getName());
-        this.waitingForHelp = false;
-    }
-
-    @Override
-    public boolean isWaitingForHelp() {
-        return this.waitingForHelp;
     }
 
     @Override

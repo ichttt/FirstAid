@@ -38,7 +38,7 @@ public class PRPresentCompatHandler implements IPRCompatHandler {
             return null;
         LazyOptional<IBleeding> bleeding = player.getCapability(BLEEDING_CAP);
         if (bleeding.isPresent() && server.isPublished())
-            return bleeding.orElseThrow(AssertionError::new);
+            return bleeding.orElseThrow(RuntimeException::new);
         else
             return null;
     }

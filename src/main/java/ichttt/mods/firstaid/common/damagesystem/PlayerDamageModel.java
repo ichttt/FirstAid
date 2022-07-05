@@ -288,7 +288,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public boolean isDead(@Nullable Player player) {
-        boolean bleeding = PRCompatManager.getHandler().isBleeding(player, false);
+        boolean bleeding = PRCompatManager.getHandler().isBleeding(player);
         if (bleeding) {
             return true; //Technically not dead yet, but we should still return true to avoid running ticking and other logic
         }

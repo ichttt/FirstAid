@@ -31,5 +31,5 @@ public interface IPRCompatHandler {
      */
     boolean tryRevivePlayer(Player player, DamageSource source);
 
-    boolean isBleeding(Player player, boolean checkStacktrace);
+    boolean isBleeding(Player player);
 }

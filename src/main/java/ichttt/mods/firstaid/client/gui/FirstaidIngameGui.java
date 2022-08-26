@@ -24,19 +24,18 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.Util;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.gui.ForgeIngameGui;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 public class FirstaidIngameGui {
 
-    // Copy of ForgeIngameGui#renderHealth, modified to fit being called from an event listener and to support different textures for different parts of the texture
-    public static void renderHealth(ForgeIngameGui gui, int width, int height, PoseStack mStack) {
+    // Copy of ForgeGui#renderHealth, modified to fit being called from an event listener and to support different textures for different parts of the texture
+    public static void renderHealth(ForgeGui gui, int width, int height, PoseStack mStack) {
         // Firstaid: No pre event, we get called from this
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getProfiler().push("health");
@@ -92,9 +91,9 @@ public class FirstaidIngameGui {
         gui.random.setSeed((long)(gui.tickCount * 312871));
 
         int left = width / 2 - 91;
-        int top = height - gui.left_height;
-        gui.left_height += (healthRows * rowHeight);
-        if (rowHeight != 10) gui.left_height += 10 - rowHeight;
+        int top = height - gui.leftHeight;
+        gui.leftHeight += (healthRows * rowHeight);
+        if (rowHeight != 10) gui.leftHeight += 10 - rowHeight;
 
         int regen = -1;
         if (player.hasEffect(MobEffects.REGENERATION))

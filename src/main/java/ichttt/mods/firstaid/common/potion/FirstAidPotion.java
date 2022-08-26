@@ -18,22 +18,17 @@
 
 package ichttt.mods.firstaid.common.potion;
 
-import ichttt.mods.firstaid.FirstAid;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class FirstAidPotion extends MobEffect {
-    public FirstAidPotion(MobEffectCategory type, int liquidColorIn, Item item) {
+    public FirstAidPotion(MobEffectCategory type, int liquidColorIn) {
         super(type, liquidColorIn);
-        setRegistryName(new ResourceLocation(FirstAid.MODID, Objects.requireNonNull(item.getRegistryName()).getPath()));
     }
 
     @Nonnull

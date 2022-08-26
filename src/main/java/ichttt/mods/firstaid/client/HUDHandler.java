@@ -39,14 +39,15 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.Util;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.gui.ForgeIngameGui;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
 import javax.annotation.Nonnull;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class HUDHandler implements ResourceManagerReloadListener {
+public class HUDHandler implements ResourceManagerReloadListener, IGuiOverlay {
     public static final HUDHandler INSTANCE = new HUDHandler();
     private static final int FADE_TIME = 30;
     private final Map<EnumPlayerPart, String> TRANSLATION_MAP = new EnumMap<>(EnumPlayerPart.class);
@@ -74,7 +75,11 @@ public class HUDHandler implements ResourceManagerReloadListener {
         return maxLength;
     }
 
-    public void renderOverlay(PoseStack mStack, ForgeIngameGui gui, float partialTicks) {
+
+    @Override
+    public void render(ForgeGui gui, PoseStack mStack, float partialTicks, int screenWidth, int screenHeight) {
+        if (FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.OFF) return;
+
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || !mc.player.isAlive()) return;
         mc.getProfiler().push("FirstAidOverlay");
@@ -83,7 +88,7 @@ public class HUDHandler implements ResourceManagerReloadListener {
         mc.getProfiler().pop();
     }
 
-    private void doRenderOverlay(PoseStack stack, Minecraft mc, ForgeIngameGui gui, float partialTicks) {
+    private void doRenderOverlay(PoseStack stack, Minecraft mc, ForgeGui gui, float partialTicks) {
         mc.getProfiler().push("prepare");
 
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);

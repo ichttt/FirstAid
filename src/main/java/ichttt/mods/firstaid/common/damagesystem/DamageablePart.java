@@ -25,7 +25,6 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
-import ichttt.mods.firstaid.common.items.FirstAidItems;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -131,9 +130,7 @@ public class DamageablePart extends AbstractDamageablePart {
             maxHealth = nbt.getInt("maxHealth");
         currentHealth = Math.min(maxHealth, nbt.getFloat("health"));
         ItemStack stack = null;
-        if (nbt.contains("healingItem"))
-            stack = new ItemStack(nbt.getByte("healingItem") == 1 ? FirstAidItems.PLASTER : FirstAidItems.BANDAGE);
-        else if (nbt.contains("healer"))
+        if (nbt.contains("healer"))
             stack = ItemStack.of((CompoundTag) Objects.requireNonNull(nbt.get("healer")));
 
         if (stack != null) {

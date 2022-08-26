@@ -39,7 +39,6 @@ public class ItemMorphine extends Item {
 
     public ItemMorphine() {
         super(new Item.Properties().tab(FirstAid.ITEM_GROUP).stacksTo(16));
-        setRegistryName(new ResourceLocation(FirstAid.MODID, "morphine"));
     }
 
     @Override

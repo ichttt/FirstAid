@@ -40,6 +40,7 @@ import net.minecraftforge.network.PacketDistributor;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * This is a hack to intervene all calls to absorption. It's not optimal but it's the best I could come up with without a coremod
@@ -49,6 +50,7 @@ public class SynchedEntityDataWrapper extends SynchedEntityData {
     private final Player player;
     private final SynchedEntityData parent;
     private boolean track = true;
+    private boolean beingRevived = false;
 
     public SynchedEntityDataWrapper(Player player, SynchedEntityData parent) {
         super(player);
@@ -91,7 +93,7 @@ public class SynchedEntityDataWrapper extends SynchedEntityData {
                 float aFloat = (Float) value;
                 if (aFloat > player.getMaxHealth()) {
                     CommonUtils.getDamageModel(player).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
-                } else if (PRCompatManager.getHandler().isBleeding(player)) {
+                } else if (beingRevived) {
                     if (FirstAidConfig.GENERAL.debug.get())
                         CommonUtils.debugLogStacktrace("Completely ignoring setHealth!");
                     return;
@@ -128,6 +130,12 @@ public class SynchedEntityDataWrapper extends SynchedEntityData {
         if (FirstAidConfig.GENERAL.debug.get())
             CommonUtils.debugLogStacktrace("Tracking status change from " + track + " to " + status);
         track = status;
+    }
+
+    public void toggleBeingRevived(boolean status) {
+        if (FirstAidConfig.GENERAL.debug.get())
+            CommonUtils.debugLogStacktrace("Revived status change from " + beingRevived + " to " + status);
+        beingRevived = status;
     }
 
     // ----------WRAPPER BELOW----------

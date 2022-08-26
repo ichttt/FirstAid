@@ -18,46 +18,55 @@
 
 package ichttt.mods.firstaid.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
-import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.InteractionHand;
-import net.minecraftforge.client.gui.IIngameOverlay;
-import net.minecraftforge.client.gui.OverlayRegistry;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.minecraftforge.client.ClientRegistry;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.lwjgl.glfw.GLFW;
 
 
 public class ClientHooks {
-    public static IIngameOverlay firstAidOverlay;
     public static final KeyMapping SHOW_WOUNDS = new KeyMapping("keybinds.show_wounds", KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_H), "First Aid");
 
-    public static void setup(FMLClientSetupEvent event) {
+    public static void setup() {
         FirstAid.LOGGER.debug("Loading ClientHooks");
         MinecraftForge.EVENT_BUS.register(ClientEventHandler.class);
-        ClientRegistry.registerKeyBinding(SHOW_WOUNDS);
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modEventBus.addListener(ClientHooks::registerKeybindEvent);
+        modEventBus.addListener(ClientHooks::registerOverlayEvent);
+        modEventBus.addListener(ClientHooks::registerReloadListenerEvent);
         EventCalendar.checkDate();
-    }
-
-    public static void lateSetup(FMLLoadCompleteEvent event) { //register after the reload listener for language has registered
-        ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(HUDHandler.INSTANCE);
-        firstAidOverlay = OverlayRegistry.registerOverlayTop("firstaid:hud", (gui, mStack, partialTicks, width, height) -> HUDHandler.INSTANCE.renderOverlay(mStack, gui, partialTicks));
-        OverlayRegistry.enableOverlay(firstAidOverlay, FirstAidConfig.CLIENT.overlayMode.get() != FirstAidConfig.Client.OverlayMode.OFF);
     }
 
     public static void showGuiApplyHealth(InteractionHand activeHand) {
         Minecraft mc = Minecraft.getInstance();
         GuiHealthScreen.INSTANCE = new GuiHealthScreen(CommonUtils.getDamageModel(mc.player), activeHand);
         mc.setScreen(GuiHealthScreen.INSTANCE);
+    }
+
+    public static void registerKeybindEvent(RegisterKeyMappingsEvent event) {
+        event.register(ClientHooks.SHOW_WOUNDS);
+    }
+
+    public static void registerOverlayEvent(RegisterGuiOverlaysEvent event) {
+        event.registerAboveAll("hud", HUDHandler.INSTANCE);
+    }
+
+    public static void registerReloadListenerEvent(RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener(HUDHandler.INSTANCE);
     }
 }

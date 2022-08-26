@@ -30,6 +30,7 @@ import ichttt.mods.firstaid.api.distribution.DamageDistributionBuilderFactory;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.EventHandler;
+import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.apiimpl.distribution.DamageDistributionBuilderFactoryImpl;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.damagesource.DamageSource;
@@ -103,7 +104,7 @@ public class RegistryManager {
 
         //---DEBUFFS---
         DebuffBuilderFactory debuffBuilderFactory = DebuffBuilderFactory.getInstance();
-        loadValuesFromConfig(debuffBuilderFactory, "blindness", () -> EventHandler.HEARTBEAT, FirstAidConfig.GENERAL.head.blindnessConditions, EnumDebuffSlot.HEAD);
+        loadValuesFromConfig(debuffBuilderFactory, "blindness", RegistryObjects.HEARTBEAT, FirstAidConfig.GENERAL.head.blindnessConditions, EnumDebuffSlot.HEAD);
 
         loadValuesFromConfig(debuffBuilderFactory, "nausea", null, FirstAidConfig.GENERAL.head.nauseaConditions, EnumDebuffSlot.HEAD);
 

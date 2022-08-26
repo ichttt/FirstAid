@@ -32,11 +32,12 @@ import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.Util;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DebugDamageCommand {
-    private static final SimpleCommandExceptionType TYPE = new SimpleCommandExceptionType(new TextComponent("0 is invalid as damage"));
+    private static final SimpleCommandExceptionType TYPE = new SimpleCommandExceptionType(Component.literal("0 is invalid as damage"));
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("damagePart").requires((source) -> source.hasPermission(2));
@@ -84,7 +85,7 @@ public class DebugDamageCommand {
             damageModel.getFromEnum(part).heal(-damage, player, debuff);
         }
         if (damageModel.isDead(player)) {
-            player.sendMessage(new TranslatableComponent("death.attack.generic", player.getDisplayName()), Util.NIL_UUID);
+            player.sendSystemMessage(Component.translatable("death.attack.generic", player.getDisplayName()));
             CommonUtils.killPlayer(damageModel, player, null);
         }
     }

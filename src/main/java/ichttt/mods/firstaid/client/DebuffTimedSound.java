@@ -21,6 +21,7 @@ package ichttt.mods.firstaid.client;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.resources.sounds.TickableSoundInstance;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.sounds.WeighedSoundEvents;
@@ -29,6 +30,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.RandomSource;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,33 +38,32 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.minecraft.client.resources.sounds.SoundInstance.Attenuation;
-
 public class DebuffTimedSound implements TickableSoundInstance {
     private static final float volumeMultiplier = 1.25F;
+    private final static Map<SoundEvent, DebuffTimedSound> ACTIVE_SOUNDS = new HashMap<>();
     private final float minusPerTick;
     private final int debuffDuration;
     private final ResourceLocation soundLocation;
     private final SoundEvent event;
     private final WeakReference<LocalPlayer> player;
+    private final RandomSource random = SoundInstance.createUnseededRandom();
     private Sound sound;
     private float volume = volumeMultiplier;
     private int ticks;
-    private final static Map<SoundEvent, DebuffTimedSound> activeSounds = new HashMap<>();
 
     public static void playHurtSound(SoundEvent event, int duration) {
         if (!FirstAidConfig.CLIENT.enableSounds.get())
             return;
         SoundManager soundHandler = Minecraft.getInstance().getSoundManager();
-        DebuffTimedSound matchingSound = activeSounds.get(event);
+        DebuffTimedSound matchingSound = ACTIVE_SOUNDS.get(event);
         if (matchingSound != null) {
             if (!matchingSound.isStopped())
                 soundHandler.stop(matchingSound);
-            activeSounds.remove(event);
+            ACTIVE_SOUNDS.remove(event);
         }
         DebuffTimedSound newSound = new DebuffTimedSound(event, duration);
         soundHandler.play(newSound);
-        activeSounds.put(event, newSound);
+        ACTIVE_SOUNDS.put(event, newSound);
     }
 
     public DebuffTimedSound(SoundEvent event, int debuffDuration) {
@@ -78,7 +79,7 @@ public class DebuffTimedSound implements TickableSoundInstance {
         LocalPlayer player = this.player.get();
         boolean done = player == null || ticks >= debuffDuration || player.getHealth() <= 0;
         if (done)
-            activeSounds.remove(this.event);
+            ACTIVE_SOUNDS.remove(this.event);
         return done;
     }
 
@@ -100,7 +101,7 @@ public class DebuffTimedSound implements TickableSoundInstance {
         }
         else
         {
-            this.sound = soundEventAccessor.getSound();
+            this.sound = soundEventAccessor.getSound(random);
         }
 
         return soundEventAccessor;

@@ -31,9 +31,9 @@ import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
 import ichttt.mods.firstaid.common.AABBAlignedBoundingBox;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.EventHandler;
+import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
-import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.PlayerSizeHelper;
@@ -44,6 +44,7 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -56,15 +57,16 @@ import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.gui.ForgeIngameGui;
-import net.minecraftforge.client.gui.OverlayRegistry;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.gui.overlay.GuiOverlayManager;
+import net.minecraftforge.client.gui.overlay.NamedGuiOverlay;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -92,9 +94,9 @@ public class ClientEventHandler {
             PlayerModelRenderer.tickFun();
         }
         if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.level != null && mc.level.isClientSide) {
-            mc.player.displayClientMessage(new TextComponent("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
+            mc.player.displayClientMessage(Component.literal("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
             for (String s : RegistryManager.debuffConfigErrors)
-                mc.player.displayClientMessage(new TextComponent("[FirstAid] " + s), false);
+                mc.player.displayClientMessage(Component.literal("[FirstAid] " + s), false);
             RegistryManager.debuffConfigErrors.clear();
         }
         if (HUDHandler.INSTANCE.ticker >= 0)
@@ -118,15 +120,15 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
-    public static void preRender(RenderGameOverlayEvent.PreLayer event) {
-        RenderGameOverlayEvent.ElementType type = event.getType();
-        if (type == RenderGameOverlayEvent.ElementType.LAYER && (event.getOverlay() == ForgeIngameGui.PLAYER_HEALTH_ELEMENT)) {
+    public static void preRender(RenderGuiOverlayEvent.Pre event) {
+        NamedGuiOverlay overlay = event.getOverlay();
+        if (overlay == VanillaGuiOverlay.PLAYER_HEALTH.type()) {
             FirstAidConfig.Client.VanillaHealthbarMode vanillaHealthBarMode = FirstAidConfig.CLIENT.vanillaHealthBarMode.get();
             if (vanillaHealthBarMode != FirstAidConfig.Client.VanillaHealthbarMode.NORMAL) {
                 event.setCanceled(true);
-                ForgeIngameGui gui = (ForgeIngameGui) Minecraft.getInstance().gui;
+                ForgeGui gui = (ForgeGui) Minecraft.getInstance().gui;
                 if (gui.shouldDrawSurvivalElements() && vanillaHealthBarMode == FirstAidConfig.Client.VanillaHealthbarMode.HIGHLIGHT_CRITICAL_PATH && FirstAidConfig.SERVER.vanillaHealthCalculation.get() == FirstAidConfig.Server.VanillaHealthCalculationMode.AVERAGE_ALL) {
-                    FirstaidIngameGui.renderHealth((ForgeIngameGui) Minecraft.getInstance().gui, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), event.getMatrixStack());
+                    FirstaidIngameGui.renderHealth((ForgeGui) Minecraft.getInstance().gui, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), event.getPoseStack());
                 }
             }
         }
@@ -169,11 +171,11 @@ public class ClientEventHandler {
     }
 
     private static Component makeArmorMsg(double value) {
-        return new TranslatableComponent("firstaid.specificarmor", FORMAT.format(value)).withStyle(ChatFormatting.BLUE); //applyTextStyle
+        return Component.translatable("firstaid.specificarmor", FORMAT.format(value)).withStyle(ChatFormatting.BLUE); //applyTextStyle
     }
 
     private static Component makeToughnessMsg(double value) {
-        return new TranslatableComponent("firstaid.specifictoughness", FORMAT.format(value)).withStyle(ChatFormatting.BLUE); //applyTextStyle
+        return Component.translatable("firstaid.specifictoughness", FORMAT.format(value)).withStyle(ChatFormatting.BLUE); //applyTextStyle
     }
 
     private static <T> void replaceOrAppend(List<T> list, T search, T replace) {
@@ -190,26 +192,25 @@ public class ClientEventHandler {
     public static void tooltipItems(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
         Item item = stack.getItem();
-        if (item == FirstAidItems.MORPHINE) {
-            event.getToolTip().add(new TranslatableComponent("firstaid.tooltip.morphine", "3:30-4:30"));
+        if (item == RegistryObjects.MORPHINE.get()) {
+            event.getToolTip().add(Component.translatable("firstaid.tooltip.morphine", "3:30-4:30"));
             return;
         }
         if (FirstAidConfig.CLIENT.armorTooltipMode.get() != FirstAidConfig.Client.TooltipMode.NONE) {
-            if (item instanceof ArmorItem) {
-                ArmorItem armor = (ArmorItem) item;
+            if (item instanceof ArmorItem armor) {
                 List<Component> tooltip = event.getToolTip();
 
                 double normalArmor = ArmorUtils.getArmor(stack, armor.getSlot());
                 double totalArmor = ArmorUtils.applyArmorModifier(armor.getSlot(), normalArmor);
                 if (totalArmor > 0D) {
-                    Component original = new TranslatableComponent("attribute.modifier.plus.0", FORMAT.format(normalArmor), new TranslatableComponent("attribute.name.generic.armor")).withStyle(ChatFormatting.BLUE);
+                    Component original = Component.translatable("attribute.modifier.plus.0", FORMAT.format(normalArmor), Component.translatable("attribute.name.generic.armor")).withStyle(ChatFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
                 }
 
                 double normalToughness = ArmorUtils.getArmorToughness(stack, armor.getSlot());
                 double totalToughness = ArmorUtils.applyToughnessModifier(armor.getSlot(), normalToughness);
                 if (totalToughness > 0D) {
-                    Component original = new TranslatableComponent("attribute.modifier.plus.0", FORMAT.format(normalToughness), new TranslatableComponent("attribute.name.generic.armor_toughness")).withStyle(ChatFormatting.BLUE);
+                    Component original = Component.translatable("attribute.modifier.plus.0", FORMAT.format(normalToughness), Component.translatable("attribute.name.generic.armor_toughness")).withStyle(ChatFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
                 }
             }
@@ -218,7 +219,7 @@ public class ClientEventHandler {
             List<MobEffectInstance> list = PotionUtils.getMobEffects(stack);
             if (!list.isEmpty()) {
                 for (MobEffectInstance potionEffect : list) {
-                    if (potionEffect.getEffect() == EventHandler.DAMAGE_RESISTANCE) {
+                    if (potionEffect.getEffect() == MobEffects.DAMAGE_RESISTANCE) {
                         MobEffect potion = potionEffect.getEffect();
                         Map<Attribute, AttributeModifier> map = potion.getAttributeModifiers();
 
@@ -236,12 +237,12 @@ public class ClientEventHandler {
                                     d1 = realModifier.getAmount() * 100.0D;
                                 }
 
-                                Component raw = (new TranslatableComponent("attribute.modifier.plus." + realModifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1), new TranslatableComponent(entry.getKey().getDescriptionId()))).withStyle(ChatFormatting.BLUE);
+                                Component raw = (Component.translatable("attribute.modifier.plus." + realModifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable(entry.getKey().getDescriptionId()))).withStyle(ChatFormatting.BLUE);
 
                                 List<Component> toolTip = event.getToolTip();
                                 int index = toolTip.indexOf(raw);
                                 if (index != -1) {
-                                    Component replacement = (new TranslatableComponent("attribute.modifier.plus." + realModifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1 * ((float) FirstAidConfig.SERVER.resistanceReductionPercentPerLevel.get() / 20F)), new TranslatableComponent(entry.getKey().getDescriptionId()))).withStyle(ChatFormatting.BLUE);
+                                    Component replacement = (Component.translatable("attribute.modifier.plus." + realModifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1 * ((float) FirstAidConfig.SERVER.resistanceReductionPercentPerLevel.get() / 20F)), Component.translatable(entry.getKey().getDescriptionId()))).withStyle(ChatFormatting.BLUE);
                                     toolTip.set(index, replacement);
                                 }
                             }
@@ -253,21 +254,14 @@ public class ClientEventHandler {
         }
 
         AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
-        if (healer != null && event.getPlayer() != null) {
-            event.getToolTip().add(new TranslatableComponent("firstaid.tooltip.healer", healer.maxHeal.getAsInt() / 2, StringUtil.formatTickDuration(healer.ticksPerHeal.getAsInt())));
+        if (healer != null && event.getEntity() != null) {
+            event.getToolTip().add(Component.translatable("firstaid.tooltip.healer", healer.maxHeal.getAsInt() / 2, StringUtil.formatTickDuration(healer.ticksPerHeal.getAsInt())));
         }
     }
 
     @SubscribeEvent
-    public static void onDisconnect(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+    public static void onDisconnect(ClientPlayerNetworkEvent.LoggingOut event) {
         FirstAid.isSynced = false;
         HUDHandler.INSTANCE.ticker = -1;
-    }
-
-    @SubscribeEvent
-    public static void onConfigChange(ModConfigEvent.Reloading event) {
-        if (event.getConfig().getModId().equals(FirstAid.MODID) && ClientHooks.firstAidOverlay != null) {
-            OverlayRegistry.enableOverlay(ClientHooks.firstAidOverlay, FirstAidConfig.CLIENT.overlayMode.get() != FirstAidConfig.Client.OverlayMode.OFF);
-        }
     }
 }

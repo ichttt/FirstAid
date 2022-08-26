@@ -160,7 +160,7 @@ public class HealthRenderUtils {
         Int2IntMap map = new Int2IntArrayMap();
         if (low) {
             for (int i = 0; i < (maxHealth + maxExtraHearts); i++)
-                map.put(i, EventHandler.rand.nextInt(2));
+                map.put(i, EventHandler.RAND.nextInt(2));
         }
 
         renderMax(stack, regen, map, maxHealth, yTexture, gui, highlight);

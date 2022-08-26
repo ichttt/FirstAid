@@ -88,8 +88,8 @@ public class CommonUtils {
                 FirstAid.LOGGER.warn("Tried to kill the player on the client! This should only happen on the server! Ignoring...", e);
             }
         }
+        SynchedEntityDataWrapper wrapper = (SynchedEntityDataWrapper) player.entityData;
         if (source != null && FirstAidConfig.SERVER.allowOtherHealingItems.get()) {
-            SynchedEntityDataWrapper wrapper = (SynchedEntityDataWrapper) player.entityData;
             boolean protection;
             wrapper.toggleTracking(false);
             try {
@@ -110,7 +110,9 @@ public class CommonUtils {
         }
         IPRCompatHandler handler = PRCompatManager.getHandler();
         if (!handler.tryRevivePlayer(player, source))
-            ((SynchedEntityDataWrapper) player.entityData).set_impl(Player.DATA_HEALTH_ID, 0F);
+            wrapper.set_impl(Player.DATA_HEALTH_ID, 0F);
+        else
+            wrapper.toggleBeingRevived(true);
     }
 
     public static boolean isValidArmorSlot(EquipmentSlot slot) {

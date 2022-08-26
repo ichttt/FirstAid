@@ -40,15 +40,12 @@ import java.lang.reflect.Method;
 
 @SuppressWarnings("unused")
 public class PotionPoisonPatched extends MobEffect {
-    public static final PotionPoisonPatched INSTANCE = new PotionPoisonPatched(MobEffectCategory.HARMFUL, 5149489);
     private static final Method getHurtSound = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "m_7975_", DamageSource.class);
     private static final Method getSoundVolume = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "m_6121_");
     private static final Method getVoicePitch = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "m_6100_");
 
-    protected PotionPoisonPatched(MobEffectCategory type, int liquidColorIn) {
+    public PotionPoisonPatched(MobEffectCategory type, int liquidColorIn) {
         super(type, liquidColorIn);
-        this.setRegistryName(new ResourceLocation("minecraft", "poison"));
-        FirstAid.LOGGER.info("Don't worry, the minecraft poison override IS intended.");
     }
 
     @Override

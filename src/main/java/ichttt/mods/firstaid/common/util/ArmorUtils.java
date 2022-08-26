@@ -36,6 +36,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import javax.annotation.Nonnull;
@@ -146,7 +147,7 @@ public class ArmorUtils {
         if (!DoubleMath.fuzzyEquals(sumOfAllAttributes, all, 0.001D)) {
             double diff = all - sumOfAllAttributes;
             if (FirstAidConfig.GENERAL.debug.get()) {
-                FirstAid.LOGGER.info("Attribute value for {} does not match sum! Diff is {}, distributing to all!", attribute.getRegistryName(), diff);
+                FirstAid.LOGGER.info("Attribute value for {} does not match sum! Diff is {}, distributing to all!", ForgeRegistries.ATTRIBUTES.getKey(attribute), diff);
             }
             return diff;
         }
@@ -223,7 +224,7 @@ public class ArmorUtils {
                 int val = enchantment.getDamageProtection(level, source);
                 List<? extends String> resourceLocation = FirstAidConfig.SERVER.enchMulOverrideResourceLocations.get();
                 List<? extends Integer> multiplierOverride = FirstAidConfig.SERVER.enchMulOverrideMultiplier.get();
-                String enchantRlAsString = enchantment.getRegistryName().toString();
+                String enchantRlAsString = ForgeRegistries.ENCHANTMENTS.getKey(enchantment).toString();
                 int multiplier = FirstAidConfig.SERVER.enchantmentMultiplier.get();
                 boolean debug = FirstAidConfig.GENERAL.debug.get();
                 if (debug) {

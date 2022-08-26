@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
 public class HealthDistribution {
     private static final List<EnumPlayerPart> parts;
@@ -51,7 +52,7 @@ public class HealthDistribution {
         }
 
         float toHeal = distribute ? health / 8F : health;
-        Collections.shuffle(parts, player.level.random);
+        Collections.shuffle(parts);
         List<AbstractDamageablePart> damageableParts = new ArrayList<>(parts.size());
 
         for (EnumPlayerPart part : parts) {

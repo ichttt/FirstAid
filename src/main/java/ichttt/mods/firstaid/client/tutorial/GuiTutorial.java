@@ -29,13 +29,11 @@ import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class GuiTutorial extends Screen {
     private final GuiHealthScreen parent;
@@ -45,7 +43,7 @@ public class GuiTutorial extends Screen {
 
     @SuppressWarnings("deprecation") // we still need this method
     public GuiTutorial() {
-        super(new TranslatableComponent("firstaid.tutorial"));
+        super(Component.translatable("firstaid.tutorial"));
         this.demoModel = PlayerDamageModel.create();
         this.parent = new GuiHealthScreen(demoModel);
         this.action = new TutorialAction(this);
@@ -75,7 +73,7 @@ public class GuiTutorial extends Screen {
     public void init() {
         parent.init(minecraft, this.width, this.height);
         guiTop = parent.guiTop - 30;
-        addRenderableWidget(new Button(parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, new TextComponent(">"), button -> {
+        addRenderableWidget(new Button(parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, Component.literal(">"), button -> {
             if (action.hasNext()) GuiTutorial.this.action.next();
             else {
                 FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));

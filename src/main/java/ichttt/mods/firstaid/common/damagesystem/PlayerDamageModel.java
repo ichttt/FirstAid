@@ -28,6 +28,7 @@ import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.CapProvider;
+import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.SynchedEntityDataWrapper;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
@@ -36,6 +37,7 @@ import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
@@ -165,11 +167,12 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
         runScaleLogic(player);
 
+        MobEffect morphineEffect = RegistryObjects.MORPHINE_EFFECT.get();
         //morphine update
         if (this.needsMorphineUpdate) {
-            player.addEffect(new MobEffectInstance(EventHandler.MORPHINE, this.morphineTicksLeft, 0, false, false));
+            player.addEffect(new MobEffectInstance(morphineEffect, this.morphineTicksLeft, 0, false, false));
         }
-        MobEffectInstance morphine = player.getEffect(EventHandler.MORPHINE);
+        MobEffectInstance morphine = player.getEffect(morphineEffect);
         if (!this.needsMorphineUpdate) {
             this.morphineTicksLeft = morphine == null ? 0 : morphine.getDuration();
         }
@@ -185,7 +188,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     }
 
     public static int getRandMorphineDuration() { //Tweak tooltip event when changing as well
-        return ((EventHandler.rand.nextInt(5) * 20 * 15) + 20 * 210);
+        return ((EventHandler.RAND.nextInt(5) * 20 * 15) + 20 * 210);
     }
 
     @Deprecated
@@ -197,7 +200,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
 
     @Override
     public void applyMorphine(Player player) {
-        player.addEffect(new MobEffectInstance(EventHandler.MORPHINE, getRandMorphineDuration(), 0, false, false));
+        player.addEffect(new MobEffectInstance(RegistryObjects.MORPHINE_EFFECT.get(), getRandMorphineDuration(), 0, false, false));
     }
 
     @Deprecated

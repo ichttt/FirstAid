@@ -21,10 +21,10 @@ package ichttt.mods.firstaid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.ClientHooks;
 import ichttt.mods.firstaid.common.EventHandler;
+import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.apiimpl.HealingItemApiHelperImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
-import ichttt.mods.firstaid.common.items.FirstAidItems;
 import ichttt.mods.firstaid.common.network.MessageAddHealth;
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
@@ -33,19 +33,12 @@ import ichttt.mods.firstaid.common.network.MessageConfiguration;
 import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.network.MessageUpdatePart;
-import ichttt.mods.firstaid.common.potion.FirstAidPotion;
-import ichttt.mods.firstaid.common.potion.PotionPoisonPatched;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
@@ -68,7 +61,7 @@ public class FirstAid {
     public static final CreativeModeTab ITEM_GROUP = new CreativeModeTab(FirstAid.MODID) {
         @Override
         public ItemStack makeIcon() {
-            return new ItemStack(FirstAidItems.BANDAGE);
+            return new ItemStack(RegistryObjects.BANDAGE.get());
         }
     };
 
@@ -90,16 +83,15 @@ public class FirstAid {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::init);
         bus.addListener(this::loadComplete);
-        bus.addGenericListener(Item.class, this::registerItems);
-        bus.addGenericListener(MobEffect.class, this::registerPotion);
-        bus.addGenericListener(SoundEvent.class, this::registerSound);
         bus.addListener(this::registerCapability);
+        RegistryObjects.registerToBus(bus);
+
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FirstAidConfig.serverSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FirstAidConfig.generalSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, FirstAidConfig.clientSpec);
 
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> bus.addListener(ClientHooks::setup));
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> bus.addListener(ClientHooks::lateSetup));
+        //noinspection Convert2MethodRef
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientHooks.setup());
         //Setup API
         HealingItemApiHelperImpl.init();
         RegistryManager.setupRegistries();
@@ -136,20 +128,6 @@ public class FirstAid {
 
     public void loadComplete(FMLLoadCompleteEvent event) {
         RegistryManager.finalizeRegistries();
-    }
-
-    public void registerItems(RegistryEvent.Register<Item> event) {
-        FirstAidItems.registerItems(event.getRegistry());
-    }
-
-    public void registerPotion(RegistryEvent.Register<MobEffect> event) {
-        event.getRegistry().register(new FirstAidPotion(MobEffectCategory.BENEFICIAL, 0xDDD, FirstAidItems.MORPHINE));
-        event.getRegistry().register(PotionPoisonPatched.INSTANCE);
-    }
-
-    public void registerSound(RegistryEvent.Register<SoundEvent> event) {
-        ResourceLocation res = new ResourceLocation(FirstAid.MODID, "debuff.heartbeat");
-        event.getRegistry().register(new SoundEvent(res).setRegistryName(res));
     }
 
     public void registerCapability(RegisterCapabilitiesEvent event) {

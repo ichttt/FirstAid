@@ -28,7 +28,7 @@ repositories {
     mavenLocal()
 }
 
-version = '1.11.0'
+version = '1.11.1'
 group = 'ichttt.mods.firstaid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'firstaid'
 
@@ -41,7 +41,7 @@ minecraft {
     // stable_#            stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not always work.
     // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: 'parchment', version: '2022.03.13-1.18.2'
+    mappings channel: 'parchment', version: '1.19.2-2022.08.21-1.19.2'
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 
     accessTransformer = file("$rootDir/src/main/resources/META-INF/accesstransformer.cfg")
@@ -82,10 +82,10 @@ dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.18.2-40.0.44'
+    minecraft 'net.minecraftforge:forge:1.19.2-43.1.1'
 
-    implementation fg.deobf("curse.maven:playerrevive-266890:3759779")
-    runtimeOnly fg.deobf("curse.maven:creativecore-257814:3834521")
+    compileOnly fg.deobf("curse.maven:playerrevive-266890:3940582")
+//    runtimeOnly fg.deobf("curse.maven:creativecore-257814:3949947")
 
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..

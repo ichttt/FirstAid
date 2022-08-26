@@ -19,6 +19,7 @@
 package ichttt.mods.firstaid.common.compat.playerrevive;
 
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.common.SynchedEntityDataWrapper;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.util.LazyOptional;
@@ -30,9 +31,20 @@ public class PlayerReviveEventHandler {
 
     @SubscribeEvent
     public static void onPlayerRevived(PlayerRevivedEvent event) {
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
+
+        SynchedEntityDataWrapper wrapper = (SynchedEntityDataWrapper) player.entityData;
+        wrapper.toggleBeingRevived(false);
+
         LazyOptional<AbstractPlayerDamageModel> damageModel = CommonUtils.getOptionalDamageModel(player);
         damageModel.ifPresent(model -> model.revivePlayer(player));
+    }
+
+    @SubscribeEvent
+    public static void onPlayerBleedOut(PlayerBleedOutEvent event) {
+        Player player = event.getEntity();
+        SynchedEntityDataWrapper wrapper = (SynchedEntityDataWrapper) player.entityData;
+        wrapper.toggleBeingRevived(false);
     }
 
 }

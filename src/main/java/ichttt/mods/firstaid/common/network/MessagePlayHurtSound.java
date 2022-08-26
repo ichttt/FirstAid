@@ -42,7 +42,7 @@ public class MessagePlayHurtSound {
     }
 
     public void encode(FriendlyByteBuf buf) {
-        buf.writeResourceLocation(Objects.requireNonNull(sound.getRegistryName()));
+        buf.writeResourceLocation(Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getKey(sound)));
         buf.writeInt(duration);
     }
 

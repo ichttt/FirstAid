@@ -24,6 +24,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.EventHandler;
+import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
@@ -91,7 +92,7 @@ public class EqualDamageDistribution implements IDamageDistribution {
 
             for (AbstractDamageablePart part : damageModel) {
                 if (part.currentHealth > 0F) {
-                    damageLeft += part.damage(toDamage, player, !player.hasEffect(EventHandler.MORPHINE), tryNoKillThisRound ? 1F : 0F);
+                    damageLeft += part.damage(toDamage, player, !player.hasEffect(RegistryObjects.MORPHINE_EFFECT.get()), tryNoKillThisRound ? 1F : 0F);
                     divCount++;
                 }
             }

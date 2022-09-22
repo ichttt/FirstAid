@@ -96,4 +96,6 @@ keybinds.show_wounds=Show wounds
 subtitles.debuff.heartbeat=Heart beats
 gui.next_heal=Next heal: %s seconds
 firstaid.specificarmor= +%s Locational Armor
+firstaid.specificarmor.take= -%s Locational Armor
 firstaid.specifictoughness= +%s Locational Armor Toughness
+firstaid.specifictoughness.take= -%s Locational Armor Toughness

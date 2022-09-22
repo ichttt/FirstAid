@@ -94,4 +94,6 @@ keybinds.show_wounds=Interface de Santé
 subtitles.debuff.heartbeat=Le coeur bat
 gui.next_heal=Prochaine guérison : %s secondes
 firstaid.specificarmor= +%s de Point d'Armure Locale
+firstaid.specificarmor.take= -%s de Point d'Armure Locale
 firstaid.specifictoughness= +%s de Résistance Locale de l'Armure
+firstaid.specifictoughness.take= -%s de Résistance Locale de l'Armure

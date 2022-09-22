@@ -93,4 +93,6 @@ subtitles.debuff.heartbeat=Herzklopfen
 gui.next_heal=Nächste Heilung: %s Sekunden
 
 firstaid.specificarmor= +%s Lokale Rüstung
+firstaid.specificarmor.take= -%s Lokale Rüstung
 firstaid.specifictoughness= +%s Lokale Rüstungshärte
+firstaid.specifictoughness.take= -%s Lokale Rüstungshärte

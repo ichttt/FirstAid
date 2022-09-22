@@ -193,11 +193,19 @@ public class ClientEventHandler {
     }
 
     private static String makeArmorMsg(double value) {
-        return TextFormatting.BLUE + I18n.format("firstaid.specificarmor", FORMAT.format(value)) + TextFormatting.RESET;
+        if (value >= 0) {
+            return TextFormatting.BLUE + I18n.format("firstaid.specificarmor", FORMAT.format(value)) + TextFormatting.RESET;
+        } else {
+            return TextFormatting.RED + I18n.format("firstaid.specificarmor.take", FORMAT.format(-value)) + TextFormatting.RESET;
+        }
     }
 
     private static String makeToughnessMsg(double value) {
-        return TextFormatting.BLUE + I18n.format("firstaid.specifictoughness", FORMAT.format(value)) + TextFormatting.RESET;
+        if (value >= 0) {
+            return TextFormatting.BLUE + I18n.format("firstaid.specifictoughness", FORMAT.format(value)) + TextFormatting.RESET;
+        } else {
+            return TextFormatting.RED + I18n.format("firstaid.specifictoughness.take", FORMAT.format(-value)) + TextFormatting.RESET;
+        }
     }
 
     private static <T> void replaceOrAppend(List<T> list, T search, T replace) {
@@ -207,6 +215,18 @@ public class ClientEventHandler {
         } else {
             list.add(replace);
         }
+    }
+
+    private static String buildOriginalText(double val, String attribute) {
+        String plusOrTake = "plus";
+        TextFormatting startFormatting = TextFormatting.BLUE;
+        if (val < 0) {
+            val = -val;
+            plusOrTake = "take";
+            startFormatting = TextFormatting.RED;
+        }
+        return startFormatting + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier." + plusOrTake + ".0", FORMAT.format(val), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic." + attribute));
+
     }
 
     @SubscribeEvent
@@ -231,7 +251,7 @@ public class ClientEventHandler {
                         if (displayArmor != 0) {
                             set = true;
                             double totalArmor = ArmorUtils.applyArmorModifier(CommonUtils.ARMOR_SLOTS[slot], displayArmor);
-                            String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(displayArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
+                            String original = buildOriginalText(displayArmor, "armor");
                             replaceOrAppend(event.getToolTip(), original, makeArmorMsg(totalArmor));
                         }
                     }
@@ -244,29 +264,29 @@ public class ClientEventHandler {
                 double normalArmor = ArmorUtils.getArmor(stack, armor.getEquipmentSlot(), false);
                 double totalArmor = ArmorUtils.applyArmorModifier(armor.armorType, normalArmor);
                 if (totalArmor > 0D) {
-                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(normalArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
+                    String original = buildOriginalText(normalArmor, "armor");
                     replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
                 }
 
                 double normalToughness = ArmorUtils.getArmorToughness(stack, armor.getEquipmentSlot(), false);
                 double totalToughness = ArmorUtils.applyToughnessModifier(armor.armorType, normalToughness);
                 if (totalToughness > 0D) {
-                    String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(normalToughness), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armorToughness"));
+                    String original = buildOriginalText(normalToughness, "armorToughness");
                     replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));
                 }
 
                 if (ArmorUtils.QUALITY_TOOLS_PRESENT) {
                     double qualityToolsNormalArmor = ArmorUtils.getValueFromQualityTools(SharedMonsterAttributes.ARMOR, stack);
                     double qualityToolsTotalArmor = qualityToolsNormalArmor * ArmorUtils.getArmorMultiplier(armor.armorType);
-                    if (qualityToolsTotalArmor > 0D) {
-                        String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(qualityToolsNormalArmor), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armor"));
+                    if (qualityToolsTotalArmor != 0D) {
+                        String original = buildOriginalText(qualityToolsNormalArmor, "armor");
                         replaceOrAppend(tooltip, original, makeArmorMsg(qualityToolsTotalArmor));
                     }
 
                     double qualityToolsNormalToughness = ArmorUtils.getValueFromQualityTools(SharedMonsterAttributes.ARMOR_TOUGHNESS, stack);
                     double qualityToolsTotalToughness = qualityToolsNormalToughness * ArmorUtils.getToughnessMultiplier(armor.armorType);
-                    if (qualityToolsTotalToughness > 0D) {
-                        String original = TextFormatting.BLUE + " " + net.minecraft.util.text.translation.I18n.translateToLocalFormatted("attribute.modifier.plus.0", FORMAT.format(qualityToolsNormalToughness), net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name.generic.armorToughness"));
+                    if (qualityToolsTotalToughness != 0D) {
+                        String original = buildOriginalText(qualityToolsNormalToughness, "armorToughness");
                         replaceOrAppend(tooltip, original, makeToughnessMsg(qualityToolsTotalToughness));
                     }
                 }

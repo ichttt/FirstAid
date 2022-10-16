@@ -28,7 +28,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "1.6.20" + (project.hasProperty('betaBuild') ? "-BETA" : "")
+version = "1.6.21" + (project.hasProperty('betaBuild') ? "-BETA" : "")
 group = "ichttt.mods.firstaid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "firstaid"
 

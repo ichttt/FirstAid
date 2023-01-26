@@ -60,7 +60,7 @@ public class RegistryObjects {
 
         // SOUNDS
         ResourceLocation soundLocation = new ResourceLocation(FirstAid.MODID, "debuff.heartbeat");
-        HEARTBEAT = SOUND_EVENT_REGISTER.register(soundLocation.getPath(), () -> new SoundEvent(soundLocation));
+        HEARTBEAT = SOUND_EVENT_REGISTER.register(soundLocation.getPath(), () -> SoundEvent.createVariableRangeEvent(soundLocation));
 
         // MOB EFFECTS
         MORPHINE_EFFECT = MOB_EFFECT_REGISTER.register("morphine", () -> new FirstAidPotion(MobEffectCategory.BENEFICIAL, 0xDDD));

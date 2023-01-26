@@ -18,8 +18,9 @@
 
 package ichttt.mods.firstaid.client.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -33,18 +34,17 @@ import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.resources.language.I18n;
-import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.util.StringUtil;
-import net.minecraft.network.chat.Component;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -129,16 +129,18 @@ public class GuiHealthScreen extends Screen {
             rightFoot.active = false;
         }
 
-        cancelButton = new Button(this.width / 2 - 100, this.height - 50, 200, 20, Component.translatable(disableButtons ? "gui.done" : "gui.cancel"), button -> onClose());
+        cancelButton = Button.builder(Component.translatable(disableButtons ? "gui.done" : "gui.cancel"), button -> onClose())
+                .bounds(this.width / 2 - 100, this.height - 50, 200, 20)
+                .build();
         addRenderableWidget(cancelButton);
 
         if (this.minecraft.options.renderDebug) {
-            Button refresh = new Button(this.guiLeft + 218, this.guiTop + 115, 36, 20, Component.literal("resync"), button -> {
+            Button refresh = Button.builder(Component.literal("resync"), button -> {
                 FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.REQUEST_REFRESH));
                 FirstAid.LOGGER.info("Requesting refresh");
                 minecraft.player.displayClientMessage(Component.literal("Re-downloading health data from server..."), true);
                 onClose();
-            });
+            }).bounds(this.guiLeft + 218, this.guiTop + 115, 36, 20).build();
             addRenderableWidget(refresh);
         }
 
@@ -302,8 +304,8 @@ public class GuiHealthScreen extends Screen {
                 float timeInSecs = (timeLeft / 1000F);
                 if (timeInSecs < 0F) timeInSecs = 0F;
                 RenderSystem.setShaderTexture(0, HealthRenderUtils.GUI_LOCATION);
-                this.blit(stack, button.x + (button.isRightSide ? 56 : -25), button.y - 2, button.isRightSide ? 2 : 0, 169, 22, 24);
-                this.minecraft.font.draw(stack, HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), button.x + (button.isRightSide ? 60 : -20), button.y + 6, 0xFFFFFF);
+                this.blit(stack, button.getX() + (button.isRightSide ? 56 : -25), button.getY() - 2, button.isRightSide ? 2 : 0, 169, 22, 24);
+                this.minecraft.font.draw(stack, HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), button.getX() + (button.isRightSide ? 60 : -20), button.getY() + 6, 0xFFFFFF);
             }
         }
     }

@@ -20,27 +20,23 @@ package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
 import ichttt.mods.firstaid.common.util.CommonUtils;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Stack;
 
 /**
  * This is a hack to intervene all calls to absorption. It's not optimal but it's the best I could come up with without a coremod
@@ -141,52 +137,39 @@ public class SynchedEntityDataWrapper extends SynchedEntityData {
     // ----------WRAPPER BELOW----------
 
     @Override
+    public <T> void define(EntityDataAccessor<T> pKey, T pValue) {
+        parent.define(pKey, pValue);
+    }
+
+    @Override
+    public <T> DataItem<T> getItem(EntityDataAccessor<T> pKey) {
+        return parent.getItem(pKey);
+    }
+
+    @Override
     public boolean isDirty() {
         return parent.isDirty();
     }
 
     @Override
     @Nullable
-    public List<DataItem<?>> packDirty() {
+    public List<DataValue<?>> packDirty() {
         return parent.packDirty();
     }
 
     @Override
     @Nullable
-    public List<DataItem<?>> getAll() {
-        return parent.getAll();
+    public List<DataValue<?>> getNonDefaultValues() {
+        return parent.getNonDefaultValues();
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public void assignValues(List<DataItem<?>> entriesIn) {
-        parent.assignValues(entriesIn);
-    }
-
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public <T> void assignValue(DataItem<T> target, DataItem<?> source) {
-        parent.assignValue(target, source);
+    public void assignValues(List<DataValue<?>> pEntries) {
+        parent.assignValues(pEntries);
     }
 
     @Override
     public boolean isEmpty() {
         return parent.isEmpty();
-    }
-
-    @Override
-    public void clearDirty() {
-        parent.clearDirty();
-    }
-
-    @Override
-    public <T> void define(EntityDataAccessor<T> key, @Nonnull T value) {
-        parent.define(key, value);
-    }
-
-    @Nonnull
-    @Override
-    public <T> DataItem<T> getItem(EntityDataAccessor<T> key) {
-        return parent.getItem(key);
     }
 }

@@ -18,16 +18,15 @@
 
 package ichttt.mods.firstaid.client.util;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.resources.ResourceLocation;
-import com.mojang.math.Vector3f;
 
 import java.util.Random;
 
@@ -53,7 +52,7 @@ public class PlayerModelRenderer {
                 stack.translate(angle * 1.5F, 0, 0);
             else
                 stack.translate(angle * 0.5F, 0, 0);
-            stack.mulPose(Vector3f.ZP.rotationDegrees(angle));
+            stack.mulPose(Axis.ZP.rotationDegrees(angle));
         }
 
         if (yOffset != 0)

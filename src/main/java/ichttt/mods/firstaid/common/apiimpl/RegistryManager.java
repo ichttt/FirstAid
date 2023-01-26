@@ -29,12 +29,11 @@ import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
 import ichttt.mods.firstaid.api.distribution.DamageDistributionBuilderFactory;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.apiimpl.distribution.DamageDistributionBuilderFactoryImpl;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EquipmentSlot;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
@@ -74,10 +73,6 @@ public class RegistryManager {
 
         distributionBuilderFactory.newStandardBuilder()
                 .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
-                .registerStatic(DamageSource.ANVIL);
-
-        distributionBuilderFactory.newStandardBuilder()
-                .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
                 .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM)
                 .ignoreOrder()
                 .registerStatic(DamageSource.LIGHTNING_BOLT);
@@ -101,6 +96,9 @@ public class RegistryManager {
         }
         distributionBuilderFactory.newRandomBuilder().tryNoKill().registerStatic(DamageSource.IN_WALL, DamageSource.CRAMMING);
         distributionBuilderFactory.newEqualBuilder().reductionMultiplier(0.8F).registerDynamic(DamageSource::isExplosion);
+        distributionBuilderFactory.newStandardBuilder()
+                .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
+                .registerDynamic(damageSource -> "anvil".equals(damageSource.getMsgId()));
 
         //---DEBUFFS---
         DebuffBuilderFactory debuffBuilderFactory = DebuffBuilderFactory.getInstance();

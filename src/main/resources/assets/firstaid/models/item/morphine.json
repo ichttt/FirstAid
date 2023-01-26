@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "firstaid:items/morphine"
+    "layer0": "firstaid:item/morphine"
   }
 }

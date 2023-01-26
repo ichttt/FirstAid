@@ -21,11 +21,11 @@ package ichttt.mods.firstaid.api.item;
 
 import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
@@ -40,21 +40,11 @@ import java.util.function.Function;
 public class ItemHealing extends Item {
 
     /**
-     * Creates a new healing item, sets its tab to the first aid tab, and registers it to the registry.
-     * @param time The time it takes in the GUI in ms
-     * @param healerFunction The function to create a new healer from the GUI
-     */
-    public static ItemHealing create(Item.Properties builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
-        builder.tab(HealingItemApiHelper.INSTANCE.getFirstAidTab());
-        return createNoTab(builder, healerFunction, time);
-    }
-
-    /**
      * Creates a new healing item, and registers it to the registry.
      * @param time The time it takes in the GUI in ms
      * @param healerFunction The function to create a new healer from the GUI
      */
-    public static ItemHealing createNoTab(Item.Properties builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
+    public static ItemHealing create(Item.Properties builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
         return new ItemHealing(builder, healerFunction, time);
     }
 

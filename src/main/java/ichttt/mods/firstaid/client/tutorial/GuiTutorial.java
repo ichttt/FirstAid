@@ -29,9 +29,9 @@ import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 
@@ -73,19 +73,19 @@ public class GuiTutorial extends Screen {
     public void init() {
         parent.init(minecraft, this.width, this.height);
         guiTop = parent.guiTop - 30;
-        addRenderableWidget(new Button(parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20, Component.literal(">"), button -> {
+        addRenderableWidget(Button.builder(Component.literal(">"), button -> {
             if (action.hasNext()) GuiTutorial.this.action.next();
             else {
                 FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
                 minecraft.setScreen(new GuiHealthScreen(CommonUtils.getDamageModel(minecraft.player)));
             }
-        }));
+        }).bounds(parent.guiLeft + GuiHealthScreen.xSize - 34, guiTop + 4, 32, 20).build());
         for (AbstractWidget button : parent.getButtons()) {
             if (button == parent.cancelButton) {
-                addRenderableWidget(new Button(button.x, button.y, button.getWidth(), button.getHeight(), button.getMessage(), ignored -> {
+                addRenderableWidget(Button.builder(button.getMessage(), ignored -> {
                     FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
                     minecraft.setScreen(null);
-                }));
+                }).bounds(button.getX(), button.getY(), button.getWidth(), button.getHeight()).build());
                 continue;
             }
             addRenderableWidget(button);

@@ -19,11 +19,10 @@
 
 package ichttt.mods.firstaid.api.item;
 
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
@@ -43,7 +42,4 @@ public abstract class HealingItemApiHelper {
 
     @Nonnull
     public abstract InteractionResultHolder<ItemStack> onItemRightClick(ItemHealing itemHealing, Level worldIn, Player playerIn, InteractionHand handIn);
-
-    @Nonnull
-    public abstract CreativeModeTab getFirstAidTab();
 }

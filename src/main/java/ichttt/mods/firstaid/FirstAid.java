@@ -25,20 +25,14 @@ import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.apiimpl.HealingItemApiHelperImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
-import ichttt.mods.firstaid.common.network.MessageAddHealth;
-import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
-import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
-import ichttt.mods.firstaid.common.network.MessageClientRequest;
-import ichttt.mods.firstaid.common.network.MessageConfiguration;
-import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
-import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
-import ichttt.mods.firstaid.common.network.MessageUpdatePart;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
+import ichttt.mods.firstaid.common.network.*;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
@@ -57,13 +51,6 @@ import org.apache.logging.log4j.Logger;
 public class FirstAid {
     public static final String MODID = "firstaid";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
-
-    public static final CreativeModeTab ITEM_GROUP = new CreativeModeTab(FirstAid.MODID) {
-        @Override
-        public ItemStack makeIcon() {
-            return new ItemStack(RegistryObjects.BANDAGE.get());
-        }
-    };
 
     private static final String NETWORKING_MAJOR = "3.";
     private static final String NETWORKING_MINOR = "0";
@@ -84,6 +71,7 @@ public class FirstAid {
         bus.addListener(this::init);
         bus.addListener(this::loadComplete);
         bus.addListener(this::registerCapability);
+        bus.addListener(this::registerCreativeTab);
         RegistryObjects.registerToBus(bus);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FirstAidConfig.serverSpec);
@@ -95,6 +83,16 @@ public class FirstAid {
         //Setup API
         HealingItemApiHelperImpl.init();
         RegistryManager.setupRegistries();
+    }
+
+    private void registerCreativeTab(CreativeModeTabEvent.Register event) {
+        event.registerCreativeModeTab(new ResourceLocation(FirstAid.MODID, "main_tab"), builder -> builder.title(Component.translatable("itemGroup.firstaid"))
+                .icon(() -> new ItemStack(RegistryObjects.BANDAGE.get()))
+                .displayItems((enabledFlags, populator, hasPermissions) -> {
+                    populator.accept(RegistryObjects.BANDAGE.get());
+                    populator.accept(RegistryObjects.PLASTER.get());
+                    populator.accept(RegistryObjects.MORPHINE.get());
+                }));
     }
 
     @SuppressWarnings("Convert2MethodRef") //Fucking classloading

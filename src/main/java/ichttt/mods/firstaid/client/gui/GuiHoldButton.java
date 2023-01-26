@@ -18,16 +18,16 @@
 
 package ichttt.mods.firstaid.client.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.Util;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.util.Mth;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 public class GuiHoldButton extends AbstractButton {
     public final int id;
@@ -64,8 +64,8 @@ public class GuiHoldButton extends AbstractButton {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        this.blit(stack, this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
-        this.blit(stack, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
+        this.blit(stack, this.getX(), this.getY(), 0, 46 + i * 20, this.width / 2, this.height);
+        this.blit(stack, this.getX() + this.width / 2, this.getY(), 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
         this.renderBg(stack, minecraft, p_renderButton_1_, p_renderButton_2_);
         int j = 0xFFFFFF;
 
@@ -73,10 +73,10 @@ public class GuiHoldButton extends AbstractButton {
         if (textScaleFactor != 1F) {
             stack.pushPose();
             stack.scale(textScaleFactor, textScaleFactor, 1);
-            this.drawCenteredString(stack, fontrenderer, this.getMessage(), Math.round((this.x + this.width / 2F) / textScaleFactor), Math.round((this.y + (this.height - 8) / 2F) / textScaleFactor), j);
+            this.drawCenteredString(stack, fontrenderer, this.getMessage(), Math.round((this.getX() + this.width / 2F) / textScaleFactor), Math.round((this.getY() + (this.height - 8) / 2F) / textScaleFactor), j);
             stack.popPose();
         } else
-            this.drawCenteredString(stack, fontrenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | Mth.ceil(this.alpha * 255.0F) << 24);
+            this.drawCenteredString(stack, fontrenderer, this.getMessage(), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, j | Mth.ceil(this.alpha * 255.0F) << 24);
     }
 
     @Override
@@ -122,7 +122,7 @@ public class GuiHoldButton extends AbstractButton {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
-        // shrug
+    protected void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
+
     }
 }

@@ -91,7 +91,7 @@ public class EventHandler {
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
         DamageSource source = event.getSource();
 
-        if (amountToDamage == Float.MAX_VALUE) {
+        if (amountToDamage == Float.MAX_VALUE || Float.isNaN(amountToDamage) || amountToDamage == Float.POSITIVE_INFINITY) {
             damageModel.forEach(damageablePart -> damageablePart.currentHealth = 0F);
             if (player instanceof ServerPlayer)
                 FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncDamageModel(damageModel, false));

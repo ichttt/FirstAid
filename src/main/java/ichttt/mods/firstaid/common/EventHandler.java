@@ -110,7 +110,7 @@ public class EventHandler {
         AbstractPlayerDamageModel damageModel = Objects.requireNonNull(player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null));
         DamageSource source = event.getSource();
 
-        if (amountToDamage == Float.MAX_VALUE) {
+        if (amountToDamage == Float.MAX_VALUE || Float.isNaN(amountToDamage) || amountToDamage == Float.POSITIVE_INFINITY) {
             damageModel.forEach(damageablePart -> damageablePart.currentHealth = 0F);
             if (player instanceof EntityPlayerMP)
                 FirstAid.NETWORKING.sendTo(new MessageSyncDamageModel(damageModel, false), (EntityPlayerMP) player);

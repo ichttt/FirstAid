@@ -500,7 +500,7 @@ public class FirstAidConfig {
                     .defineEnum("overlayPosition", Position.TOP_LEFT);
 
             armorTooltipMode = builder
-                    .comment("Determines how first aid should display armor on item tooltips.", "REPLACE replaces the vanilla description with the one fitting first aid\nAPPEND will add the first aid values at the bottom", "NONE will show the old vanilla values. Be advised this is purly visual, interally, the first aid value will always be used")
+                    .comment("Determines how first aid should display armor on item tooltips.", "REPLACE replaces the vanilla description with the one fitting first aid\nAPPEND will add the first aid values at the bottom", "NONE will show the old vanilla values. Be advised this is purely visual, interally, the first aid value will always be used")
                     .defineEnum("armorTooltipMode", TooltipMode.REPLACE);
 
             xOffset = builder

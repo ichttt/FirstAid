@@ -30,18 +30,20 @@ import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
 import ichttt.mods.firstaid.common.AABBAlignedBoundingBox;
 import ichttt.mods.firstaid.common.CapProvider;
-import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.PlayerSizeHelper;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -52,25 +54,19 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.util.StringUtil;
 import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.client.gui.overlay.GuiOverlayManager;
 import net.minecraftforge.client.gui.overlay.NamedGuiOverlay;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 import java.text.DecimalFormat;
 import java.util.Collection;
@@ -200,15 +196,15 @@ public class ClientEventHandler {
             if (item instanceof ArmorItem armor) {
                 List<Component> tooltip = event.getToolTip();
 
-                double normalArmor = ArmorUtils.getArmor(stack, armor.getSlot());
-                double totalArmor = ArmorUtils.applyArmorModifier(armor.getSlot(), normalArmor);
+                double normalArmor = ArmorUtils.getArmor(stack, armor.getEquipmentSlot());
+                double totalArmor = ArmorUtils.applyArmorModifier(armor.getEquipmentSlot(), normalArmor);
                 if (totalArmor > 0D) {
                     Component original = Component.translatable("attribute.modifier.plus.0", FORMAT.format(normalArmor), Component.translatable("attribute.name.generic.armor")).withStyle(ChatFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeArmorMsg(totalArmor));
                 }
 
-                double normalToughness = ArmorUtils.getArmorToughness(stack, armor.getSlot());
-                double totalToughness = ArmorUtils.applyToughnessModifier(armor.getSlot(), normalToughness);
+                double normalToughness = ArmorUtils.getArmorToughness(stack, armor.getEquipmentSlot());
+                double totalToughness = ArmorUtils.applyToughnessModifier(armor.getEquipmentSlot(), normalToughness);
                 if (totalToughness > 0D) {
                     Component original = Component.translatable("attribute.modifier.plus.0", FORMAT.format(normalToughness), Component.translatable("attribute.name.generic.armor_toughness")).withStyle(ChatFormatting.BLUE);
                     replaceOrAppend(tooltip, original, makeToughnessMsg(totalToughness));

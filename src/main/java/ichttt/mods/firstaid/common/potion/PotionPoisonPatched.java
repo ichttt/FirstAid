@@ -24,13 +24,12 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.util.CommonUtils;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
@@ -51,15 +50,15 @@ public class PotionPoisonPatched extends MobEffect {
     @Override
     public void applyEffectTick(@Nonnull LivingEntity entity, int amplifier) {
         if (entity instanceof Player && !(entity instanceof FakePlayer) && (FirstAidConfig.SERVER.causeDeathBody.get() || FirstAidConfig.SERVER.causeDeathHead.get())) {
-            if (entity.level.isClientSide || !entity.isAlive() || entity.isInvulnerableTo(DamageSource.MAGIC))
+            if (entity.level.isClientSide || !entity.isAlive() || entity.isInvulnerableTo(entity.damageSources().magic()))
                 return;
             if (entity.isSleeping())
                 entity.stopSleeping();
             Player player = (Player) entity;
             AbstractPlayerDamageModel playerDamageModel = CommonUtils.getDamageModel(player);
-            if (DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false) != 1.0F) {
+            if (DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, entity.damageSources().magic(), true, false) != 1.0F) {
                 try {
-                    SoundEvent sound = (SoundEvent) getHurtSound.invoke(player, DamageSource.MAGIC);
+                    SoundEvent sound = (SoundEvent) getHurtSound.invoke(player, entity.damageSources().magic());
                     player.level.playSound(null, player.getX(), player.getY(), player.getZ(), sound, player.getSoundSource(), (float) getSoundVolume.invoke(player), (float) getVoicePitch.invoke(player));
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     FirstAid.LOGGER.error("Could not play hurt sound!", e);

@@ -35,6 +35,7 @@ import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.PlayerSizeHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -70,11 +71,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.network.PacketDistributor;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Random;
-import java.util.WeakHashMap;
+import java.util.*;
 
 public class EventHandler {
     public static final Random RAND = new Random();
@@ -103,7 +100,7 @@ public class EventHandler {
         boolean addStat = amountToDamage < 3.4028235E37F;
         IDamageDistribution damageDistribution = FirstAidRegistryImpl.INSTANCE.getDamageDistributionForSource(source);
 
-        if (source.isProjectile()) {
+        if (source.is(DamageTypeTags.IS_PROJECTILE)) {
             Pair<Entity, HitResult> rayTraceResult = hitList.remove(player);
             if (rayTraceResult != null) {
                 Entity entityProjectile = rayTraceResult.getLeft();

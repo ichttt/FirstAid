@@ -18,24 +18,24 @@
 
 package ichttt.mods.firstaid.common.util;
 
-import com.google.common.collect.Iterators;
 import com.google.common.math.DoubleMath;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.CombatRules;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.stats.Stats;
-import net.minecraft.world.damagesource.CombatRules;
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -159,7 +159,7 @@ public class ArmorUtils {
      */
     @SuppressWarnings("JavadocReference")
     public static float applyArmor(@Nonnull Player entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, float damage, @Nonnull EquipmentSlot slot) {
-        if (source.isBypassArmor()) return damage;
+        if (source.is(DamageTypeTags.BYPASSES_ARMOR)) return damage;
         Item item = itemStack.getItem();
         float totalArmor = 0F;
         float totalToughness = 0F;
@@ -173,7 +173,7 @@ public class ArmorUtils {
         totalToughness += getGlobalRestAttribute(entity, Attributes.ARMOR_TOUGHNESS);
 
         if (damage > 0 && (totalArmor > 0 || totalToughness > 0)) {
-            if (item instanceof ArmorItem && (!source.isFire() || !item.isFireResistant())) {
+            if (item instanceof ArmorItem && (!source.is(DamageTypeTags.IS_FIRE) || !item.isFireResistant())) {
                 int itemDamage = Math.max((int) damage, 1);
                 itemStack.hurtAndBreak(itemDamage, entity, (player) -> player.broadcastBreakEvent(slot));
             }
@@ -187,9 +187,9 @@ public class ArmorUtils {
      */
     @SuppressWarnings("JavadocReference")
     public static float applyGlobalPotionModifiers(Player player, DamageSource source, float damage) {
-        if (source.isBypassMagic())
+        if (source.is(DamageTypeTags.BYPASSES_ARMOR))
             return damage;
-        if (player.hasEffect(MobEffects.DAMAGE_RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
+        if (player.hasEffect(MobEffects.DAMAGE_RESISTANCE) && source != player.damageSources().outOfWorld()) {
             @SuppressWarnings("ConstantConditions")
             int i = (player.getEffect(MobEffects.DAMAGE_RESISTANCE).getAmplifier() + 1) * FirstAidConfig.SERVER.resistanceReductionPercentPerLevel.get();
             int j = 100 - i;

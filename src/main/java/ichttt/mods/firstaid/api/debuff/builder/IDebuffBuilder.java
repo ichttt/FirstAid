@@ -19,6 +19,7 @@
 
 package ichttt.mods.firstaid.api.debuff.builder;
 
+import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import net.minecraft.sounds.SoundEvent;
 
@@ -31,7 +32,7 @@ import java.util.function.Supplier;
  * Use this if you want to add simple onHit or constant debuffs.
  * <br>
  * If you want to do your own, custom implementation, you can use {@link ichttt.mods.firstaid.api.debuff.IDebuff}
- * directly and register it using {@link ichttt.mods.firstaid.api.FirstAidRegistry#registerDebuff(EnumDebuffSlot, Supplier)}.
+ * directly and register it using {@link FirstAidRegistry#registerDebuff(EnumDebuffSlot, Supplier)}.
  */
 public interface IDebuffBuilder {
 
@@ -68,7 +69,7 @@ public interface IDebuffBuilder {
     /**
      * Builds and registers this debuff to the FirstAid registry.
      * This is the final step.
-     * This does the same as {@link ichttt.mods.firstaid.api.FirstAidRegistry#registerDebuff(EnumDebuffSlot, IDebuffBuilder)}
+     * This does the same as {@link FirstAidRegistry#registerDebuff(EnumDebuffSlot, IDebuffBuilder)}
      *
      * @param slot The slot where the debuff should apply
      */

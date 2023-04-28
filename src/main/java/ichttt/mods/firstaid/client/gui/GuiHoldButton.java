@@ -18,12 +18,10 @@
 
 package ichttt.mods.firstaid.client.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -52,31 +50,25 @@ public class GuiHoldButton extends AbstractButton {
     }
 
     @Override
-    public void renderButton(PoseStack stack, int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
+    public void renderWidget(PoseStack stack, int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
         Minecraft minecraft = Minecraft.getInstance();
-        Font fontrenderer = minecraft.font;
         RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
-        if (this.active)
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-        else
-            RenderSystem.setShaderColor(0.0F, 1.0F, 1.0F, this.alpha);
-        int i = this.getYImage(this.isHoveredOrFocused());
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
         RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        this.blit(stack, this.getX(), this.getY(), 0, 46 + i * 20, this.width / 2, this.height);
-        this.blit(stack, this.getX() + this.width / 2, this.getY(), 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
-        this.renderBg(stack, minecraft, p_renderButton_1_, p_renderButton_2_);
-        int j = 0xFFFFFF;
+        RenderSystem.enableDepthTest();
+        blitNineSliced(stack, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        int i = getFGColor();
 
         //CHANGE: scale text if not fitting
         if (textScaleFactor != 1F) {
             stack.pushPose();
             stack.scale(textScaleFactor, textScaleFactor, 1);
-            this.drawCenteredString(stack, fontrenderer, this.getMessage(), Math.round((this.getX() + this.width / 2F) / textScaleFactor), Math.round((this.getY() + (this.height - 8) / 2F) / textScaleFactor), j);
+            this.renderString(stack, minecraft.font, i | Mth.ceil(this.alpha * 255.0F) << 24);
             stack.popPose();
-        } else
-            this.drawCenteredString(stack, fontrenderer, this.getMessage(), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, j | Mth.ceil(this.alpha * 255.0F) << 24);
+        } else {
+            this.renderString(stack, minecraft.font, i | Mth.ceil(this.alpha * 255.0F) << 24);
+        }
     }
 
     @Override
@@ -87,8 +79,8 @@ public class GuiHoldButton extends AbstractButton {
     }
 
     @Override
-    protected void onFocusedChanged(boolean focused) {
-        super.onFocusedChanged(focused);
+    public void setFocused(boolean focused) {
+        super.setFocused(focused);
         if (pressStart != -1 && !focused)
             pressStart = -1;
     }
@@ -104,7 +96,7 @@ public class GuiHoldButton extends AbstractButton {
     }
 
     /**
-     * The time left in in ms
+     * The time left in ms
      */
     public int getTimeLeft() {
         if (pressStart == -1)

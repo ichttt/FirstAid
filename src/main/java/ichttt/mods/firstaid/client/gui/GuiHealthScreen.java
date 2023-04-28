@@ -182,7 +182,7 @@ public class GuiHealthScreen extends Screen {
                 entityLookY = -entityLookY;
             }
         }
-        InventoryScreen.renderEntityInInventory(this.width / 2, this.height / 2 + 30, 45, entityLookX, entityLookY, minecraft.player);
+        InventoryScreen.renderEntityInInventoryFollowsMouse(stack, this.width / 2, this.height / 2 + 30, 45, entityLookX, entityLookY, minecraft.player);
 
         //Button
         super.render(stack, mouseX, mouseY, partialTicks);
@@ -230,7 +230,7 @@ public class GuiHealthScreen extends Screen {
         modelViewStack.pushPose();
         modelViewStack.scale(bedScaleFactor, bedScaleFactor, bedScaleFactor);
         RenderSystem.applyModelViewMatrix();
-        minecraft.getItemRenderer().renderAndDecorateItem(BED_ITEMSTACK, renderBedX, renderBedY);
+        minecraft.getItemRenderer().renderAndDecorateItem(stack, BED_ITEMSTACK, renderBedX, renderBedY);
         modelViewStack.popPose();
         RenderSystem.applyModelViewMatrix();
 

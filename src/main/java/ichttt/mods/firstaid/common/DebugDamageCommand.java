@@ -32,12 +32,8 @@ import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.Util;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -80,7 +76,7 @@ public class DebugDamageCommand {
 
     private static void doDamage(EnumPlayerPart part, float damage, boolean debuff, ServerPlayer player, AbstractPlayerDamageModel damageModel) {
         if (damage > 0F) {
-            DamageDistribution.handleDamageTaken(new DirectDamageDistribution(part, debuff), damageModel, damage, player, DamageSource.OUT_OF_WORLD, false, false);
+            DamageDistribution.handleDamageTaken(new DirectDamageDistribution(part, debuff), damageModel, damage, player, player.damageSources().outOfWorld(), false, false);
         } else {
             damageModel.getFromEnum(part).heal(-damage, player, debuff);
         }

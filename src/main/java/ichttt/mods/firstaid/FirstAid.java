@@ -88,10 +88,10 @@ public class FirstAid {
     private void registerCreativeTab(CreativeModeTabEvent.Register event) {
         event.registerCreativeModeTab(new ResourceLocation(FirstAid.MODID, "main_tab"), builder -> builder.title(Component.translatable("itemGroup.firstaid"))
                 .icon(() -> new ItemStack(RegistryObjects.BANDAGE.get()))
-                .displayItems((enabledFlags, populator, hasPermissions) -> {
-                    populator.accept(RegistryObjects.BANDAGE.get());
-                    populator.accept(RegistryObjects.PLASTER.get());
-                    populator.accept(RegistryObjects.MORPHINE.get());
+                .displayItems((context, output) -> {
+                    output.accept(RegistryObjects.BANDAGE.get());
+                    output.accept(RegistryObjects.PLASTER.get());
+                    output.accept(RegistryObjects.MORPHINE.get());
                 }));
     }
 

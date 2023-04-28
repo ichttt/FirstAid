@@ -34,9 +34,9 @@ import ichttt.mods.firstaid.common.damagesystem.debuff.OnHitDebuff;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 import ichttt.mods.firstaid.common.util.CommonUtils;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.damagesource.DamageSource;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -151,7 +151,7 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Nullable
     @Override
     public IDamageDistribution getDamageDistributionForSource(@Nonnull DamageSource source) {
-        IDamageDistribution distribution = distributionsStatic.get(source.msgId);
+        IDamageDistribution distribution = distributionsStatic.get(source.type().msgId());
         if (distribution == null) {
             //lookup if we have any matching dynamic distribution
             for (Pair<Predicate<DamageSource>, IDamageDistribution> pair : distributionsDynamic) {
@@ -178,9 +178,9 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     public void registerDistribution(DamageSource[] sources, IDamageDistribution distribution) {
         if (!registrationAllowed) throw new IllegalStateException("Too late to register!");
         for (DamageSource damageType : sources) {
-            if (distributionsStatic.containsKey(damageType.msgId))
+            if (distributionsStatic.containsKey(damageType.type().msgId()))
                 FirstAid.LOGGER.info("Damage Distribution override detected for source " + damageType);
-            distributionsStatic.put(damageType.msgId, distribution);
+            distributionsStatic.put(damageType.type().msgId(), distribution);
         }
     }
 }

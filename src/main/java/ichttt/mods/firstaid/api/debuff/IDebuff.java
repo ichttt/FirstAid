@@ -1,6 +1,6 @@
 /*
  * FirstAid API
- * Copyright (c) 2017-2022
+ * Copyright (c) 2017-2023
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,8 +19,8 @@
 
 package ichttt.mods.firstaid.api.debuff;
 
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 public interface IDebuff {
 

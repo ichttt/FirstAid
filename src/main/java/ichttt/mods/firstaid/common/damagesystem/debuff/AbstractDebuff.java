@@ -1,6 +1,6 @@
 /*
  * FirstAid
- * Copyright (C) 2017-2022
+ * Copyright (C) 2017-2023
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@ package ichttt.mods.firstaid.common.damagesystem.debuff;
 
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;

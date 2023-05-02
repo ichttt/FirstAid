@@ -1,6 +1,6 @@
 /*
  * FirstAid API
- * Copyright (c) 2017-2022
+ * Copyright (c) 2017-2023
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,8 +20,8 @@
 package ichttt.mods.firstaid.api.damagesystem;
 
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.INBTSerializable;
 

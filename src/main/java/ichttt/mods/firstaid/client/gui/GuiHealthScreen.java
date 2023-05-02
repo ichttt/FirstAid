@@ -23,6 +23,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
+import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
@@ -30,7 +31,6 @@ import ichttt.mods.firstaid.client.ClientHooks;
 import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
-import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import net.minecraft.client.gui.Gui;
@@ -147,7 +147,7 @@ public class GuiHealthScreen extends Screen {
         holdButtons.clear();
         for (AbstractWidget button : this.getButtons()) {
             if (button instanceof GuiHoldButton) {
-                Integer holdTime = activeHand == null ? null : FirstAidRegistryImpl.INSTANCE.getPartHealingTime(minecraft.player.getItemInHand(activeHand));
+                Integer holdTime = activeHand == null ? null : FirstAidRegistry.getImplOrThrow().getPartHealingTime(minecraft.player.getItemInHand(activeHand));
                 if (holdTime == null) holdTime = Integer.MAX_VALUE;
                 ((GuiHoldButton) button).setup(holdTime, button.getWidth() / ((float) HUDHandler.INSTANCE.getMaxLength()));
                 holdButtons.add((GuiHoldButton) button);
@@ -296,7 +296,7 @@ public class GuiHealthScreen extends Screen {
                 EnumPlayerPart playerPart = EnumPlayerPart.VALUES[button.id - 1];
                 FirstAid.NETWORKING.sendToServer(new MessageApplyHealingItem(playerPart, activeHand));
                 AbstractDamageablePart part = damageModel.getFromEnum(playerPart);
-                part.activeHealer = FirstAidRegistryImpl.INSTANCE.getPartHealer(minecraft.player.getItemInHand(this.activeHand));
+                part.activeHealer = FirstAidRegistry.getImplOrThrow().getPartHealer(minecraft.player.getItemInHand(this.activeHand));
                 onClose();
             } else if (stack == null) {
                 button.reset();

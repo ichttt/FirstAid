@@ -19,25 +19,13 @@
 
 package ichttt.mods.firstaid.api.distribution;
 
-import net.minecraft.world.damagesource.DamageSource;
-
-import java.util.function.Predicate;
+import ichttt.mods.firstaid.api.IDamageDistribution;
 
 public interface IDamageDistributionBuilder {
 
     /**
-     * Binds a matcher predicate.
-     * The matcher should be simple, as it will be called every time no static fitting distribution could be found.
-     * Use {@link #registerStatic(DamageSource[])} whenever possible, as it is the faster option
-     * @param matcher The matcher to select whether this distribution should be used or not.
-     *                Will only be called if no static distribution could be found
+     * Builds the damage distribution, returning the new distribution
+     * @return The built distribution
      */
-    void registerDynamic(Predicate<DamageSource> matcher);
-
-    /**
-     * Binds the damage source to a distribution.
-     * This should be preferred over {@link #registerDynamic(Predicate)} whenever possible
-     * @param source The sources that should use this distribution
-     */
-    void registerStatic(DamageSource... source);
+    IDamageDistribution build();
 }

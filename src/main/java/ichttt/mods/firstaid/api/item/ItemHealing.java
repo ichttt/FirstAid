@@ -19,17 +19,17 @@
 
 package ichttt.mods.firstaid.api.item;
 
-import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
+import ichttt.mods.firstaid.api.event.RegisterHealingTypeEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -38,6 +38,9 @@ import java.util.function.Function;
  * Will automatically register this item to the registry as well
  */
 public class ItemHealing extends Item {
+
+    private final Function<ItemStack, AbstractPartHealer> healerFunction;
+    private final Function<ItemStack, Integer> time;
 
     /**
      * Creates a new healing item, and registers it to the registry.
@@ -51,12 +54,19 @@ public class ItemHealing extends Item {
 
     protected ItemHealing(Item.Properties builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
         super(builder);
-        Objects.requireNonNull(FirstAidRegistry.getImpl(), "FirstAid not loaded or not present!").registerHealingType(this, healerFunction, time);
+
+        this.healerFunction = healerFunction;
+        this.time = time;
+        MinecraftForge.EVENT_BUS.addListener(this::registerHealingType);
     }
 
     @Nonnull
     @Override
     public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, @Nonnull InteractionHand handIn) {
         return HealingItemApiHelper.INSTANCE.onItemRightClick(this, worldIn, playerIn, handIn);
+    }
+
+    private void registerHealingType(RegisterHealingTypeEvent event) {
+        event.registerHealingType(this, this.healerFunction, this.time);
     }
 }

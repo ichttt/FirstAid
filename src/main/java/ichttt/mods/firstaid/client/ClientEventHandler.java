@@ -249,7 +249,7 @@ public class ClientEventHandler {
             }
         }
 
-        AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
+        AbstractPartHealer healer = FirstAidRegistryImpl.getImplOrThrow().getPartHealer(stack);
         if (healer != null && event.getEntity() != null) {
             event.getToolTip().add(Component.translatable("firstaid.tooltip.healer", healer.maxHeal.getAsInt() / 2, StringUtil.formatTickDuration(healer.ticksPerHeal.getAsInt())));
         }

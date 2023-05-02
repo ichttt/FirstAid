@@ -25,10 +25,10 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
@@ -134,7 +134,7 @@ public class DamageablePart extends AbstractDamageablePart {
             stack = ItemStack.of((CompoundTag) Objects.requireNonNull(nbt.get("healer")));
 
         if (stack != null) {
-            AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
+            AbstractPartHealer healer = FirstAidRegistryImpl.getImplOrThrow().getPartHealer(stack);
             if (healer == null) FirstAid.LOGGER.warn("Failed to lookup healer for item {}", stack.getItem());
             else activeHealer = healer.loadNBT(nbt.getInt("itemTicks"), nbt.getInt("itemHeals"));
         }

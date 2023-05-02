@@ -23,27 +23,9 @@ import ichttt.mods.firstaid.api.IDamageDistribution;
 import net.minecraft.world.damagesource.DamageSource;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.function.Predicate;
 
 public abstract class DamageDistributionBuilderFactory {
-    private static DamageDistributionBuilderFactory factory;
-
-    /**
-     * DO NOT USE! ONLY FOR INTERNAL USE
-     */
-    public static void setInstance(DamageDistributionBuilderFactory builderFactory) {
-        factory = builderFactory;
-    }
-
-    /**
-     * Use this to get the active instance.
-     * Null if FirstAid is not active or a version without this feature (prior to 1.7.11) is loaded
-     */
-    @Nullable
-    public static DamageDistributionBuilderFactory getInstance() {
-        return factory;
-    }
 
     /**
      * Creates a new {@link IStandardDamageDistributionBuilder}.

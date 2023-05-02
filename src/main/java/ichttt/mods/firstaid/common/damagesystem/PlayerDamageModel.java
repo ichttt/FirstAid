@@ -28,20 +28,20 @@ import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.CapProvider;
+import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.SynchedEntityDataWrapper;
-import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -49,14 +49,7 @@ import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private final Set<SharedDebuff> sharedDebuffs = new HashSet<>();
@@ -69,7 +62,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private int resyncTimer = -1;
 
     public static PlayerDamageModel create() {
-        FirstAidRegistry registry = FirstAidRegistryImpl.INSTANCE;
+        FirstAidRegistry registry = FirstAidRegistryImpl.getImplOrThrow();
         IDebuff[] headDebuffs = registry.getDebuffs(EnumDebuffSlot.HEAD);
         IDebuff[] bodyDebuffs = registry.getDebuffs(EnumDebuffSlot.BODY);
         IDebuff[] armsDebuffs = registry.getDebuffs(EnumDebuffSlot.ARMS);

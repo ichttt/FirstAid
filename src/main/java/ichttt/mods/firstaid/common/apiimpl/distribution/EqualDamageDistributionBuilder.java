@@ -20,12 +20,13 @@ package ichttt.mods.firstaid.common.apiimpl.distribution;
 
 import com.google.common.base.Preconditions;
 import ichttt.mods.firstaid.api.IDamageDistribution;
+import ichttt.mods.firstaid.api.distribution.IDamageDistributionBuilder;
 import ichttt.mods.firstaid.api.distribution.IEqualDamageDistributionBuilder;
 import ichttt.mods.firstaid.common.damagesystem.distribution.EqualDamageDistribution;
 
 import javax.annotation.Nonnull;
 
-public class EqualDamageDistributionBuilder extends BaseDamageDistributionBuilder implements IEqualDamageDistributionBuilder {
+public class EqualDamageDistributionBuilder implements IEqualDamageDistributionBuilder, IDamageDistributionBuilder {
     private boolean tryNoKill;
     private float multiplier = 1F;
 

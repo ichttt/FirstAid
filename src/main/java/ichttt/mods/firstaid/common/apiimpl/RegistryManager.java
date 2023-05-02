@@ -24,11 +24,14 @@ import cpw.mods.modlauncher.TransformingClassLoader;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
-import ichttt.mods.firstaid.api.debuff.builder.DebuffBuilderFactory;
-import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
+import ichttt.mods.firstaid.api.debuff.DebuffBuilderFactory;
+import ichttt.mods.firstaid.api.debuff.IDebuffBuilder;
 import ichttt.mods.firstaid.api.distribution.DamageDistributionBuilderFactory;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.api.event.RegisterDamageDistributionEvent;
+import ichttt.mods.firstaid.api.event.RegisterDebuffEvent;
+import ichttt.mods.firstaid.api.event.RegisterHealingTypeEvent;
 import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.apiimpl.distribution.DamageDistributionBuilderFactoryImpl;
 import net.minecraft.sounds.SoundEvent;
@@ -37,21 +40,19 @@ import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 public class RegistryManager {
     public static final List<String> debuffConfigErrors = new ArrayList<>();
 
-    public static void setupRegistries() {
-        FirstAidRegistry.setImpl(FirstAidRegistryImpl.INSTANCE);
-        DebuffBuilderFactory.setInstance(DebuffBuilderFactoryImpl.INSTANCE);
-        DamageDistributionBuilderFactory.setInstance(DamageDistributionBuilderFactoryImpl.INSTANCE);
+    public static void validateClassloading() {
         //Validate everything is on the same TCL, otherwise things might break
         if (RegistryManager.class.getClassLoader() != FirstAidRegistry.class.getClassLoader()) {
             FirstAid.LOGGER.error("API and normal mod loaded on two different classloaders! Normal mod: {}, First Aid Registry: {}", RegistryManager.class.getName(), FirstAidRegistry.class.getName());
@@ -64,73 +65,103 @@ public class RegistryManager {
         }
     }
 
-    // TODO refactor damage sources to use DamageTypes instead
-    public static void registerDefaults() {
-        Level level = null;
-        FirstAid.LOGGER.debug("Registering defaults registry values");
-        DamageDistributionBuilderFactory distributionBuilderFactory = Objects.requireNonNull(DamageDistributionBuilderFactory.getInstance());
+    public static void fireRegistryEvents(Level level) {
+        if (FirstAidRegistry.getImpl() != null) FirstAid.LOGGER.warn("A registry has already been set!");
+        RegisterDamageDistributionEvent registerDamageDistributionEvent = new RegisterDamageDistributionEvent(level, new DamageDistributionBuilderFactoryImpl());
+        MinecraftForge.EVENT_BUS.post(registerDamageDistributionEvent);
+        RegisterDebuffEvent registerDebuffEvent = new RegisterDebuffEvent(level, new DebuffBuilderFactoryImpl());
+        MinecraftForge.EVENT_BUS.post(registerDebuffEvent);
+        RegisterHealingTypeEvent registerHealingTypeEvent = new RegisterHealingTypeEvent(level);
+        MinecraftForge.EVENT_BUS.post(registerHealingTypeEvent);
+        FirstAidRegistryImpl impl = new FirstAidRegistryImpl(registerDamageDistributionEvent.getDistributionsDynamic(),
+                registerDamageDistributionEvent.getDistributionsStatic(),
+                registerHealingTypeEvent.getHealerMap(),
+                registerDebuffEvent.getDebuffs());
 
-        //---DAMAGE SOURCES---
-        DamageSources damageSources = level.damageSources();
-        distributionBuilderFactory.newStandardBuilder()
-                .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
-                .addDistributionLayer(EquipmentSlot.LEGS, EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)
-                .registerStatic(damageSources.fall(), damageSources.hotFloor());
-
-        distributionBuilderFactory.newStandardBuilder()
-                .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
-                .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM)
-                .ignoreOrder()
-                .registerStatic(damageSources.lightningBolt());
-
-        distributionBuilderFactory.newStandardBuilder()
-                .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
-                .registerStatic(damageSources.stalagmite());
-
-        distributionBuilderFactory.newStandardBuilder()
-                .addDistributionLayer(EquipmentSlot.LEGS, EnumPlayerPart.RIGHT_LEG, EnumPlayerPart.LEFT_LEG)
-                .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
-                .registerStatic(damageSources.sweetBerryBush());
-
-        distributionBuilderFactory.newRandomBuilder().registerStatic(damageSources.magic());
-
-        if (FirstAidConfig.GENERAL.hardMode.get()) {
-            distributionBuilderFactory.newStandardBuilder()
-                    .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.BODY)
-                    .disableNeighbourRestDistribution()
-                    .registerStatic(damageSources.starve());
-
-            distributionBuilderFactory.newStandardBuilder()
-                    .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.BODY)
-                    .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
-                    .ignoreOrder()
-                    .disableNeighbourRestDistribution()
-                    .registerStatic(damageSources.drown());
-        } else {
-            distributionBuilderFactory.newRandomBuilder().tryNoKill().registerStatic(damageSources.starve(), damageSources.drown());
-        }
-        distributionBuilderFactory.newRandomBuilder().tryNoKill().registerStatic(damageSources.inWall(), damageSources.cramming());
-        distributionBuilderFactory.newEqualBuilder().reductionMultiplier(0.8F).registerDynamic(damageSource -> damageSource.is(DamageTypeTags.IS_EXPLOSION));
-        distributionBuilderFactory.newStandardBuilder()
-                .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
-                .registerDynamic(damageSource -> damageSource.typeHolder().is(DamageTypes.FALLING_ANVIL));
-
-        //---DEBUFFS---
-        DebuffBuilderFactory debuffBuilderFactory = DebuffBuilderFactory.getInstance();
-        loadValuesFromConfig(debuffBuilderFactory, "blindness", RegistryObjects.HEARTBEAT, FirstAidConfig.GENERAL.head.blindnessConditions, EnumDebuffSlot.HEAD);
-
-        loadValuesFromConfig(debuffBuilderFactory, "nausea", null, FirstAidConfig.GENERAL.head.nauseaConditions, EnumDebuffSlot.HEAD);
-
-        loadValuesFromConfig(debuffBuilderFactory, "nausea", null, FirstAidConfig.GENERAL.body.nauseaConditions, EnumDebuffSlot.BODY);
-
-        loadValuesFromConfig(debuffBuilderFactory, "weakness", FirstAidConfig.GENERAL.body.weaknessConditions, EnumDebuffSlot.BODY);
-
-        loadValuesFromConfig(debuffBuilderFactory, "mining_fatigue", FirstAidConfig.GENERAL.arms.miningFatigueConditions, EnumDebuffSlot.ARMS);
-
-        loadValuesFromConfig(debuffBuilderFactory, "slowness", FirstAidConfig.GENERAL.legsAndFeet.slownessConditions, EnumDebuffSlot.LEGS_AND_FEET);
+        FirstAidRegistry.setImpl(impl);
     }
 
-    private static void loadValuesFromConfig(DebuffBuilderFactory factory, String potionName, Supplier<SoundEvent> event, FirstAidConfig.General.ConditionOnHit config, EnumDebuffSlot slot) {
+    public static void destroyRegistry() {
+        if (FirstAidRegistry.getImpl() == null) FirstAid.LOGGER.warn("No registry has been set!");
+        FirstAidRegistry.setImpl(null);
+    }
+
+    @SubscribeEvent
+    public void registerDamageDistributions(RegisterDamageDistributionEvent event) {
+        Level level = event.getLevel();
+        DamageDistributionBuilderFactory distributionBuilderFactory = event.getDistributionBuilderFactory();
+
+        DamageSources damageSources = level.damageSources();
+        event.registerDamageDistributionStatic(
+                distributionBuilderFactory.newStandardBuilder()
+                        .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
+                        .addDistributionLayer(EquipmentSlot.LEGS, EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)
+                        .build(),
+                damageSources.fall(), damageSources.hotFloor());
+
+        event.registerDamageDistributionStatic(
+                distributionBuilderFactory.newStandardBuilder()
+                        .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
+                        .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM)
+                        .ignoreOrder()
+                        .build(),
+                damageSources.lightningBolt());
+
+        event.registerDamageDistributionStatic(
+                distributionBuilderFactory.newStandardBuilder()
+                        .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
+                        .build(),
+                damageSources.stalagmite());
+
+        event.registerDamageDistributionStatic(
+                distributionBuilderFactory.newStandardBuilder()
+                        .addDistributionLayer(EquipmentSlot.LEGS, EnumPlayerPart.RIGHT_LEG, EnumPlayerPart.LEFT_LEG)
+                        .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
+                        .build(),
+                damageSources.sweetBerryBush());
+
+        event.registerDamageDistributionStatic(distributionBuilderFactory.newRandomBuilder().build(), damageSources.magic());
+
+        if (FirstAidConfig.GENERAL.hardMode.get()) {
+            event.registerDamageDistributionStatic(
+                    distributionBuilderFactory.newStandardBuilder()
+                            .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.BODY)
+                            .disableNeighbourRestDistribution()
+                            .build(),
+                    damageSources.starve());
+
+            event.registerDamageDistributionStatic(
+                    distributionBuilderFactory.newStandardBuilder()
+                            .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.BODY)
+                            .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
+                            .ignoreOrder()
+                            .disableNeighbourRestDistribution()
+                            .build(),
+                    damageSources.drown());
+        } else {
+            event.registerDamageDistributionStatic(distributionBuilderFactory.newRandomBuilder().tryNoKill().build(), damageSources.starve(), damageSources.drown());
+        }
+        event.registerDamageDistributionStatic(distributionBuilderFactory.newRandomBuilder().tryNoKill().build(), damageSources.inWall(), damageSources.cramming());
+        event.registerDamageDistributionDynamic(distributionBuilderFactory.newEqualBuilder().reductionMultiplier(0.8F).build(), damageSource -> damageSource.is(DamageTypeTags.IS_EXPLOSION));
+        event.registerDamageDistributionDynamic(
+                distributionBuilderFactory.newStandardBuilder()
+                        .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
+                        .build(),
+                damageSource -> damageSource.typeHolder().is(DamageTypes.FALLING_ANVIL));
+    }
+
+    @SubscribeEvent
+    public void registerDebuffs(RegisterDebuffEvent event) {
+        loadValuesFromConfig(event, "blindness", RegistryObjects.HEARTBEAT, FirstAidConfig.GENERAL.head.blindnessConditions, EnumDebuffSlot.HEAD);
+        loadValuesFromConfig(event, "nausea", null, FirstAidConfig.GENERAL.head.nauseaConditions, EnumDebuffSlot.HEAD);
+        loadValuesFromConfig(event, "nausea", null, FirstAidConfig.GENERAL.body.nauseaConditions, EnumDebuffSlot.BODY);
+        loadValuesFromConfig(event, "weakness", FirstAidConfig.GENERAL.body.weaknessConditions, EnumDebuffSlot.BODY);
+        loadValuesFromConfig(event, "mining_fatigue", FirstAidConfig.GENERAL.arms.miningFatigueConditions, EnumDebuffSlot.ARMS);
+        loadValuesFromConfig(event, "slowness", FirstAidConfig.GENERAL.legsAndFeet.slownessConditions, EnumDebuffSlot.LEGS_AND_FEET);
+    }
+
+    private static void loadValuesFromConfig(RegisterDebuffEvent event, String potionName, Supplier<SoundEvent> soundEventSupplier, FirstAidConfig.General.ConditionOnHit config, EnumDebuffSlot slot) {
+        DebuffBuilderFactory debuffBuilderFactory = event.getDebuffBuilderFactory();
         float[] damageTaken = Floats.toArray(config.damageTaken.get());
         int[] debuffLength = Ints.toArray(config.debuffLength.get());
         if (debuffLength.length != damageTaken.length) {
@@ -151,16 +182,17 @@ public class RegistryManager {
             return;
         }
 
-        IDebuffBuilder builder = factory.newOnHitDebuffBuilder(potionName);
+        IDebuffBuilder builder = debuffBuilderFactory.newOnHitDebuffBuilder(potionName);
         builder.addEnableCondition(config.enabled::get);
         for (int i = 0; i < damageTaken.length; i++)
             builder.addBound(damageTaken[i], debuffLength[i]);
 
-        if (event != null) builder.addSoundEffect(event);
-        builder.register(slot);
+        if (soundEventSupplier != null) builder.addSoundEffect(soundEventSupplier);
+        event.registerDebuff(builder.build(), slot);
     }
 
-    private static void loadValuesFromConfig(DebuffBuilderFactory factory, String potionName, FirstAidConfig.General.ConditionConstant config, EnumDebuffSlot slot) {
+    private static void loadValuesFromConfig(RegisterDebuffEvent event, String potionName, FirstAidConfig.General.ConditionConstant config, EnumDebuffSlot slot) {
+        DebuffBuilderFactory debuffBuilderFactory = event.getDebuffBuilderFactory();
         int[] debuffStrength = Ints.toArray(config.debuffStrength.get());
         float[] healthPercentageLeft = Floats.toArray(config.healthPercentageLeft.get());
         if (debuffStrength.length != healthPercentageLeft.length) {
@@ -176,22 +208,17 @@ public class RegistryManager {
             logError("The healthPercentageLeft field is not sorted right!", potionName, slot);
             return;
         }
-        IDebuffBuilder builder = factory.newConstantDebuffBuilder(potionName);
+        IDebuffBuilder builder = debuffBuilderFactory.newConstantDebuffBuilder(potionName);
         builder.addEnableCondition(config.enabled::get);
         for (int i = 0; i < healthPercentageLeft.length; i++)
             builder.addBound(healthPercentageLeft[i], debuffStrength[i]);
 
-        builder.register(slot);
+        event.registerDebuff(builder.build(), slot);
     }
 
     private static void logError(String error, String potionName, EnumDebuffSlot slot) {
         String errorMsg = String.format("Invalid config entry for debuff %s at part %s: %s", potionName, slot.toString(), error);
         FirstAid.LOGGER.warn(errorMsg);
         debuffConfigErrors.add(errorMsg);
-    }
-
-    public static void finalizeRegistries() {
-        FirstAidRegistryImpl.finish();
-        DebuffBuilderFactoryImpl.verify();
     }
 }

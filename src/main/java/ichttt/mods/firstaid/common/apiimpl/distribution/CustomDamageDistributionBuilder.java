@@ -20,8 +20,9 @@ package ichttt.mods.firstaid.common.apiimpl.distribution;
 
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.distribution.ICustomDamageDistributionBuilder;
+import ichttt.mods.firstaid.api.distribution.IDamageDistributionBuilder;
 
-public class CustomDamageDistributionBuilder extends BaseDamageDistributionBuilder implements ICustomDamageDistributionBuilder {
+public class CustomDamageDistributionBuilder implements ICustomDamageDistributionBuilder, IDamageDistributionBuilder {
     private final IDamageDistribution distribution;
 
     public CustomDamageDistributionBuilder(IDamageDistribution distribution) {

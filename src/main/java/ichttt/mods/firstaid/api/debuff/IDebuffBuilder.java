@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-package ichttt.mods.firstaid.api.debuff.builder;
+package ichttt.mods.firstaid.api.debuff;
 
 import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
@@ -66,12 +66,5 @@ public interface IDebuffBuilder {
     @Nonnull
     IDebuffBuilder addEnableCondition(@Nullable BooleanSupplier isEnabled);
 
-    /**
-     * Builds and registers this debuff to the FirstAid registry.
-     * This is the final step.
-     * This does the same as {@link FirstAidRegistry#registerDebuff(EnumDebuffSlot, IDebuffBuilder)}
-     *
-     * @param slot The slot where the debuff should apply
-     */
-    void register(@Nonnull EnumDebuffSlot slot);
+    Supplier<IDebuff> build();
 }

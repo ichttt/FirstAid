@@ -19,18 +19,12 @@
 package ichttt.mods.firstaid.common.apiimpl.distribution;
 
 import ichttt.mods.firstaid.api.IDamageDistribution;
-import ichttt.mods.firstaid.api.distribution.DamageDistributionBuilderFactory;
-import ichttt.mods.firstaid.api.distribution.ICustomDamageDistributionBuilder;
-import ichttt.mods.firstaid.api.distribution.IEqualDamageDistributionBuilder;
-import ichttt.mods.firstaid.api.distribution.IRandomDamageDistributionBuilder;
-import ichttt.mods.firstaid.api.distribution.IStandardDamageDistributionBuilder;
+import ichttt.mods.firstaid.api.distribution.*;
 
 import javax.annotation.Nonnull;
 
 public class DamageDistributionBuilderFactoryImpl extends DamageDistributionBuilderFactory {
-    public static final DamageDistributionBuilderFactoryImpl INSTANCE = new DamageDistributionBuilderFactoryImpl();
 
-    private DamageDistributionBuilderFactoryImpl() {}
 
     @Nonnull
     @Override

@@ -19,12 +19,13 @@
 package ichttt.mods.firstaid.common.apiimpl.distribution;
 
 import ichttt.mods.firstaid.api.IDamageDistribution;
+import ichttt.mods.firstaid.api.distribution.IDamageDistributionBuilder;
 import ichttt.mods.firstaid.api.distribution.IRandomDamageDistributionBuilder;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
 
 import javax.annotation.Nonnull;
 
-public class RandomDamageDistributionBuilder extends BaseDamageDistributionBuilder implements IRandomDamageDistributionBuilder {
+public class RandomDamageDistributionBuilder implements IRandomDamageDistributionBuilder, IDamageDistributionBuilder {
     private boolean nearestFirst = false;
     private boolean tryNoKill = false;
 

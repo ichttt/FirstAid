@@ -18,22 +18,12 @@
 
 package ichttt.mods.firstaid.common.apiimpl;
 
-import ichttt.mods.firstaid.api.debuff.builder.DebuffBuilderFactory;
-import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
+import ichttt.mods.firstaid.api.debuff.DebuffBuilderFactory;
+import ichttt.mods.firstaid.api.debuff.IDebuffBuilder;
 
 import javax.annotation.Nonnull;
 
 public class DebuffBuilderFactoryImpl extends DebuffBuilderFactory {
-    public static final DebuffBuilderFactoryImpl INSTANCE = new DebuffBuilderFactoryImpl();
-
-    public static void verify() {
-        DebuffBuilderFactory registryImpl = DebuffBuilderFactory.getInstance();
-        if (registryImpl == null)
-            throw new IllegalStateException("The apiimpl has not been set! Something went seriously wrong!");
-        if (registryImpl != INSTANCE)
-            throw new IllegalStateException("A mod has registered a custom apiimpl for the registry. THIS IS NOT ALLOWED!" +
-                    "It should be " + INSTANCE.getClass().getName() + " but it actually is " + registryImpl.getClass().getName());
-    }
 
     /**
      * Creates a new builder for a onHit debuff

@@ -19,18 +19,18 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.util.CommonUtils;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.InteractionHand;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -64,7 +64,7 @@ public class MessageApplyHealingItem {
                 AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
                 ItemStack stack = player.getItemInHand(message.hand);
                 Item item = stack.getItem();
-                AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);
+                AbstractPartHealer healer = FirstAidRegistry.getImplOrThrow().getPartHealer(stack);
                 if (healer == null) {
                     FirstAid.LOGGER.warn("Player {} has invalid item in hand {} while it should be an healing item", player.getName(), ForgeRegistries.ITEMS.getKey(item));
                     player.sendSystemMessage(Component.literal("Unable to apply healing item!"));

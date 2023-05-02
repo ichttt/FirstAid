@@ -18,8 +18,6 @@
 
 package ichttt.mods.firstaid.common.apiimpl;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
@@ -27,59 +25,44 @@ import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
-import ichttt.mods.firstaid.api.debuff.builder.IDebuffBuilder;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import ichttt.mods.firstaid.common.damagesystem.debuff.ConstantDebuff;
-import ichttt.mods.firstaid.common.damagesystem.debuff.OnHitDebuff;
-import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
-import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
-import ichttt.mods.firstaid.common.util.CommonUtils;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class FirstAidRegistryImpl extends FirstAidRegistry {
-    public static final FirstAidRegistryImpl INSTANCE = new FirstAidRegistryImpl();
-    private final ArrayList<Pair<Predicate<DamageSource>, IDamageDistribution>> distributionsDynamic = new ArrayList<>();
-    private final Map<String, IDamageDistribution> distributionsStatic = new HashMap<>();
-    private final Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> healerMap = new HashMap<>();
-    private final Multimap<EnumDebuffSlot, Supplier<IDebuff>> debuffs = HashMultimap.create();
-    private boolean registrationAllowed = true;
+    private final List<Pair<Predicate<DamageSource>, IDamageDistribution>> distributionsDynamic;
+    private final Map<ResourceKey<DamageType>, IDamageDistribution> distributionsStatic;
+    private final Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> healerMap;
+    private final Multimap<EnumDebuffSlot, Supplier<IDebuff>> debuffs;
 
-    public static void finish() {
-        FirstAidRegistry registryImpl = FirstAidRegistry.getImpl();
-        if (registryImpl == null)
-            throw new IllegalStateException("The apiimpl has not been set! Something went seriously wrong!");
-        if (registryImpl != INSTANCE)
-            throw new IllegalStateException("A mod has registered a custom apiimpl for the registry. THIS IS NOT ALLOWED!" +
-            "It should be " + INSTANCE.getClass().getName() + " but it actually is " + registryImpl.getClass().getName());
-        INSTANCE.registrationAllowed = false;
-        INSTANCE.distributionsDynamic.trimToSize();
+    public FirstAidRegistryImpl(List<Pair<Predicate<DamageSource>, IDamageDistribution>> distributionsDynamic,
+                                Map<ResourceKey<DamageType>, IDamageDistribution> distributionsStatic,
+                                Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> healerMap,
+                                Multimap<EnumDebuffSlot, Supplier<IDebuff>> debuffs) {
+        this.distributionsDynamic = distributionsDynamic;
+        this.distributionsStatic = distributionsStatic;
+        this.healerMap = healerMap;
+        this.debuffs = debuffs;
         if (FirstAidConfig.GENERAL.debug.get()) {
             FirstAid.LOGGER.info("REG READOUT:");
-            for (Map.Entry<String, IDamageDistribution> entry : INSTANCE.distributionsStatic.entrySet()) {
+            for (Map.Entry<ResourceKey<DamageType>, IDamageDistribution> entry : distributionsStatic.entrySet()) {
                 FirstAid.LOGGER.info("{} bound to {}", entry.getKey(), entry.getValue());
             }
-            FirstAid.LOGGER.info("+{} additional dynamic distributions", INSTANCE.distributionsDynamic.size());
+            FirstAid.LOGGER.info("+{} additional dynamic distributions", distributionsDynamic.size());
         }
-    }
-
-    @Override
-    public void registerHealingType(@Nonnull Item item, @Nonnull Function<ItemStack, AbstractPartHealer> factory, Function<ItemStack, Integer> applyTime) {
-        if (this.healerMap.containsKey(item))
-            FirstAid.LOGGER.warn("Healing type override detected for item " + item);
-        this.healerMap.put(item, Pair.of(factory, applyTime));
     }
 
     @Nullable
@@ -99,59 +82,16 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
         return null;
     }
 
-    @Override
-    public void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull IDebuffBuilder abstractBuilder) {
-        DebuffBuilder builder;
-        try {
-            builder = (DebuffBuilder) abstractBuilder;
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException("Builder must an instance of the default builder received via DebuffBuilderFactory!", e);
-        }
-        //Build the finished debuff
-        FirstAid.LOGGER.debug("Building debuff from mod {} for slot {} with potion effect {}, type = {}", CommonUtils.getActiveModidSafe(), slot, builder.potionName, builder.isOnHit ? "OnHit" : "Constant");
-        BooleanSupplier isEnabled;
-        if (builder.isEnabledSupplier == null)
-            isEnabled = () -> true;
-        else
-            isEnabled = builder.isEnabledSupplier;
-
-        Preconditions.checkArgument(!builder.map.isEmpty(), "Failed to register debuff with condition has set");
-        Supplier<IDebuff> debuff;
-        if (builder.isOnHit) {
-            debuff = () -> new OnHitDebuff(builder.potionName, builder.map, isEnabled, builder.sound);
-        } else {
-            Preconditions.checkArgument(builder.sound == null, "Tried to register constant debuff with sound effect.");
-            debuff = () -> new ConstantDebuff(builder.potionName, builder.map, isEnabled);
-        }
-        registerDebuff(slot, debuff);
-    }
-
-    @Override
-    public synchronized void registerDebuff(@Nonnull EnumDebuffSlot slot, @Nonnull Supplier<IDebuff> debuff) {
-        if (!registrationAllowed)
-            throw new IllegalStateException("Registration must take place before FMLLoadCompleteEvent");
-
-        if (slot.playerParts.length > 1 && !(debuff instanceof SharedDebuff)) {
-            this.debuffs.put(slot, () -> new SharedDebuff(debuff.get(), slot));
-            return;
-        }
-
-        this.debuffs.put(slot, debuff);
-    }
-
-    @Nonnull
-    @Override
-    public IDamageDistribution getDamageDistribution(@Nonnull DamageSource source) {
-        IDamageDistribution distribution = getDamageDistributionForSource(source);
-        if (distribution == null)
-            distribution = RandomDamageDistribution.getDefault();
-        return distribution;
-    }
-
     @Nullable
     @Override
     public IDamageDistribution getDamageDistributionForSource(@Nonnull DamageSource source) {
-        IDamageDistribution distribution = distributionsStatic.get(source.type().msgId());
+        Optional<ResourceKey<DamageType>> damageTypeResourceKeyOptional = source.typeHolder().unwrapKey();
+        if (damageTypeResourceKeyOptional.isEmpty()) {
+            FirstAid.LOGGER.warn("Attempted to get damage distrbution for unregistered damage source!");
+            return null;
+        }
+        ResourceKey<DamageType> damageTypeResourceKey = damageTypeResourceKeyOptional.get();
+        IDamageDistribution distribution = distributionsStatic.get(damageTypeResourceKey);
         if (distribution == null) {
             //lookup if we have any matching dynamic distribution
             for (Pair<Predicate<DamageSource>, IDamageDistribution> pair : distributionsDynamic) {
@@ -168,19 +108,5 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Override
     public IDebuff[] getDebuffs(@Nonnull EnumDebuffSlot slot) {
         return debuffs.get(slot).stream().map(Supplier::get).toArray(IDebuff[]::new);
-    }
-
-    public void registerDistribution(Predicate<DamageSource> matcher, IDamageDistribution distribution) {
-        if (!registrationAllowed) throw new IllegalStateException("Too late to register!");
-        distributionsDynamic.add(Pair.of(matcher, distribution));
-    }
-
-    public void registerDistribution(DamageSource[] sources, IDamageDistribution distribution) {
-        if (!registrationAllowed) throw new IllegalStateException("Too late to register!");
-        for (DamageSource damageType : sources) {
-            if (distributionsStatic.containsKey(damageType.type().msgId()))
-                FirstAid.LOGGER.info("Damage Distribution override detected for source " + damageType);
-            distributionsStatic.put(damageType.type().msgId(), distribution);
-        }
     }
 }

@@ -35,12 +35,10 @@ import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -61,7 +59,6 @@ public class FirstAid {
             () -> NETWORKING_VERSION,
             s -> s.startsWith(NETWORKING_MAJOR),
             s -> s.equals(NETWORKING_VERSION));
-    public static boolean morpheusLoaded = false;
     public static boolean isSynced = false;
 
 
@@ -69,7 +66,6 @@ public class FirstAid {
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::init);
-        bus.addListener(this::loadComplete);
         bus.addListener(this::registerCapability);
         bus.addListener(this::registerCreativeTab);
         RegistryObjects.registerToBus(bus);
@@ -82,7 +78,7 @@ public class FirstAid {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientHooks.setup());
         //Setup API
         HealingItemApiHelperImpl.init();
-        RegistryManager.setupRegistries();
+        RegistryManager.validateClassloading();
     }
 
     private void registerCreativeTab(CreativeModeTabEvent.Register event) {
@@ -114,18 +110,7 @@ public class FirstAid {
         NETWORKING.registerMessage(++i, MessageClientRequest.class, MessageClientRequest::encode, MessageClientRequest::new, (message, supplier) -> MessageClientRequest.Handler.onMessage(message, supplier));
         NETWORKING.registerMessage(++i, MessageSyncDamageModel.class, MessageSyncDamageModel::encode, MessageSyncDamageModel::new, (message, supplier) -> MessageSyncDamageModel.Handler.onMessage(message, supplier));
 
-
-        if (ModList.get().isLoaded("morpheus")) {
-//            DeferredWorkQueue.runLater(MorpheusHelper::register); TODO morpheus compat
-            morpheusLoaded = true;
-        }
-
-        RegistryManager.registerDefaults();
         event.enqueueWork(() -> PRCompatManager.init());
-    }
-
-    public void loadComplete(FMLLoadCompleteEvent event) {
-        RegistryManager.finalizeRegistries();
     }
 
     public void registerCapability(RegisterCapabilitiesEvent event) {

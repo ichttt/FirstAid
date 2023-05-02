@@ -279,6 +279,7 @@ public class EventHandler {
             FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncDamageModel(CommonUtils.getDamageModel(player), true));
     }
 
+    @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event) {
         ServerLevel overworld = event.getServer().overworld();
         if (overworld == null) {

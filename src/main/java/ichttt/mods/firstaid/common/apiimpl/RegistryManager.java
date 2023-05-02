@@ -52,7 +52,8 @@ import java.util.function.Supplier;
 public class RegistryManager {
     public static final List<String> debuffConfigErrors = new ArrayList<>();
 
-    public static void validateClassloading() {
+    public static void registerAndValidate() {
+        MinecraftForge.EVENT_BUS.register(RegistryManager.class);
         //Validate everything is on the same TCL, otherwise things might break
         if (RegistryManager.class.getClassLoader() != FirstAidRegistry.class.getClassLoader()) {
             FirstAid.LOGGER.error("API and normal mod loaded on two different classloaders! Normal mod: {}, First Aid Registry: {}", RegistryManager.class.getName(), FirstAidRegistry.class.getName());
@@ -87,7 +88,7 @@ public class RegistryManager {
     }
 
     @SubscribeEvent
-    public void registerDamageDistributions(RegisterDamageDistributionEvent event) {
+    public static void registerDamageDistributions(RegisterDamageDistributionEvent event) {
         Level level = event.getLevel();
         DamageDistributionBuilderFactory distributionBuilderFactory = event.getDistributionBuilderFactory();
 
@@ -117,6 +118,7 @@ public class RegistryManager {
                 distributionBuilderFactory.newStandardBuilder()
                         .addDistributionLayer(EquipmentSlot.LEGS, EnumPlayerPart.RIGHT_LEG, EnumPlayerPart.LEFT_LEG)
                         .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
+                        .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY)
                         .build(),
                 damageSources.sweetBerryBush());
 
@@ -151,7 +153,7 @@ public class RegistryManager {
     }
 
     @SubscribeEvent
-    public void registerDebuffs(RegisterDebuffEvent event) {
+    public static void registerDebuffs(RegisterDebuffEvent event) {
         loadValuesFromConfig(event, "blindness", RegistryObjects.HEARTBEAT, FirstAidConfig.GENERAL.head.blindnessConditions, EnumDebuffSlot.HEAD);
         loadValuesFromConfig(event, "nausea", null, FirstAidConfig.GENERAL.head.nauseaConditions, EnumDebuffSlot.HEAD);
         loadValuesFromConfig(event, "nausea", null, FirstAidConfig.GENERAL.body.nauseaConditions, EnumDebuffSlot.BODY);

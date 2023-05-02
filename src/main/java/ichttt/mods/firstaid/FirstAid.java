@@ -78,7 +78,7 @@ public class FirstAid {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientHooks.setup());
         //Setup API
         HealingItemApiHelperImpl.init();
-        RegistryManager.validateClassloading();
+        RegistryManager.registerAndValidate();
     }
 
     private void registerCreativeTab(CreativeModeTabEvent.Register event) {

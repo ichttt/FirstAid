@@ -19,6 +19,7 @@
 
 package ichttt.mods.firstaid.api;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 
@@ -27,6 +28,11 @@ import javax.annotation.Nonnull;
 public interface IDamageDistribution {
 
     float distributeDamage(float damage, @Nonnull Player player, @Nonnull DamageSource source, boolean addStat);
+
+    /**
+     * @return the codec which serializes and deserializes this biome modifier
+     */
+    Codec<? extends IDamageDistribution> codec();
 
     default boolean skipGlobalPotionModifiers() {
         return false;

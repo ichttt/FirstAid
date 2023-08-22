@@ -18,6 +18,8 @@
 
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
@@ -30,6 +32,12 @@ import javax.annotation.Nonnull;
 import java.util.*;
 
 public class RandomDamageDistribution extends DamageDistribution {
+    public static final Codec<RandomDamageDistribution> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    Codec.BOOL.fieldOf("nearestFirst").forGetter(o -> o.nearestFirst),
+                    Codec.BOOL.fieldOf("tryNoKill").forGetter(o -> o.tryNoKill)
+            ).apply(instance, RandomDamageDistribution::pick));
+
     public static final RandomDamageDistribution NEAREST_NOKILL = new RandomDamageDistribution(true, true);
     public static final RandomDamageDistribution NEAREST_KILL = new RandomDamageDistribution(true, false);
     public static final RandomDamageDistribution ANY_NOKILL = new RandomDamageDistribution(false, true);
@@ -37,6 +45,14 @@ public class RandomDamageDistribution extends DamageDistribution {
 
     public static RandomDamageDistribution getDefault() {
         return FirstAidConfig.SERVER.useFriendlyRandomDistribution.get() ? NEAREST_NOKILL : NEAREST_KILL;
+    }
+
+    public static RandomDamageDistribution pick(boolean nearestFirst, boolean tryNoKill) {
+        if (nearestFirst) {
+            return tryNoKill ? NEAREST_NOKILL : NEAREST_KILL;
+        } else {
+            return tryNoKill ? ANY_NOKILL : ANY_KILL;
+        }
     }
 
     private static final Random RANDOM = new Random();
@@ -88,5 +104,10 @@ public class RandomDamageDistribution extends DamageDistribution {
             partList.add(Pair.of(slot, parts.toArray(new EnumPlayerPart[0])));
         }
         return partList;
+    }
+
+    @Override
+    public Codec<RandomDamageDistribution> codec() {
+        return CODEC;
     }
 }

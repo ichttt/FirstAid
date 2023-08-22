@@ -20,18 +20,16 @@
 package ichttt.mods.firstaid.api.enums;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.EquipmentSlot;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-public enum EnumPlayerPart {
+public enum EnumPlayerPart implements StringRepresentable {
     HEAD(EquipmentSlot.HEAD), LEFT_ARM(EquipmentSlot.CHEST), LEFT_LEG(EquipmentSlot.LEGS), LEFT_FOOT(EquipmentSlot.FEET),
     BODY(EquipmentSlot.CHEST), RIGHT_ARM(EquipmentSlot.CHEST), RIGHT_LEG(EquipmentSlot.LEGS), RIGHT_FOOT(EquipmentSlot.FEET);
 
@@ -65,10 +63,12 @@ public enum EnumPlayerPart {
     }
 
     private ImmutableList<EnumPlayerPart> neighbours;
+    private final String serializedName;
     public final EquipmentSlot slot;
 
     EnumPlayerPart(EquipmentSlot slot) {
         this.slot = slot;
+        this.serializedName = name().toLowerCase(Locale.ROOT);
     }
 
     public ImmutableList<EnumPlayerPart> getNeighbours() {
@@ -80,7 +80,9 @@ public enum EnumPlayerPart {
                     builder.addAll(getNeighboursUp());
                     builder.addAll(getNeighboursLeft());
                     builder.addAll(getNeighboursRight());
-                    neighbours = builder.build();
+                    ImmutableList<EnumPlayerPart> builtList = builder.build();
+                    neighbours = builtList;
+                    return builtList;
                 }
             }
         }
@@ -152,4 +154,8 @@ public enum EnumPlayerPart {
         }
     }
 
+    @Override
+    public String getSerializedName() {
+        return this.serializedName;
+    }
 }

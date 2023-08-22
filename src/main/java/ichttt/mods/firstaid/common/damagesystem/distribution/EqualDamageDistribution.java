@@ -18,6 +18,8 @@
 
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -44,7 +46,12 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 public class EqualDamageDistribution implements IDamageDistribution {
-    private static final Method applyPotionDamageCalculationsMethod = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "m_6515_", DamageSource.class, float.class);
+    public static final Codec<EqualDamageDistribution> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    Codec.BOOL.fieldOf("tryNoKill").forGetter(o -> o.tryNoKill),
+                    Codec.FLOAT.fieldOf("reductionMultiplier").forGetter(o -> o.reductionMultiplier)
+            ).apply(instance, EqualDamageDistribution::new));
+    private static final Method APPLY_POTION_DAMAGE_CALCULATIONS_METHOD = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "m_6515_", DamageSource.class, float.class);
     private final boolean tryNoKill;
     private final float reductionMultiplier;
 
@@ -63,7 +70,7 @@ public class EqualDamageDistribution implements IDamageDistribution {
         }
         //Use vanilla potion damage calculations
         try {
-            damage = (float) applyPotionDamageCalculationsMethod.invoke(player, source, damage);
+            damage = (float) APPLY_POTION_DAMAGE_CALCULATIONS_METHOD.invoke(player, source, damage);
         } catch (IllegalAccessException | InvocationTargetException e) {
             FirstAid.LOGGER.error("Could not invoke applyPotionDamageCalculations!", e);
         }
@@ -128,5 +135,10 @@ public class EqualDamageDistribution implements IDamageDistribution {
     @Override
     public boolean skipGlobalPotionModifiers() {
         return true; //We apply all potions ourself
+    }
+
+    @Override
+    public Codec<EqualDamageDistribution> codec() {
+        return CODEC;
     }
 }

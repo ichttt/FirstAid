@@ -76,7 +76,7 @@ public class DebugDamageCommand {
 
     private static void doDamage(EnumPlayerPart part, float damage, boolean debuff, ServerPlayer player, AbstractPlayerDamageModel damageModel) {
         if (damage > 0F) {
-            DamageDistribution.handleDamageTaken(new DirectDamageDistribution(part, debuff), damageModel, damage, player, player.damageSources().outOfWorld(), false, false);
+            DamageDistribution.handleDamageTaken(new DirectDamageDistribution(part, debuff), damageModel, damage, player, player.damageSources().fellOutOfWorld(), false, false);
         } else {
             damageModel.getFromEnum(part).heal(-damage, player, debuff);
         }

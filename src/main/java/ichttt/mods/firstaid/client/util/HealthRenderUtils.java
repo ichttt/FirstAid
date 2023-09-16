@@ -19,7 +19,6 @@
 package ichttt.mods.firstaid.client.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -32,7 +31,8 @@ import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.Font.DisplayMode;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 
@@ -42,9 +42,11 @@ import java.util.Objects;
 
 public class HealthRenderUtils {
     public static final ResourceLocation GUI_LOCATION = new ResourceLocation(FirstAid.MODID, "textures/gui/show_wounds.png");
+    public static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png"); 
     public static final DecimalFormat TEXT_FORMAT = new DecimalFormat("0.0");
     private static final Object2IntOpenHashMap<EnumPlayerPart> prevHealth = new Object2IntOpenHashMap<>();
     private static final EnumMap<EnumPlayerPart, FlashStateManager> flashStates = new EnumMap<>(EnumPlayerPart.class);
+    
 
     static {
         for (EnumPlayerPart part : EnumPlayerPart.VALUES) {
@@ -52,19 +54,21 @@ public class HealthRenderUtils {
         }
     }
 
-    public static void drawHealthString(PoseStack stack, AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, boolean allowSecondLine) {
+    public static void drawHealthString(GuiGraphics stack, AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, boolean allowSecondLine) {
         float absorption = damageablePart.getAbsorption();
         String text = TEXT_FORMAT.format(damageablePart.currentHealth) + "/" + damageablePart.getMaxHealth();
         if (absorption > 0) {
             String line2 = "+ " + TEXT_FORMAT.format(absorption);
             if (allowSecondLine) {
-                Minecraft.getInstance().font.drawShadow(stack, line2, xTranslation, yTranslation + 5, 0xFFFFFF);
+                Minecraft.getInstance().font.drawInBatch(line2, xTranslation, yTranslation, 0, true, null, null, DisplayMode.NORMAL, 0, 0);
+                //drawShadow(stack, line2, xTranslation, yTranslation + 5, 0xFFFFFF);
                 yTranslation -= 5;
             } else {
                 text += " " + line2;
             }
         }
-        Minecraft.getInstance().font.drawShadow(stack, text, xTranslation, yTranslation, 0xFFFFFF);
+        Minecraft.getInstance().font.drawInBatch(text, xTranslation, yTranslation, 0xFFFFFF, true, null, null, DisplayMode.NORMAL, 0, 0);
+        //.drawShadow(stack, text, xTranslation, yTranslation, 0xFFFFFF);
     }
 
     private static void updatePrev(EnumPlayerPart part, int current, boolean playerDead) {
@@ -97,14 +101,14 @@ public class HealthRenderUtils {
         return (maxHealth + maxExtraHealth > 8 && allowSecondLine) || ((maxHealth + maxExtraHealth) > 12);
     }
 
-    public static void drawHealth(PoseStack stack, AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, GuiComponent gui, boolean allowSecondLine) {
+    public static void drawHealth(GuiGraphics gui, AbstractDamageablePart damageablePart, float xTranslation, float yTranslation, boolean allowSecondLine) {
         int maxHealth = getMaxHearts(damageablePart.getMaxHealth());
         int maxExtraHealth = getMaxHearts(damageablePart.getAbsorption());
         int current = (int) Math.ceil(damageablePart.currentHealth);
         FlashStateManager activeFlashState = Objects.requireNonNull(flashStates.get(damageablePart.part));
 
         if (drawAsString(damageablePart, allowSecondLine)) {
-            drawHealthString(stack, damageablePart, xTranslation, yTranslation, allowSecondLine);
+            drawHealthString(gui, damageablePart, xTranslation, yTranslation, allowSecondLine);
             return;
         }
 
@@ -117,10 +121,10 @@ public class HealthRenderUtils {
         if (FirstAidConfig.SERVER.allowOtherHealingItems.get() && mc.player.hasEffect(MobEffects.REGENERATION))
             regen = (int) ((mc.gui.getGuiTicks() / 2) % 15);
         boolean low = (current + absorption) < 1.25F;
-
-        RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
-        stack.pushPose();
-        stack.translate(xTranslation, yTranslation, 0);
+        
+        RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
+        gui.pose().pushPose();
+        gui.pose().translate(xTranslation, yTranslation, 0);
         boolean drawSecondLine = allowSecondLine;
         if (allowSecondLine) drawSecondLine = (maxHealth + maxExtraHealth) > 4;
 
@@ -143,42 +147,42 @@ public class HealthRenderUtils {
             int absorption2 = absorption - maxExtraHealth * 2;
             absorption -= absorption2;
 
-            stack.translate(0F, 5F, 0F);
-            stack.pushPose();
-            renderLine(stack, regen, low, yTexture, maxHealth2, maxExtraHealth2, current2, absorption2, gui, highlight);
+            gui.pose().translate(0F, 5F, 0F);
+            gui.pose().pushPose();
+            renderLine(gui, regen, low, yTexture, maxHealth2, maxExtraHealth2, current2, absorption2, highlight);
             regen -= (maxHealth2 + maxExtraHealth);
-            stack.popPose();
-            stack.translate(0F, -10F, 0F);
+            gui.pose().popPose();
+            gui.pose().translate(0F, -10F, 0F);
         }
-        renderLine(stack, regen, low, yTexture, maxHealth, maxExtraHealth, current, absorption, gui, highlight);
+        renderLine(gui, regen, low, yTexture, maxHealth, maxExtraHealth, current, absorption, highlight);
 
-        stack.popPose();
+        gui.pose().popPose();
     }
 
-    private static void renderLine(PoseStack stack, int regen, boolean low, int yTexture, int maxHealth, int maxExtraHearts, int current, int absorption, GuiComponent gui, boolean highlight) {
-        stack.pushPose();
+    private static void renderLine(GuiGraphics stack, int regen, boolean low, int yTexture, int maxHealth, int maxExtraHearts, int current, int absorption, boolean highlight) {
+        stack.pose().pushPose();
         Int2IntMap map = new Int2IntArrayMap();
         if (low) {
             for (int i = 0; i < (maxHealth + maxExtraHearts); i++)
                 map.put(i, EventHandler.RAND.nextInt(2));
         }
 
-        renderMax(stack, regen, map, maxHealth, yTexture, gui, highlight);
+        renderMax(stack, regen, map, maxHealth, yTexture, highlight);
         if (maxExtraHearts > 0) { //for absorption
             if (maxHealth != 0) {
-                stack.translate(2 + 9 * maxHealth, 0, 0);
+                stack.pose().translate(2 + 9 * maxHealth, 0, 0);
             }
-            renderMax(stack, regen - maxHealth, map, maxExtraHearts, yTexture, gui, false); //Do not highlight absorption
+            renderMax(stack, regen - maxHealth, map, maxExtraHearts, yTexture, false); //Do not highlight absorption
         }
-        stack.popPose();
-        stack.translate(0, 0, 1);
+        stack.pose().popPose();
+        stack.pose().translate(0, 0, 1);
 
-        renderCurrentHealth(stack, regen, map, current, yTexture, gui);
+        renderCurrentHealth(stack, regen, map, current, yTexture);
 
         if (absorption > 0) {
             int offset = maxHealth * 9 + (maxHealth == 0 ? 0 : 2);
-            stack.translate(offset, 0, 0);
-            renderAbsorption(stack, regen - maxHealth, map, absorption, yTexture, gui);
+            stack.pose().translate(offset, 0, 0);
+            renderAbsorption(stack, regen - maxHealth, map, absorption, yTexture);
         }
     }
 
@@ -189,12 +193,12 @@ public class HealthRenderUtils {
         return maxCurrentHearts >> 1;
     }
 
-    private static void renderMax(PoseStack stack, int regen, Int2IntFunction function, int max, int yTexture, GuiComponent gui, boolean highlight) {
+    private static void renderMax(GuiGraphics stack, int regen, Int2IntFunction function, int max, int yTexture, boolean highlight) {
         final int BACKGROUND = (highlight ? 25 : 16);
-        renderTexturedModalRects(stack, regen, function, max, false, BACKGROUND, BACKGROUND, yTexture, gui);
+        renderTexturedModalRects(stack, regen, function, max, false, BACKGROUND, BACKGROUND, yTexture);
     }
 
-    private static void renderCurrentHealth(PoseStack stack, int regen, Int2IntFunction function, int current, int yTexture, GuiComponent gui) {
+    private static void renderCurrentHealth(GuiGraphics stack, int regen, Int2IntFunction function, int current, int yTexture) {
         boolean renderLastHalf;
         int render;
 
@@ -204,10 +208,10 @@ public class HealthRenderUtils {
             renderLastHalf = true;
             render++;
         }
-        renderTexturedModalRects(stack, regen, function, render, renderLastHalf, 61, 52, yTexture, gui);
+        renderTexturedModalRects(stack, regen, function, render, renderLastHalf, 61, 52, yTexture);
     }
 
-    private static void renderAbsorption(PoseStack stack, int regen, Int2IntFunction function, int absorption, int yTexture, GuiComponent gui) {
+    private static void renderAbsorption(GuiGraphics stack, int regen, Int2IntFunction function, int absorption, int yTexture) {
         boolean renderLastHalf = false;
         int render = absorption >> 1;
         if (absorption % 2 != 0) {
@@ -215,16 +219,17 @@ public class HealthRenderUtils {
             render++;
         }
 
-        if (render > 0) renderTexturedModalRects(stack, regen, function, render, renderLastHalf, 169, 160, yTexture, gui);
+        if (render > 0) renderTexturedModalRects(stack, regen, function, render, renderLastHalf, 169, 160, yTexture);
     }
 
-    private static void renderTexturedModalRects(PoseStack stack, int regen, Int2IntFunction function, int toDraw, boolean lastOneHalf, int halfTextureX, int textureX, int textureY, GuiComponent gui) {
+    private static void renderTexturedModalRects(GuiGraphics stack, int regen, Int2IntFunction function, int toDraw, boolean lastOneHalf, int halfTextureX, int textureX, int textureY) {
         if (toDraw == 0)
             return;
         if (toDraw < 0) throw new IllegalArgumentException("Cannot draw negative amount of icons " + toDraw);
         for (int i = 0; i < toDraw; i++) {
             boolean renderHalf = lastOneHalf && i + 1 == toDraw;
-            gui.blit(stack, (int) (9F * i), (i == regen ? -2 : 0) - function.get(i), renderHalf ? halfTextureX : textureX, textureY, 9, 9);
+            
+        stack.blit(GUI_ICONS_LOCATION, (int) (9F * i), (i == regen ? -2 : 0) - function.get(i), renderHalf ? halfTextureX : textureX, textureY, 9, 9);
         }
     }
 }

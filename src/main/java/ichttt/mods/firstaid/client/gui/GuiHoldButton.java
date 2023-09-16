@@ -19,9 +19,10 @@
 package ichttt.mods.firstaid.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -50,22 +51,22 @@ public class GuiHoldButton extends AbstractButton {
     }
 
     @Override
-    public void renderWidget(PoseStack stack, int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
+    public void renderWidget(GuiGraphics stack, int pMouseX, int pMouseY, float pPartialTick) {
+    //public void renderWidget(PoseStack stack, int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
         Minecraft minecraft = Minecraft.getInstance();
         RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
         RenderSystem.enableBlend();
         RenderSystem.enableDepthTest();
-        blitNineSliced(stack, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
+        stack.blitNineSliced(WIDGETS_LOCATION, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         int i = getFGColor();
 
         //CHANGE: scale text if not fitting
         if (textScaleFactor != 1F) {
-            stack.pushPose();
-            stack.scale(textScaleFactor, textScaleFactor, 1);
+            stack.pose();
             this.renderString(stack, minecraft.font, i | Mth.ceil(this.alpha * 255.0F) << 24);
-            stack.popPose();
+            stack.pose();
         } else {
             this.renderString(stack, minecraft.font, i | Mth.ceil(this.alpha * 255.0F) << 24);
         }

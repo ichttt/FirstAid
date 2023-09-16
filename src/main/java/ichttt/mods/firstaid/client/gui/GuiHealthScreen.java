@@ -33,7 +33,7 @@ import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -41,6 +41,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -56,7 +57,7 @@ public class GuiHealthScreen extends Screen {
     public static final int ySize = 137;
     public static final ItemStack BED_ITEMSTACK = new ItemStack(Items.RED_BED);
     private static final DecimalFormat FORMAT = new DecimalFormat("##.#");
-
+    private static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
     public static GuiHealthScreen INSTANCE;
     public static boolean isOpen = false;
     private static int funTicks = 0; // mod 500
@@ -158,12 +159,13 @@ public class GuiHealthScreen extends Screen {
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
         //Setup background
         this.renderBackground(stack);
-        this.fillGradient(stack, this.guiLeft, this.guiTop, this.guiLeft + xSize, this.guiTop + ySize, -16777216, -16777216);
-        RenderSystem.setShaderTexture(0, HealthRenderUtils.GUI_LOCATION);
-        this.blit(stack, this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
+        stack.fillGradient(this.guiLeft, this.guiTop, this.guiLeft + xSize, this.guiTop + ySize, -16777216, -16777216);
+        RenderSystem.setShaderTexture(0, HealthRenderUtils.GUI_LOCATION);      
+        stack.blit(HealthRenderUtils.GUI_LOCATION, this.guiLeft, this.guiTop, 0, 0, xSize, ySize);
+        
         //Player
         int entityLookX = this.guiLeft + (xSize / 2) - mouseX;
         int entityLookY = this.guiTop + 20 - mouseY;
@@ -190,11 +192,13 @@ public class GuiHealthScreen extends Screen {
         //Text info
         int morphineTicks = damageModel.getMorphineTicks();
         if (morphineTicks > 0)
-            drawCenteredString(stack, this.minecraft.font, I18n.get("firstaid.gui.morphine_left", StringUtil.formatTickDuration(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - (this.activeHand == null ? 21 : 29), 0xFFFFFF);
+            stack.drawCenteredString(this.minecraft.font, I18n.get("firstaid.gui.morphine_left", StringUtil.formatTickDuration(morphineTicks)), this.guiLeft + (xSize / 2), this.guiTop + ySize - (this.activeHand == null ? 21 : 29), 0xFFFFFF);
         if (this.activeHand != null)
-            drawCenteredString(stack, this.minecraft.font, I18n.get("firstaid.gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
-
-        RenderSystem.setShaderTexture(0, Gui.GUI_ICONS_LOCATION);
+            stack.drawCenteredString(this.minecraft.font, I18n.get("firstaid.gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
+        
+        
+        RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
+        
         //Health
         RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
         drawHealth(stack, damageModel.HEAD, false, 14);
@@ -205,9 +209,9 @@ public class GuiHealthScreen extends Screen {
         drawHealth(stack, damageModel.RIGHT_ARM, true, 39);
         drawHealth(stack, damageModel.RIGHT_LEG, true, 64);
         drawHealth(stack, damageModel.RIGHT_FOOT, true, 89);
-
+        stack.pose();
+        
         //Tooltip
-        stack.pushPose();
         tooltipButton(stack, head, damageModel.HEAD, mouseX, mouseY);
         tooltipButton(stack, leftArm, damageModel.LEFT_ARM, mouseX, mouseY);
         tooltipButton(stack, leftLeg, damageModel.LEFT_LEG, mouseX, mouseY);
@@ -216,7 +220,7 @@ public class GuiHealthScreen extends Screen {
         tooltipButton(stack, rightArm, damageModel.RIGHT_ARM, mouseX, mouseY);
         tooltipButton(stack, rightLeg, damageModel.RIGHT_LEG, mouseX, mouseY);
         tooltipButton(stack, rightFoot, damageModel.RIGHT_FOOT, mouseX, mouseY);
-        stack.popPose();
+        stack.pose();
 
         //Sleep info setup
         double sleepHealing = FirstAidConfig.SERVER.sleepHealPercentage.get();
@@ -230,32 +234,37 @@ public class GuiHealthScreen extends Screen {
         modelViewStack.pushPose();
         modelViewStack.scale(bedScaleFactor, bedScaleFactor, bedScaleFactor);
         RenderSystem.applyModelViewMatrix();
-        minecraft.getItemRenderer().renderAndDecorateItem(stack, BED_ITEMSTACK, renderBedX, renderBedY);
+        stack.renderItem(BED_ITEMSTACK, renderBedX, renderBedY);
         modelViewStack.popPose();
         RenderSystem.applyModelViewMatrix();
 
         //Sleep info tooltip
         if (mouseX >= bedX && mouseY >= bedY && mouseX < bedX + (16 * bedScaleFactor) && mouseY < bedY + (16 * bedScaleFactor)) {
             Component s = sleepHealing == 0D ? Component.translatable("firstaid.gui.no_sleep_heal") : Component.translatable("firstaid.gui.sleep_heal_amount", FORMAT.format(sleepHealing * 100));
-            renderTooltip(stack, s, mouseX, mouseY);
+
+            stack.renderTooltip(this.minecraft.font, s, mouseX, mouseY);
         }
 
         holdButtonMouseCallback(stack); //callback: check if buttons are finish
     }
 
-    private void tooltipButton(PoseStack stack, AbstractButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
+    private void tooltipButton(GuiGraphics stack, AbstractButton button, AbstractDamageablePart part, int mouseX, int mouseY) {
         boolean enabled = part.activeHealer == null;
         if (!enabled && button.isHoveredOrFocused()) {
-            renderComponentTooltip(stack, Arrays.asList(Component.literal(I18n.get("firstaid.gui.active_item") + ": " + I18n.get(part.activeHealer.stack.getDescriptionId())), Component.translatable("firstaid.gui.next_heal", Math.round((part.activeHealer.ticksPerHeal.getAsInt() - part.activeHealer.getTicksPassed()) / 20F))), mouseX, mouseY);
+        	
+        	//stack.renderTooltip(this.minecraft.font, Arrays.asList(Component.literal(I18n.get("firstaid.gui.active_item") + ": " + I18n.get(part.activeHealer.stack.getDescriptionId())), Component.translatable("firstaid.gui.next_heal", Math.round((part.activeHealer.ticksPerHeal.getAsInt() - part.activeHealer.getTicksPassed()) / 20F))), null, mouseX, mouseY);
+        	//stack.drawCenteredString(this.minecraft.font, Component.literal(I18n.get("firstaid.gui.active_item") + ": " + I18n.get(part.activeHealer.stack.getDescriptionId())), mouseX, mouseY, 0xFFFFFF);
+        	stack.renderComponentTooltip(this.minecraft.font, Arrays.asList(Component.literal(I18n.get("firstaid.gui.active_item") + ": " + I18n.get(part.activeHealer.stack.getDescriptionId())), Component.translatable("firstaid.gui.next_heal", Math.round((part.activeHealer.ticksPerHeal.getAsInt() - part.activeHealer.getTicksPassed()) / 20F))), mouseX, mouseY);
+        	stack.drawString(this.minecraft.font, Component.literal(""), mouseX, mouseY, 0xFFFFFF);
         }
         if (!disableButtons) button.active = enabled;
     }
 
-    public void drawHealth(PoseStack stack, AbstractDamageablePart damageablePart, boolean right, int yOffset) {
-        stack.pushPose();
+    public void drawHealth(GuiGraphics stack, AbstractDamageablePart damageablePart, boolean right, int yOffset) {
+        stack.pose().pushPose();
         int xTranslation = guiLeft + (right ? getRightOffset(damageablePart) : 57);
-        HealthRenderUtils.drawHealth(stack, damageablePart, xTranslation, guiTop + yOffset, this, true);
-        stack.popPose();
+        HealthRenderUtils.drawHealth(stack, damageablePart, xTranslation, guiTop + yOffset, true);
+        stack.pose().popPose();
     }
 
     private static int getRightOffset(AbstractDamageablePart damageablePart) {
@@ -287,7 +296,7 @@ public class GuiHealthScreen extends Screen {
         }
     }
 
-    protected void holdButtonMouseCallback(PoseStack stack) {
+    protected void holdButtonMouseCallback(GuiGraphics stack) {
         for (GuiHoldButton button : this.holdButtons) {
             int timeLeft = button.getTimeLeft();
             if (timeLeft == 0) {
@@ -304,8 +313,10 @@ public class GuiHealthScreen extends Screen {
                 float timeInSecs = (timeLeft / 1000F);
                 if (timeInSecs < 0F) timeInSecs = 0F;
                 RenderSystem.setShaderTexture(0, HealthRenderUtils.GUI_LOCATION);
-                this.blit(stack, button.getX() + (button.isRightSide ? 56 : -25), button.getY() - 2, button.isRightSide ? 2 : 0, 169, 22, 24);
-                this.minecraft.font.draw(stack, HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), button.getX() + (button.isRightSide ? 60 : -20), button.getY() + 6, 0xFFFFFF);
+                stack.blit(HealthRenderUtils.GUI_LOCATION, button.getX() + (button.isRightSide ? 56 : -25), button.getY() - 2, button.isRightSide ? 2 : 0, 169, 22, 24);
+                stack.drawString(this.minecraft.font, HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), button.getX() + (button.isRightSide ? 60 : -20), button.getY() + 6, 0xFFFFFF);
+                //this.minecraft.font.drawInBatch(HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), (float) button.getX() + (button.isRightSide ? 60F : -20F), (float) button.getY() + 6F, 0xFFFFFF, false, null, stack.bufferSource(), DisplayMode.NORMAL, 0, 0);
+                //this.minecraft.font.draw(stack, HealthRenderUtils.TEXT_FORMAT.format(timeInSecs), button.getX() + (button.isRightSide ? 60 : -20), button.getY() + 6, 0xFFFFFF);
             }
         }
     }

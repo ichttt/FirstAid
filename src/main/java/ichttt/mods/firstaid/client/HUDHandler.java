@@ -20,7 +20,6 @@ package ichttt.mods.firstaid.client;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
@@ -33,9 +32,10 @@ import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.Mth;
@@ -49,6 +49,7 @@ import java.util.Map;
 
 public class HUDHandler implements ResourceManagerReloadListener, IGuiOverlay {
     public static final HUDHandler INSTANCE = new HUDHandler();
+    public static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
     private static final int FADE_TIME = 30;
     private final Map<EnumPlayerPart, String> TRANSLATION_MAP = new EnumMap<>(EnumPlayerPart.class);
     private final FlashStateManager flashStateManager = new FlashStateManager();
@@ -75,20 +76,19 @@ public class HUDHandler implements ResourceManagerReloadListener, IGuiOverlay {
         return maxLength;
     }
 
-
     @Override
-    public void render(ForgeGui gui, PoseStack mStack, float partialTicks, int screenWidth, int screenHeight) {
+    public void render(ForgeGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight) {
         if (FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.OFF) return;
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || !mc.player.isAlive()) return;
         mc.getProfiler().push("FirstAidOverlay");
-        doRenderOverlay(mStack, mc, gui, partialTicks);
+        doRenderOverlay(guiGraphics, mc, gui, partialTick);
         mc.getProfiler().pop();
         mc.getProfiler().pop();
     }
 
-    private void doRenderOverlay(PoseStack stack, Minecraft mc, ForgeGui gui, float partialTicks) {
+    private void doRenderOverlay(GuiGraphics stack, Minecraft mc, ForgeGui gui, float partialTicks) {
         mc.getProfiler().push("prepare");
 
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
@@ -116,8 +116,9 @@ public class HUDHandler implements ResourceManagerReloadListener, IGuiOverlay {
 
         if (visibleTicks != -1 && ticker < 0)
             return;
-
-        RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
+        
+        
+        RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
         int xOffset = FirstAidConfig.CLIENT.xOffset.get();
         int yOffset = FirstAidConfig.CLIENT.yOffset.get();
         boolean playerModel = overlayMode.isPlayerModel();
@@ -149,9 +150,10 @@ public class HUDHandler implements ResourceManagerReloadListener, IGuiOverlay {
 
         boolean enableAlphaBlend = visibleTicks != -1 && ticker < FADE_TIME;
         int alpha = enableAlphaBlend ? Mth.clamp((int)((FADE_TIME - ticker) * 255.0F / (float) FADE_TIME), FirstAidConfig.CLIENT.alpha.get(), 250) : FirstAidConfig.CLIENT.alpha.get();
-
-        stack.pushPose();
-        stack.translate(xOffset, yOffset, 0F);
+        
+       
+        stack.pose().pushPose();
+        stack.pose().translate(xOffset, yOffset, 0F);
         if (enableAlphaBlend) {
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
@@ -163,17 +165,19 @@ public class HUDHandler implements ResourceManagerReloadListener, IGuiOverlay {
         } else {
             int xTranslation = maxLength;
             for (AbstractDamageablePart part : damageModel) {
-                mc.font.drawShadow(stack, TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF - (alpha << 24 & -0xFFFFFF));
+                stack.drawString(mc.font, TRANSLATION_MAP.get(part.part), 0, 0, 0xFFFFFF - (alpha << 24 & -0xFFFFFF), true);
                 if (FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.NUMBERS) {
                     HealthRenderUtils.drawHealthString(stack, part, xTranslation, 0, false);
                 } else {
-                    HealthRenderUtils.drawHealth(stack, part, xTranslation, 0, gui, false);
+                    HealthRenderUtils.drawHealth(stack, part, (float) xTranslation, 0F, false);
                 }
-                stack.translate(0, 10F, 0F);
+                stack.pose().translate(0, 10F, 0F);
             }
         }
         if (enableAlphaBlend)
             RenderSystem.disableBlend();
-        stack.popPose();
+        stack.pose().popPose();
     }
+
+		
 }

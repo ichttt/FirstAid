@@ -84,7 +84,7 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST) //so all other can modify their damage first, and we apply after that
     public static void onLivingHurt(LivingHurtEvent event) {
         LivingEntity entity = event.getEntity();
-        if (entity.level.isClientSide || !CommonUtils.hasDamageModel(entity))
+        if (entity.level().isClientSide || !CommonUtils.hasDamageModel(entity))
             return;
         float amountToDamage = event.getAmount();
         Player player = (Player) entity;
@@ -136,7 +136,7 @@ public class EventHandler {
             return;
 
         Entity entity = ((EntityHitResult) result).getEntity();
-        if (!entity.level.isClientSide && entity instanceof Player) {
+        if (!entity.level().isClientSide && entity instanceof Player) {
             hitList.put((Player) entity, Pair.of(event.getEntity(), event.getRayTraceResult()));
         }
     }
@@ -157,7 +157,7 @@ public class EventHandler {
     public static void tickPlayers(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END && !event.player.getAbilities().invulnerable) {
             if (!event.player.isAlive()) return;
-            CommonUtils.getDamageModel(event.player).tick(event.player.level, event.player);
+            CommonUtils.getDamageModel(event.player).tick(event.player.level(), event.player);
             hitList.remove(event.player); //Damage should be done in the same tick as the hit was noted, otherwise we got a false-positive
         }
     }
@@ -232,7 +232,7 @@ public class EventHandler {
         if (!CommonUtils.hasDamageModel(entity))
             return;
         event.setCanceled(true);
-        if (entity.level.isClientSide || !FirstAidConfig.SERVER.allowOtherHealingItems.get())
+        if (entity.level().isClientSide || !FirstAidConfig.SERVER.allowOtherHealingItems.get())
             return;
         float amount = event.getAmount();
         //Hacky shit to reduce vanilla regen
@@ -250,7 +250,7 @@ public class EventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (!event.getEntity().level.isClientSide) {
+        if (!event.getEntity().level().isClientSide) {
             FirstAid.LOGGER.debug("Sending damage model to " + event.getEntity().getName());
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(event.getEntity());
             if (damageModel.hasTutorial)
@@ -275,10 +275,10 @@ public class EventHandler {
     @SubscribeEvent
     public static void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
         Player player = event.getEntity();
-        if (!player.level.isClientSide && player instanceof ServerPlayer) //Mojang seems to wipe all caps on teleport
+        if (!player.level().isClientSide && player instanceof ServerPlayer) //Mojang seems to wipe all caps on teleport
             FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncDamageModel(CommonUtils.getDamageModel(player), true));
     }
-
+ 
     @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event) {
         ServerLevel overworld = event.getServer().overworld();
@@ -305,7 +305,7 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         Player player = event.getEntity();
-        if (!event.isEndConquered() && !player.level.isClientSide && player instanceof ServerPlayer) {
+        if (!event.isEndConquered() && !player.level().isClientSide && player instanceof ServerPlayer) {
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
             damageModel.runScaleLogic(player);
             damageModel.forEach(damageablePart -> damageablePart.heal(damageablePart.getMaxHealth(), player, false));

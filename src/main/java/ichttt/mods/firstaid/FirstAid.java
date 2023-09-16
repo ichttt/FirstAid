@@ -26,13 +26,13 @@ import ichttt.mods.firstaid.common.apiimpl.HealingItemApiHelperImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
 import ichttt.mods.firstaid.common.network.*;
-import net.minecraft.network.chat.Component;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
-import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -42,6 +42,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -60,14 +63,15 @@ public class FirstAid {
             s -> s.startsWith(NETWORKING_MAJOR),
             s -> s.equals(NETWORKING_VERSION));
     public static boolean isSynced = false;
-
+    
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public FirstAid() {
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::init);
         bus.addListener(this::registerCapability);
-        bus.addListener(this::registerCreativeTab);
+        CREATIVE_MODE_TABS.register(bus);
         RegistryObjects.registerToBus(bus);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FirstAidConfig.serverSpec);
@@ -81,17 +85,16 @@ public class FirstAid {
         RegistryManager.registerAndValidate();
     }
 
-    private void registerCreativeTab(CreativeModeTabEvent.Register event) {
-        event.registerCreativeModeTab(new ResourceLocation(FirstAid.MODID, "main_tab"), builder -> builder.title(Component.translatable("itemGroup.firstaid"))
-                .icon(() -> new ItemStack(RegistryObjects.BANDAGE.get()))
-                .displayItems((context, output) -> {
-                    output.accept(RegistryObjects.BANDAGE.get());
-                    output.accept(RegistryObjects.PLASTER.get());
-                    output.accept(RegistryObjects.MORPHINE.get());
-                }));
-    }
+    public static final RegistryObject<CreativeModeTab> FIRST_AID = CREATIVE_MODE_TABS.register("first_aid", () -> CreativeModeTab.builder()
+            .withTabsBefore(CreativeModeTabs.COMBAT)
+            .icon(() -> RegistryObjects.BANDAGE.get().getDefaultInstance())
+            .displayItems((parameters, output) -> {
+                output.accept(RegistryObjects.BANDAGE.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
+                output.accept(RegistryObjects.PLASTER.get());
+                output.accept(RegistryObjects.MORPHINE.get());
+            }).build());
 
-    @SuppressWarnings("Convert2MethodRef") //Fucking classloading
+    //@SuppressWarnings("Convert2MethodRef") //Fucking classloading
     public void init(FMLCommonSetupEvent event) {
         LOGGER.info("{} starting...", MODID);
         if (FirstAidConfig.GENERAL.debug.get()) {

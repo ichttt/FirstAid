@@ -157,7 +157,6 @@ public class ArmorUtils {
     /**
      * Changed copy of ISpecialArmor {@link LivingEntity#applyArmorCalculations(DamageSource, float)}
      */
-    @SuppressWarnings("JavadocReference")
     public static float applyArmor(@Nonnull Player entity, @Nonnull ItemStack itemStack, @Nonnull DamageSource source, float damage, @Nonnull EquipmentSlot slot) {
         if (source.is(DamageTypeTags.BYPASSES_ARMOR)) return damage;
         Item item = itemStack.getItem();
@@ -185,12 +184,10 @@ public class ArmorUtils {
     /**
      * Changed copy of the first part from {@link LivingEntity#applyPotionDamageCalculations(DamageSource, float)}
      */
-    @SuppressWarnings("JavadocReference")
     public static float applyGlobalPotionModifiers(Player player, DamageSource source, float damage) {
         if (source.is(DamageTypeTags.BYPASSES_ARMOR))
             return damage;
-        if (player.hasEffect(MobEffects.DAMAGE_RESISTANCE) && source != player.damageSources().outOfWorld()) {
-            @SuppressWarnings("ConstantConditions")
+        if (player.hasEffect(MobEffects.DAMAGE_RESISTANCE) && source != player.damageSources().fellOutOfWorld()) {
             int i = (player.getEffect(MobEffects.DAMAGE_RESISTANCE).getAmplifier() + 1) * FirstAidConfig.SERVER.resistanceReductionPercentPerLevel.get();
             int j = 100 - i;
             float f = damage * (float) j;
@@ -212,7 +209,6 @@ public class ArmorUtils {
     /**
      * Changed copy of the second part from {@link LivingEntity#applyPotionDamageCalculations(DamageSource, float)}
      */
-    @SuppressWarnings("JavadocReference")
     public static float applyEnchantmentModifiers(Player player, EquipmentSlot slot, DamageSource source, float damage) {
         int k;
         FirstAidConfig.Server.ArmorEnchantmentMode enchantmentMode = FirstAidConfig.SERVER.armorEnchantmentMode.get();

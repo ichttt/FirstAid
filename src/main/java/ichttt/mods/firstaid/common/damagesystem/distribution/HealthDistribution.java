@@ -39,7 +39,7 @@ public class HealthDistribution {
     }
 
     public static void manageHealth(float health, AbstractPlayerDamageModel damageModel, Player player, boolean sendChanges, boolean distribute) {
-        if (sendChanges && player.level.isClientSide) {
+        if (sendChanges && player.level().isClientSide) {
             FirstAid.LOGGER.warn("The sendChanges flag was set on the client, it can however only work on the server!" ,new RuntimeException("sendChanges flag set on the client, this is not supported!"));
             sendChanges = false;
         } else if (sendChanges && !(player instanceof ServerPlayer)) { //EntityOtherPlayerMP? log something?
@@ -60,7 +60,7 @@ public class HealthDistribution {
 
         for (int i = 0; i < 8; i++) {
             AbstractDamageablePart part = damageableParts.get(i);
-            float diff = toHeal - part.heal(toHeal, player, !player.level.isClientSide);
+            float diff = toHeal - part.heal(toHeal, player, !player.level().isClientSide);
             //prevent inaccuracy
             diff = Math.round(diff * 10000.0F) / 10000.0F;
             healingDone[part.part.ordinal()] = diff;

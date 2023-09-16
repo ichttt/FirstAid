@@ -19,14 +19,14 @@
 package ichttt.mods.firstaid.client.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 import java.util.Random;
 
@@ -38,7 +38,7 @@ public class PlayerModelRenderer {
     private static boolean otherWay = false;
     private static int cooldown = 0;
 
-    public static void renderPlayerHealth(PoseStack stack, AbstractPlayerDamageModel damageModel, boolean fourColors, GuiComponent gui, boolean flashState, float alpha, float partialTicks) {
+    public static void renderPlayerHealth(GuiGraphics stack, AbstractPlayerDamageModel damageModel, boolean fourColors, ForgeGui gui, boolean flashState, float alpha, float partialTicks) {
         int yOffset = flashState ? 64 : 0;
         RenderSystem.enableBlend();
         RenderSystem.setShaderColor(1F, 1F, 1F, 1 - (alpha / 255));
@@ -49,14 +49,14 @@ public class PlayerModelRenderer {
                 angle += ((otherWay ? -partialTicks : partialTicks) * 2);
             }
             if (FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.BOTTOM_LEFT || FirstAidConfig.CLIENT.pos.get() == FirstAidConfig.Client.Position.TOP_LEFT)
-                stack.translate(angle * 1.5F, 0, 0);
+                stack.pose().translate(angle * 1.5F, 0, 0);
             else
-                stack.translate(angle * 0.5F, 0, 0);
-            stack.mulPose(Axis.ZP.rotationDegrees(angle));
+                stack.pose().translate(angle * 0.5F, 0, 0);
+            stack.pose().mulPose(Axis.ZP.rotationDegrees(angle));
         }
 
         if (yOffset != 0)
-            stack.translate(0, -yOffset, 0);
+            stack.pose().translate(0, -yOffset, 0);
 
         drawPart(stack, gui, fourColors, damageModel.HEAD, 8, yOffset + 0, 16, 16);
         drawPart(stack, gui, fourColors, damageModel.BODY, 8, yOffset + 16, 16, 24);
@@ -70,10 +70,10 @@ public class PlayerModelRenderer {
         RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
     }
 
-    private static void drawPart(PoseStack stack, GuiComponent gui, boolean fourColors, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
+    private static void drawPart(GuiGraphics stack, ForgeGui gui, boolean fourColors, AbstractDamageablePart part, int texX, int texY, int sizeX, int sizeY) {
         int rawTexX = texX;
         texX += SIZE * getState(part, fourColors);
-        gui.blit(stack, rawTexX, texY, texX, texY, sizeX, sizeY);
+        stack.blit(HEALTH_RENDER_LOCATION, rawTexX, texY, texX, texY, sizeX, sizeY);
     }
 
     private static int getState(AbstractDamageablePart part, boolean fourColors) {

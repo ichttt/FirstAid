@@ -21,9 +21,9 @@ package ichttt.mods.firstaid.common.damagesystem.distribution;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.distribution.IDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
@@ -45,17 +45,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
-public class EqualDamageDistribution implements IDamageDistribution {
-    public static final Codec<EqualDamageDistribution> CODEC = RecordCodecBuilder.create(instance ->
+public class EqualDamageDistributionAlgorithm implements IDamageDistributionAlgorithm {
+    public static final Codec<EqualDamageDistributionAlgorithm> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     Codec.BOOL.fieldOf("tryNoKill").forGetter(o -> o.tryNoKill),
                     Codec.FLOAT.fieldOf("reductionMultiplier").forGetter(o -> o.reductionMultiplier)
-            ).apply(instance, EqualDamageDistribution::new));
+            ).apply(instance, EqualDamageDistributionAlgorithm::new));
     private static final Method APPLY_POTION_DAMAGE_CALCULATIONS_METHOD = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "m_6515_", DamageSource.class, float.class);
     private final boolean tryNoKill;
     private final float reductionMultiplier;
 
-    public EqualDamageDistribution(boolean tryNoKill, float reductionMultiplier) {
+    public EqualDamageDistributionAlgorithm(boolean tryNoKill, float reductionMultiplier) {
         this.tryNoKill = tryNoKill;
         this.reductionMultiplier = reductionMultiplier;
     }
@@ -138,7 +138,7 @@ public class EqualDamageDistribution implements IDamageDistribution {
     }
 
     @Override
-    public Codec<EqualDamageDistribution> codec() {
+    public Codec<EqualDamageDistributionAlgorithm> codec() {
         return CODEC;
     }
 }

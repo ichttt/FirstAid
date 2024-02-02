@@ -22,7 +22,7 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
-import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
+import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.common.network.MessageApplyAbsorption;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -104,7 +104,7 @@ public class SynchedEntityDataWrapper extends SynchedEntityData {
                                 if (FirstAidConfig.GENERAL.debug.get()) {
                                     CommonUtils.debugLogStacktrace("DAMAGING: " + (-healed));
                                 }
-                                DamageDistribution.handleDamageTaken(RandomDamageDistribution.getDefault(), CommonUtils.getDamageModel(player), -healed, player, player.damageSources().magic(), true, true);
+                                DamageDistribution.handleDamageTaken(RandomDamageDistributionAlgorithm.getDefault(), CommonUtils.getDamageModel(player), -healed, player, player.damageSources().magic(), true, true);
                             } else {
                                 if (FirstAidConfig.GENERAL.debug.get()) {
                                     CommonUtils.debugLogStacktrace("HEALING: " + healed);

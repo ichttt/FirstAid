@@ -21,6 +21,7 @@ package ichttt.mods.firstaid.api;
 
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
+import ichttt.mods.firstaid.api.distribution.IDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.item.ItemStack;
@@ -67,7 +68,7 @@ public abstract class FirstAidRegistry {
     public abstract Integer getPartHealingTime(@Nonnull ItemStack itemStack);
 
     @Nullable
-    public abstract IDamageDistribution getDamageDistributionForSource(@Nonnull DamageSource source);
+    public abstract IDamageDistributionAlgorithm getDamageDistributionForSource(@Nonnull DamageSource source);
 
     @Nonnull
     public abstract IDebuff[] getDebuffs(@Nonnull EnumDebuffSlot slot);

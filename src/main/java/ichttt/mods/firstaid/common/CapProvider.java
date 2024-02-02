@@ -21,6 +21,7 @@ package ichttt.mods.firstaid.common;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -36,12 +37,10 @@ import java.util.Set;
 public class CapProvider implements ICapabilitySerializable<CompoundTag> {
     public static final ResourceLocation IDENTIFIER = new ResourceLocation(FirstAid.MODID, "cap_adv_dmg_mdl");
     public static final Set<String> tutorialDone = new HashSet<>();
-    private final AbstractPlayerDamageModel damageModel;
     private final LazyOptional<AbstractPlayerDamageModel> optional;
 
-    public CapProvider(AbstractPlayerDamageModel damageModel) {
-        this.damageModel = damageModel;
-        this.optional = LazyOptional.of(() -> damageModel);
+    public CapProvider() {
+        this.optional = LazyOptional.of(PlayerDamageModel::create);
     }
 
     @Nonnull
@@ -54,11 +53,11 @@ public class CapProvider implements ICapabilitySerializable<CompoundTag> {
 
     @Override
     public CompoundTag serializeNBT() {
-        return damageModel.serializeNBT();
+        return this.optional.orElseThrow(IllegalStateException::new).serializeNBT();
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        damageModel.deserializeNBT(nbt);
+        this.optional.orElseThrow(IllegalStateException::new).deserializeNBT(nbt);
     }
 }

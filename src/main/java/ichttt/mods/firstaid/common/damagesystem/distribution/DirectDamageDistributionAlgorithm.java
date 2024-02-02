@@ -20,7 +20,7 @@ package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import ichttt.mods.firstaid.api.IDamageDistribution;
+import ichttt.mods.firstaid.api.distribution.IDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.util.StringRepresentable;
@@ -29,16 +29,16 @@ import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nonnull;
 
-public class DirectDamageDistribution implements IDamageDistribution {
-    public static final Codec<DirectDamageDistribution> CODEC = RecordCodecBuilder.create(instance ->
+public class DirectDamageDistributionAlgorithm implements IDamageDistributionAlgorithm {
+    public static final Codec<DirectDamageDistributionAlgorithm> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     StringRepresentable.fromEnum(() -> EnumPlayerPart.VALUES).fieldOf("part").forGetter(o -> o.part),
                     Codec.BOOL.fieldOf("debuff").forGetter(o -> o.debuff)
-            ).apply(instance, DirectDamageDistribution::new));
+            ).apply(instance, DirectDamageDistributionAlgorithm::new));
     private final EnumPlayerPart part;
     private final boolean debuff;
 
-    public DirectDamageDistribution(EnumPlayerPart part, boolean debuff) {
+    public DirectDamageDistributionAlgorithm(EnumPlayerPart part, boolean debuff) {
         this.part = part;
         this.debuff = debuff;
     }
@@ -49,7 +49,7 @@ public class DirectDamageDistribution implements IDamageDistribution {
     }
 
     @Override
-    public Codec<DirectDamageDistribution> codec() {
+    public Codec<DirectDamageDistributionAlgorithm> codec() {
         return CODEC;
     }
 }

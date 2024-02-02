@@ -26,6 +26,7 @@ import ichttt.mods.firstaid.common.apiimpl.HealingItemApiHelperImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
 import ichttt.mods.firstaid.common.network.*;
+import ichttt.mods.firstaid.common.registries.FirstAidRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -50,7 +51,7 @@ public class FirstAid {
     public static final String MODID = "firstaid";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
-    private static final String NETWORKING_MAJOR = "3.";
+    private static final String NETWORKING_MAJOR = "4.";
     private static final String NETWORKING_MINOR = "0";
 
     private static final String NETWORKING_VERSION = NETWORKING_MAJOR + NETWORKING_MINOR;
@@ -69,6 +70,7 @@ public class FirstAid {
         bus.addListener(this::registerCapability);
         bus.addListener(this::registerCreativeTab);
         RegistryObjects.registerToBus(bus);
+        FirstAidRegistries.setup(bus);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FirstAidConfig.serverSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FirstAidConfig.generalSpec);

@@ -31,23 +31,23 @@ import org.apache.commons.lang3.tuple.Pair;
 import javax.annotation.Nonnull;
 import java.util.*;
 
-public class RandomDamageDistribution extends DamageDistribution {
-    public static final Codec<RandomDamageDistribution> CODEC = RecordCodecBuilder.create(instance ->
+public class RandomDamageDistributionAlgorithm extends DamageDistribution {
+    public static final Codec<RandomDamageDistributionAlgorithm> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     Codec.BOOL.fieldOf("nearestFirst").forGetter(o -> o.nearestFirst),
                     Codec.BOOL.fieldOf("tryNoKill").forGetter(o -> o.tryNoKill)
-            ).apply(instance, RandomDamageDistribution::pick));
+            ).apply(instance, RandomDamageDistributionAlgorithm::pick));
 
-    public static final RandomDamageDistribution NEAREST_NOKILL = new RandomDamageDistribution(true, true);
-    public static final RandomDamageDistribution NEAREST_KILL = new RandomDamageDistribution(true, false);
-    public static final RandomDamageDistribution ANY_NOKILL = new RandomDamageDistribution(false, true);
-    public static final RandomDamageDistribution ANY_KILL = new RandomDamageDistribution(false, false);
+    public static final RandomDamageDistributionAlgorithm NEAREST_NOKILL = new RandomDamageDistributionAlgorithm(true, true);
+    public static final RandomDamageDistributionAlgorithm NEAREST_KILL = new RandomDamageDistributionAlgorithm(true, false);
+    public static final RandomDamageDistributionAlgorithm ANY_NOKILL = new RandomDamageDistributionAlgorithm(false, true);
+    public static final RandomDamageDistributionAlgorithm ANY_KILL = new RandomDamageDistributionAlgorithm(false, false);
 
-    public static RandomDamageDistribution getDefault() {
+    public static RandomDamageDistributionAlgorithm getDefault() {
         return FirstAidConfig.SERVER.useFriendlyRandomDistribution.get() ? NEAREST_NOKILL : NEAREST_KILL;
     }
 
-    public static RandomDamageDistribution pick(boolean nearestFirst, boolean tryNoKill) {
+    public static RandomDamageDistributionAlgorithm pick(boolean nearestFirst, boolean tryNoKill) {
         if (nearestFirst) {
             return tryNoKill ? NEAREST_NOKILL : NEAREST_KILL;
         } else {
@@ -59,7 +59,7 @@ public class RandomDamageDistribution extends DamageDistribution {
     private final boolean nearestFirst;
     private final boolean tryNoKill;
 
-    protected RandomDamageDistribution(boolean nearestFirst, boolean tryNoKill) {
+    protected RandomDamageDistributionAlgorithm(boolean nearestFirst, boolean tryNoKill) {
         this.nearestFirst = nearestFirst;
         this.tryNoKill = tryNoKill;
     }
@@ -107,7 +107,7 @@ public class RandomDamageDistribution extends DamageDistribution {
     }
 
     @Override
-    public Codec<RandomDamageDistribution> codec() {
+    public Codec<RandomDamageDistributionAlgorithm> codec() {
         return CODEC;
     }
 }

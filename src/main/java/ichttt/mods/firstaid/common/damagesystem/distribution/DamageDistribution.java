@@ -20,9 +20,9 @@ package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.distribution.IDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.api.event.FirstAidLivingDamageEvent;
 import ichttt.mods.firstaid.common.RegistryObjects;
@@ -47,9 +47,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class DamageDistribution implements IDamageDistribution {
+public abstract class DamageDistribution implements IDamageDistributionAlgorithm {
 
-    public static float handleDamageTaken(IDamageDistribution damageDistribution, AbstractPlayerDamageModel damageModel, float damage, @Nonnull Player player, @Nonnull DamageSource source, boolean addStat, boolean redistributeIfLeft) {
+    public static float handleDamageTaken(IDamageDistributionAlgorithm damageDistribution, AbstractPlayerDamageModel damageModel, float damage, @Nonnull Player player, @Nonnull DamageSource source, boolean addStat, boolean redistributeIfLeft) {
         if (FirstAidConfig.GENERAL.debug.get()) {
             FirstAid.LOGGER.info("--- Damaging {} using {} for dmg source {}, redistribute {}, addStat {} ---", damage, damageDistribution.toString(), source.type().msgId(), redistributeIfLeft, addStat);
         }
@@ -65,11 +65,11 @@ public abstract class DamageDistribution implements IDamageDistribution {
 
         float left = damageDistribution.distributeDamage(damage, player, source, addStat);
         if (left > 0 && redistributeIfLeft) {
-            boolean hasTriedNoKill = damageDistribution == RandomDamageDistribution.NEAREST_NOKILL || damageDistribution == RandomDamageDistribution.ANY_NOKILL;
-            damageDistribution = hasTriedNoKill ? RandomDamageDistribution.NEAREST_KILL : RandomDamageDistribution.getDefault();
+            boolean hasTriedNoKill = damageDistribution == RandomDamageDistributionAlgorithm.NEAREST_NOKILL || damageDistribution == RandomDamageDistributionAlgorithm.ANY_NOKILL;
+            damageDistribution = hasTriedNoKill ? RandomDamageDistributionAlgorithm.NEAREST_KILL : RandomDamageDistributionAlgorithm.getDefault();
             left = damageDistribution.distributeDamage(left, player, source, addStat);
             if (left > 0 && !hasTriedNoKill) {
-                damageDistribution = RandomDamageDistribution.NEAREST_KILL;
+                damageDistribution = RandomDamageDistributionAlgorithm.NEAREST_KILL;
                 left = damageDistribution.distributeDamage(left, player, source, addStat);
             }
         }

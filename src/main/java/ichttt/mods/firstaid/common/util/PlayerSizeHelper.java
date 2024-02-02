@@ -20,10 +20,10 @@ package ichttt.mods.firstaid.common.util;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.IDamageDistribution;
+import ichttt.mods.firstaid.api.distribution.IDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.AABBAlignedBoundingBox;
-import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistribution;
+import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistributionAlgorithm;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -32,7 +32,6 @@ import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -112,7 +111,7 @@ public class PlayerSizeHelper {
     }
 
 
-    public static IDamageDistribution getMeleeDistribution(Player player, DamageSource source) {
+    public static IDamageDistributionAlgorithm getMeleeDistribution(Player player, DamageSource source) {
         Entity causingEntity = source.getEntity();
         if (causingEntity != null && causingEntity == source.getDirectEntity() && causingEntity instanceof Mob) {
             Mob mobEntity = (Mob) causingEntity;
@@ -140,11 +139,11 @@ public class PlayerSizeHelper {
                         allowedParts.add(EquipmentSlot.FEET);
                     }
                     if (!allowedParts.isEmpty() && !allowedParts.containsAll(Arrays.asList(CommonUtils.ARMOR_SLOTS))) {
-                        List<Pair<EquipmentSlot, EnumPlayerPart[]>> list = new ArrayList<>();
+                        Map<EquipmentSlot, List<EnumPlayerPart>> list = new LinkedHashMap<>();
                         for (EquipmentSlot allowedPart : allowedParts) {
-                            list.add(Pair.of(allowedPart, CommonUtils.getPartArrayForSlot(allowedPart)));
+                            list.put(allowedPart, CommonUtils.getPartListForSlot(allowedPart));
                         }
-                        return new StandardDamageDistribution(list, true, true);
+                        return new StandardDamageDistributionAlgorithm(list, true, true);
                     }
                 }
             }

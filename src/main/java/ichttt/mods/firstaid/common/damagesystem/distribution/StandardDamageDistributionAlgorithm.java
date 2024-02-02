@@ -32,21 +32,21 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class StandardDamageDistribution extends DamageDistribution {
-    public static final Codec<StandardDamageDistribution> CODEC = RecordCodecBuilder.create(instance ->
+public class StandardDamageDistributionAlgorithm extends DamageDistribution {
+    public static final Codec<StandardDamageDistributionAlgorithm> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     Codec.unboundedMap(ExtraCodecs.stringResolverCodec(EquipmentSlot::getName, EquipmentSlot::byName), StringRepresentable.fromEnum(() -> EnumPlayerPart.VALUES).listOf())
                             .fieldOf("partMap").forGetter(o -> o.builtList.stream().collect(Collectors.toMap(Pair::getKey, pair -> Arrays.asList(pair.getRight())))),
-                    Codec.BOOL.fieldOf("shuffle").forGetter(o -> o.shuffle),
-                    Codec.BOOL.fieldOf("doNeighbours").forGetter(o -> o.doNeighbours)
-            ).apply(instance, StandardDamageDistribution::new));
+                    Codec.BOOL.optionalFieldOf("shuffle", false).forGetter(o -> o.shuffle),
+                    Codec.BOOL.optionalFieldOf("doNeighbours", false).forGetter(o -> o.doNeighbours)
+            ).apply(instance, StandardDamageDistributionAlgorithm::new));
 
     private final boolean shuffle;
     private final boolean doNeighbours;
     private final EnumSet<EnumPlayerPart> blockedParts;
     private final List<Pair<EquipmentSlot, EnumPlayerPart[]>> builtList;
 
-    public StandardDamageDistribution(Map<EquipmentSlot, List<EnumPlayerPart>> partList, boolean shuffle, boolean doNeighbours) {
+    public StandardDamageDistributionAlgorithm(Map<EquipmentSlot, List<EnumPlayerPart>> partList, boolean shuffle, boolean doNeighbours) {
         this.builtList = new ArrayList<>(partList.size());
         for (Map.Entry<EquipmentSlot, List<EnumPlayerPart>> entry : partList.entrySet()) {
             EquipmentSlot slot = entry.getKey();
@@ -64,7 +64,7 @@ public class StandardDamageDistribution extends DamageDistribution {
 
     // Private constructor, no validation required
     // This is done for speed, as these are temp distributions for the redistribution
-    private StandardDamageDistribution(List<Pair<EquipmentSlot, EnumPlayerPart[]>> partList, boolean shuffle, boolean doNeighbours, EnumSet<EnumPlayerPart> blockedParts) {
+    private StandardDamageDistributionAlgorithm(List<Pair<EquipmentSlot, EnumPlayerPart[]>> partList, boolean shuffle, boolean doNeighbours, EnumSet<EnumPlayerPart> blockedParts) {
         this.builtList = partList;
         this.shuffle = shuffle;
         this.doNeighbours = doNeighbours;
@@ -115,7 +115,7 @@ public class StandardDamageDistribution extends DamageDistribution {
 
 
                     // shuffle can be false, we already shuffle above. Always do neighbours to have a predictable order
-                    StandardDamageDistribution remainingDistribution = new StandardDamageDistribution(neighbourDistributions, false, true, blockedParts);
+                    StandardDamageDistributionAlgorithm remainingDistribution = new StandardDamageDistributionAlgorithm(neighbourDistributions, false, true, blockedParts);
                     rest = remainingDistribution.distributeDamage(rest, player, source, addStat);
                     if (rest <= 0F) break; //Check if we actually need to do next layer or if it is fine with this iteration
 
@@ -130,7 +130,7 @@ public class StandardDamageDistribution extends DamageDistribution {
     }
 
     @Override
-    public Codec<StandardDamageDistribution> codec() {
+    public Codec<StandardDamageDistributionAlgorithm> codec() {
         return CODEC;
     }
 }

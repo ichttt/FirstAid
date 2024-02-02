@@ -17,24 +17,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-package ichttt.mods.firstaid.api;
+package ichttt.mods.firstaid.api.distribution;
 
 import com.mojang.serialization.Codec;
+import ichttt.mods.firstaid.common.registries.FirstAidRegistries;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nonnull;
+import java.util.function.Function;
 
-public interface IDamageDistribution {
+public interface IDamageDistributionAlgorithm {
+    Codec<IDamageDistributionAlgorithm> DIRECT_CODEC = ExtraCodecs.lazyInitializedCodec(() -> FirstAidRegistries.DAMAGE_DISTRIBUTION_ALGORITHMS.get().getCodec())
+            .dispatch(IDamageDistributionAlgorithm::codec, Function.identity());
 
     float distributeDamage(float damage, @Nonnull Player player, @Nonnull DamageSource source, boolean addStat);
-
-    /**
-     * @return the codec which serializes and deserializes this biome modifier
-     */
-    Codec<? extends IDamageDistribution> codec();
 
     default boolean skipGlobalPotionModifiers() {
         return false;
     }
+
+    /**
+     * @return the codec which serializes and deserializes this damage distribution
+     */
+    Codec<? extends IDamageDistributionAlgorithm> codec();
 }

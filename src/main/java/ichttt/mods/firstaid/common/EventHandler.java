@@ -20,16 +20,15 @@ package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.distribution.IDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
-import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
-import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistribution;
-import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistribution;
+import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistributionAlgorithm;
+import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.common.network.MessageConfiguration;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
@@ -101,7 +100,7 @@ public class EventHandler {
         }
 
         boolean addStat = amountToDamage < 3.4028235E37F;
-        IDamageDistribution damageDistribution = FirstAidRegistryImpl.getImplOrThrow().getDamageDistributionForSource(source);
+        IDamageDistributionAlgorithm damageDistribution = FirstAidRegistryImpl.getImplOrThrow().getDamageDistributionForSource(source);
 
         if (source.is(DamageTypeTags.IS_PROJECTILE)) {
             Pair<Entity, HitResult> rayTraceResult = hitList.remove(player);
@@ -109,8 +108,8 @@ public class EventHandler {
                 Entity entityProjectile = rayTraceResult.getLeft();
                 EquipmentSlot slot = PlayerSizeHelper.getSlotTypeForProjectileHit(entityProjectile, player);
                 if (slot != null) {
-                    EnumPlayerPart[] possibleParts = CommonUtils.getPartArrayForSlot(slot);
-                    damageDistribution = new StandardDamageDistribution(Collections.singletonList(Pair.of(slot, possibleParts)), false, true);
+                    List<EnumPlayerPart> possibleParts = CommonUtils.getPartListForSlot(slot);
+                    damageDistribution = new StandardDamageDistributionAlgorithm(Collections.singletonMap(slot, possibleParts), false, true);
                 }
             }
         }
@@ -118,7 +117,7 @@ public class EventHandler {
             // No given distribution found, and no projectile distribution either. Let's check if we can tell by the source where we should apply the damage, otherwise fall back to random
             damageDistribution = PlayerSizeHelper.getMeleeDistribution(player, source);
             if (damageDistribution == null) {
-                damageDistribution = RandomDamageDistribution.getDefault();
+                damageDistribution = RandomDamageDistributionAlgorithm.getDefault();
             }
         }
 
@@ -146,8 +145,7 @@ public class EventHandler {
         Entity obj = event.getObject();
         if (CommonUtils.hasDamageModel(obj)) {
             Player player = (Player) obj;
-            AbstractPlayerDamageModel damageModel = PlayerDamageModel.create();
-            event.addCapability(CapProvider.IDENTIFIER, new CapProvider(damageModel));
+            event.addCapability(CapProvider.IDENTIFIER, new CapProvider());
             //replace the data manager with our wrapper to grab absorption
             player.entityData = new SynchedEntityDataWrapper(player, player.entityData);
         }

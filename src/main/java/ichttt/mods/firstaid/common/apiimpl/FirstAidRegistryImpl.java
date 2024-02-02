@@ -20,11 +20,10 @@ package ichttt.mods.firstaid.common.apiimpl;
 
 import com.google.common.collect.Multimap;
 import ichttt.mods.firstaid.FirstAid;
-import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
-import ichttt.mods.firstaid.api.IDamageDistribution;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
+import ichttt.mods.firstaid.api.distribution.IDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.damagesource.DamageSource;
@@ -35,34 +34,19 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class FirstAidRegistryImpl extends FirstAidRegistry {
-    private final List<Pair<Predicate<DamageSource>, IDamageDistribution>> distributionsDynamic;
-    private final Map<ResourceKey<DamageType>, IDamageDistribution> distributionsStatic;
     private final Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> healerMap;
     private final Multimap<EnumDebuffSlot, Supplier<IDebuff>> debuffs;
 
-    public FirstAidRegistryImpl(List<Pair<Predicate<DamageSource>, IDamageDistribution>> distributionsDynamic,
-                                Map<ResourceKey<DamageType>, IDamageDistribution> distributionsStatic,
-                                Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> healerMap,
+    public FirstAidRegistryImpl(Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> healerMap,
                                 Multimap<EnumDebuffSlot, Supplier<IDebuff>> debuffs) {
-        this.distributionsDynamic = distributionsDynamic;
-        this.distributionsStatic = distributionsStatic;
         this.healerMap = healerMap;
         this.debuffs = debuffs;
-        if (FirstAidConfig.GENERAL.debug.get()) {
-            FirstAid.LOGGER.info("REG READOUT:");
-            for (Map.Entry<ResourceKey<DamageType>, IDamageDistribution> entry : distributionsStatic.entrySet()) {
-                FirstAid.LOGGER.info("{} bound to {}", entry.getKey(), entry.getValue());
-            }
-            FirstAid.LOGGER.info("+{} additional dynamic distributions", distributionsDynamic.size());
-        }
     }
 
     @Nullable
@@ -84,24 +68,13 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
 
     @Nullable
     @Override
-    public IDamageDistribution getDamageDistributionForSource(@Nonnull DamageSource source) {
+    public IDamageDistributionAlgorithm getDamageDistributionForSource(@Nonnull DamageSource source) {
         Optional<ResourceKey<DamageType>> damageTypeResourceKeyOptional = source.typeHolder().unwrapKey();
         if (damageTypeResourceKeyOptional.isEmpty()) {
             FirstAid.LOGGER.warn("Attempted to get damage distrbution for unregistered damage source!");
             return null;
         }
-        ResourceKey<DamageType> damageTypeResourceKey = damageTypeResourceKeyOptional.get();
-        IDamageDistribution distribution = distributionsStatic.get(damageTypeResourceKey);
-        if (distribution == null) {
-            //lookup if we have any matching dynamic distribution
-            for (Pair<Predicate<DamageSource>, IDamageDistribution> pair : distributionsDynamic) {
-                if (pair.getLeft().test(source)) {
-                    distribution = pair.getRight();
-                    break;
-                }
-            }
-        }
-        return distribution;
+        return null; //TODO
     }
 
     @Nonnull

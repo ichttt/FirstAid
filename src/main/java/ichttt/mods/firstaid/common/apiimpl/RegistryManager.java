@@ -26,19 +26,11 @@ import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.debuff.DebuffBuilderFactory;
 import ichttt.mods.firstaid.api.debuff.IDebuffBuilder;
-import ichttt.mods.firstaid.api.distribution.DamageDistributionBuilderFactory;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.api.event.RegisterDamageDistributionEvent;
 import ichttt.mods.firstaid.api.event.RegisterDebuffEvent;
 import ichttt.mods.firstaid.api.event.RegisterHealingTypeEvent;
 import ichttt.mods.firstaid.common.RegistryObjects;
-import ichttt.mods.firstaid.common.apiimpl.distribution.DamageDistributionBuilderFactoryImpl;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.world.damagesource.DamageSources;
-import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -68,16 +60,11 @@ public class RegistryManager {
 
     public static void fireRegistryEvents(Level level) {
         if (FirstAidRegistry.getImpl() != null) FirstAid.LOGGER.warn("A registry has already been set!");
-        RegisterDamageDistributionEvent registerDamageDistributionEvent = new RegisterDamageDistributionEvent(level, new DamageDistributionBuilderFactoryImpl());
-        MinecraftForge.EVENT_BUS.post(registerDamageDistributionEvent);
         RegisterDebuffEvent registerDebuffEvent = new RegisterDebuffEvent(level, new DebuffBuilderFactoryImpl());
         MinecraftForge.EVENT_BUS.post(registerDebuffEvent);
         RegisterHealingTypeEvent registerHealingTypeEvent = new RegisterHealingTypeEvent(level);
         MinecraftForge.EVENT_BUS.post(registerHealingTypeEvent);
-        FirstAidRegistryImpl impl = new FirstAidRegistryImpl(registerDamageDistributionEvent.getDistributionsDynamic(),
-                registerDamageDistributionEvent.getDistributionsStatic(),
-                registerHealingTypeEvent.getHealerMap(),
-                registerDebuffEvent.getDebuffs());
+        FirstAidRegistryImpl impl = new FirstAidRegistryImpl(registerHealingTypeEvent.getHealerMap(), registerDebuffEvent.getDebuffs());
 
         FirstAidRegistry.setImpl(impl);
     }
@@ -87,70 +74,70 @@ public class RegistryManager {
         FirstAidRegistry.setImpl(null);
     }
 
-    @SubscribeEvent
-    public static void registerDamageDistributions(RegisterDamageDistributionEvent event) {
-        Level level = event.getLevel();
-        DamageDistributionBuilderFactory distributionBuilderFactory = event.getDistributionBuilderFactory();
-
-        DamageSources damageSources = level.damageSources();
-        event.registerDamageDistributionStatic(
-                distributionBuilderFactory.newStandardBuilder()
-                        .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
-                        .addDistributionLayer(EquipmentSlot.LEGS, EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)
-                        .build(),
-                damageSources.fall(), damageSources.hotFloor());
-
-        event.registerDamageDistributionStatic(
-                distributionBuilderFactory.newStandardBuilder()
-                        .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
-                        .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM)
-                        .ignoreOrder()
-                        .build(),
-                damageSources.lightningBolt());
-
-        event.registerDamageDistributionStatic(
-                distributionBuilderFactory.newStandardBuilder()
-                        .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
-                        .build(),
-                damageSources.stalagmite());
-
-        event.registerDamageDistributionStatic(
-                distributionBuilderFactory.newStandardBuilder()
-                        .addDistributionLayer(EquipmentSlot.LEGS, EnumPlayerPart.RIGHT_LEG, EnumPlayerPart.LEFT_LEG)
-                        .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
-                        .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY)
-                        .build(),
-                damageSources.sweetBerryBush());
-
-        event.registerDamageDistributionStatic(distributionBuilderFactory.newRandomBuilder().build(), damageSources.magic());
-
-        if (FirstAidConfig.GENERAL.hardMode.get()) {
-            event.registerDamageDistributionStatic(
-                    distributionBuilderFactory.newStandardBuilder()
-                            .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.BODY)
-                            .disableNeighbourRestDistribution()
-                            .build(),
-                    damageSources.starve());
-
-            event.registerDamageDistributionStatic(
-                    distributionBuilderFactory.newStandardBuilder()
-                            .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.BODY)
-                            .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
-                            .ignoreOrder()
-                            .disableNeighbourRestDistribution()
-                            .build(),
-                    damageSources.drown());
-        } else {
-            event.registerDamageDistributionStatic(distributionBuilderFactory.newRandomBuilder().tryNoKill().build(), damageSources.starve(), damageSources.drown());
-        }
-        event.registerDamageDistributionStatic(distributionBuilderFactory.newRandomBuilder().tryNoKill().build(), damageSources.inWall(), damageSources.cramming());
-        event.registerDamageDistributionDynamic(distributionBuilderFactory.newEqualBuilder().reductionMultiplier(0.8F).build(), damageSource -> damageSource.is(DamageTypeTags.IS_EXPLOSION));
-        event.registerDamageDistributionDynamic(
-                distributionBuilderFactory.newStandardBuilder()
-                        .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
-                        .build(),
-                damageSource -> damageSource.typeHolder().is(DamageTypes.FALLING_ANVIL));
-    }
+//    @SubscribeEvent
+//    public static void registerDamageDistributions(RegisterDamageDistributionEvent event) {
+//        Level level = event.getLevel();
+//        DamageDistributionBuilderFactory distributionBuilderFactory = event.getDistributionBuilderFactory();
+//
+//        DamageSources damageSources = level.damageSources();
+//        event.registerDamageDistributionStatic(
+//                distributionBuilderFactory.newStandardBuilder()
+//                        .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
+//                        .addDistributionLayer(EquipmentSlot.LEGS, EnumPlayerPart.LEFT_LEG, EnumPlayerPart.RIGHT_LEG)
+//                        .build(),
+//                damageSources.fall(), damageSources.hotFloor());
+//
+//        event.registerDamageDistributionStatic(
+//                distributionBuilderFactory.newStandardBuilder()
+//                        .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
+//                        .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM)
+//                        .ignoreOrder()
+//                        .build(),
+//                damageSources.lightningBolt());
+//
+//        event.registerDamageDistributionStatic(
+//                distributionBuilderFactory.newStandardBuilder()
+//                        .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
+//                        .build(),
+//                damageSources.stalagmite());
+//
+//        event.registerDamageDistributionStatic(
+//                distributionBuilderFactory.newStandardBuilder()
+//                        .addDistributionLayer(EquipmentSlot.LEGS, EnumPlayerPart.RIGHT_LEG, EnumPlayerPart.LEFT_LEG)
+//                        .addDistributionLayer(EquipmentSlot.FEET, EnumPlayerPart.LEFT_FOOT, EnumPlayerPart.RIGHT_FOOT)
+//                        .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.LEFT_ARM, EnumPlayerPart.RIGHT_ARM, EnumPlayerPart.BODY)
+//                        .build(),
+//                damageSources.sweetBerryBush());
+//
+//        event.registerDamageDistributionStatic(distributionBuilderFactory.newRandomBuilder().build(), damageSources.magic());
+//
+//        if (FirstAidConfig.GENERAL.hardMode.get()) {
+//            event.registerDamageDistributionStatic(
+//                    distributionBuilderFactory.newStandardBuilder()
+//                            .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.BODY)
+//                            .disableNeighbourRestDistribution()
+//                            .build(),
+//                    damageSources.starve());
+//
+//            event.registerDamageDistributionStatic(
+//                    distributionBuilderFactory.newStandardBuilder()
+//                            .addDistributionLayer(EquipmentSlot.CHEST, EnumPlayerPart.BODY)
+//                            .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
+//                            .ignoreOrder()
+//                            .disableNeighbourRestDistribution()
+//                            .build(),
+//                    damageSources.drown());
+//        } else {
+//            event.registerDamageDistributionStatic(distributionBuilderFactory.newRandomBuilder().tryNoKill().build(), damageSources.starve(), damageSources.drown());
+//        }
+//        event.registerDamageDistributionStatic(distributionBuilderFactory.newRandomBuilder().tryNoKill().build(), damageSources.inWall(), damageSources.cramming());
+//        event.registerDamageDistributionDynamic(distributionBuilderFactory.newEqualBuilder().reductionMultiplier(0.8F).build(), damageSource -> damageSource.is(DamageTypeTags.IS_EXPLOSION));
+//        event.registerDamageDistributionDynamic(
+//                distributionBuilderFactory.newStandardBuilder()
+//                        .addDistributionLayer(EquipmentSlot.HEAD, EnumPlayerPart.HEAD)
+//                        .build(),
+//                damageSource -> damageSource.typeHolder().is(DamageTypes.FALLING_ANVIL));
+//    }
 
     @SubscribeEvent
     public static void registerDebuffs(RegisterDebuffEvent event) {

@@ -1,0 +1,12 @@
+{
+  "type": "firstaid:static",
+  "damageTypes": ["falling_anvil"],
+  "algorithm": {
+    "type": "firstaid:standard",
+    "partMap": {
+      "head": [
+        "head"
+      ]
+    }
+  }
+}

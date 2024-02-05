@@ -308,7 +308,7 @@ public class FirstAidConfig {
             builder.pop();
             builder.push("misc");
             hardMode = builder
-                    .comment("If true, many damage distributions will be more realistic, but this will also cause them to be harder\\nIf enabled, e.g. drowing will only damage your body instead of your body and head last")
+                    .comment("If true, many damage distributions will be more realistic, but this will also cause them to be harder\nIf enabled, e.g. drowning will only damage your body instead of your body and head last")
                     .translation("firstaid.config.hardmode")
                     .worldRestart()
                     .define("hardMode", false);

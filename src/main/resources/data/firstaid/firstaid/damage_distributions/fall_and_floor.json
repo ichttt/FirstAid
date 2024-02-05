@@ -1,0 +1,17 @@
+{
+  "type": "firstaid:static",
+  "damageTypes": ["fall", "hot_floor"],
+  "algorithm": {
+    "type": "firstaid:standard",
+    "partMap": {
+      "feet": [
+        "left_foot",
+        "right_foot"
+      ],
+      "legs": [
+        "left_leg",
+        "right_leg"
+      ]
+    }
+  }
+}

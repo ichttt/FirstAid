@@ -1,0 +1,9 @@
+{
+  "type": "firstaid:tag",
+  "tag": "minecraft:is_explosion",
+  "algorithm": {
+    "type": "firstaid:equal",
+    "reductionMultiplier": 0.8,
+    "tryNoKill": false
+  }
+}

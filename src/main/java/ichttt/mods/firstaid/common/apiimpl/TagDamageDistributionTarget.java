@@ -14,7 +14,7 @@ import java.util.List;
 
 public class TagDamageDistributionTarget implements IDamageDistributionTarget {
 
-    private static final Codec<TagDamageDistributionTarget> CODEC = RecordCodecBuilder.create(instance ->
+    public static final Codec<TagDamageDistributionTarget> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     IDamageDistributionAlgorithm.DIRECT_CODEC.fieldOf("algorithm").forGetter(o -> o.algorithm),
                     TagKey.codec(Registries.DAMAGE_TYPE).fieldOf("tag").forGetter(o -> o.tag)

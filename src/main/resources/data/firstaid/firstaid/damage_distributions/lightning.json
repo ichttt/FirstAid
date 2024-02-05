@@ -1,0 +1,17 @@
+{
+  "type": "firstaid:static",
+  "damageTypes": ["lightning_bolt"],
+  "algorithm": {
+    "type": "firstaid:standard",
+    "ignoreOrder": true,
+    "partMap": {
+      "head": [
+        "head"
+      ],
+      "chest": [
+        "left_arm",
+        "right_arm"
+      ]
+    }
+  }
+}

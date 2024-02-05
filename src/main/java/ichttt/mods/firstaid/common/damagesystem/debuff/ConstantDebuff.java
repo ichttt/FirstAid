@@ -18,31 +18,30 @@
 
 package ichttt.mods.firstaid.common.damagesystem.debuff;
 
-import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.floats.Float2IntMap;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nonnull;
-import java.util.function.BooleanSupplier;
+import java.util.List;
 
 public class ConstantDebuff extends AbstractDebuff {
     private int ticks = 0;
     private int activeMultiplier = 0;
+    private final List<ConstantDebuffEntry> amplifierBoundaries;
 
-    public ConstantDebuff(@Nonnull String potionName, @Nonnull Float2IntLinkedOpenHashMap map, @Nonnull BooleanSupplier isEnabled) {
-        super(potionName, map, isEnabled);
+    public ConstantDebuff(@Nonnull ResourceLocation potionName, @Nonnull List<ConstantDebuffEntry> amplifierBoundaries) {
+        super(potionName);
+        this.amplifierBoundaries = amplifierBoundaries;
     }
 
     private void syncMultiplier(float healthPerMax) {
-        if (!this.isEnabled.getAsBoolean())
-            return;
         boolean found = false;
-        for (Float2IntMap.Entry entry : map.float2IntEntrySet()) {
-            if (healthPerMax < entry.getFloatKey()) {
+        for (ConstantDebuffEntry entry : amplifierBoundaries) {
+            if (healthPerMax < entry.healthFractionThreshold()) {
                 ticks = 0;
-                activeMultiplier = entry.getIntValue();
+                activeMultiplier = entry.effectAmplifier(); // TODO move to zero-based numbering so we don't have to do - 1 later on.
                 found = true;
                 break;
             }
@@ -52,34 +51,31 @@ public class ConstantDebuff extends AbstractDebuff {
     }
 
     @Override
-    public void handleDamageTaken(float damage, float healthPerMax, ServerPlayer player) {
-        syncMultiplier(healthPerMax);
+    public void handleDamageTaken(float damage, float healthFraction, ServerPlayer player) {
+        syncMultiplier(healthFraction);
     }
 
     @Override
-    public void handleHealing(float healingDone, float healthPerMax, ServerPlayer player) {
-        syncMultiplier(healthPerMax);
+    public void handleHealing(float healingDone, float healthFraction, ServerPlayer player) {
+        syncMultiplier(healthFraction);
     }
 
     @Override
-    public void update(Player player) {
-        this.update(player, -1);
-    }
-
-    @Override
-    public void update(Player player, float healthPerMax) {
-        if (!this.isEnabled.getAsBoolean()) return;
+    public void update(Player player, float healthFraction) {
         if (activeMultiplier == 0) {
             ticks = 0;
-        } else {
-            if (ticks == 0) {
-                if (healthPerMax != -1)
-                    syncMultiplier(healthPerMax); //There are apparently some cases where the multiplier does not sync up right... fix this
-                if (activeMultiplier != 0)
-                    player.addEffect(new MobEffectInstance(effect, 169, activeMultiplier - 1, false, false));
-            }
-            ticks++;
-            if (ticks >= 79) ticks = 0;
+            return;
         }
+
+        if (ticks == 0) {
+            if (healthFraction != -1) {
+                syncMultiplier(healthFraction); //There are apparently some cases where the multiplier does not sync up right... fix this
+            }
+            if (activeMultiplier != 0) {
+                player.addEffect(new MobEffectInstance(effect, 169, activeMultiplier - 1, false, false));
+            }
+        }
+        ticks++;
+        if (ticks >= 79) ticks = 0;
     }
 }

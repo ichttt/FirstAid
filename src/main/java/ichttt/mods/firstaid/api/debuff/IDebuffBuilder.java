@@ -19,52 +19,28 @@
 
 package ichttt.mods.firstaid.api.debuff;
 
-import ichttt.mods.firstaid.api.FirstAidRegistry;
+import com.mojang.serialization.Codec;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import net.minecraft.sounds.SoundEvent;
+import ichttt.mods.firstaid.common.registries.FirstAidRegistries;
+import net.minecraft.util.ExtraCodecs;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
-/**
- * Use this if you want to add simple onHit or constant debuffs.
- * <br>
- * If you want to do your own, custom implementation, you can use {@link ichttt.mods.firstaid.api.debuff.IDebuff}
- * directly and register it using {@link FirstAidRegistry#registerDebuff(EnumDebuffSlot, Supplier)}.
- */
 public interface IDebuffBuilder {
+    Codec<IDebuffBuilder> DIRECT_CODEC = ExtraCodecs.lazyInitializedCodec(() -> FirstAidRegistries.DEBUFF_BUILDERS.get().getCodec())
+            .dispatch(IDebuffBuilder::codec, Function.identity());
 
     /**
-     * Adds a sound to the debuff. The sound will be played as long as the debuff is timed.
-     * <b>Does only work with onHit debuffs!</b>
-     *
-     * @param event The sound that should be player
-     * @return this
+     * @return A codec for serialization
      */
-    @Nonnull
-    IDebuffBuilder addSoundEffect(@Nullable Supplier<SoundEvent> event);
+    Codec<? extends IDebuffBuilder> codec();
+
+    EnumDebuffSlot affectedSlot();
 
     /**
-     * If OnHit damage: value = absolute damage taken for this multiplier to apply;
-     * If Constant: value = percentage of health left for this multiplier
-     *
-     * @param value      absolute damage (onHit) or percentage of the health left (constant)
-     * @param multiplier the potion effect multiplier
-     * @return this
+     * Builds a new debuff instance based on the builder.
+     * Each call to this should create a new instance
+     * @return A new debuff instance
      */
-    @Nonnull
-    IDebuffBuilder addBound(float value, int multiplier);
-
-    /**
-     * Provide a boolean supplier to control runtime-disabling of certain effects (e.g. via config)
-     *
-     * @param isEnabled A supplier that should return true if the debug should be applied
-     * @return this
-     */
-    @Nonnull
-    IDebuffBuilder addEnableCondition(@Nullable BooleanSupplier isEnabled);
-
-    Supplier<IDebuff> build();
+    IDebuff build();
 }

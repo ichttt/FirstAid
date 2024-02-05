@@ -1,0 +1,16 @@
+{
+  "type": "firstaid:on_hit",
+  "debuffSlot": "head",
+  "potionName": "blindness",
+  "soundEffect": "firstaid:debuff.heartbeat",
+  "timeBoundaries": [
+    {
+      "damageTakenThreshold": 2,
+      "effectDuration": 160
+    },
+    {
+      "damageTakenThreshold": 1,
+      "effectDuration": 80
+    }
+  ]
+}

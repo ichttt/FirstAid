@@ -21,7 +21,6 @@ package ichttt.mods.firstaid;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -300,18 +299,8 @@ public class FirstAidConfig {
     public static class General {
 
         public General(ForgeConfigSpec.Builder builder) {
-            builder.comment("Server only configuration settings").push("Debuffs");
-            head = new General.Head(builder);
-            body = new General.Body(builder);
-            arms = new General.Arms(builder);
-            legsAndFeet = new General.LegsAndFeet(builder);
-            builder.pop();
+            builder.comment("Generic configuration settings");
             builder.push("misc");
-            hardMode = builder
-                    .comment("If true, many damage distributions will be more realistic, but this will also cause them to be harder\nIf enabled, e.g. drowning will only damage your body instead of your body and head last")
-                    .translation("firstaid.config.hardmode")
-                    .worldRestart()
-                    .define("hardMode", false);
             debug = builder
                     .comment("Enabled additional debug logs - May slow down the game and will increase log file size",
                             "Only enable for special purposes")
@@ -320,130 +309,7 @@ public class FirstAidConfig {
             builder.pop();
         }
 
-        public final Head head;
-        public final Body body;
-        public final Arms arms;
-        public final LegsAndFeet legsAndFeet;
-        public final ForgeConfigSpec.BooleanValue hardMode;
         public final ForgeConfigSpec.BooleanValue debug;
-
-        public static class Head {
-
-            Head(ForgeConfigSpec.Builder builder) {
-                builder.push("Head");
-                this.blindnessConditions = new ConditionOnHit(builder, "blindness", Arrays.asList(2F, 1F), Arrays.asList(8 * 20, 4 * 20));
-                this.nauseaConditions = new ConditionOnHit(builder, "nausea", Arrays.asList(3F, 2F), Arrays.asList(16 * 20, 12 * 20));
-                builder.pop();
-            }
-
-            public final ConditionOnHit blindnessConditions;
-            public final ConditionOnHit nauseaConditions;
-        }
-
-        public static class Body {
-
-            Body(ForgeConfigSpec.Builder builder) {
-                builder.push("Body");
-                this.nauseaConditions = new ConditionOnHit(builder, "nausea", Arrays.asList(4F, 2F), Arrays.asList(16 * 20, 8 * 20));
-                this.weaknessConditions = new ConditionConstant(builder, "weakness", Arrays.asList(0.25F, 0.50F), Arrays.asList(2, 1));
-                builder.pop();
-            }
-            public final ConditionOnHit nauseaConditions;
-            public final ConditionConstant weaknessConditions;
-        }
-
-        public static class Arms {
-
-            Arms(ForgeConfigSpec.Builder builder) {
-                builder.push("Arms");
-                this.miningFatigueConditions = new ConditionConstant(builder, "miningFatigue", Arrays.asList(0.25F, 0.50F, 0.75F), Arrays.asList(3, 2, 1));
-                builder.pop();
-            }
-            public final ConditionConstant miningFatigueConditions;
-        }
-
-        public static class LegsAndFeet {
-
-            LegsAndFeet(ForgeConfigSpec.Builder builder) {
-                builder.push("Legs and Feet");
-                this.slownessConditions = new ConditionConstant(builder, "slowness", Arrays.asList(0.35F, 0.6F, 0.8F), Arrays.asList(3, 2, 1));
-                builder.pop();
-            }
-            public final ConditionConstant slownessConditions;
-        }
-
-        public static class ConditionOnHit {
-            public ConditionOnHit(ForgeConfigSpec.Builder builder, String name, List<Float> defaultTaken, List<Integer> defaultLength) {
-                builder.push(name);
-                this.enabled = builder
-                        .comment("Enables/Disables this debuff")
-                        .translation("firstaid.config.debuff.enabled")
-                        .define("enabled", true);
-                this.damageTaken = builder
-                        .comment("How much damage the user must have taken for the debuff to apply at the mapped length. Must be sorted so the **highest** value comes first. 2 = 1 heart")
-                        .translation("firstaid.config.debuff.damagetaken")
-                        .defineList("damageTaken", defaultTaken, o -> {
-                            try {
-                                float val = Float.parseFloat(o.toString());
-                                return val >= 0F && val <= 10F;
-                            } catch (NumberFormatException ignored) {}
-                            FirstAid.LOGGER.warn("Invalid entry " + o.toString() + " for damageTaken at " + name);
-                            return false;
-                        });
-                this.debuffLength = builder
-                        .comment("How long the debuff should stay. If the first condition from the damageTaken config is met, the first value in this list will be taken")
-                        .translation("firstaid.config.debuff.debufflength")
-                        .defineList("debuffLength", defaultLength, o -> {
-                            try {
-                                float val = Float.parseFloat(o.toString());
-                                return val >= 0F && val <= Short.MAX_VALUE;
-                            } catch (NumberFormatException ignored) {}
-                            FirstAid.LOGGER.warn("Invalid entry " + o.toString() + " for debuffLength at " + name);
-                            return false;
-                        });
-                builder.pop();
-            }
-            public final ForgeConfigSpec.BooleanValue enabled;
-            public final ForgeConfigSpec.ConfigValue<List<? extends Float>> damageTaken;
-            public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> debuffLength;
-        }
-
-        public static class ConditionConstant {
-            public ConditionConstant(ForgeConfigSpec.Builder builder, String name, List<Float> defaultPercentage, List<Integer> defaultStrength) {
-                builder.push(name);
-                this.enabled = builder
-                        .comment("Enables/Disables this debuff")
-                        .translation("firstaid.config.debuff.enabled")
-                        .define("enabled", true);
-                this.healthPercentageLeft = builder
-                        .comment("How much health the user must have left for the debuff to apply at the mapped length. Must be sorted so the **lowest** value comes first")
-                        .translation("firstaid.config.debuff.healthpercentageleft")
-                        .defineList("healthPercentageLeft", defaultPercentage, o -> {
-                            try {
-                                float val = Float.parseFloat(o.toString());
-                                return val >= 0F && val <= 1F;
-                            } catch (NumberFormatException ignored) {}
-                            FirstAid.LOGGER.warn("Invalid entry " + o.toString() + " for healthPercentageLeft at " + name);
-                            return false;
-                        });
-                this.debuffStrength = builder
-                        .comment("How strong the potion effect should stay. If the first condition from the healthPercentageLeft config is met, the first value in this list will be taken")
-                        .translation("firstaid.config.debuff.debuffstrength")
-                        .defineList("debuffStrength", defaultStrength, o -> {
-                            try {
-                                float val = Float.parseFloat(o.toString());
-                                return val >= 0F && val <= Short.MAX_VALUE;
-                            } catch (NumberFormatException ignored) {}
-                            FirstAid.LOGGER.warn("Invalid entry " + o.toString() + " for debuffStrength at " + name);
-                            return false;
-                        });
-                builder.pop();
-            }
-
-            public final ForgeConfigSpec.BooleanValue enabled;
-            public final ForgeConfigSpec.ConfigValue<List<? extends Float>> healthPercentageLeft;
-            public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> debuffStrength;
-        }
     }
 
     public static class Client {

@@ -19,6 +19,7 @@
 package ichttt.mods.firstaid.common.damagesystem.distribution;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.Keyable;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.util.ExtraCodecs;
@@ -35,7 +36,7 @@ import java.util.stream.Collectors;
 public class StandardDamageDistributionAlgorithm extends DamageDistribution {
     public static final Codec<StandardDamageDistributionAlgorithm> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Codec.unboundedMap(ExtraCodecs.stringResolverCodec(EquipmentSlot::getName, EquipmentSlot::byName), StringRepresentable.fromEnum(() -> EnumPlayerPart.VALUES).listOf())
+                    Codec.simpleMap(ExtraCodecs.stringResolverCodec(EquipmentSlot::getName, EquipmentSlot::byName), StringRepresentable.fromEnum(() -> EnumPlayerPart.VALUES).listOf(), Keyable.forStrings(() -> Arrays.stream(EquipmentSlot.values()).map(EquipmentSlot::getName)))
                             .fieldOf("partMap").forGetter(o -> o.builtList.stream().collect(Collectors.toMap(Pair::getKey, pair -> Arrays.asList(pair.getRight())))),
                     Codec.BOOL.optionalFieldOf("shuffle", false).forGetter(o -> o.shuffle),
                     Codec.BOOL.optionalFieldOf("doNeighbours", false).forGetter(o -> o.doNeighbours)

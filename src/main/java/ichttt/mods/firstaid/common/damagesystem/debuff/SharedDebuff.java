@@ -18,20 +18,21 @@
 
 package ichttt.mods.firstaid.common.damagesystem.debuff;
 
-import ichttt.mods.firstaid.api.CapabilityExtendedHealthSystem;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
+import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
+// TODO: What is the rational behind this? It is documented nowhere...
 public class SharedDebuff implements IDebuff {
     private final IDebuff debuff;
     private final EnumPlayerPart[] parts;
-    private int damage;
-    private int healingDone;
+    private float damage;
+    private float healingDone;
     private int damageCount;
     private int healingCount;
 
@@ -43,46 +44,40 @@ public class SharedDebuff implements IDebuff {
     }
 
     @Override
-    public void handleDamageTaken(float damage, float healthPerMax, ServerPlayer player) {
-        if (debuff.isEnabled()) {
-            this.damage += damage;
-            this.damageCount++;
-        }
+    public void handleDamageTaken(float damage, float healthFraction, ServerPlayer player) {
+        this.damage += damage;
+        this.damageCount++;
     }
 
     @Override
-    public void handleHealing(float healingDone, float healthPerMax, ServerPlayer player) {
-        if (debuff.isEnabled()) {
-            this.healingDone += healingDone;
-            this.healingCount++;
-        }
+    public void handleHealing(float healingDone, float healthFraction, ServerPlayer player) {
+        this.healingDone += healingDone;
+        this.healingCount++;
     }
 
     public void tick(Player player) {
-        if (!debuff.isEnabled() || !(player instanceof ServerPlayer))
+        if (!(player instanceof ServerPlayer))
             return;
 
-        AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null).orElseThrow(() -> new RuntimeException("Could not find damage model for " + player));
-        float healthPerMax = 0;
+        AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+        float healthFraction = 0;
         for (EnumPlayerPart part : parts) {
             AbstractDamageablePart damageablePart = damageModel.getFromEnum(part);
-            healthPerMax += damageablePart.currentHealth / damageablePart.getMaxHealth();
+            healthFraction += damageablePart.currentHealth / damageablePart.getMaxHealth();
         }
 
-        healthPerMax /= parts.length;
+        healthFraction /= parts.length;
         if (healingCount > 0) {
-            this.healingDone /= healingCount;
-            debuff.handleHealing(this.healingDone, healthPerMax, (ServerPlayer) player);
+            debuff.handleHealing(this.healingDone / this.healingCount, healthFraction, (ServerPlayer) player);
         }
         if (damageCount > 0) {
-            this.damage /= damageCount;
-            debuff.handleDamageTaken(this.damage, healthPerMax, (ServerPlayer) player);
+            debuff.handleDamageTaken(this.damage / this.damageCount, healthFraction, (ServerPlayer) player);
         }
         this.healingDone = 0;
         this.damage = 0;
         this.damageCount = 0;
         this.healingCount = 0;
 
-        debuff.update(player, healthPerMax);
+        debuff.update(player, healthFraction);
     }
 }

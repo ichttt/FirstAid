@@ -1,0 +1,15 @@
+{
+  "type": "firstaid:constant",
+  "debuffSlot": "body",
+  "potionName": "weakness",
+  "amplifierBoundaries": [
+    {
+      "healthFractionThreshold": 0.25,
+      "effectAmplifier": 2
+    },
+    {
+      "healthFractionThreshold": 0.5,
+      "effectAmplifier": 1
+    }
+  ]
+}

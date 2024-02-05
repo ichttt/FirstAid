@@ -20,44 +20,45 @@ package ichttt.mods.firstaid.common.damagesystem.debuff;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.common.network.MessagePlayHurtSound;
-import it.unimi.dsi.fastutil.floats.Float2IntLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.floats.Float2IntMap;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
+import java.util.List;
+import java.util.Objects;
 
 public class OnHitDebuff extends AbstractDebuff {
+    @Nonnull
+    private final List<OnHitDebuffEntry> timeBoundaries;
     @Nullable
-    private final Supplier<SoundEvent> sound;
+    private final SoundEvent sound;
 
-    public OnHitDebuff(@Nonnull String potionName, @Nonnull Float2IntLinkedOpenHashMap map, @Nonnull BooleanSupplier isEnabled, @Nullable Supplier<SoundEvent> sound) {
-        super(potionName, map, isEnabled);
-        this.sound = sound;
+    public OnHitDebuff(@Nonnull ResourceLocation potionName, @Nonnull List<OnHitDebuffEntry> timeBoundaries, @Nullable ResourceLocation soundEvent) {
+        super(potionName);
+        this.timeBoundaries = timeBoundaries;
+        this.sound = soundEvent == null ? null : Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(soundEvent));
     }
 
     @Override
-    public void handleDamageTaken(float damage, float healthPerMax, ServerPlayer player) {
-        if (!this.isEnabled.getAsBoolean())
-            return;
+    public void handleDamageTaken(float damage, float healthFraction, ServerPlayer player) {
         int value = -1;
-        for (Float2IntMap.Entry entry : map.float2IntEntrySet()) {
-            if (damage >= entry.getFloatKey()) {
-                value = Math.max(value, entry.getIntValue());
-                player.addEffect(new MobEffectInstance(effect, entry.getIntValue(), 0, false, false));
+        for (OnHitDebuffEntry entry : timeBoundaries) {
+            if (damage >= entry.damageTakenThreshold()) {
+                value = Math.max(value, entry.effectDuration()); //TODO why is there no break here?
+                player.addEffect(new MobEffectInstance(effect, entry.effectDuration(), 0, false, false));
             }
         }
         if (value != -1 && sound != null)
-            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessagePlayHurtSound(sound.get(), value));
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessagePlayHurtSound(sound, value));
     }
 
     @Override
-    public void handleHealing(float healingDone, float healthPerMax, ServerPlayer player) {
+    public void handleHealing(float healingDone, float healthFraction, ServerPlayer player) {
 
     }
 }

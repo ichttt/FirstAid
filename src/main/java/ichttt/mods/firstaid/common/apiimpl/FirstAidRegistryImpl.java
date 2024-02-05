@@ -18,7 +18,6 @@
 
 package ichttt.mods.firstaid.common.apiimpl;
 
-import com.google.common.collect.Multimap;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
@@ -37,16 +36,12 @@ import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class FirstAidRegistryImpl extends FirstAidRegistry {
     private final Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> healerMap;
-    private final Multimap<EnumDebuffSlot, Supplier<IDebuff>> debuffs;
 
-    public FirstAidRegistryImpl(Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> healerMap,
-                                Multimap<EnumDebuffSlot, Supplier<IDebuff>> debuffs) {
+    public FirstAidRegistryImpl(Map<Item, Pair<Function<ItemStack, AbstractPartHealer>, Function<ItemStack, Integer>>> healerMap) {
         this.healerMap = healerMap;
-        this.debuffs = debuffs;
     }
 
     @Nullable
@@ -80,6 +75,6 @@ public class FirstAidRegistryImpl extends FirstAidRegistry {
     @Nonnull
     @Override
     public IDebuff[] getDebuffs(@Nonnull EnumDebuffSlot slot) {
-        return debuffs.get(slot).stream().map(Supplier::get).toArray(IDebuff[]::new);
+        return null; //TODO
     }
 }

@@ -1,0 +1,19 @@
+{
+  "type": "firstaid:constant",
+  "debuffSlot": "arms",
+  "potionName": "mining_fatigue",
+  "amplifierBoundaries": [
+    {
+      "healthFractionThreshold": 0.25,
+      "effectAmplifier": 3
+    },
+    {
+      "healthFractionThreshold": 0.5,
+      "effectAmplifier": 2
+    },
+    {
+      "healthFractionThreshold": 0.75,
+      "effectAmplifier": 1
+    }
+  ]
+}

@@ -39,7 +39,7 @@ public class StandardDamageDistributionAlgorithm extends DamageDistribution {
                     Codec.simpleMap(ExtraCodecs.stringResolverCodec(EquipmentSlot::getName, EquipmentSlot::byName), StringRepresentable.fromEnum(() -> EnumPlayerPart.VALUES).listOf(), Keyable.forStrings(() -> Arrays.stream(EquipmentSlot.values()).map(EquipmentSlot::getName)))
                             .fieldOf("partMap").forGetter(o -> o.builtList.stream().collect(Collectors.toMap(Pair::getKey, pair -> Arrays.asList(pair.getRight())))),
                     Codec.BOOL.optionalFieldOf("shuffle", false).forGetter(o -> o.shuffle),
-                    Codec.BOOL.optionalFieldOf("doNeighbours", false).forGetter(o -> o.doNeighbours)
+                    Codec.BOOL.optionalFieldOf("doNeighbours", true).forGetter(o -> o.doNeighbours)
             ).apply(instance, StandardDamageDistributionAlgorithm::new));
 
     private final boolean shuffle;

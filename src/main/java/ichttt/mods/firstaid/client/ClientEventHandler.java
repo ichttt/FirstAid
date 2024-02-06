@@ -32,14 +32,12 @@ import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
 import ichttt.mods.firstaid.common.AABBAlignedBoundingBox;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.RegistryObjects;
-import ichttt.mods.firstaid.common.registries.FirstAidRegistryLookups;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.PlayerSizeHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -253,17 +251,8 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
-    public static void clientLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
-        ClientPacketListener connection = Minecraft.getInstance().getConnection();
-        if (!connection.getConnection().isMemoryConnection()) {
-            FirstAidRegistryLookups.init(connection.registryAccess());
-        }
-    }
-
-    @SubscribeEvent
     public static void onDisconnect(ClientPlayerNetworkEvent.LoggingOut event) {
         FirstAid.isSynced = false;
         HUDHandler.INSTANCE.ticker = -1;
-        FirstAidRegistryLookups.reset();
     }
 }

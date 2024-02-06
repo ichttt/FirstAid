@@ -5,10 +5,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import ichttt.mods.firstaid.api.distribution.IDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.api.distribution.IDamageDistributionTarget;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageType;
-import net.minecraftforge.registries.IForgeRegistry;
 
 import java.util.List;
 
@@ -35,10 +36,10 @@ public class TagDamageDistributionTarget implements IDamageDistributionTarget {
     }
 
     @Override
-    public List<DamageType> buildApplyList(IForgeRegistry<DamageType> allDamageTypes) {
+    public List<DamageType> buildApplyList(Registry<DamageType> allDamageTypes) {
         ImmutableList.Builder<DamageType> builder = ImmutableList.builder();
-        for (DamageType damageType : allDamageTypes) {
-            allDamageTypes.getHolder(damageType).filter(damageTypeHolder -> damageTypeHolder.is(this.tag)).ifPresent(holder -> builder.add(damageType));
+        for (ResourceKey<DamageType> key : allDamageTypes.registryKeySet()) {
+            allDamageTypes.getHolder(key).filter(holder -> holder.is(this.tag)).ifPresent(holder -> builder.add(holder.get()));
         }
         return builder.build();
     }

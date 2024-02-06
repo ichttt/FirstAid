@@ -20,7 +20,7 @@ package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.item.ItemHealing;
+import ichttt.mods.firstaid.api.healing.ItemHealing;
 import ichttt.mods.firstaid.common.damagesystem.PartHealer;
 import ichttt.mods.firstaid.common.items.ItemMorphine;
 import ichttt.mods.firstaid.common.potion.FirstAidPotion;

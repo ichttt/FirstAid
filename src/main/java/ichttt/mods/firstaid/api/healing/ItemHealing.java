@@ -17,17 +17,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-package ichttt.mods.firstaid.api.item;
+package ichttt.mods.firstaid.api.healing;
 
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
-import ichttt.mods.firstaid.api.event.RegisterHealingTypeEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nonnull;
 import java.util.function.Function;
@@ -37,10 +35,7 @@ import java.util.function.Function;
  * Registry name, stack size and other behavior can be specified individually.
  * Will automatically register this item to the registry as well
  */
-public class ItemHealing extends Item {
-
-    private final Function<ItemStack, AbstractPartHealer> healerFunction;
-    private final Function<ItemStack, Integer> time;
+public abstract class ItemHealing extends Item {
 
     /**
      * Creates a new healing item, and registers it to the registry.
@@ -48,16 +43,22 @@ public class ItemHealing extends Item {
      * @param healerFunction The function to create a new healer from the GUI
      */
     public static ItemHealing create(Item.Properties builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
-        return new ItemHealing(builder, healerFunction, time);
+        return new ItemHealing(builder, healerFunction, time) {
+            @Override
+            public AbstractPartHealer createNewHealer(ItemStack stack) {
+                return healerFunction.apply(stack);
+            }
+
+            @Override
+            public int getApplyTime(ItemStack stack) {
+                return time.apply(stack);
+            }
+        };
     }
 
 
     protected ItemHealing(Item.Properties builder, Function<ItemStack, AbstractPartHealer> healerFunction, Function<ItemStack, Integer> time) {
         super(builder);
-
-        this.healerFunction = healerFunction;
-        this.time = time;
-        MinecraftForge.EVENT_BUS.addListener(this::registerHealingType);
     }
 
     @Nonnull
@@ -66,7 +67,7 @@ public class ItemHealing extends Item {
         return HealingItemApiHelper.INSTANCE.onItemRightClick(this, worldIn, playerIn, handIn);
     }
 
-    private void registerHealingType(RegisterHealingTypeEvent event) {
-        event.registerHealingType(this, this.healerFunction, this.time);
-    }
+    public abstract AbstractPartHealer createNewHealer(ItemStack stack);
+
+    public abstract int getApplyTime(ItemStack stack);
 }

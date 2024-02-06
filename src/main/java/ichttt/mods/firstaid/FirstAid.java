@@ -23,7 +23,6 @@ import ichttt.mods.firstaid.client.ClientHooks;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.apiimpl.HealingItemApiHelperImpl;
-import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
 import ichttt.mods.firstaid.common.network.*;
 import ichttt.mods.firstaid.common.registries.FirstAidRegistries;
@@ -80,7 +79,6 @@ public class FirstAid {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientHooks.setup());
         //Setup API
         HealingItemApiHelperImpl.init();
-        RegistryManager.registerAndValidate();
     }
 
     private void registerCreativeTab(CreativeModeTabEvent.Register event) {

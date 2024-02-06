@@ -20,7 +20,6 @@ package ichttt.mods.firstaid.common.damagesystem;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
-import ichttt.mods.firstaid.api.FirstAidRegistry;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
@@ -31,10 +30,10 @@ import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.EventHandler;
 import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.SynchedEntityDataWrapper;
-import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
 import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
+import ichttt.mods.firstaid.common.registries.FirstAidRegistryLookups;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -62,11 +61,10 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private int resyncTimer = -1;
 
     public static PlayerDamageModel create() {
-        FirstAidRegistry registry = FirstAidRegistryImpl.getImplOrThrow();
-        IDebuff[] headDebuffs = registry.getDebuffs(EnumDebuffSlot.HEAD);
-        IDebuff[] bodyDebuffs = registry.getDebuffs(EnumDebuffSlot.BODY);
-        IDebuff[] armsDebuffs = registry.getDebuffs(EnumDebuffSlot.ARMS);
-        IDebuff[] legFootDebuffs = registry.getDebuffs(EnumDebuffSlot.LEGS_AND_FEET);
+        IDebuff[] headDebuffs = FirstAidRegistryLookups.getDebuffs(EnumDebuffSlot.HEAD);
+        IDebuff[] bodyDebuffs = FirstAidRegistryLookups.getDebuffs(EnumDebuffSlot.BODY);
+        IDebuff[] armsDebuffs = FirstAidRegistryLookups.getDebuffs(EnumDebuffSlot.ARMS);
+        IDebuff[] legFootDebuffs = FirstAidRegistryLookups.getDebuffs(EnumDebuffSlot.LEGS_AND_FEET);
         return new PlayerDamageModel(headDebuffs, bodyDebuffs, armsDebuffs, legFootDebuffs);
     }
 

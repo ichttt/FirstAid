@@ -23,18 +23,16 @@ import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.distribution.IDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
-import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.common.damagesystem.distribution.StandardDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.common.network.MessageConfiguration;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
+import ichttt.mods.firstaid.common.registries.FirstAidRegistryLookups;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.PlayerSizeHelper;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
@@ -100,7 +98,7 @@ public class EventHandler {
         }
 
         boolean addStat = amountToDamage < 3.4028235E37F;
-        IDamageDistributionAlgorithm damageDistribution = FirstAidRegistryImpl.getImplOrThrow().getDamageDistributionForSource(source);
+        IDamageDistributionAlgorithm damageDistribution = FirstAidRegistryLookups.getDamageDistributions(source.type());
 
         if (source.is(DamageTypeTags.IS_PROJECTILE)) {
             Pair<Entity, HitResult> rayTraceResult = hitList.remove(player);
@@ -279,12 +277,7 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event) {
-        ServerLevel overworld = event.getServer().overworld();
-        if (overworld == null) {
-            FirstAid.LOGGER.fatal("Failed to find overworld!");
-            throw new RuntimeException("Failed to find overworld");
-        }
-        RegistryManager.fireRegistryEvents(overworld);
+        FirstAidRegistryLookups.init(event.getServer().registryAccess());
     }
 
     @SubscribeEvent
@@ -292,7 +285,7 @@ public class EventHandler {
         FirstAid.LOGGER.debug("Cleaning up");
         CapProvider.tutorialDone.clear();
         EventHandler.hitList.clear();
-        RegistryManager.destroyRegistry();
+        FirstAidRegistryLookups.reset();
     }
 
     @SubscribeEvent

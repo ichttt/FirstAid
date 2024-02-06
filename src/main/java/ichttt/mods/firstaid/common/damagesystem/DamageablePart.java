@@ -24,10 +24,11 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
-import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
+import ichttt.mods.firstaid.api.healing.ItemHealing;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -134,9 +135,16 @@ public class DamageablePart extends AbstractDamageablePart {
             stack = ItemStack.of((CompoundTag) Objects.requireNonNull(nbt.get("healer")));
 
         if (stack != null) {
-            AbstractPartHealer healer = FirstAidRegistryImpl.getImplOrThrow().getPartHealer(stack);
-            if (healer == null) FirstAid.LOGGER.warn("Failed to lookup healer for item {}", stack.getItem());
-            else activeHealer = healer.loadNBT(nbt.getInt("itemTicks"), nbt.getInt("itemHeals"));
+            Item item = stack.getItem();
+            AbstractPartHealer healer = null;
+            if (item instanceof ItemHealing itemHealing) {
+                healer = itemHealing.createNewHealer(stack);
+            }
+            if (healer == null) {
+                FirstAid.LOGGER.warn("Failed to lookup healer for item {}", stack.getItem());
+            } else {
+                activeHealer = healer.loadNBT(nbt.getInt("itemTicks"), nbt.getInt("itemHeals"));
+            }
         }
         if (nbt.contains("absorption"))
             absorption = nbt.getFloat("absorption");

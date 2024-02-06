@@ -2,9 +2,9 @@ package ichttt.mods.firstaid.api.distribution;
 
 import com.mojang.serialization.Codec;
 import ichttt.mods.firstaid.common.registries.FirstAidRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.damagesource.DamageType;
-import net.minecraftforge.registries.IForgeRegistry;
 
 import java.util.List;
 import java.util.function.Function;
@@ -15,7 +15,7 @@ public interface IDamageDistributionTarget {
 
     IDamageDistributionAlgorithm getAlgorithm();
 
-    List<DamageType> buildApplyList(IForgeRegistry<DamageType> damageTypes);
+    List<DamageType> buildApplyList(Registry<DamageType> damageTypes);
 
     /**
      * Returns weather this target is dynamic of not.

@@ -27,12 +27,12 @@ import java.util.function.Supplier;
 public final class FirstAidRegistries {
 
     public static class Keys {
-        private static final ResourceKey<Registry<Codec<? extends IDamageDistributionAlgorithm>>> DAMAGE_DISTRIBUTION_ALGORITHMS = key("damage_distribution_algorithms");
-        private static final ResourceKey<Registry<Codec<? extends IDamageDistributionTarget>>> DAMAGE_DISTRIBUTION_TARGETS = key("damage_distribution_targets");
-        private static final ResourceKey<Registry<IDamageDistributionTarget>> DAMAGE_DISTRIBUTIONS = key("damage_distributions");
+        static final ResourceKey<Registry<Codec<? extends IDamageDistributionAlgorithm>>> DAMAGE_DISTRIBUTION_ALGORITHMS = key("damage_distribution_algorithms");
+        static final ResourceKey<Registry<Codec<? extends IDamageDistributionTarget>>> DAMAGE_DISTRIBUTION_TARGETS = key("damage_distribution_targets");
+        static final ResourceKey<Registry<IDamageDistributionTarget>> DAMAGE_DISTRIBUTIONS = key("damage_distributions");
 
-        private static final ResourceKey<Registry<Codec<? extends IDebuffBuilder>>> DEBUFF_BUILDERS = key("debuff_builders");
-        private static final ResourceKey<Registry<IDebuffBuilder>> DEBUFFS = key("debuffs");
+        static final ResourceKey<Registry<Codec<? extends IDebuffBuilder>>> DEBUFF_BUILDERS = key("debuff_builders");
+        static final ResourceKey<Registry<IDebuffBuilder>> DEBUFFS = key("debuffs");
 
 
         private static <T> ResourceKey<Registry<T>> key(String name) {

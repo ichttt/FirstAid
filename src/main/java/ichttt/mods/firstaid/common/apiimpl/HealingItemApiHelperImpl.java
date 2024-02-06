@@ -18,8 +18,8 @@
 
 package ichttt.mods.firstaid.common.apiimpl;
 
-import ichttt.mods.firstaid.api.item.HealingItemApiHelper;
-import ichttt.mods.firstaid.api.item.ItemHealing;
+import ichttt.mods.firstaid.api.healing.HealingItemApiHelper;
+import ichttt.mods.firstaid.api.healing.ItemHealing;
 import ichttt.mods.firstaid.client.ClientHooks;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;

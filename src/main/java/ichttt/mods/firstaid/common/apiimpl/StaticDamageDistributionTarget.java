@@ -6,11 +6,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.distribution.IDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.api.distribution.IDamageDistributionTarget;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageType;
-import net.minecraftforge.registries.IForgeRegistry;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,16 +37,17 @@ public class StaticDamageDistributionTarget implements IDamageDistributionTarget
     }
 
     @Override
-    public List<DamageType> buildApplyList(IForgeRegistry<DamageType> allDamageTypes) {
+    public List<DamageType> buildApplyList(Registry<DamageType> allDamageTypes) {
         ImmutableList.Builder<DamageType> builder = ImmutableList.builder();
-        for (Map.Entry<ResourceKey<DamageType>, DamageType> entry : allDamageTypes.getEntries()) {
+        List<ResourceLocation> localDamageTypes = new ArrayList<>(damageTypes);
+        for (Map.Entry<ResourceKey<DamageType>, DamageType> entry : allDamageTypes.entrySet()) {
             ResourceLocation location = entry.getKey().location();
-            if (this.damageTypes.remove(location)) {
+            if (localDamageTypes.remove(location)) {
                 builder.add(entry.getValue());
             }
         }
-        if (!this.damageTypes.isEmpty()) {
-            FirstAid.LOGGER.warn("Some damage types in {} failed to map: {}", StaticDamageDistributionTarget.class.getSimpleName(), this.damageTypes);
+        if (!localDamageTypes.isEmpty()) {
+            FirstAid.LOGGER.warn("Some damage types in {} failed to map: {}", StaticDamageDistributionTarget.class.getSimpleName(), localDamageTypes);
         }
         return builder.build();
     }

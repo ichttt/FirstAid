@@ -23,6 +23,7 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.healing.ItemHealing;
 import ichttt.mods.firstaid.client.gui.FirstaidIngameGui;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.tutorial.GuiTutorial;
@@ -31,14 +32,14 @@ import ichttt.mods.firstaid.client.util.PlayerModelRenderer;
 import ichttt.mods.firstaid.common.AABBAlignedBoundingBox;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.RegistryObjects;
-import ichttt.mods.firstaid.common.apiimpl.FirstAidRegistryImpl;
-import ichttt.mods.firstaid.common.apiimpl.RegistryManager;
+import ichttt.mods.firstaid.common.registries.FirstAidRegistryLookups;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import ichttt.mods.firstaid.common.util.PlayerSizeHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -88,12 +89,6 @@ public class ClientEventHandler {
             if (id > 15) id = 0;
             GuiHealthScreen.tickFun();
             PlayerModelRenderer.tickFun();
-        }
-        if (!RegistryManager.debuffConfigErrors.isEmpty() && mc.level != null && mc.level.isClientSide) {
-            mc.player.displayClientMessage(Component.literal("[FirstAid] FirstAid has detected invalid debuff config entries."), false);
-            for (String s : RegistryManager.debuffConfigErrors)
-                mc.player.displayClientMessage(Component.literal("[FirstAid] " + s), false);
-            RegistryManager.debuffConfigErrors.clear();
         }
         if (HUDHandler.INSTANCE.ticker >= 0)
             HUDHandler.INSTANCE.ticker--;
@@ -249,9 +244,19 @@ public class ClientEventHandler {
             }
         }
 
-        AbstractPartHealer healer = FirstAidRegistryImpl.getImplOrThrow().getPartHealer(stack);
-        if (healer != null && event.getEntity() != null) {
-            event.getToolTip().add(Component.translatable("firstaid.tooltip.healer", healer.maxHeal.getAsInt() / 2, StringUtil.formatTickDuration(healer.ticksPerHeal.getAsInt())));
+        if (stack.getItem() instanceof ItemHealing itemHealing) {
+            AbstractPartHealer healer = itemHealing.createNewHealer(stack);
+            if (healer != null && event.getEntity() != null) {
+                event.getToolTip().add(Component.translatable("firstaid.tooltip.healer", healer.maxHeal.getAsInt() / 2, StringUtil.formatTickDuration(healer.ticksPerHeal.getAsInt())));
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void clientLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
+        ClientPacketListener connection = Minecraft.getInstance().getConnection();
+        if (!connection.getConnection().isMemoryConnection()) {
+            FirstAidRegistryLookups.init(connection.registryAccess());
         }
     }
 
@@ -259,5 +264,6 @@ public class ClientEventHandler {
     public static void onDisconnect(ClientPlayerNetworkEvent.LoggingOut event) {
         FirstAid.isSynced = false;
         HUDHandler.INSTANCE.ticker = -1;
+        FirstAidRegistryLookups.reset();
     }
 }

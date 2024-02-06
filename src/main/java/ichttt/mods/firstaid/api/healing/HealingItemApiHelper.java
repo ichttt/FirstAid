@@ -17,24 +17,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-package ichttt.mods.firstaid.api.event;
+package ichttt.mods.firstaid.api.healing;
 
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.eventbus.api.Event;
+
+import javax.annotation.Nonnull;
 
 /**
- * Base class for all first aid registry events
- * <br>
- * All events are fired on the {@link net.minecraftforge.common.MinecraftForge#EVENT_BUS} once the server starts
+ * Methods that link to internal helper methods
  */
-public class FirstAidRegisterEvent extends Event {
-    private final Level level;
+public abstract class HealingItemApiHelper {
+    static HealingItemApiHelper INSTANCE;
 
-    public FirstAidRegisterEvent(Level level) {
-        this.level = level;
+    /**
+     * DO NOT USE! ONLY FOR INTERNAL THINGS
+     */
+    public static void setImpl(HealingItemApiHelper impl) {
+        INSTANCE = impl;
     }
 
-    public Level getLevel() {
-        return level;
-    }
+    @Nonnull
+    public abstract InteractionResultHolder<ItemStack> onItemRightClick(ItemHealing itemHealing, Level worldIn, Player playerIn, InteractionHand handIn);
 }

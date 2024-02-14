@@ -117,7 +117,7 @@ public class ClientEventHandler {
                 event.setCanceled(true);
                 ForgeGui gui = (ForgeGui) Minecraft.getInstance().gui;
                 if (gui.shouldDrawSurvivalElements() && vanillaHealthBarMode == FirstAidConfig.Client.VanillaHealthbarMode.HIGHLIGHT_CRITICAL_PATH && FirstAidConfig.SERVER.vanillaHealthCalculation.get() == FirstAidConfig.Server.VanillaHealthCalculationMode.AVERAGE_ALL) {
-                    FirstaidIngameGui.renderHealth((ForgeGui) Minecraft.getInstance().gui, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), event.getPoseStack());
+                    FirstaidIngameGui.renderHealth((ForgeGui) Minecraft.getInstance().gui, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), event.getGuiGraphics());
                 }
             }
         }

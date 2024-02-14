@@ -84,7 +84,7 @@ public class SynchedEntityDataWrapper extends SynchedEntityData {
             CommonUtils.getDamageModel(player).setAbsorption(floatValue);
         } else if (key == LivingEntity.DATA_HEALTH_ID) {
             // AVERT YOUR EYES - this code is barely readable and very hacky
-            if (value instanceof Float && !player.level.isClientSide) {
+            if (value instanceof Float && !player.level().isClientSide) {
                 float aFloat = (Float) value;
                 if (aFloat > player.getMaxHealth()) {
                     CommonUtils.getDamageModel(player).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());

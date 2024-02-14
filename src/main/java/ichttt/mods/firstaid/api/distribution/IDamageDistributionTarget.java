@@ -20,17 +20,12 @@
 package ichttt.mods.firstaid.api.distribution;
 
 import com.mojang.serialization.Codec;
-import ichttt.mods.firstaid.common.registries.FirstAidRegistries;
 import net.minecraft.core.Registry;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.damagesource.DamageType;
 
 import java.util.List;
-import java.util.function.Function;
 
 public interface IDamageDistributionTarget {
-    Codec<IDamageDistributionTarget> DIRECT_CODEC = ExtraCodecs.lazyInitializedCodec(() -> FirstAidRegistries.DAMAGE_DISTRIBUTION_TARGETS.get().getCodec())
-            .dispatch(IDamageDistributionTarget::codec, Function.identity());
 
     IDamageDistributionAlgorithm getAlgorithm();
 

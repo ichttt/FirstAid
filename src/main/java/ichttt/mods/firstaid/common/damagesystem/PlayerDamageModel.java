@@ -367,20 +367,20 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
             }
         }
         //make sure to resync the client health
-        if (!player.level.isClientSide && player instanceof ServerPlayer)
+        if (!player.level().isClientSide && player instanceof ServerPlayer)
             FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncDamageModel(this, true)); //Upload changes to the client
     }
 
     @Override
     public void runScaleLogic(Player player) {
         if (FirstAidConfig.SERVER.scaleMaxHealth.get()) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
-            player.level.getProfiler().push("healthscaling");
+            player.level().getProfiler().push("healthscaling");
             float globalFactor = player.getMaxHealth() / 20F;
             if (prevScaleFactor != globalFactor) {
                 if (FirstAidConfig.GENERAL.debug.get()) {
                     FirstAid.LOGGER.info("Starting health scaling factor {} -> {} (max health {})", prevScaleFactor, globalFactor, player.getMaxHealth());
                 }
-                player.level.getProfiler().push("distribution");
+                player.level().getProfiler().push("distribution");
                 int reduced = 0;
                 int added = 0;
                 float expectedNewMaxHealth = 0F;
@@ -411,7 +411,7 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                     }
                     part.setMaxHealth(result);
                 }
-                player.level.getProfiler().popPush("correcting");
+                player.level().getProfiler().popPush("correcting");
                 if (Math.abs(expectedNewMaxHealth - newMaxHealth) >= 2F) {
                     if (FirstAidConfig.GENERAL.debug.get()) {
                         FirstAid.LOGGER.info("Entering second stage - diff {}", Math.abs(expectedNewMaxHealth - newMaxHealth));
@@ -438,10 +438,10 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
                         }
                     }
                 }
-                player.level.getProfiler().pop();
+                player.level().getProfiler().pop();
             }
             prevScaleFactor = globalFactor;
-            player.level.getProfiler().pop();
+            player.level().getProfiler().pop();
         }
     }
 

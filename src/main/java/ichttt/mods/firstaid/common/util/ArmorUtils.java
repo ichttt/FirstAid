@@ -189,7 +189,7 @@ public class ArmorUtils {
     public static float applyGlobalPotionModifiers(Player player, DamageSource source, float damage) {
         if (source.is(DamageTypeTags.BYPASSES_ARMOR))
             return damage;
-        if (player.hasEffect(MobEffects.DAMAGE_RESISTANCE) && source != player.damageSources().outOfWorld()) {
+        if (player.hasEffect(MobEffects.DAMAGE_RESISTANCE) && source != player.damageSources().fellOutOfWorld()) {
             @SuppressWarnings("ConstantConditions")
             int i = (player.getEffect(MobEffects.DAMAGE_RESISTANCE).getAmplifier() + 1) * FirstAidConfig.SERVER.resistanceReductionPercentPerLevel.get();
             int j = 100 - i;

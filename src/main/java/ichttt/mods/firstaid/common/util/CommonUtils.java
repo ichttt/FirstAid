@@ -75,7 +75,7 @@ public class CommonUtils {
     }
 
     public static void killPlayer(@Nonnull AbstractPlayerDamageModel damageModel, @Nonnull Player player, @Nullable DamageSource source) {
-        if (player.level.isClientSide) {
+        if (player.level().isClientSide) {
             try {
                 throw new RuntimeException("Tried to kill the player on the client!");
             } catch (RuntimeException e) {

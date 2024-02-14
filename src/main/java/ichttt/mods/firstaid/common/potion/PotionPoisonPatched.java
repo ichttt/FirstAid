@@ -50,7 +50,7 @@ public class PotionPoisonPatched extends MobEffect {
     @Override
     public void applyEffectTick(@Nonnull LivingEntity entity, int amplifier) {
         if (entity instanceof Player && !(entity instanceof FakePlayer) && (FirstAidConfig.SERVER.causeDeathBody.get() || FirstAidConfig.SERVER.causeDeathHead.get())) {
-            if (entity.level.isClientSide || !entity.isAlive() || entity.isInvulnerableTo(entity.damageSources().magic()))
+            if (entity.level().isClientSide || !entity.isAlive() || entity.isInvulnerableTo(entity.damageSources().magic()))
                 return;
             if (entity.isSleeping())
                 entity.stopSleeping();
@@ -59,7 +59,7 @@ public class PotionPoisonPatched extends MobEffect {
             if (DamageDistribution.handleDamageTaken(RandomDamageDistributionAlgorithm.ANY_NOKILL, playerDamageModel, 1.0F, player, entity.damageSources().magic(), true, false) != 1.0F) {
                 try {
                     SoundEvent sound = (SoundEvent) getHurtSound.invoke(player, entity.damageSources().magic());
-                    player.level.playSound(null, player.getX(), player.getY(), player.getZ(), sound, player.getSoundSource(), (float) getSoundVolume.invoke(player), (float) getVoicePitch.invoke(player));
+                    player.level().playSound(null, player.getX(), player.getY(), player.getZ(), sound, player.getSoundSource(), (float) getSoundVolume.invoke(player), (float) getVoicePitch.invoke(player));
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     FirstAid.LOGGER.error("Could not play hurt sound!", e);
                 }

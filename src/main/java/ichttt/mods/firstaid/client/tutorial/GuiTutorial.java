@@ -18,7 +18,6 @@
 
 package ichttt.mods.firstaid.client.tutorial;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
@@ -29,6 +28,7 @@ import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.damagesystem.PlayerDamageModel;
 import ichttt.mods.firstaid.common.network.MessageClientRequest;
 import ichttt.mods.firstaid.common.util.CommonUtils;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -93,22 +93,22 @@ public class GuiTutorial extends Screen {
         parent.getButtons().clear();
     }
 
-    public void drawOffsetString(PoseStack stack, String s, int yOffset) {
-        drawString(stack, minecraft.font, s, parent.guiLeft + 30, guiTop + yOffset, 0xFFFFFF);
+    public void drawOffsetString(GuiGraphics guiGraphics, String s, int yOffset) {
+        guiGraphics.drawString(minecraft.font, s, parent.guiLeft + 30, guiTop + yOffset, 0xFFFFFF);
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        PoseStack stack = guiGraphics.pose();
         stack.pushPose();
-        parent.render(stack, mouseX, mouseY, partialTicks);
+        parent.render(guiGraphics, mouseX, mouseY, partialTicks);
         stack.popPose();
-        RenderSystem.setShaderTexture(0, HealthRenderUtils.GUI_LOCATION);
-        blit(stack, parent.guiLeft, guiTop, 0, 139, GuiHealthScreen.xSize, 28);
+        guiGraphics.blit(HealthRenderUtils.SHOW_WOUNDS_LOCATION, parent.guiLeft, guiTop, 0, 139, GuiHealthScreen.xSize, 28);
         stack.pushPose();
-        this.action.draw(stack);
+        this.action.draw(guiGraphics);
         stack.popPose();
-        drawCenteredString(stack, minecraft.font, I18n.get("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 128, 0xFFFFFF);
-        super.render(stack, mouseX, mouseY, partialTicks);
+        guiGraphics.drawCenteredString(minecraft.font, I18n.get("firstaid.tutorial.notice"), parent.guiLeft + (GuiHealthScreen.xSize / 2), parent.guiTop + 128, 0xFFFFFF);
+        super.render(guiGraphics, mouseX, mouseY, partialTicks);
     }
 
     @Override

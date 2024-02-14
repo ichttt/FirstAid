@@ -26,13 +26,11 @@ import ichttt.mods.firstaid.common.apiimpl.HealingItemApiHelperImpl;
 import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
 import ichttt.mods.firstaid.common.network.*;
 import ichttt.mods.firstaid.common.registries.FirstAidRegistries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -81,14 +79,12 @@ public class FirstAid {
         HealingItemApiHelperImpl.init();
     }
 
-    private void registerCreativeTab(CreativeModeTabEvent.Register event) {
-        event.registerCreativeModeTab(new ResourceLocation(FirstAid.MODID, "main_tab"), builder -> builder.title(Component.translatable("itemGroup.firstaid"))
-                .icon(() -> new ItemStack(RegistryObjects.BANDAGE.get()))
-                .displayItems((context, output) -> {
-                    output.accept(RegistryObjects.BANDAGE.get());
-                    output.accept(RegistryObjects.PLASTER.get());
-                    output.accept(RegistryObjects.MORPHINE.get());
-                }));
+    private void registerCreativeTab(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey().equals(RegistryObjects.CREATIVE_TAB.getKey())) {
+            event.accept(RegistryObjects.BANDAGE);
+            event.accept(RegistryObjects.PLASTER);
+            event.accept(RegistryObjects.MORPHINE);
+        }
     }
 
     @SuppressWarnings("Convert2MethodRef") //Fucking classloading

@@ -22,10 +22,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -36,7 +37,9 @@ import net.minecraftforge.client.gui.overlay.ForgeGui;
 public class FirstaidIngameGui {
 
     // Copy of ForgeGui#renderHealth, modified to fit being called from an event listener and to support different textures for different parts of the texture
-    public static void renderHealth(ForgeGui gui, int width, int height, PoseStack stack) {
+    public static void renderHealth(ForgeGui gui, int width, int height, GuiGraphics guiGraphics) {
+        PoseStack stack = guiGraphics.pose();
+
         // Firstaid: No pre event, we get called from this
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getProfiler().push("health");
@@ -120,32 +123,32 @@ public class FirstaidIngameGui {
             if (health <= 4) y += gui.random.nextInt(2);
             if (i == regen) y -= 2;
 
-            GuiComponent.blit(stack, x, y, BACKGROUND, TOP, 9, 9);
+            guiGraphics.blit(HealthRenderUtils.GUI_ICONS_LOCATION, x, y, BACKGROUND, TOP, 9, 9);
 
             if (highlight)
             {
                 if (thisHalfCritical) {
                     stack.pushPose();
                     stack.translate(0.0F, 0.0F, 1000.0F);
-                    GuiComponent.blit(stack, x, y, MARGIN + 63, 9 * 5, 9, 9);
+                    guiGraphics.blit(HealthRenderUtils.GUI_ICONS_LOCATION, x, y, MARGIN + 63, 9 * 5, 9, 9);
                     stack.popPose();
                 }
                 if (i * 2 + 1 < healthLast)
-                    GuiComponent.blit(stack, x + (thisHalfCritical ? 5 : 0), y, MARGIN + 54 + (thisHalfCritical ? 5 : 0), TOP, 9 - (thisHalfCritical ? 5 : 0), 9); //6
+                    guiGraphics.blit(HealthRenderUtils.GUI_ICONS_LOCATION, x + (thisHalfCritical ? 5 : 0), y, MARGIN + 54 + (thisHalfCritical ? 5 : 0), TOP, 9 - (thisHalfCritical ? 5 : 0), 9); //6
                 else if (i * 2 + 1 == healthLast)
-                    GuiComponent.blit(stack, x, y, MARGIN + 63, TOP, 9, 9); //7
+                    guiGraphics.blit(HealthRenderUtils.GUI_ICONS_LOCATION, x, y, MARGIN + 63, TOP, 9, 9); //7
             }
 
             if (absorbRemaining > 0.0F)
             {
                 if (absorbRemaining == absorb && absorb % 2.0F == 1.0F)
                 {
-                    GuiComponent.blit(stack, x, y, MARGIN + 153, TOP, 9, 9); //17
+                    guiGraphics.blit(HealthRenderUtils.GUI_ICONS_LOCATION, x, y, MARGIN + 153, TOP, 9, 9); //17
                     absorbRemaining -= 1.0F;
                 }
                 else
                 {
-                    GuiComponent.blit(stack, x, y, MARGIN + 144, TOP, 9, 9); //16
+                    guiGraphics.blit(HealthRenderUtils.GUI_ICONS_LOCATION, x, y, MARGIN + 144, TOP, 9, 9); //16
                     absorbRemaining -= 2.0F;
                 }
             }
@@ -154,13 +157,13 @@ public class FirstaidIngameGui {
                 if (thisHalfCritical) {
                     stack.pushPose();
                     stack.translate(0.0F, 0.0F, 10.0F);
-                    GuiComponent.blit(stack, x, y, MARGIN + 45, 9 * 5, 9, 9);
+                    guiGraphics.blit(HealthRenderUtils.GUI_ICONS_LOCATION, x, y, MARGIN + 45, 9 * 5, 9, 9);
                     stack.popPose();
                 }
                 if (i * 2 + 1 < health)
-                    GuiComponent.blit(stack, x + (thisHalfCritical ? 5 : 0), y, MARGIN + 36 + (thisHalfCritical ? 5 : 0), TOP, 9 - (thisHalfCritical ? 5 : 0), 9); //4
+                    guiGraphics.blit(HealthRenderUtils.GUI_ICONS_LOCATION, x + (thisHalfCritical ? 5 : 0), y, MARGIN + 36 + (thisHalfCritical ? 5 : 0), TOP, 9 - (thisHalfCritical ? 5 : 0), 9); //4
                 else if (i * 2 + 1 == health && !thisHalfCritical)
-                    GuiComponent.blit(stack, x, y, MARGIN + 45, TOP, 9, 9); //5
+                    guiGraphics.blit(HealthRenderUtils.GUI_ICONS_LOCATION, x, y, MARGIN + 45, TOP, 9, 9); //5
             }
         }
 

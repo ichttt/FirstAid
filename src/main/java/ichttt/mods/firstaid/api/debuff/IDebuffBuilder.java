@@ -21,14 +21,8 @@ package ichttt.mods.firstaid.api.debuff;
 
 import com.mojang.serialization.Codec;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
-import ichttt.mods.firstaid.common.registries.FirstAidRegistries;
-import net.minecraft.util.ExtraCodecs;
-
-import java.util.function.Function;
 
 public interface IDebuffBuilder {
-    Codec<IDebuffBuilder> DIRECT_CODEC = ExtraCodecs.lazyInitializedCodec(() -> FirstAidRegistries.DEBUFF_BUILDERS.get().getCodec())
-            .dispatch(IDebuffBuilder::codec, Function.identity());
 
     /**
      * @return A codec for serialization

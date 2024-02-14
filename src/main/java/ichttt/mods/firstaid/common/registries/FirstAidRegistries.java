@@ -57,6 +57,7 @@ public final class FirstAidRegistries {
             return ResourceKey.createRegistryKey(new ResourceLocation(FirstAid.MODID, name));
         }
     }
+
     // --- REGULAR REGISTRIES ---
     static final DeferredRegister<Codec<? extends IDamageDistributionAlgorithm>> DEFERRED_DAMAGE_DISTRIBUTION_ALGORITHMS = DeferredRegister.create(Keys.DAMAGE_DISTRIBUTION_ALGORITHMS, FirstAid.MODID);
     public static final Supplier<IForgeRegistry<Codec<? extends IDamageDistributionAlgorithm>>> DAMAGE_DISTRIBUTION_ALGORITHMS = DEFERRED_DAMAGE_DISTRIBUTION_ALGORITHMS.makeRegistry(() -> new RegistryBuilder<Codec<? extends IDamageDistributionAlgorithm>>().disableSaving());
@@ -82,8 +83,8 @@ public final class FirstAidRegistries {
 
     // --- DATA DRIVEN REGISTRIES
     public static void createDataPackRegistries(DataPackRegistryEvent.NewRegistry event) {
-        event.dataPackRegistry(Keys.DAMAGE_DISTRIBUTIONS, IDamageDistributionTarget.DIRECT_CODEC, IDamageDistributionTarget.DIRECT_CODEC);
-        event.dataPackRegistry(Keys.DEBUFFS, IDebuffBuilder.DIRECT_CODEC, IDebuffBuilder.DIRECT_CODEC);
+        event.dataPackRegistry(Keys.DAMAGE_DISTRIBUTIONS, FirstAidBaseCodecs.DAMAGE_DISTRIBUTION_TARGETS_DIRECT_CODEC, FirstAidBaseCodecs.DAMAGE_DISTRIBUTION_TARGETS_DIRECT_CODEC);
+        event.dataPackRegistry(Keys.DEBUFFS, FirstAidBaseCodecs.DEBUFF_BUILDERS_DIRECT_CODEC, FirstAidBaseCodecs.DEBUFF_BUILDERS_DIRECT_CODEC);
     }
 
     public static void setup(IEventBus modEventBus) {

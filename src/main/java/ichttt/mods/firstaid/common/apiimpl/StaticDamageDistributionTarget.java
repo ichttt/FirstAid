@@ -24,6 +24,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.distribution.IDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.api.distribution.IDamageDistributionTarget;
+import ichttt.mods.firstaid.common.registries.FirstAidBaseCodecs;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -36,7 +37,7 @@ import java.util.Map;
 public class StaticDamageDistributionTarget implements IDamageDistributionTarget {
     public static final Codec<StaticDamageDistributionTarget> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    IDamageDistributionAlgorithm.DIRECT_CODEC.fieldOf("algorithm").forGetter(o -> o.algorithm),
+                    FirstAidBaseCodecs.DAMAGE_DISTRIBUTION_ALGORITHMS_DIRECT_CODEC.fieldOf("algorithm").forGetter(o -> o.algorithm),
                     ResourceLocation.CODEC.listOf().fieldOf("damageTypes").forGetter(o -> o.damageTypes)
             ).apply(instance, StaticDamageDistributionTarget::new)
     );

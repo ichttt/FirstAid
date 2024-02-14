@@ -59,8 +59,7 @@ public abstract class DamageDistribution implements IDamageDistributionAlgorithm
         //VANILLA COPY - combat tracker and exhaustion
         if (damage != 0.0F) {
             player.causeFoodExhaustion(source.getFoodExhaustion());
-            float currentHealth = player.getHealth();
-            player.getCombatTracker().recordDamage(source, currentHealth, damage);
+            player.getCombatTracker().recordDamage(source, damage);
         }
 
         float left = damageDistribution.distributeDamage(damage, player, source, addStat);

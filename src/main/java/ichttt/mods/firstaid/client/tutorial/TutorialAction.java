@@ -18,7 +18,7 @@
 
 package ichttt.mods.firstaid.client.tutorial;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 
 import java.util.ArrayList;
@@ -36,12 +36,12 @@ public class TutorialAction {
         this.guiContext = guiContext;
     }
 
-    public void draw(PoseStack stack) {
+    public void draw(GuiGraphics guiGraphics) {
         if (s2 != null) {
-            guiContext.drawOffsetString(stack, s1, 4);
-            guiContext.drawOffsetString(stack, s2, 16);
+            guiContext.drawOffsetString(guiGraphics, s1, 4);
+            guiContext.drawOffsetString(guiGraphics, s2, 16);
         } else if (s1 != null) {
-            guiContext.drawOffsetString(stack, s1, 10);
+            guiContext.drawOffsetString(guiGraphics, s1, 10);
         }
     }
 

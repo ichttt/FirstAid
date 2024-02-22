@@ -26,9 +26,9 @@ import net.minecraft.network.chat.Component;
 public class GuiHoldButton extends AbstractButton {
     public final int id;
     private int holdTime;
-    private float textScaleFactor;
     public final boolean isRightSide;
     private long pressStart = -1;
+    private boolean mouseIsPressed = false;
 
     public GuiHoldButton(int id, int x, int y, int widthIn, int heightIn, Component buttonText, boolean isRightSide) {
         super(x, y, widthIn, heightIn, buttonText);
@@ -36,13 +36,8 @@ public class GuiHoldButton extends AbstractButton {
         this.isRightSide = isRightSide;
     }
 
-    public void setup(int holdTime, float textScaleFactor) {
+    public void setup(int holdTime) {
         this.holdTime = holdTime;
-        if (textScaleFactor > 0.95F)
-            textScaleFactor = 1F;
-        if (textScaleFactor < 0.8F)
-            textScaleFactor = 0.8F;
-        this.textScaleFactor = textScaleFactor;
     }
 
     @Override
@@ -55,12 +50,28 @@ public class GuiHoldButton extends AbstractButton {
     @Override
     public void setFocused(boolean focused) {
         super.setFocused(focused);
-        if (pressStart != -1 && !focused)
+        // The main point of this func is to stop the apply countdown if it has been started with a keyboard and the focus is switched
+        // (for example using tab)
+        // Small rant: In AbstractContainerEventHandler#setFocused, Mojang calls setFocus on the old and new element,
+        // once with the param false to signal the old component it is being deselected and once with true for the new one
+        // to signal that it is being selected
+        // this, however leads to an edge case in this code, as if a button is focused and is clicked the mouse, first onPress is called and then
+        // this func is first called with false and then with true, as AbstractContainerEventHandler#setFocused does not check if old == new...
+        // That's why mouseIsPressed is here
+        if (pressStart != -1 && !focused && !mouseIsPressed) {
             pressStart = -1;
+        }
+    }
+
+    @Override
+    public void onClick(double pMouseX, double pMouseY) {
+        super.onClick(pMouseX, pMouseY);
+        mouseIsPressed = true;
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        mouseIsPressed = false;
         if (button != 0) return false;
         boolean result = pressStart != -1 && (super.mouseReleased(mouseX, mouseY, button));
         if (result) {

@@ -25,6 +25,7 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.distribution.IDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.api.distribution.IDamageDistributionTarget;
 import ichttt.mods.firstaid.common.registries.FirstAidBaseCodecs;
+import ichttt.mods.firstaid.common.util.LoggingMarkers;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -66,7 +67,7 @@ public class StaticDamageDistributionTarget implements IDamageDistributionTarget
             }
         }
         if (!localDamageTypes.isEmpty()) {
-            FirstAid.LOGGER.warn("Some damage types in {} failed to map: {}", StaticDamageDistributionTarget.class.getSimpleName(), localDamageTypes);
+            FirstAid.LOGGER.warn(LoggingMarkers.REGISTRY, "Some damage types in {} failed to map: {}", StaticDamageDistributionTarget.class.getSimpleName(), localDamageTypes);
         }
         return builder.build();
     }

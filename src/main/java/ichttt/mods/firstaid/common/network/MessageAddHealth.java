@@ -22,6 +22,7 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.util.CommonUtils;
+import ichttt.mods.firstaid.common.util.LoggingMarkers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
@@ -65,7 +66,7 @@ public class MessageAddHealth {
                         damageModel.getFromEnum(part).heal(f, playerSP, false);
                     }
                 } else {
-                    FirstAid.LOGGER.debug("Failed to find damage model, what?");
+                    FirstAid.LOGGER.debug(LoggingMarkers.NETWORK, "Failed to find damage model, what?");
                 }
             });
         }

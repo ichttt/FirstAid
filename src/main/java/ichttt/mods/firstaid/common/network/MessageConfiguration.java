@@ -24,6 +24,7 @@ import ichttt.mods.firstaid.client.ClientHooks;
 import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.util.CommonUtils;
+import ichttt.mods.firstaid.common.util.LoggingMarkers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
@@ -55,7 +56,7 @@ public class MessageConfiguration {
             NetworkEvent.Context ctx = supplier.get();
             CommonUtils.checkClient(ctx);
 
-            FirstAid.LOGGER.info("Received remote damage model");
+            FirstAid.LOGGER.info(LoggingMarkers.NETWORK, "Received remote damage model");
             ctx.enqueueWork(() -> {
                 AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(Minecraft.getInstance().player);
                 damageModel.deserializeNBT(message.playerDamageModel);

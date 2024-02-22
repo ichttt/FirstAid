@@ -28,7 +28,6 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.api.healing.ItemHealing;
 import ichttt.mods.firstaid.client.ClientHooks;
-import ichttt.mods.firstaid.client.HUDHandler;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.client.util.HealthRenderUtils;
 import ichttt.mods.firstaid.common.network.MessageApplyHealingItem;
@@ -64,7 +63,6 @@ public class GuiHealthScreen extends Screen {
     private final AbstractPlayerDamageModel damageModel;
     private final List<GuiHoldButton> holdButtons = new ArrayList<>();
     private final boolean disableButtons;
-    private final float bedScaleFactor = EventCalendar.isGuiFun() ? 1.5F : 1.25F;
 
     public int guiLeft;
     public int guiTop;
@@ -154,7 +152,7 @@ public class GuiHealthScreen extends Screen {
                         holdTime = itemHealing.getApplyTime(itemInHand);
                     }
                 }
-                holdButton.setup(holdTime, button.getWidth() / ((float) HUDHandler.INSTANCE.getMaxLength()));
+                holdButton.setup(holdTime);
                 holdButtons.add(holdButton);
             }
         }
@@ -199,7 +197,6 @@ public class GuiHealthScreen extends Screen {
             guiGraphics.drawCenteredString(this.minecraft.font, I18n.get("firstaid.gui.apply_hint"), this.guiLeft + (xSize / 2), this.guiTop + ySize - (morphineTicks == 0 ? 21 : 11), 0xFFFFFF);
 
         //Health
-        RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
         drawHealth(guiGraphics, damageModel.HEAD, false, 14);
         drawHealth(guiGraphics, damageModel.LEFT_ARM, false, 39);
         drawHealth(guiGraphics, damageModel.LEFT_LEG, false, 64);
@@ -223,22 +220,17 @@ public class GuiHealthScreen extends Screen {
 
         //Sleep info setup
         double sleepHealing = FirstAidConfig.SERVER.sleepHealPercentage.get();
-        int renderBedX = Math.round(guiLeft / bedScaleFactor) + 2;
-        int renderBedY = Math.round((guiTop + ySize) / bedScaleFactor) - 18;
-        int bedX = (int) (renderBedX * bedScaleFactor);
-        int bedY = (int) (renderBedY * bedScaleFactor);
+        int bedX = guiLeft + 3;
+        int bedY = (guiTop + ySize) - 19;
 
         //Sleep info icon
         PoseStack modelViewStack = RenderSystem.getModelViewStack();
         modelViewStack.pushPose();
-        modelViewStack.scale(bedScaleFactor, bedScaleFactor, bedScaleFactor);
-        RenderSystem.applyModelViewMatrix();
-        guiGraphics.renderItem(BED_ITEMSTACK, renderBedX, renderBedY);
+        guiGraphics.renderItem(BED_ITEMSTACK, bedX, bedY);
         modelViewStack.popPose();
-        RenderSystem.applyModelViewMatrix();
 
         //Sleep info tooltip
-        if (mouseX >= bedX && mouseY >= bedY && mouseX < bedX + (16 * bedScaleFactor) && mouseY < bedY + (16 * bedScaleFactor)) {
+        if (mouseX >= bedX && mouseY >= bedY && mouseX < bedX + 16 && mouseY < bedY + 16) {
             Component s = sleepHealing == 0D ? Component.translatable("firstaid.gui.no_sleep_heal") : Component.translatable("firstaid.gui.sleep_heal_amount", FORMAT.format(sleepHealing * 100));
             guiGraphics.renderTooltip(font, s, mouseX, mouseY);
         }

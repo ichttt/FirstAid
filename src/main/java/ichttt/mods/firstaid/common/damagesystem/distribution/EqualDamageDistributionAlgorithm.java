@@ -29,6 +29,7 @@ import ichttt.mods.firstaid.common.RegistryObjects;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.util.ArmorUtils;
 import ichttt.mods.firstaid.common.util.CommonUtils;
+import ichttt.mods.firstaid.common.util.LoggingMarkers;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.damagesource.DamageSource;
@@ -51,7 +52,7 @@ public class EqualDamageDistributionAlgorithm implements IDamageDistributionAlgo
                     Codec.BOOL.fieldOf("tryNoKill").forGetter(o -> o.tryNoKill),
                     Codec.FLOAT.fieldOf("reductionMultiplier").forGetter(o -> o.reductionMultiplier)
             ).apply(instance, EqualDamageDistributionAlgorithm::new));
-    private static final Method APPLY_POTION_DAMAGE_CALCULATIONS_METHOD = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "m_6515_", DamageSource.class, float.class);
+    private static final Method GET_DAMAGE_AFTER_MAGIC_ABSORB_METHOD = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "m_6515_", DamageSource.class, float.class);
     private final boolean tryNoKill;
     private final float reductionMultiplier;
 
@@ -70,9 +71,9 @@ public class EqualDamageDistributionAlgorithm implements IDamageDistributionAlgo
         }
         //Use vanilla potion damage calculations
         try {
-            damage = (float) APPLY_POTION_DAMAGE_CALCULATIONS_METHOD.invoke(player, source, damage);
+            damage = (float) GET_DAMAGE_AFTER_MAGIC_ABSORB_METHOD.invoke(player, source, damage);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            FirstAid.LOGGER.error("Could not invoke applyPotionDamageCalculations!", e);
+            FirstAid.LOGGER.error(LoggingMarkers.DAMAGE_DISTRIBUTION, "Could not invoke getDamageAfterMagicAbsorb!", e);
         }
         if (damage <= 0F) return 0F; // If the damage got reduced to zero, respect that and continue.
         float reduction = originalDamage - damage;
@@ -105,7 +106,7 @@ public class EqualDamageDistributionAlgorithm implements IDamageDistributionAlgo
 
             //For safety
             if (iterationCounter >= 50) {
-                FirstAid.LOGGER.warn("Not done distribution equally after 50 rounds, diff {}. Dropping!", Math.abs(prevDamageLeft - damageLeft));
+                FirstAid.LOGGER.warn(LoggingMarkers.DAMAGE_DISTRIBUTION, "Not done distribution equally after 50 rounds, diff {}. Dropping!", Math.abs(prevDamageLeft - damageLeft));
                 break;
             }
             iterationCounter++;

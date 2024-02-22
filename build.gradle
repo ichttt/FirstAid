@@ -61,6 +61,11 @@ minecraft {
             property 'forge.enabledGameTestNamespaces', mod_id
         }
 
+        client2 {
+            parent runs.client
+            args '--username', 'Player2'
+        }
+
         server {
             property 'forge.enabledGameTestNamespaces', mod_id
             args '--nogui'
@@ -97,7 +102,7 @@ dependencies {
     minecraft "net.neoforged:forge:${minecraft_version}-${neo_version}"
 
     compileOnly fg.deobf("curse.maven:playerrevive-266890:5095414")
-    runtimeOnly fg.deobf("curse.maven:creativecore-257814:5093473")
+    //runtimeOnly fg.deobf("curse.maven:creativecore-257814:5093473")
 
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..

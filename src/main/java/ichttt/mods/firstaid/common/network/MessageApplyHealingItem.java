@@ -25,6 +25,7 @@ import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.api.healing.ItemHealing;
 import ichttt.mods.firstaid.common.util.CommonUtils;
+import ichttt.mods.firstaid.common.util.LoggingMarkers;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -67,7 +68,7 @@ public class MessageApplyHealingItem {
                     healer = itemHealing.createNewHealer(stack);
                 }
                 if (healer == null) {
-                    FirstAid.LOGGER.warn("Player {} has invalid item in hand {} while it should be an healing item", player.getName(), ForgeRegistries.ITEMS.getKey(stack.getItem()));
+                    FirstAid.LOGGER.warn(LoggingMarkers.NETWORK, "Player {} has invalid item in hand {} while it should be an healing item", player.getName(), ForgeRegistries.ITEMS.getKey(stack.getItem()));
                     player.sendSystemMessage(Component.literal("Unable to apply healing item!"));
                     return;
                 }

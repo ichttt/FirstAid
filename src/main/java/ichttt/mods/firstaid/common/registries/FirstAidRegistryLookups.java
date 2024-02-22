@@ -26,6 +26,7 @@ import ichttt.mods.firstaid.api.distribution.IDamageDistributionAlgorithm;
 import ichttt.mods.firstaid.api.distribution.IDamageDistributionTarget;
 import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
+import ichttt.mods.firstaid.common.util.LoggingMarkers;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
@@ -57,6 +58,7 @@ public class FirstAidRegistryLookups {
     public static void init(RegistryAccess registryAccess) {
         DAMAGE_DISTRIBUTIONS = buildDamageDistributions(registryAccess);
         DEBUFF_BUILDERS = buildDebuffs(registryAccess);
+        FirstAid.LOGGER.info(LoggingMarkers.REGISTRY, "Built FirstAid registry lookups");
     }
 
     private static Map<DamageType, IDamageDistributionAlgorithm> buildDamageDistributions(RegistryAccess registryAccess) {
@@ -75,7 +77,7 @@ public class FirstAidRegistryLookups {
             for (DamageType damageType : damageTypes) {
                 IDamageDistributionAlgorithm oldVal = mapToUse.put(damageType, algorithm);
                 if (oldVal != null) {
-                    FirstAid.LOGGER.warn("Damage distribution {} overwrites previously registered distribution for damage type {}", key, damageType.msgId());
+                    FirstAid.LOGGER.warn(LoggingMarkers.REGISTRY, "Damage distribution {} overwrites previously registered distribution for damage type {}", key, damageType.msgId());
                 }
             }
         }

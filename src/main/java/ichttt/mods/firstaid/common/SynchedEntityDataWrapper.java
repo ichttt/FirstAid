@@ -185,4 +185,7 @@ public class SynchedEntityDataWrapper extends SynchedEntityData {
     public boolean isEmpty() {
         return parent.isEmpty();
     }
+    public <T> boolean hasItem(EntityDataAccessor<T> pKey) {
+        return parent.hasItem(pKey);
+    }
 }

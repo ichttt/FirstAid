@@ -191,6 +191,21 @@ public class DamageablePart extends AbstractDamageablePart {
             maxHealth = 128;
         this.maxHealth = Math.max(2, maxHealth); //set 2 as a minimum
         this.currentHealth = Math.min(currentHealth, this.maxHealth);
+
+        int requestedMax = maxHealth;
+        float oldCurrent = currentHealth;
+        int oldMax = this.maxHealth;
+
+        FirstAid.LOGGER.info(
+            "[FirstAid part clamp] part={} requestedMax={} oldMax={} newMax={} oldCurrent={} newCurrent={} capMaxHealth={}",
+            part,
+            requestedMax,
+            oldMax,
+            this.maxHealth,
+            oldCurrent,
+            this.currentHealth,
+            FirstAidConfig.SERVER.capMaxHealth.get()
+        );
     }
 
     @Override

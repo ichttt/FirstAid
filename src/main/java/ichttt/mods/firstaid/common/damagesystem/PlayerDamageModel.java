@@ -135,6 +135,10 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel implements Look
         else if (sleepBlockTicks < 0)
             throw new RuntimeException("Negative sleepBlockTicks " + sleepBlockTicks);
 
+        if (!world.isClientSide) {
+            runScaleLogic(player);
+        }
+
         float newCurrentHealth = calculateNewCurrentHealth(player);
         if (Float.isNaN(newCurrentHealth)) {
             FirstAid.LOGGER.warn("New current health is not a number, setting it to 0!");
@@ -163,8 +167,6 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel implements Look
 
         if (!this.hasTutorial)
             this.hasTutorial = CapProvider.tutorialDone.contains(player.getName().getString());
-
-        runScaleLogic(player);
 
         MobEffect morphineEffect = RegistryObjects.MORPHINE_EFFECT.get();
         //morphine update
@@ -379,78 +381,134 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel implements Look
             FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncDamageModel(this, true)); //Upload changes to the client
     }
 
+    private static int sanitizeMaxHealth(int maxHealth) {
+        if (maxHealth > 12 && FirstAidConfig.SERVER.capMaxHealth.get()) {
+            maxHealth = 12;
+        }
+
+        if (maxHealth > 128) {
+            maxHealth = 128;
+        }
+
+        return Math.max(2, maxHealth);
+    }
+
     @Override
     public void runScaleLogic(Player player) {
-        if (FirstAidConfig.SERVER.scaleMaxHealth.get()) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
-            player.level().getProfiler().push("healthscaling");
-            float globalFactor = player.getMaxHealth() / 20F;
-            if (prevScaleFactor != globalFactor) {
-                if (FirstAidConfig.GENERAL.debug.get()) {
-                    FirstAid.LOGGER.info("Starting health scaling factor {} -> {} (max health {})", prevScaleFactor, globalFactor, player.getMaxHealth());
-                }
-                player.level().getProfiler().push("distribution");
-                int reduced = 0;
-                int added = 0;
-                float expectedNewMaxHealth = 0F;
-                int newMaxHealth = 0;
-                for (AbstractDamageablePart part : this) {
-                    float floatResult = ((float) part.initialMaxHealth) * globalFactor;
-                    expectedNewMaxHealth += floatResult;
-                    int result = (int) floatResult;
-                    if (result % 2 == 1) {
-                        int partMaxHealth = part.getMaxHealth();
-                        if (part.currentHealth < partMaxHealth && reduced < 4) {
-                            result--;
-                            reduced++;
-                        } else if (part.currentHealth > partMaxHealth && added < 4) {
-                            result++;
-                            added++;
-                        } else if (reduced > added) {
-                            result++;
-                            added++;
-                        } else {
-                            result--;
-                            reduced++;
-                        }
-                    }
-                    newMaxHealth += result;
-                    if (FirstAidConfig.GENERAL.debug.get()) {
-                        FirstAid.LOGGER.info("Part {} max health: {} initial; {} old; {} new", part.part.name(), part.initialMaxHealth, part.getMaxHealth(), result);
-                    }
-                    part.setMaxHealth(result);
-                }
-                player.level().getProfiler().popPush("correcting");
-                if (Math.abs(expectedNewMaxHealth - newMaxHealth) >= 2F) {
-                    if (FirstAidConfig.GENERAL.debug.get()) {
-                        FirstAid.LOGGER.info("Entering second stage - diff {}", Math.abs(expectedNewMaxHealth - newMaxHealth));
-                    }
-                    List<AbstractDamageablePart> prioList = new ArrayList<>();
-                    for (AbstractDamageablePart part : this) {
-                        prioList.add(part);
-                    }
-                    prioList.sort(Comparator.comparingInt(AbstractDamageablePart::getMaxHealth));
-                    for (AbstractDamageablePart part : prioList) {
-                        int maxHealth = part.getMaxHealth();
-                        if (FirstAidConfig.GENERAL.debug.get()) {
-                            FirstAid.LOGGER.info("Part {}: Second stage with total diff {}", part.part.name(), Math.abs(expectedNewMaxHealth - newMaxHealth));
-                        }
-                        if (expectedNewMaxHealth > newMaxHealth) {
-                            part.setMaxHealth(maxHealth + 2);
-                            newMaxHealth += (part.getMaxHealth() - maxHealth);
-                        } else if (expectedNewMaxHealth < newMaxHealth) {
-                            part.setMaxHealth(maxHealth - 2);
-                            newMaxHealth -= (maxHealth - part.getMaxHealth());
-                        }
-                        if (Math.abs(expectedNewMaxHealth - newMaxHealth) < 2F) {
-                            break;
-                        }
-                    }
-                }
-                player.level().getProfiler().pop();
+        if (!FirstAidConfig.SERVER.scaleMaxHealth.get()) {
+            return;
+        }
+        if (player.level().isClientSide) {
+            return;
+        }
+        if (player.isRemoved() || !player.isAlive() || player.isDeadOrDying() || player.getHealth() <= 0F || isDead(player)) {
+            return;
+        }
+        player.level().getProfiler().push("healthscaling");
+        if (FirstAidConfig.GENERAL.debug.get()) {
+            FirstAid.LOGGER.info("[FirstAid scale] player={} tick={} vanillaMax={} prevScaleFactor={} limbMaxTotal={}", player.getName().getString(), player.tickCount, player.getMaxHealth(), prevScaleFactor, getCurrentMaxHealth());
+        }
+        float globalFactor = player.getMaxHealth() / 20F;
+        if (Math.abs(prevScaleFactor - globalFactor) > 0.0001F) {
+            if (FirstAidConfig.GENERAL.debug.get()) { 
+                FirstAid.LOGGER.info( "Starting health scaling factor {} -> {} (max health {})", prevScaleFactor, globalFactor, player.getMaxHealth());
             }
-            prevScaleFactor = globalFactor;
+            player.level().getProfiler().push("distribution");
+            class Target {
+                final AbstractDamageablePart part;
+                final float desired;
+                final float remainder;
+                int target;
+                Target(AbstractDamageablePart part, float desired, int target) {
+                    this.part = part;
+                    this.desired = desired;
+                    this.target = target;
+                    this.remainder = desired - target;
+                }
+            }
+            List<Target> targets = new ArrayList<>();
+            float expectedNewMaxHealth = 0F;
+            int newMaxHealth = 0;
+            for (AbstractDamageablePart part : this) {
+                float desired = ((float) part.initialMaxHealth) * globalFactor;
+                expectedNewMaxHealth += desired;
+                int lowerEven = ((int) Math.floor(desired / 2F)) * 2;
+                lowerEven = sanitizeMaxHealth(lowerEven);
+                Target target = new Target(part, desired, lowerEven);
+                targets.add(target);
+                newMaxHealth += lowerEven;
+                if (FirstAidConfig.GENERAL.debug.get()) {
+                    FirstAid.LOGGER.info( "Part {} max health base target: {} initial; {} old; desired {}; {} base", part.part.name(), part.initialMaxHealth, part.getMaxHealth(), desired, lowerEven);
+                }
+            }
+            player.level().getProfiler().popPush("correcting");
+            int wantedTotal = Math.round(expectedNewMaxHealth / 2F) * 2;
+            int minPossibleTotal = 0;
+            int maxPossibleTotal = 0;
+            for (Target target : targets) {
+                minPossibleTotal += sanitizeMaxHealth(2);
+                maxPossibleTotal += sanitizeMaxHealth(128);
+            }
+            wantedTotal = Math.max(minPossibleTotal, wantedTotal);
+            wantedTotal = Math.min(maxPossibleTotal, wantedTotal);
+            int healthToAdd = wantedTotal - newMaxHealth;
+            if (healthToAdd > 0) {
+                targets.sort(
+                        Comparator.<Target>comparingDouble(target -> target.remainder)
+                                .reversed()
+                                .thenComparingInt(target -> target.part.part.ordinal())
+                );
+                for (Target target : targets) {
+                    if (healthToAdd < 2) break;
+                    int oldTarget = target.target;
+                    int newTarget = sanitizeMaxHealth(oldTarget + 2);
+                    if (newTarget != oldTarget) {
+                        target.target = newTarget;
+                        newMaxHealth += newTarget - oldTarget;
+                        healthToAdd -= newTarget - oldTarget;
+                        if (FirstAidConfig.GENERAL.debug.get()) {
+                            FirstAid.LOGGER.info("Part {} corrected target {} -> {}; total now {}; wanted {}; expected {}", target.part.part.name(), oldTarget, newTarget, newMaxHealth, wantedTotal, expectedNewMaxHealth);
+                        }
+                    }
+                }
+            } else if (healthToAdd < 0) {
+                targets.sort(
+                        Comparator.<Target>comparingDouble(target -> target.remainder)
+                                .thenComparingInt(target -> target.part.part.ordinal())
+                );
+                for (Target target : targets) {
+                    if (healthToAdd > -2) break;
+                    int oldTarget = target.target;
+                    int newTarget = sanitizeMaxHealth(oldTarget - 2);
+                    if (newTarget != oldTarget) {
+                        target.target = newTarget;
+                        newMaxHealth += newTarget - oldTarget;
+                        healthToAdd -= newTarget - oldTarget;
+                        if (FirstAidConfig.GENERAL.debug.get()) {
+                            FirstAid.LOGGER.info("Part {} corrected target {} -> {}; total now {}; wanted {}; expected {}", target.part.part.name(), oldTarget, newTarget, newMaxHealth, wantedTotal, expectedNewMaxHealth);
+                        }
+                    }
+                }
+            }
+            player.level().getProfiler().popPush("apply");
+            boolean changed = false;
+            for (Target target : targets) {
+                AbstractDamageablePart part = target.part;
+                if (FirstAidConfig.GENERAL.debug.get()) {
+                    FirstAid.LOGGER.info( "Part {} applying final max health: {} old; {} final", part.part.name(), part.getMaxHealth(), target.target);
+                }
+                if (part.getMaxHealth() != target.target) {
+                    changed = true;
+                }
+                part.setMaxHealth(target.target);
+            }
+            if (changed) {
+                scheduleResync();
+            }
             player.level().getProfiler().pop();
         }
+        prevScaleFactor = globalFactor;
+        player.level().getProfiler().pop();
     }
 
     @Override

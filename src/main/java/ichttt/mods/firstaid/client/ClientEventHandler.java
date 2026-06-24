@@ -173,7 +173,7 @@ public class ClientEventHandler {
         if (FirstAidConfig.CLIENT.armorTooltipMode.get() == FirstAidConfig.Client.TooltipMode.REPLACE && index >= 0) {
             list.set(index, replace);
         } else {
-            list.add(replace);
+            list.add(index++, replace);
         }
     }
 
